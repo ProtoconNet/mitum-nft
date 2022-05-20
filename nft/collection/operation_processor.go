@@ -152,7 +152,11 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		*extension.CreateContractAccountsProcessor,
 		*extension.DeactivateProcessor,
 		*extension.WithdrawsProcessor,
-		*DelegateProcessor:
+		*DelegateProcessor,
+		*ApproveProcessor,
+		*CollectionRegisterProcessor,
+		*MintProcessor,
+		*TransferProcessor:
 		return opr.process(op)
 	case currency.Transfers,
 		currency.CreateAccounts,
@@ -163,7 +167,11 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		extension.CreateContractAccounts,
 		extension.Deactivate,
 		extension.Withdraws,
-		Delegate:
+		Delegate,
+		Approve,
+		CollectionRegister,
+		Mint,
+		Transfer:
 		pr, err := opr.PreProcess(op)
 		if err != nil {
 			return err
@@ -191,6 +199,14 @@ func (opr *OperationProcessor) process(op state.Processor) error {
 	case *extension.WithdrawsProcessor:
 		sp = t
 	case *DelegateProcessor:
+		sp = t
+	case *ApproveProcessor:
+		sp = t
+	case *CollectionRegisterProcessor:
+		sp = t
+	case *MintProcessor:
+		sp = t
+	case *TransferProcessor:
 		sp = t
 	default:
 		return op.Process(opr.pool.Get, opr.pool.Set)
@@ -240,6 +256,18 @@ func (opr *OperationProcessor) checkDuplication(op state.Processor) error { // n
 		didtype = DuplicationTypeSender
 	case Delegate:
 		did = t.Fact().(DelegateFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case Approve:
+		did = t.Fact().(ApproveFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case CollectionRegister:
+		did = t.Fact().(CollectionRegisterFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case Mint:
+		did = t.Fact().(CollectionRegisterFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case Transfer:
+		did = t.Fact().(CollectionRegisterFact).Sender().String()
 		didtype = DuplicationTypeSender
 	default:
 		return nil
@@ -329,7 +357,11 @@ func (opr *OperationProcessor) getNewProcessor(op state.Processor) (state.Proces
 		extension.CreateContractAccounts,
 		extension.Deactivate,
 		extension.Withdraws,
-		Delegate:
+		Delegate,
+		Approve,
+		CollectionRegister,
+		Mint,
+		Transfer:
 
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
