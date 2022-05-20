@@ -45,9 +45,9 @@ func (pp PaymentParameter) Uint() uint {
 }
 
 func (pp PaymentParameter) IsValid([]byte) error {
-	if uint(pp) > 100 {
+	if uint(pp) >= 100 {
 		return isvalid.InvalidError.Errorf(
-			"invalid range of symbol; %d <= %d <= %d", 0, pp, 100)
+			"invalid range of symbol; %d <= %d < %d", 0, pp, 100)
 	}
 
 	return nil
@@ -57,5 +57,6 @@ type BasePolicy interface {
 	isvalid.IsValider
 	Bytes() []byte
 	Symbol() Symbol
+	Equal(policy BasePolicy) bool
 	Rebuild() BasePolicy
 }

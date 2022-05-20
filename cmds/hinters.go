@@ -4,8 +4,11 @@ import (
 	"github.com/spikeekips/mitum/launch"
 	"github.com/spikeekips/mitum/util/hint"
 
+	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/nft/collection"
+
+	"github.com/ProtoconNet/mitum-account-extension/digest"
 	"github.com/ProtoconNet/mitum-account-extension/extension"
-	"github.com/ProtoconNet/mitum-nft/digest"
 	"github.com/spikeekips/mitum-currency/currency"
 )
 
@@ -57,6 +60,25 @@ var types = []hint.Type{
 	extension.WithdrawsType,
 	extension.WithdrawsItemMultiAmountsType,
 	extension.WithdrawsItemSingleAmountType,
+	nft.NFTIDType,
+	nft.CopyrighterType,
+	nft.NFTType,
+	collection.AgentBoxType,
+	collection.CollectionPolicyBoxType,
+	collection.CollectionPolicyType,
+	collection.MintFormType,
+	collection.DelegateFactType,
+	collection.DelegateType,
+	collection.ApproveFactType,
+	collection.ApproveType,
+	collection.CollectionRegisterFactType,
+	collection.CollectionRegisterType,
+	collection.MintFactType,
+	collection.MintType,
+	collection.TransferFactType,
+	collection.TransferType,
+	collection.TransferItemMultiNFTsType,
+	collection.TransferItemSingleNFTType,
 	digest.ProblemType,
 	digest.NodeInfoType,
 	digest.BaseHalType,
@@ -107,6 +129,25 @@ var hinters = []hint.Hinter{
 	extension.WithdrawsHinter,
 	extension.WithdrawsItemMultiAmountsHinter,
 	extension.WithdrawsItemSingleAmountHinter,
+	nft.NFTIDHinter,
+	nft.CopyrighterHinter,
+	nft.NFTHinter,
+	collection.AgentBoxHinter,
+	collection.CollectionPolicyBoxHinter,
+	collection.CollectionPolicyHinter,
+	collection.MintFormHinter,
+	collection.DelegateFactHinter,
+	collection.DelegateHinter,
+	collection.ApproveFactHinter,
+	collection.ApproveHinter,
+	collection.CollectionRegisterFactHinter,
+	collection.CollectionRegisterHinter,
+	collection.MintFactHinter,
+	collection.MintHinter,
+	collection.TransferFactHinter,
+	collection.TransferHinter,
+	collection.TransferItemMultiNFTsHinter,
+	collection.TransferItemSingleNFTHinter.BaseTransferItem,
 	digest.AccountValue{},
 	digest.BaseHal{},
 	digest.NodeInfo{},

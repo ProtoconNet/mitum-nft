@@ -2,6 +2,7 @@ package collection
 
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
+
 	"github.com/pkg/errors"
 
 	"github.com/spikeekips/mitum-currency/currency"

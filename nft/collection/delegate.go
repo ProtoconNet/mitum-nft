@@ -21,21 +21,46 @@ var (
 
 var MaxAgents = 10
 
+var (
+	DelegateAllow  = DelegateMode("allow")
+	DelegateCancel = DelegateMode("cancel")
+)
+
+type DelegateMode string
+
+func (mode DelegateMode) Bytes() []byte {
+	return []byte(mode)
+}
+
+func (mode DelegateMode) String() string {
+	return string(mode)
+}
+
+func (mode DelegateMode) IsValid([]byte) error {
+	if !(mode == DelegateAllow || mode == DelegateCancel) {
+		return isvalid.InvalidError.Errorf("wrong delegate mode; %s", mode)
+	}
+
+	return nil
+}
+
 type DelegateFact struct {
 	hint.BaseHinter
 	h      valuehash.Hash
 	token  []byte
 	sender base.Address
 	agents []base.Address
+	mode   DelegateMode
 	cid    currency.CurrencyID
 }
 
-func NewDelegateFact(token []byte, sender base.Address, agents []base.Address, cid currency.CurrencyID) DelegateFact {
+func NewDelegateFact(token []byte, sender base.Address, agents []base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateFact {
 	fact := DelegateFact{
 		BaseHinter: hint.NewBaseHinter(DelegateFactHint),
 		token:      token,
 		sender:     sender,
 		agents:     agents,
+		mode:       mode,
 		cid:        cid,
 	}
 	fact.h = fact.GenerateHash()
@@ -61,6 +86,7 @@ func (fact DelegateFact) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		fact.token,
 		fact.sender.Bytes(),
+		fact.mode.Bytes(),
 		fact.cid.Bytes(),
 		util.ConcatBytesSlice(ags...),
 	)
@@ -83,6 +109,7 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		nil, false,
 		fact.h,
 		fact.sender,
+		fact.mode,
 		fact.cid); err != nil {
 		return err
 	}
@@ -124,6 +151,10 @@ func (fact DelegateFact) Sender() base.Address {
 
 func (fact DelegateFact) Agents() []base.Address {
 	return fact.agents
+}
+
+func (fact DelegateFact) Mode() DelegateMode {
+	return fact.mode
 }
 
 func (fact DelegateFact) Addresses() ([]base.Address, error) {

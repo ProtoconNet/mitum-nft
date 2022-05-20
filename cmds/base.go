@@ -8,8 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
+
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
@@ -150,8 +151,8 @@ func AttachProposalProcessor(
 	nodepool *network.Nodepool,
 	suffrage base.Suffrage,
 	cp *currency.CurrencyPool,
-) (*collection.OperationProcessor, error) {
-	opr := collection.NewOperationProcessor(cp)
+) (*extension.OperationProcessor, error) {
+	opr := extension.NewOperationProcessor(cp)
 	if _, err := opr.SetProcessor(currency.CreateAccountsHinter, currency.NewCreateAccountsProcessor(cp)); err != nil {
 		return nil, err
 	} else if _, err := opr.SetProcessor(currency.KeyUpdaterHinter, currency.NewKeyUpdaterProcessor(cp)); err != nil {
@@ -163,6 +164,16 @@ func AttachProposalProcessor(
 	} else if _, err := opr.SetProcessor(extension.DeactivateHinter, extension.NewDeactivateProcessor(cp)); err != nil {
 		return nil, err
 	} else if _, err := opr.SetProcessor(extension.WithdrawsHinter, extension.NewWithdrawsProcessor(cp)); err != nil {
+		return nil, err
+	} else if _, err := opr.SetProcessor(collection.DelegateHinter, collection.NewDelegateProcessor(cp)); err != nil {
+		return nil, err
+	} else if _, err := opr.SetProcessor(collection.ApproveHinter, collection.NewApproveProcessor(cp)); err != nil {
+		return nil, err
+	} else if _, err := opr.SetProcessor(collection.CollectionRegisterHinter, collection.NewCollectionRegisterProcessor(cp)); err != nil {
+		return nil, err
+	} else if _, err := opr.SetProcessor(collection.MintHinter, collection.NewMintProcessor(cp)); err != nil {
+		return nil, err
+	} else if _, err := opr.SetProcessor(collection.TransferHinter, collection.NewTransferProcessor(cp)); err != nil {
 		return nil, err
 	}
 
@@ -202,7 +213,7 @@ func AttachProposalProcessor(
 	return opr, nil
 }
 
-func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationProcessor) (context.Context, error) {
+func InitializeProposalProcessor(ctx context.Context, opr *extension.OperationProcessor) (context.Context, error) {
 	var oprs *hint.Hintmap
 	if err := process.LoadOperationProcessorsContextValue(ctx, &oprs); err != nil {
 		if !errors.Is(err, util.ContextValueNotFoundError) {
@@ -226,6 +237,11 @@ func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationP
 		extension.CreateContractAccountsHinter,
 		extension.DeactivateHinter,
 		extension.WithdrawsHinter,
+		collection.DelegateHinter,
+		collection.ApproveHinter,
+		collection.CollectionRegisterHinter,
+		collection.MintHinter,
+		collection.TransferHinter,
 	} {
 		if err := oprs.Add(hinter, opr); err != nil {
 			return ctx, err

@@ -1,4 +1,4 @@
-package nft // nolint: dupl, revive
+package collection // nolint: dupl, revive
 
 import (
 	"github.com/pkg/errors"

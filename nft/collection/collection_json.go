@@ -2,6 +2,7 @@ package collection
 
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
+
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )

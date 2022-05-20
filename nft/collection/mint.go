@@ -2,6 +2,7 @@ package collection
 
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
+
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -24,25 +25,44 @@ type MintForm struct {
 	copyrighter nft.Copyrighter
 }
 
-func (info MintForm) Bytes() []byte {
+func NewMintForm(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyrighter) MintForm {
+	return MintForm{
+		BaseHinter:  hint.NewBaseHinter(MintFormHint),
+		hash:        hash,
+		uri:         uri,
+		copyrighter: copyrighter,
+	}
+}
+
+func MustNewMintform(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyrighter) MintForm {
+	form := NewMintForm(hash, uri, copyrighter)
+
+	if err := form.IsValid(nil); err != nil {
+		panic(err)
+	}
+
+	return form
+}
+
+func (form MintForm) Bytes() []byte {
 	return util.ConcatBytesSlice(
-		info.hash.Bytes(),
-		info.uri.Bytes(),
-		info.copyrighter.Bytes(),
+		form.hash.Bytes(),
+		form.uri.Bytes(),
+		form.copyrighter.Bytes(),
 	)
 }
 
-func (info MintForm) IsValid([]byte) error {
-	if err := info.BaseHinter.IsValid(nil); err != nil {
+func (form MintForm) IsValid([]byte) error {
+	if err := form.BaseHinter.IsValid(nil); err != nil {
 		return err
 	}
 
 	if err := isvalid.Check(
 		nil, false,
-		info.BaseHinter,
-		info.hash,
-		info.uri,
-		info.copyrighter); err != nil {
+		form.BaseHinter,
+		form.hash,
+		form.uri,
+		form.copyrighter); err != nil {
 		return err
 	}
 
@@ -87,7 +107,7 @@ func (fact MintFact) Hash() valuehash.Hash {
 }
 
 func (fact MintFact) GenerateHash() valuehash.Hash {
-	return valuehash.NewSHA256(fact.h.Bytes())
+	return valuehash.NewSHA256(fact.Bytes())
 }
 
 func (fact MintFact) Bytes() []byte {

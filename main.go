@@ -14,8 +14,8 @@ import (
 var (
 	Version = "v0.0.0"
 	options = []kong.Option{
-		kong.Name("mitum-currency"),
-		kong.Description("mitum-currency tool"),
+		kong.Name("mitum-nft"),
+		kong.Description("mitum-nft tool"),
 		currencycmds.KeyAddressVars,
 		currencycmds.SendVars,
 		mitumcmds.BlockDownloadVars,
@@ -40,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	storagecommand, err := cmds.NewStorageCommand()
+	storageCommand, err := cmds.NewStorageCommand()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %+v\n", err) // revive:disable-line:unhandled-error
 
@@ -51,7 +51,7 @@ func main() {
 		Node:       nodeCommand,
 		Key:        currencycmds.NewKeyCommand(),
 		Seal:       cmds.NewSealCommand(),
-		Storage:    storagecommand,
+		Storage:    storageCommand,
 		Deploy:     currencycmds.NewDeployCommand(),
 		QuicClient: mitumcmds.NewQuicClientCommand(),
 	}

@@ -1,4 +1,4 @@
-package nft
+package collection
 
 import (
 	"github.com/spikeekips/mitum-currency/currency"

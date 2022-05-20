@@ -151,7 +151,8 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		*currency.SuffrageInflationProcessor,
 		*extension.CreateContractAccountsProcessor,
 		*extension.DeactivateProcessor,
-		*extension.WithdrawsProcessor:
+		*extension.WithdrawsProcessor,
+		*DelegateProcessor:
 		return opr.process(op)
 	case currency.Transfers,
 		currency.CreateAccounts,
@@ -161,7 +162,8 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		currency.SuffrageInflation,
 		extension.CreateContractAccounts,
 		extension.Deactivate,
-		extension.Withdraws:
+		extension.Withdraws,
+		Delegate:
 		pr, err := opr.PreProcess(op)
 		if err != nil {
 			return err
@@ -187,6 +189,8 @@ func (opr *OperationProcessor) process(op state.Processor) error {
 	case *extension.DeactivateProcessor:
 		sp = t
 	case *extension.WithdrawsProcessor:
+		sp = t
+	case *DelegateProcessor:
 		sp = t
 	default:
 		return op.Process(opr.pool.Get, opr.pool.Set)
@@ -233,6 +237,9 @@ func (opr *OperationProcessor) checkDuplication(op state.Processor) error { // n
 		didtype = DuplicationTypeSender
 	case extension.Withdraws:
 		did = t.Fact().(extension.WithdrawsFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case Delegate:
+		did = t.Fact().(DelegateFact).Sender().String()
 		didtype = DuplicationTypeSender
 	default:
 		return nil
@@ -321,7 +328,8 @@ func (opr *OperationProcessor) getNewProcessor(op state.Processor) (state.Proces
 		currency.SuffrageInflation,
 		extension.CreateContractAccounts,
 		extension.Deactivate,
-		extension.Withdraws:
+		extension.Withdraws,
+		Delegate:
 
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
+
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"

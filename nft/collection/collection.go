@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"bytes"
 	"regexp"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
@@ -30,7 +31,7 @@ func (cn CollectionName) IsValid([]byte) error {
 	if l := len(cn); l < MinLengthCollectionName || l > MaxLengthCollectionName {
 		return isvalid.InvalidError.Errorf(
 			"invalid length of collection name; %d <= %d <= %d", MinLengthCollectionName, l, MaxLengthCollectionName)
-	} else if !nft.ReValidSymbol.Match([]byte(cn)) {
+	} else if !ReValidCollectionName.Match([]byte(cn)) {
 		return isvalid.InvalidError.Errorf("wrong collection name; %q", cn)
 	}
 
@@ -48,10 +49,6 @@ func (cu CollectionUri) String() string {
 }
 
 func (cu CollectionUri) IsValid([]byte) error {
-	if len(cu) == 0 {
-		return isvalid.InvalidError.Errorf("empty collection uri")
-	}
-
 	return nil
 }
 
@@ -82,59 +79,63 @@ func NewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator base.Ad
 }
 
 func MustNewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri CollectionUri) CollectionPolicy {
-	collection := NewCollectionPolicy(symbol, name, creator, royalty, uri)
+	policy := NewCollectionPolicy(symbol, name, creator, royalty, uri)
 
-	if err := collection.IsValid(nil); err != nil {
+	if err := policy.IsValid(nil); err != nil {
 		panic(err)
 	}
 
-	return collection
+	return policy
 }
 
-func (collection CollectionPolicy) Bytes() []byte {
+func (policy CollectionPolicy) Bytes() []byte {
 	return util.ConcatBytesSlice(
-		collection.symbol.Bytes(),
-		collection.name.Bytes(),
-		collection.creator.Bytes(),
-		collection.royalty.Bytes(),
-		collection.uri.Bytes(),
+		policy.symbol.Bytes(),
+		policy.name.Bytes(),
+		policy.creator.Bytes(),
+		policy.royalty.Bytes(),
+		policy.uri.Bytes(),
 	)
 }
 
-func (collection CollectionPolicy) IsValid([]byte) error {
+func (policy CollectionPolicy) IsValid([]byte) error {
 
 	if err := isvalid.Check(nil, false,
-		collection.symbol,
-		collection.name,
-		collection.creator,
-		collection.royalty,
-		collection.uri); err != nil {
+		policy.symbol,
+		policy.name,
+		policy.creator,
+		policy.royalty,
+		policy.uri); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (collection CollectionPolicy) Symbol() nft.Symbol {
-	return collection.symbol
+func (policy CollectionPolicy) Symbol() nft.Symbol {
+	return policy.symbol
 }
 
-func (collection CollectionPolicy) Name() CollectionName {
-	return collection.name
+func (policy CollectionPolicy) Name() CollectionName {
+	return policy.name
 }
 
-func (collection CollectionPolicy) Creator() base.Address {
-	return collection.creator
+func (policy CollectionPolicy) Creator() base.Address {
+	return policy.creator
 }
 
-func (collection CollectionPolicy) Royalty() nft.PaymentParameter {
-	return collection.royalty
+func (policy CollectionPolicy) Royalty() nft.PaymentParameter {
+	return policy.royalty
 }
 
-func (collection CollectionPolicy) Uri() CollectionUri {
-	return collection.uri
+func (policy CollectionPolicy) Uri() CollectionUri {
+	return policy.uri
 }
 
-func (collection CollectionPolicy) Rebuild() CollectionPolicy {
-	return collection
+func (policy CollectionPolicy) Equal(cpolicy CollectionPolicy) bool {
+	return bytes.Equal(policy.Bytes(), cpolicy.Bytes())
+}
+
+func (policy CollectionPolicy) Rebuild() CollectionPolicy {
+	return policy
 }

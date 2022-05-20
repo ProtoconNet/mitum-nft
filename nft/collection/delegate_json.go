@@ -13,6 +13,7 @@ type DelegateFactJSONPacker struct {
 	TK []byte              `json:"token"`
 	SD base.Address        `json:"sender"`
 	AG []base.Address      `json:"agents"`
+	MD DelegateMode        `json:"mode"`
 	CR currency.CurrencyID `json:"currency"`
 }
 
@@ -23,6 +24,7 @@ func (fact DelegateFact) MarshalJSON() ([]byte, error) {
 		TK:         fact.token,
 		SD:         fact.sender,
 		AG:         fact.agents,
+		MD:         fact.mode,
 		CR:         fact.cid,
 	})
 }
@@ -32,6 +34,7 @@ type DelegateFactJSONUnpacker struct {
 	TK []byte                `json:"token"`
 	SD base.AddressDecoder   `json:"sender"`
 	AG []base.AddressDecoder `json:"agents"`
+	MD string                `json:"mode"`
 	CR string                `json:"currency"`
 }
 
@@ -41,7 +44,7 @@ func (fact *DelegateFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AG, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AG, ufact.MD, ufact.CR)
 }
 
 func (op *Delegate) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {

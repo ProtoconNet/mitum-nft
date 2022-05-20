@@ -28,7 +28,7 @@ type CollectionRegisterFact struct {
 	cid    currency.CurrencyID
 }
 
-func NewAddUserDefinedPolicyFact(token []byte, sender base.Address, target base.Address, policy CollectionPolicy, cid currency.CurrencyID) CollectionRegisterFact {
+func NewCollectionRegisterFact(token []byte, sender base.Address, target base.Address, policy CollectionPolicy, cid currency.CurrencyID) CollectionRegisterFact {
 	fact := CollectionRegisterFact{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFactHint),
 		token:      token,

@@ -17,6 +17,7 @@ func (fact DelegateFact) MarshalBSON() ([]byte, error) {
 				"token":    fact.token,
 				"sender":   fact.sender,
 				"agents":   fact.agents,
+				"mode":     fact.mode,
 				"currency": fact.cid,
 			}))
 }
@@ -26,6 +27,7 @@ type DelegateFactBSONUnpacker struct {
 	TK []byte                `bson:"token"`
 	SD base.AddressDecoder   `bson:"sender"`
 	AG []base.AddressDecoder `bson:"agents"`
+	MD string                `bson:"mode"`
 	CR string                `bson:"currency"`
 }
 
@@ -35,7 +37,7 @@ func (fact *DelegateFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AG, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AG, ufact.MD, ufact.CR)
 }
 
 func (op *Delegate) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

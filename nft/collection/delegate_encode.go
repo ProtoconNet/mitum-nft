@@ -13,6 +13,7 @@ func (fact *DelegateFact) unpack(
 	token []byte,
 	bSender base.AddressDecoder,
 	bAgents []base.AddressDecoder,
+	mode string,
 	cid string,
 ) error {
 	sender, err := bSender.Encode(enc)
@@ -34,6 +35,7 @@ func (fact *DelegateFact) unpack(
 	fact.token = token
 	fact.sender = sender
 	fact.agents = agents
+	fact.mode = DelegateMode(mode)
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil
