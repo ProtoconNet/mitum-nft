@@ -151,8 +151,8 @@ func AttachProposalProcessor(
 	nodepool *network.Nodepool,
 	suffrage base.Suffrage,
 	cp *currency.CurrencyPool,
-) (*extension.OperationProcessor, error) {
-	opr := extension.NewOperationProcessor(cp)
+) (*collection.OperationProcessor, error) {
+	opr := collection.NewOperationProcessor(cp)
 	if _, err := opr.SetProcessor(currency.CreateAccountsHinter, currency.NewCreateAccountsProcessor(cp)); err != nil {
 		return nil, err
 	} else if _, err := opr.SetProcessor(currency.KeyUpdaterHinter, currency.NewKeyUpdaterProcessor(cp)); err != nil {
@@ -213,7 +213,7 @@ func AttachProposalProcessor(
 	return opr, nil
 }
 
-func InitializeProposalProcessor(ctx context.Context, opr *extension.OperationProcessor) (context.Context, error) {
+func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationProcessor) (context.Context, error) {
 	var oprs *hint.Hintmap
 	if err := process.LoadOperationProcessorsContextValue(ctx, &oprs); err != nil {
 		if !errors.Is(err, util.ContextValueNotFoundError) {

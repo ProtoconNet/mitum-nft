@@ -7,8 +7,8 @@ import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 
-	"github.com/ProtoconNet/mitum-account-extension/digest"
 	"github.com/ProtoconNet/mitum-account-extension/extension"
+	"github.com/ProtoconNet/mitum-nft/digest"
 	"github.com/spikeekips/mitum-currency/currency"
 )
 
