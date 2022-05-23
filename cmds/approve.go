@@ -92,7 +92,19 @@ func (cmd *ApproveCommand) parseFlags() error {
 }
 
 func (cmd *ApproveCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewApproveFact([]byte(cmd.Token), cmd.sender, cmd.approved, cmd.nfts, cmd.Currency.CID)
+	items := make([]collection.ApproveItem, 1)
+
+	if len(cmd.nfts) > 1 {
+		items[0] = collection.NewApproveItemMultiNFTs(cmd.approved, cmd.nfts, cmd.Currency.CID)
+	} else {
+		items[0] = collection.NewApproveItemSingleNFT(cmd.approved, cmd.nfts[0], cmd.Currency.CID)
+	}
+
+	fact := collection.NewApproveFact(
+		[]byte(cmd.Token),
+		cmd.sender,
+		items,
+	)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

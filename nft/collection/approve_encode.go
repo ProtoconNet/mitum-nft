@@ -1,9 +1,6 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-nft/nft"
-
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/encoder"
@@ -15,41 +12,32 @@ func (fact *ApproveFact) unpack(
 	h valuehash.Hash,
 	token []byte,
 	bSender base.AddressDecoder,
-	bApproved base.AddressDecoder,
-	bNFTs []byte,
-	cid string,
+	bItems []byte,
 ) error {
 	sender, err := bSender.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	approved, err := bApproved.Encode(enc)
+	hits, err := enc.DecodeSlice(bItems)
 	if err != nil {
 		return err
 	}
 
-	hNFTs, err := enc.DecodeSlice(bNFTs)
-	if err != nil {
-		return err
-	}
-
-	nfts := make([]nft.NFTID, len(hNFTs))
-	for i := range hNFTs {
-		j, ok := hNFTs[i].(nft.NFTID)
+	its := make([]ApproveItem, len(hits))
+	for i := range hits {
+		j, ok := hits[i].(ApproveItem)
 		if !ok {
-			return util.WrongTypeError.Errorf("not NFTID; %T", hNFTs[i])
+			return util.WrongTypeError.Errorf("not ApproveItem; %T", hits[i])
 		}
 
-		nfts[i] = j
+		its[i] = j
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.approved = approved
-	fact.nfts = nfts
-	fact.cid = currency.CurrencyID(cid)
+	fact.items = its
 
 	return nil
 }

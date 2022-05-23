@@ -1,8 +1,8 @@
 package collection
 
 import (
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
+	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/encoder"
 	"github.com/spikeekips/mitum/util/valuehash"
 )
@@ -12,31 +12,32 @@ func (fact *DelegateFact) unpack(
 	h valuehash.Hash,
 	token []byte,
 	bSender base.AddressDecoder,
-	bAgents []base.AddressDecoder,
-	mode string,
-	cid string,
+	bItems []byte,
 ) error {
 	sender, err := bSender.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	agents := make([]base.Address, len(bAgents))
-	for i := range agents {
-		agent, err := bAgents[i].Encode(enc)
-		if err != nil {
-			return err
+	hits, err := enc.DecodeSlice(bItems)
+	if err != nil {
+		return err
+	}
+
+	its := make([]DelegateItem, len(hits))
+	for i := range hits {
+		j, ok := hits[i].(DelegateItem)
+		if !ok {
+			return util.WrongTypeError.Errorf("not DelegateItem; %T", hits[i])
 		}
 
-		agents[i] = agent
+		its[i] = j
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.agents = agents
-	fact.mode = DelegateMode(mode)
-	fact.cid = currency.CurrencyID(cid)
+	fact.items = its
 
 	return nil
 }

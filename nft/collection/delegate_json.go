@@ -1,6 +1,8 @@
 package collection
 
 import (
+	"encoding/json"
+
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
@@ -9,12 +11,10 @@ import (
 
 type DelegateFactJSONPacker struct {
 	jsonenc.HintedHead
-	H  valuehash.Hash      `json:"hash"`
-	TK []byte              `json:"token"`
-	SD base.Address        `json:"sender"`
-	AG []base.Address      `json:"agents"`
-	MD DelegateMode        `json:"mode"`
-	CR currency.CurrencyID `json:"currency"`
+	H  valuehash.Hash `json:"hash"`
+	TK []byte         `json:"token"`
+	SD base.Address   `json:"sender"`
+	IT []DelegateItem `json:"items"`
 }
 
 func (fact DelegateFact) MarshalJSON() ([]byte, error) {
@@ -23,19 +23,15 @@ func (fact DelegateFact) MarshalJSON() ([]byte, error) {
 		H:          fact.h,
 		TK:         fact.token,
 		SD:         fact.sender,
-		AG:         fact.agents,
-		MD:         fact.mode,
-		CR:         fact.cid,
+		IT:         fact.items,
 	})
 }
 
 type DelegateFactJSONUnpacker struct {
-	H  valuehash.Bytes       `json:"hash"`
-	TK []byte                `json:"token"`
-	SD base.AddressDecoder   `json:"sender"`
-	AG []base.AddressDecoder `json:"agents"`
-	MD string                `json:"mode"`
-	CR string                `json:"currency"`
+	H  valuehash.Bytes     `json:"hash"`
+	TK []byte              `json:"token"`
+	SD base.AddressDecoder `json:"sender"`
+	IT json.RawMessage     `json:"items"`
 }
 
 func (fact *DelegateFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -44,7 +40,7 @@ func (fact *DelegateFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AG, ufact.MD, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.IT)
 }
 
 func (op *Delegate) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {

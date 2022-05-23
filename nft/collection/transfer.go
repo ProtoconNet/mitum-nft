@@ -93,7 +93,7 @@ func (fact TransferFact) IsValid(b []byte) error {
 		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", n, MaxTransferItems)
 	}
 
-	if err := isvalid.Check(nil, false, fact.sender); err != nil {
+	if err := fact.sender.IsValid(nil); err != nil {
 		return err
 	}
 
@@ -117,6 +117,10 @@ func (fact TransferFact) IsValid(b []byte) error {
 
 			foundNFT[nft] = true
 		}
+	}
+
+	if !fact.h.Equal(fact.GenerateHash()) {
+		return isvalid.InvalidError.Errorf("wrong Fact hash")
 	}
 
 	return nil

@@ -21,47 +21,20 @@ var (
 
 var MaxAgents = 10
 
-var (
-	DelegateAllow  = DelegateMode("allow")
-	DelegateCancel = DelegateMode("cancel")
-)
-
-type DelegateMode string
-
-func (mode DelegateMode) Bytes() []byte {
-	return []byte(mode)
-}
-
-func (mode DelegateMode) String() string {
-	return string(mode)
-}
-
-func (mode DelegateMode) IsValid([]byte) error {
-	if !(mode == DelegateAllow || mode == DelegateCancel) {
-		return isvalid.InvalidError.Errorf("wrong delegate mode; %s", mode)
-	}
-
-	return nil
-}
-
 type DelegateFact struct {
 	hint.BaseHinter
 	h      valuehash.Hash
 	token  []byte
 	sender base.Address
-	agents []base.Address
-	mode   DelegateMode
-	cid    currency.CurrencyID
+	items  []DelegateItem
 }
 
-func NewDelegateFact(token []byte, sender base.Address, agents []base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateFact {
+func NewDelegateFact(token []byte, sender base.Address, items []DelegateItem) DelegateFact {
 	fact := DelegateFact{
 		BaseHinter: hint.NewBaseHinter(DelegateFactHint),
 		token:      token,
 		sender:     sender,
-		agents:     agents,
-		mode:       mode,
-		cid:        cid,
+		items:      items,
 	}
 	fact.h = fact.GenerateHash()
 
@@ -77,18 +50,15 @@ func (fact DelegateFact) GenerateHash() valuehash.Hash {
 }
 
 func (fact DelegateFact) Bytes() []byte {
-	ags := make([][]byte, len(fact.agents))
-
-	for i := range fact.agents {
-		ags[i] = fact.agents[i].Bytes()
+	is := make([][]byte, len(fact.items))
+	for i := range fact.items {
+		is[i] = fact.items[i].Bytes()
 	}
 
 	return util.ConcatBytesSlice(
 		fact.token,
 		fact.sender.Bytes(),
-		fact.mode.Bytes(),
-		fact.cid.Bytes(),
-		util.ConcatBytesSlice(ags...),
+		util.ConcatBytesSlice(is...),
 	)
 }
 
@@ -108,34 +78,25 @@ func (fact DelegateFact) IsValid(b []byte) error {
 	if err := isvalid.Check(
 		nil, false,
 		fact.h,
-		fact.sender,
-		fact.mode,
-		fact.cid); err != nil {
+		fact.sender); err != nil {
 		return err
 	}
 
-	if n := len(fact.agents); n < 1 {
-		return isvalid.InvalidError.Errorf("empty agents for DelegateFact")
-	} else if n > MaxAgents {
-		return isvalid.InvalidError.Errorf("agents over allowed; %d > %d", n, MaxAgents)
-	}
-
 	foundAgent := map[string]bool{}
-	for i := range fact.agents {
-		if err := fact.agents[i].IsValid(nil); err != nil {
+	for i := range fact.items {
+		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
 		}
 
-		agent := fact.agents[i].String()
-		if _, found := foundAgent[agent]; found {
-			return isvalid.InvalidError.Errorf("duplicate agent found; %s", agent)
+		agent := fact.items[i].Agent()
+		if err := agent.IsValid(nil); err != nil {
+			return err
 		}
 
-		foundAgent[agent] = true
-	}
-
-	if !fact.h.Equal(fact.GenerateHash()) {
-		return isvalid.InvalidError.Errorf("wrong Fact hash")
+		if _, found := foundAgent[agent.String()]; found {
+			return isvalid.InvalidError.Errorf("duplicated agent found; %s", agent)
+		}
+		foundAgent[agent.String()] = true
 	}
 
 	return nil
@@ -149,31 +110,36 @@ func (fact DelegateFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact DelegateFact) Agents() []base.Address {
-	return fact.agents
-}
-
-func (fact DelegateFact) Mode() DelegateMode {
-	return fact.mode
-}
-
 func (fact DelegateFact) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, len(fact.agents)+1)
+	as := make([]base.Address, len(fact.items)+1)
 
-	for i := range fact.agents {
-		as[i] = fact.agents[i]
+	for i := range fact.items {
+		as[i] = fact.items[i].Agent()
 	}
 
-	as[len(fact.agents)] = fact.sender
+	as[len(fact.items)] = fact.sender
 
 	return as, nil
 }
 
-func (fact DelegateFact) Currency() currency.CurrencyID {
-	return fact.cid
+func (fact DelegateFact) Currencies() []currency.CurrencyID {
+	cs := make([]currency.CurrencyID, len(fact.items))
+
+	for i := range fact.items {
+		cs[i] = fact.items[i].Currency()
+	}
+
+	return cs
 }
 
 func (fact DelegateFact) Rebuild() DelegateFact {
+	items := make([]DelegateItem, len(fact.items))
+	for i := range fact.items {
+		it := fact.items[i]
+		items[i] = it.Rebuild()
+	}
+
+	fact.items = items
 	fact.h = fact.GenerateHash()
 
 	return fact

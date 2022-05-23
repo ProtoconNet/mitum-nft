@@ -96,7 +96,9 @@ func (cmd *DelegateCommand) parseFlags() error {
 }
 
 func (cmd *DelegateCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewDelegateFact([]byte(cmd.Token), cmd.sender, cmd.agents, cmd.mode, cmd.Currency.CID)
+	items := []collection.DelegateItem{collection.NewDelegateItem(cmd.agents[0], cmd.mode, cmd.Currency.CID)}
+
+	fact := collection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

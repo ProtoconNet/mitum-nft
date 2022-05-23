@@ -11,6 +11,19 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
+var MaxApproveItems = 10
+
+type ApproveItem interface {
+	hint.Hinter
+	isvalid.IsValider
+	NFTsItem
+	Bytes() []byte
+	Approved() base.Address
+	Addresses() []base.Address
+	Currency() currency.CurrencyID
+	Rebuild() ApproveItem
+}
+
 var (
 	ApproveFactType   = hint.Type("mitum-nft-approve-operation-fact")
 	ApproveFactHint   = hint.NewHint(ApproveFactType, "v0.0.1")
@@ -22,22 +35,18 @@ var (
 
 type ApproveFact struct {
 	hint.BaseHinter
-	h        valuehash.Hash
-	token    []byte
-	sender   base.Address
-	approved base.Address
-	nfts     []nft.NFTID
-	cid      currency.CurrencyID
+	h      valuehash.Hash
+	token  []byte
+	sender base.Address
+	items  []ApproveItem
 }
 
-func NewApproveFact(token []byte, sender base.Address, approved base.Address, nfts []nft.NFTID, cid currency.CurrencyID) ApproveFact {
+func NewApproveFact(token []byte, sender base.Address, items []ApproveItem) ApproveFact {
 	fact := ApproveFact{
 		BaseHinter: hint.NewBaseHinter(ApproveFactHint),
 		token:      token,
 		sender:     sender,
-		approved:   approved,
-		nfts:       nfts,
-		cid:        cid,
+		items:      items,
 	}
 	fact.h = fact.GenerateHash()
 
@@ -53,17 +62,15 @@ func (fact ApproveFact) GenerateHash() valuehash.Hash {
 }
 
 func (fact ApproveFact) Bytes() []byte {
-	ns := make([][]byte, len(fact.nfts))
-	for i := range fact.nfts {
-		ns[i] = fact.nfts[i].Bytes()
+	is := make([][]byte, len(fact.items))
+	for i := range fact.items {
+		is[i] = fact.items[i].Bytes()
 	}
 
 	return util.ConcatBytesSlice(
 		fact.token,
 		fact.sender.Bytes(),
-		fact.approved.Bytes(),
-		fact.cid.Bytes(),
-		util.ConcatBytesSlice(ns...),
+		util.ConcatBytesSlice(is...),
 	)
 }
 
@@ -76,28 +83,36 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if len(fact.token) < 1 {
-		return isvalid.InvalidError.Errorf("empty token for ApproveFact")
-	} else if len(fact.nfts) < 1 {
-		return isvalid.InvalidError.Errorf("empty nfts for ApproveFact")
+	if n := len(fact.items); n < 1 {
+		return isvalid.InvalidError.Errorf("empty items for ApproveFact")
+	} else if n > int(MaxApproveItems) {
+		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", n, MaxApproveItems)
 	}
 
-	if err := isvalid.Check(
-		nil, false, fact.h,
-		fact.sender, fact.approved, fact.cid); err != nil {
+	if err := fact.sender.IsValid(nil); err != nil {
 		return err
 	}
 
 	foundNFT := map[string]bool{}
-	for i := range fact.nfts {
-		if err := fact.nfts[i].IsValid(nil); err != nil {
+	for i := range fact.items {
+		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
 		}
-		nft := fact.nfts[i].String()
-		if _, found := foundNFT[nft]; found {
-			return isvalid.InvalidError.Errorf("duplicated nft found; %s", nft)
+
+		nfts := fact.items[i].NFTs()
+
+		for j := range nfts {
+			if err := nfts[j].IsValid(nil); err != nil {
+				return err
+			}
+
+			nft := nfts[j].String()
+			if _, found := foundNFT[nft]; found {
+				return isvalid.InvalidError.Errorf("duplicated nft found; %s", nft)
+			}
+
+			foundNFT[nft] = true
 		}
-		foundNFT[nft] = true
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {
@@ -115,28 +130,45 @@ func (fact ApproveFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact ApproveFact) Approved() base.Address {
-	return fact.approved
-}
-
 func (fact ApproveFact) NFTs() []nft.NFTID {
-	return fact.nfts
+	ns := []nft.NFTID{}
+
+	for i := range fact.items {
+		ns = append(ns, fact.items[i].NFTs()...)
+	}
+
+	return ns
 }
 
 func (fact ApproveFact) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, 2)
+	as := make([]base.Address, len(fact.items)+1)
 
-	as[0] = fact.sender
-	as[1] = fact.approved
+	for i := range fact.items {
+		as[i] = fact.items[i].Approved()
+	}
+	as[len(fact.items)] = fact.sender
 
 	return as, nil
 }
 
-func (fact ApproveFact) Currency() currency.CurrencyID {
-	return fact.cid
+func (fact ApproveFact) Currencies() []currency.CurrencyID {
+	cs := make([]currency.CurrencyID, len(fact.items))
+
+	for i := range fact.items {
+		cs[i] = fact.items[i].Currency()
+	}
+
+	return cs
 }
 
 func (fact ApproveFact) Rebuild() ApproveFact {
+	items := make([]ApproveItem, len(fact.items))
+	for i := range fact.items {
+		it := fact.items[i]
+		items[i] = it.Rebuild()
+	}
+
+	fact.items = items
 	fact.h = fact.GenerateHash()
 
 	return fact

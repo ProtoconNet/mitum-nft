@@ -13,12 +13,10 @@ func (fact ApproveFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(fact.Hint()),
 			bson.M{
-				"hash":     fact.h,
-				"token":    fact.token,
-				"sender":   fact.sender,
-				"approved": fact.approved,
-				"nfts":     fact.nfts,
-				"currency": fact.cid,
+				"hash":   fact.h,
+				"token":  fact.token,
+				"sender": fact.sender,
+				"items":  fact.items,
 			}))
 }
 
@@ -26,9 +24,7 @@ type ApproveFactBSONUnpacker struct {
 	H  valuehash.Bytes     `bson:"hash"`
 	TK []byte              `bson:"token"`
 	SD base.AddressDecoder `bson:"sender"`
-	AP base.AddressDecoder `bson:"approved"`
-	NS bson.Raw            `bson:"nfts"`
-	CR string              `bson:"currency"`
+	IT bson.Raw            `bson:"items"`
 }
 
 func (fact *ApproveFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -37,7 +33,7 @@ func (fact *ApproveFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AP, ufact.NS, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.IT)
 }
 
 func (op *Approve) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

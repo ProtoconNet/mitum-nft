@@ -3,8 +3,6 @@ package collection
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-nft/nft"
-
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
@@ -13,12 +11,10 @@ import (
 
 type ApproveFactJSONPacker struct {
 	jsonenc.HintedHead
-	H  valuehash.Hash      `json:"hash"`
-	TK []byte              `json:"token"`
-	SD base.Address        `json:"sender"`
-	AP base.Address        `json:"approved"`
-	NS []nft.NFTID         `json:"nfts"`
-	CR currency.CurrencyID `json:"currency"`
+	H  valuehash.Hash `json:"hash"`
+	TK []byte         `json:"token"`
+	SD base.Address   `json:"sender"`
+	IT []ApproveItem  `json:"items"`
 }
 
 func (fact ApproveFact) MarshalJSON() ([]byte, error) {
@@ -27,9 +23,7 @@ func (fact ApproveFact) MarshalJSON() ([]byte, error) {
 		H:          fact.h,
 		TK:         fact.token,
 		SD:         fact.sender,
-		AP:         fact.approved,
-		NS:         fact.nfts,
-		CR:         fact.cid,
+		IT:         fact.items,
 	})
 }
 
@@ -37,9 +31,7 @@ type ApproveFactJSONUnpacker struct {
 	H  valuehash.Bytes     `json:"hash"`
 	TK []byte              `json:"token"`
 	SD base.AddressDecoder `json:"sender"`
-	AP base.AddressDecoder `json:"approved"`
-	NS json.RawMessage     `json:"nfts"`
-	CR string              `json:"currency"`
+	IT json.RawMessage     `json:"items"`
 }
 
 func (fact *ApproveFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -48,7 +40,7 @@ func (fact *ApproveFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.AP, ufact.NS, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.IT)
 }
 
 func (op *Approve) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
