@@ -2,7 +2,9 @@ package nft
 
 import (
 	"fmt"
+	"net/url"
 
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -20,11 +22,11 @@ var (
 
 type NFTID struct {
 	hint.BaseHinter
-	collection Symbol
+	collection extension.ContractID
 	idx        currency.Big
 }
 
-func NewNFTID(collection Symbol, idx currency.Big) NFTID {
+func NewNFTID(collection extension.ContractID, idx currency.Big) NFTID {
 	return NFTID{
 		BaseHinter: hint.NewBaseHinter(NFTIDHint),
 		collection: collection,
@@ -32,7 +34,7 @@ func NewNFTID(collection Symbol, idx currency.Big) NFTID {
 	}
 }
 
-func MustNewNFTID(collection Symbol, idx currency.Big) NFTID {
+func MustNewNFTID(collection extension.ContractID, idx currency.Big) NFTID {
 	id := NewNFTID(collection, idx)
 
 	if err := id.IsValid(nil); err != nil {
@@ -65,7 +67,7 @@ func (nid NFTID) IsValid([]byte) error {
 	return nil
 }
 
-func (nid NFTID) Symbol() Symbol {
+func (nid NFTID) Symbol() extension.ContractID {
 	return nid.collection
 }
 
@@ -75,24 +77,6 @@ func (nid NFTID) Idx() currency.Big {
 
 func (nid NFTID) String() string {
 	return fmt.Sprintf("%s-%s)", nid.collection.String(), nid.idx.String())
-}
-
-type NFTUri string
-
-func (uri NFTUri) Bytes() []byte {
-	return []byte(uri)
-}
-
-func (uri NFTUri) String() string {
-	return string(uri)
-}
-
-func (uri NFTUri) IsValid([]byte) error {
-	if len(uri) == 0 {
-		return isvalid.InvalidError.Errorf("empty nft uri")
-	}
-
-	return nil
 }
 
 type NFTHash string
@@ -119,73 +103,6 @@ var (
 	CopyrighterHinter = NFT{BaseHinter: hint.NewBaseHinter(CopyrighterHint)}
 )
 
-type Copyrighter struct {
-	hint.BaseHinter
-	set     bool
-	address base.Address
-}
-
-func NewCopyrighter(set bool, address base.Address) Copyrighter {
-	if set {
-		return Copyrighter{
-			BaseHinter: hint.NewBaseHinter(CopyrighterHint),
-			set:        set,
-			address:    address,
-		}
-	}
-
-	return Copyrighter{
-		BaseHinter: hint.NewBaseHinter(CopyrighterHint),
-		set:        set,
-		address:    currency.Address{},
-	}
-}
-
-func MustNewCopyrighter(set bool, address base.Address) Copyrighter {
-	copyrighter := NewCopyrighter(set, address)
-
-	if err := copyrighter.IsValid(nil); err != nil {
-		panic(err)
-	}
-
-	return copyrighter
-}
-
-func (cpr Copyrighter) Bytes() []byte {
-	if cpr.set {
-		return util.ConcatBytesSlice(
-			[]byte{1},
-			cpr.address.Bytes(),
-		)
-	}
-
-	return []byte{0}
-}
-
-func (cpr Copyrighter) String() string {
-	if cpr.set {
-		return cpr.address.String()
-	}
-
-	return ""
-}
-
-func (cpr Copyrighter) IsValid([]byte) error {
-	if err := cpr.BaseHinter.IsValid(nil); err != nil {
-		return isvalid.InvalidError.Errorf("invalid copyrightr; %w", err)
-	}
-
-	if !cpr.set {
-		return nil
-	}
-
-	if err := cpr.address.IsValid(nil); err != nil {
-		return isvalid.InvalidError.Errorf("invalid address for copyrighter; %w", err)
-	}
-
-	return nil
-}
-
 var (
 	NFTType   = hint.Type("mitum-nft-post-info")
 	NFTHint   = hint.NewHint(NFTType, "v0.0.1")
@@ -197,12 +114,12 @@ type NFT struct {
 	id          NFTID
 	owner       base.Address
 	hash        NFTHash
-	uri         NFTUri
+	uri         url.URL
 	approved    base.Address
-	copyrighter Copyrighter
+	copyrighter base.Address
 }
 
-func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri NFTUri, approved base.Address, copyrighter Copyrighter) NFT {
+func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri url.URL, approved base.Address, copyrighter base.Address) NFT {
 	return NFT{
 		BaseHinter:  hint.NewBaseHinter(NFTHint),
 		id:          id,
@@ -214,7 +131,7 @@ func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri NFTUri, approved bas
 	}
 }
 
-func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri NFTUri, approved base.Address, copyrighter Copyrighter) NFT {
+func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri url.URL, approved base.Address, copyrighter base.Address) NFT {
 	nft := NewNFT(id, owner, hash, uri, approved, copyrighter)
 
 	if err := nft.IsValid(nil); err != nil {
@@ -229,21 +146,29 @@ func (nft NFT) Bytes() []byte {
 		nft.id.Bytes(),
 		nft.owner.Bytes(),
 		nft.hash.Bytes(),
-		nft.uri.Bytes(),
+		[]byte(nft.uri.String()),
 		nft.approved.Bytes(),
 		nft.copyrighter.Bytes(),
 	)
 }
 
 func (nft NFT) IsValid([]byte) error {
+	if len(nft.uri.String()) < 1 {
+		return isvalid.InvalidError.Errorf("empty uri")
+	}
+
+	if len(nft.copyrighter.String()) > 1 {
+		if err := nft.copyrighter.IsValid(nil); err != nil {
+			return err
+		}
+	}
+
 	if err := isvalid.Check(
 		nil, false,
 		nft.id,
 		nft.owner,
 		nft.hash,
-		nft.uri,
 		nft.approved,
-		nft.copyrighter,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}
@@ -262,7 +187,7 @@ func (nft NFT) Hash() NFTHash {
 	return nft.hash
 }
 
-func (nft NFT) Uri() NFTUri {
+func (nft NFT) Uri() url.URL {
 	return nft.uri
 }
 
@@ -270,6 +195,6 @@ func (nft NFT) Approved() base.Address {
 	return nft.approved
 }
 
-func (nft NFT) Copyrighter() Copyrighter {
+func (nft NFT) Copyrighter() base.Address {
 	return nft.copyrighter
 }

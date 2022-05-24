@@ -1,31 +1,36 @@
 package collection
 
 import (
+	"net/url"
+
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util/encoder"
 )
 
-func (cudp *CollectionPolicy) unpack(
+func (p *Policy) unpack(
 	enc encoder.Encoder,
-	symbol string,
 	name string,
 	bCreator base.AddressDecoder,
 	royalty uint,
-	uri string,
+	_uri string,
 ) error {
-	cudp.symbol = nft.Symbol(symbol)
-	cudp.name = CollectionName(name)
+	p.name = CollectionName(name)
 
 	creator, err := bCreator.Encode(enc)
 	if err != nil {
 		return err
 	}
-	cudp.creator = creator
+	p.creator = creator
 
-	cudp.royalty = nft.PaymentParameter(royalty)
-	cudp.uri = CollectionUri(uri)
+	p.royalty = nft.PaymentParameter(royalty)
+
+	if uri, err := url.Parse(_uri); err != nil {
+		return err
+	} else {
+		p.uri = *uri
+	}
 
 	return nil
 }

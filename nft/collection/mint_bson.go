@@ -14,15 +14,15 @@ func (form MintForm) MarshalBSON() ([]byte, error) {
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(form.Hint()),
 			bson.M{
 				"hash":        form.hash,
-				"uri":         form.uri,
+				"uri":         form.uri.String(),
 				"copyrighter": form.copyrighter,
 			}))
 }
 
 type MintFormBSONUnpacker struct {
-	HS string   `bson:"hash"`
-	UR string   `bson:"uri"`
-	CP bson.Raw `bson:"copyrighter"`
+	HS string              `bson:"hash"`
+	UR string              `bson:"uri"`
+	CP base.AddressDecoder `bson:"copyrighter"`
 }
 
 func (form *MintForm) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

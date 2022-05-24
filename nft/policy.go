@@ -1,38 +1,11 @@
 package nft
 
 import (
-	"regexp"
-
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/spikeekips/mitum/util"
+	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
 )
-
-var (
-	MinLengthSymbol = 3
-	MaxLengthSymbol = 10
-	ReValidSymbol   = regexp.MustCompile(`^[A-Z]+$`)
-)
-
-type Symbol string
-
-func (s Symbol) Bytes() []byte {
-	return []byte(s)
-}
-
-func (s Symbol) String() string {
-	return string(s)
-}
-
-func (s Symbol) IsValid([]byte) error {
-	if l := len(s); l < MinLengthSymbol || l > MaxLengthSymbol {
-		return isvalid.InvalidError.Errorf(
-			"invalid length of symbol; %d <= %d <= %d", MinLengthSymbol, l, MaxLengthSymbol)
-	} else if !ReValidSymbol.Match([]byte(s)) {
-		return isvalid.InvalidError.Errorf("wrong symbol; %q", s)
-	}
-
-	return nil
-}
 
 type PaymentParameter uint
 
@@ -53,10 +26,67 @@ func (pp PaymentParameter) IsValid([]byte) error {
 	return nil
 }
 
+var (
+	DesignType   = hint.Type("mitum-nft-design")
+	DesignHint   = hint.NewHint(DesignType, "v0.0.1")
+	DesignHinter = NFT{BaseHinter: hint.NewBaseHinter(DesignHint)}
+)
+
+type Design struct {
+	hint.BaseHinter
+	symbol extension.ContractID
+	policy BasePolicy
+}
+
+func NewDesign(symbol extension.ContractID, policy BasePolicy) Design {
+	return Design{
+		BaseHinter: hint.NewBaseHinter(DesignHint),
+		symbol:     symbol,
+		policy:     policy,
+	}
+}
+
+func MustNewDesign(symbol extension.ContractID, policy BasePolicy) Design {
+	d := NewDesign(symbol, policy)
+	if err := d.IsValid(nil); err != nil {
+		panic(err)
+	}
+	return d
+}
+
+func (d Design) Bytes() []byte {
+	return util.ConcatBytesSlice(
+		d.symbol.Bytes(),
+		d.policy.Bytes(),
+	)
+}
+
+func (d Design) Symbol() extension.ContractID {
+	return d.symbol
+}
+
+func (d Design) Policy() BasePolicy {
+	return d.policy
+}
+
+func (d Design) IsValid([]byte) error {
+	if err := isvalid.Check(
+		nil, false,
+		d.BaseHinter,
+		d.symbol,
+		d.policy); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d Design) Rebuild() Design {
+	d.policy = d.policy.Rebuild()
+	return d
+}
+
 type BasePolicy interface {
 	isvalid.IsValider
 	Bytes() []byte
-	Symbol() Symbol
-	Equal(policy BasePolicy) bool
 	Rebuild() BasePolicy
 }

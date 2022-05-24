@@ -118,7 +118,7 @@ func (doc ContractAccountStatusDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	address := doc.st.Key()[:len(doc.st.Key())-len(extension.StateKeyContractAccountStatusSuffix)]
+	address := doc.st.Key()[:len(doc.st.Key())-len(extension.StateKeyContractAccountSuffix)]
 	m["address"] = address
 	m["height"] = doc.st.Height()
 

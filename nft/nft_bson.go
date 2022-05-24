@@ -32,30 +32,6 @@ func (nid *NFTID) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 	return nid.unpack(enc, unid.CL, unid.IX)
 }
 
-func (cr Copyrighter) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(bsonenc.MergeBSONM(
-		bsonenc.NewHintedDoc(cr.Hint()),
-		bson.M{
-			"set":     cr.set,
-			"address": cr.address,
-		}),
-	)
-}
-
-type CopyrighterBSONUnpacker struct {
-	ST bool                `bson:"set"`
-	AD base.AddressDecoder `bson:"address"`
-}
-
-func (cr *Copyrighter) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var ucr CopyrighterBSONUnpacker
-	if err := enc.Unmarshal(b, &ucr); err != nil {
-		return err
-	}
-
-	return cr.unpack(enc, ucr.ST, ucr.AD)
-}
-
 func (nft NFT) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bsonenc.MergeBSONM(
 		bsonenc.NewHintedDoc(nft.Hint()),
@@ -76,7 +52,7 @@ type NFTBSONUnpacker struct {
 	HS string              `bson:"hash"`
 	UR string              `bson:"uri"`
 	AP base.AddressDecoder `bson:"approved"`
-	CP bson.Raw            `bson:"copyrighter"`
+	CP base.AddressDecoder `bson:"copyrighter"`
 }
 
 func (nft *NFT) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

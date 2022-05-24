@@ -936,7 +936,7 @@ func (st *Database) ContractAccountStatus(a base.Address) (base.Address, bool, b
 		}
 	}
 
-	v, err := extension.StateContractAccountStatusValue(sta)
+	v, err := extension.StateContractAccountValue(sta)
 	if err != nil {
 		return nil, false, lastHeight, previousHeight, err
 	}

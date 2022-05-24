@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"bytes"
+	"net/url"
 	"regexp"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
@@ -38,39 +38,23 @@ func (cn CollectionName) IsValid([]byte) error {
 	return nil
 }
 
-type CollectionUri string
-
-func (cu CollectionUri) Bytes() []byte {
-	return []byte(cu)
-}
-
-func (cu CollectionUri) String() string {
-	return string(cu)
-}
-
-func (cu CollectionUri) IsValid([]byte) error {
-	return nil
-}
-
 var (
-	CollectionPolicyType   = hint.Type("mitum-nft-collection-policy")
-	CollectionPolicyHint   = hint.NewHint(CollectionPolicyType, "v0.0.1")
-	CollectionPolicyHinter = CollectionPolicy{BaseHinter: hint.NewBaseHinter(CollectionPolicyHint)}
+	PolicyType   = hint.Type("mitum-nft-policy")
+	PolicyHint   = hint.NewHint(PolicyType, "v0.0.1")
+	PolicyHinter = Policy{BaseHinter: hint.NewBaseHinter(PolicyHint)}
 )
 
-type CollectionPolicy struct {
+type Policy struct {
 	hint.BaseHinter
-	symbol  nft.Symbol
 	name    CollectionName
 	creator base.Address
 	royalty nft.PaymentParameter
-	uri     CollectionUri
+	uri     url.URL
 }
 
-func NewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri CollectionUri) CollectionPolicy {
-	return CollectionPolicy{
-		BaseHinter: hint.NewBaseHinter(CollectionPolicyHint),
-		symbol:     symbol,
+func NewPolicy(name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri url.URL) Policy {
+	return Policy{
+		BaseHinter: hint.NewBaseHinter(PolicyHint),
 		name:       name,
 		creator:    creator,
 		royalty:    royalty,
@@ -78,8 +62,8 @@ func NewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator base.Ad
 	}
 }
 
-func MustNewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri CollectionUri) CollectionPolicy {
-	policy := NewCollectionPolicy(symbol, name, creator, royalty, uri)
+func MustNewPolicy(name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri url.URL) Policy {
+	policy := NewPolicy(name, creator, royalty, uri)
 
 	if err := policy.IsValid(nil); err != nil {
 		panic(err)
@@ -88,54 +72,42 @@ func MustNewCollectionPolicy(symbol nft.Symbol, name CollectionName, creator bas
 	return policy
 }
 
-func (policy CollectionPolicy) Bytes() []byte {
+func (policy Policy) Bytes() []byte {
 	return util.ConcatBytesSlice(
-		policy.symbol.Bytes(),
 		policy.name.Bytes(),
 		policy.creator.Bytes(),
 		policy.royalty.Bytes(),
-		policy.uri.Bytes(),
+		[]byte(policy.uri.String()),
 	)
 }
 
-func (policy CollectionPolicy) IsValid([]byte) error {
-
+func (policy Policy) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false,
-		policy.symbol,
 		policy.name,
 		policy.creator,
-		policy.royalty,
-		policy.uri); err != nil {
+		policy.royalty); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (policy CollectionPolicy) Symbol() nft.Symbol {
-	return policy.symbol
-}
-
-func (policy CollectionPolicy) Name() CollectionName {
+func (policy Policy) Name() CollectionName {
 	return policy.name
 }
 
-func (policy CollectionPolicy) Creator() base.Address {
+func (policy Policy) Creator() base.Address {
 	return policy.creator
 }
 
-func (policy CollectionPolicy) Royalty() nft.PaymentParameter {
+func (policy Policy) Royalty() nft.PaymentParameter {
 	return policy.royalty
 }
 
-func (policy CollectionPolicy) Uri() CollectionUri {
+func (policy Policy) Uri() url.URL {
 	return policy.uri
 }
 
-func (policy CollectionPolicy) Equal(cpolicy CollectionPolicy) bool {
-	return bytes.Equal(policy.Bytes(), cpolicy.Bytes())
-}
-
-func (policy CollectionPolicy) Rebuild() CollectionPolicy {
+func (policy Policy) Rebuild() nft.BasePolicy {
 	return policy
 }

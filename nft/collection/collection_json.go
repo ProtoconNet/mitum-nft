@@ -7,39 +7,36 @@ import (
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
 
-type CollectionPolicyJSONPacker struct {
+type PolicyJSONPacker struct {
 	jsonenc.HintedHead
-	SB nft.Symbol           `json:"symbol"`
 	NM CollectionName       `json:"name"`
 	CE base.Address         `json:"creator"`
 	RY nft.PaymentParameter `json:"royalty"`
-	UR CollectionUri        `json:"uri"`
+	UR string               `json:"uri"`
 }
 
-func (cp CollectionPolicy) MarshalJSON() ([]byte, error) {
-	return jsonenc.Marshal(CollectionPolicyJSONPacker{
-		HintedHead: jsonenc.NewHintedHead(cp.Hint()),
-		SB:         cp.symbol,
-		NM:         cp.name,
-		CE:         cp.creator,
-		RY:         cp.royalty,
-		UR:         cp.uri,
+func (p Policy) MarshalJSON() ([]byte, error) {
+	return jsonenc.Marshal(PolicyJSONPacker{
+		HintedHead: jsonenc.NewHintedHead(p.Hint()),
+		NM:         p.name,
+		CE:         p.creator,
+		RY:         p.royalty,
+		UR:         p.uri.String(),
 	})
 }
 
-type CollectionPolicyJSONUnpacker struct {
-	SB string              `json:"symbol"`
+type PolicyJSONUnpacker struct {
 	NM string              `json:"name"`
 	CE base.AddressDecoder `json:"creator"`
 	RY uint                `json:"royalty"`
 	UR string              `json:"uri"`
 }
 
-func (cp *CollectionPolicy) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var ucp CollectionPolicyJSONUnpacker
-	if err := enc.Unmarshal(b, &ucp); err != nil {
+func (p *Policy) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+	var up PolicyJSONUnpacker
+	if err := enc.Unmarshal(b, &up); err != nil {
 		return err
 	}
 
-	return cp.unpack(enc, ucp.SB, ucp.NM, ucp.CE, ucp.RY, ucp.UR)
+	return p.unpack(enc, up.NM, up.CE, up.RY, up.UR)
 }

@@ -2,7 +2,9 @@ package nft
 
 import (
 	"encoding/json"
+	"net/url"
 
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
@@ -10,8 +12,8 @@ import (
 
 type NFTIDJSONPacker struct {
 	jsonenc.HintedHead
-	CL Symbol       `json:"collection"`
-	IX currency.Big `json:"id"`
+	CL extension.ContractID `json:"collection"`
+	IX currency.Big         `json:"id"`
 }
 
 func (nid NFTID) MarshalJSON() ([]byte, error) {
@@ -36,42 +38,14 @@ func (nid *NFTID) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 	return nid.unpack(enc, uid.CL, uid.IX)
 }
 
-type CopyrighterJSONPacker struct {
-	jsonenc.HintedHead
-	ST bool         `json:"set"`
-	AD base.Address `json:"address"`
-}
-
-func (cp Copyrighter) MarshalJSON() ([]byte, error) {
-	return jsonenc.Marshal(CopyrighterJSONPacker{
-		HintedHead: jsonenc.NewHintedHead(cp.Hint()),
-		ST:         cp.set,
-		AD:         cp.address,
-	})
-}
-
-type CopyrighterJSONUnpacker struct {
-	ST bool                `json:"set"`
-	AD base.AddressDecoder `json:"address"`
-}
-
-func (cp *Copyrighter) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var ucp CopyrighterJSONUnpacker
-	if err := enc.Unmarshal(b, &ucp); err != nil {
-		return err
-	}
-
-	return cp.unpack(enc, ucp.ST, ucp.AD)
-}
-
 type NFTJSONPacker struct {
 	jsonenc.HintedHead
 	ID NFTID        `json:"id"`
 	ON base.Address `json:"owner"`
 	HS NFTHash      `json:"hash"`
-	UR NFTUri       `json:"uri"`
+	UR url.URL      `json:"uri"`
 	AP base.Address `json:"approved"`
-	CP Copyrighter  `json:"copyrighter"`
+	CP base.Address `json:"copyrighter"`
 }
 
 func (nft NFT) MarshalJSON() ([]byte, error) {
@@ -92,7 +66,7 @@ type NFTJSONUnpacker struct {
 	HS string              `json:"hash"`
 	UR string              `json:"uri"`
 	AP base.AddressDecoder `json:"approved"`
-	CP json.RawMessage     `json:"copyrighter"`
+	CP base.AddressDecoder `json:"copyrighter"`
 }
 
 func (nft *NFT) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {

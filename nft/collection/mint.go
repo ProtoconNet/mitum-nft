@@ -1,6 +1,9 @@
 package collection
 
 import (
+	"net/url"
+
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/pkg/errors"
@@ -21,11 +24,11 @@ var (
 type MintForm struct {
 	hint.BaseHinter
 	hash        nft.NFTHash
-	uri         nft.NFTUri
-	copyrighter nft.Copyrighter
+	uri         url.URL
+	copyrighter base.Address
 }
 
-func NewMintForm(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyrighter) MintForm {
+func NewMintForm(hash nft.NFTHash, uri url.URL, copyrighter base.Address) MintForm {
 	return MintForm{
 		BaseHinter:  hint.NewBaseHinter(MintFormHint),
 		hash:        hash,
@@ -34,7 +37,7 @@ func NewMintForm(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyrighter) 
 	}
 }
 
-func MustNewMintform(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyrighter) MintForm {
+func MustNewMintform(hash nft.NFTHash, uri url.URL, copyrighter base.Address) MintForm {
 	form := NewMintForm(hash, uri, copyrighter)
 
 	if err := form.IsValid(nil); err != nil {
@@ -47,7 +50,7 @@ func MustNewMintform(hash nft.NFTHash, uri nft.NFTUri, copyrighter nft.Copyright
 func (form MintForm) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		form.hash.Bytes(),
-		form.uri.Bytes(),
+		[]byte(form.uri.String()),
 		form.copyrighter.Bytes(),
 	)
 }
@@ -57,12 +60,20 @@ func (form MintForm) IsValid([]byte) error {
 		return err
 	}
 
+	if len(form.uri.String()) < 1 {
+		return isvalid.InvalidError.Errorf("empty uri")
+	}
+
+	if len(form.copyrighter.String()) > 1 {
+		if err := form.copyrighter.IsValid(nil); err != nil {
+			return err
+		}
+	}
+
 	if err := isvalid.Check(
 		nil, false,
 		form.BaseHinter,
-		form.hash,
-		form.uri,
-		form.copyrighter); err != nil {
+		form.hash); err != nil {
 		return err
 	}
 
@@ -83,12 +94,12 @@ type MintFact struct {
 	h          valuehash.Hash
 	token      []byte
 	sender     base.Address
-	collection nft.Symbol
+	collection extension.ContractID
 	form       MintForm
 	cid        currency.CurrencyID
 }
 
-func NewMintFact(token []byte, sender base.Address, collection nft.Symbol, form MintForm, cid currency.CurrencyID) MintFact {
+func NewMintFact(token []byte, sender base.Address, collection extension.ContractID, form MintForm, cid currency.CurrencyID) MintFact {
 	fact := MintFact{
 		BaseHinter: hint.NewBaseHinter(MintFactHint),
 		token:      token,
@@ -158,7 +169,7 @@ func (fact MintFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) Collection() nft.Symbol {
+func (fact MintFact) Collection() extension.ContractID {
 	return fact.collection
 }
 

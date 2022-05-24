@@ -1,6 +1,9 @@
 package cmds
 
 import (
+	"net/url"
+
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 
@@ -75,23 +78,26 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	uri := nft.NFTUri(cmd.Uri)
-	if err := uri.IsValid(nil); err != nil {
+	var uri url.URL
+	if _uri, err := url.Parse(cmd.Uri); err != nil {
 		return err
+	} else {
+		uri = *_uri
 	}
 
-	var copyrighter nft.Copyrighter
+	var copyrighter base.Address
 	if len(cmd.Copyrighter.String()) < 1 {
-		copyrighter = nft.NewCopyrighter(false, currency.Address{})
+		copyrighter = currency.Address{}
 	} else {
 		if a, err := cmd.Copyrighter.Encode(jenc); err != nil {
 			return errors.Wrapf(err, "invalid copyrighter format; %q", cmd.Copyrighter.String())
 		} else {
-			copyrighter = nft.NewCopyrighter(true, a)
+			copyrighter = a
 		}
-	}
-	if err := copyrighter.IsValid(nil); err != nil {
-		return err
+
+		if err := copyrighter.IsValid(nil); err != nil {
+			return err
+		}
 	}
 
 	form := collection.NewMintForm(hash, uri, copyrighter)
@@ -105,7 +111,7 @@ func (cmd *MintCommand) parseFlags() error {
 }
 
 func (cmd *MintCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, nft.Symbol(cmd.CSymbol), cmd.form, cmd.Currency.CID)
+	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, extension.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

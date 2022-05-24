@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -24,17 +25,17 @@ type CollectionRegisterFact struct {
 	token  []byte
 	sender base.Address
 	target base.Address
-	policy CollectionPolicy
+	design nft.Design
 	cid    currency.CurrencyID
 }
 
-func NewCollectionRegisterFact(token []byte, sender base.Address, target base.Address, policy CollectionPolicy, cid currency.CurrencyID) CollectionRegisterFact {
+func NewCollectionRegisterFact(token []byte, sender base.Address, target base.Address, design nft.Design, cid currency.CurrencyID) CollectionRegisterFact {
 	fact := CollectionRegisterFact{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFactHint),
 		token:      token,
 		sender:     sender,
 		target:     target,
-		policy:     policy,
+		design:     design,
 		cid:        cid,
 	}
 	fact.h = fact.GenerateHash()
@@ -55,7 +56,7 @@ func (fact CollectionRegisterFact) Bytes() []byte {
 		fact.token,
 		fact.sender.Bytes(),
 		fact.target.Bytes(),
-		fact.policy.Bytes(),
+		fact.design.Bytes(),
 		fact.cid.Bytes(),
 	)
 }
@@ -78,7 +79,7 @@ func (fact CollectionRegisterFact) IsValid(b []byte) error {
 		fact.h,
 		fact.sender,
 		fact.target,
-		fact.policy,
+		fact.design,
 		fact.cid); err != nil {
 		return err
 	}
@@ -102,8 +103,8 @@ func (fact CollectionRegisterFact) Target() base.Address {
 	return fact.target
 }
 
-func (fact CollectionRegisterFact) Policy() CollectionPolicy {
-	return fact.policy
+func (fact CollectionRegisterFact) Design() nft.Design {
+	return fact.design
 }
 
 func (fact CollectionRegisterFact) Addresses() ([]base.Address, error) {
@@ -120,8 +121,8 @@ func (fact CollectionRegisterFact) Currency() currency.CurrencyID {
 }
 
 func (fact CollectionRegisterFact) Rebuild() CollectionRegisterFact {
-	policy := fact.policy.Rebuild()
-	fact.policy = policy
+	design := fact.design.Rebuild()
+	fact.design = design
 
 	fact.h = fact.GenerateHash()
 

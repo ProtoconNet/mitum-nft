@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -14,7 +15,7 @@ func (fact *CollectionRegisterFact) unpack(
 	token []byte,
 	bSender base.AddressDecoder,
 	bTarget base.AddressDecoder,
-	bPolicy []byte,
+	bDesign []byte,
 	cid string,
 ) error {
 	sender, err := bSender.Encode(enc)
@@ -27,20 +28,20 @@ func (fact *CollectionRegisterFact) unpack(
 		return err
 	}
 
-	var policy CollectionPolicy
-	if hinter, err := enc.Decode(bPolicy); err != nil {
+	var design nft.Design
+	if hinter, err := enc.Decode(bDesign); err != nil {
 		return err
-	} else if i, ok := hinter.(CollectionPolicy); !ok {
-		return util.WrongTypeError.Errorf("not CollectionPolicy; %T", hinter)
+	} else if i, ok := hinter.(nft.Design); !ok {
+		return util.WrongTypeError.Errorf("not Design; %T", hinter)
 	} else {
-		policy = i
+		design = i
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
 	fact.target = target
-	fact.policy = policy
+	fact.design = design
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil

@@ -3,6 +3,7 @@ package collection
 import (
 	"encoding/json"
 
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
@@ -15,7 +16,7 @@ type CollectionRegisterFactJSONPacker struct {
 	TK []byte              `json:"token"`
 	SD base.Address        `json:"sender"`
 	TG base.Address        `json:"target"`
-	PL CollectionPolicy    `json:"policy"`
+	DS nft.Design          `json:"design"`
 	CR currency.CurrencyID `json:"currency"`
 }
 
@@ -26,7 +27,7 @@ func (fact CollectionRegisterFact) MarshalJSON() ([]byte, error) {
 		TK:         fact.token,
 		SD:         fact.sender,
 		TG:         fact.target,
-		PL:         fact.policy,
+		DS:         fact.design,
 		CR:         fact.cid,
 	})
 }
@@ -36,7 +37,7 @@ type CollectionRegisterFactJSONUnpacker struct {
 	TK []byte              `json:"token"`
 	SD base.AddressDecoder `json:"sender"`
 	TG base.AddressDecoder `json:"target"`
-	PL json.RawMessage     `json:"policy"`
+	DS json.RawMessage     `json:"design"`
 	CR string              `json:"currency"`
 }
 
@@ -46,7 +47,7 @@ func (fact *CollectionRegisterFact) UnpackJSON(b []byte, enc *jsonenc.Encoder) e
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.TG, ufact.PL, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.TG, ufact.DS, ufact.CR)
 }
 
 func (op *CollectionRegister) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {

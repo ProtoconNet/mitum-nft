@@ -3,6 +3,7 @@ package collection
 import (
 	"encoding/json"
 
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum-currency/currency"
@@ -13,24 +14,24 @@ import (
 
 type MintFormJSONPacker struct {
 	jsonenc.HintedHead
-	HS nft.NFTHash     `json:"hash"`
-	UR nft.NFTUri      `json:"uri"`
-	CP nft.Copyrighter `json:"copyrighter"`
+	HS nft.NFTHash  `json:"hash"`
+	UR string       `json:"uri"`
+	CP base.Address `json:"copyrighter"`
 }
 
 func (form MintForm) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(MintFormJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(form.Hint()),
 		HS:         form.hash,
-		UR:         form.uri,
+		UR:         form.uri.String(),
 		CP:         form.copyrighter,
 	})
 }
 
 type MintFormJSONUnpacker struct {
-	HS string          `json:"hash"`
-	UR string          `json:"uri"`
-	CP json.RawMessage `json:"copyrighter"`
+	HS string              `json:"hash"`
+	UR string              `json:"uri"`
+	CP base.AddressDecoder `json:"copyrighter"`
 }
 
 func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -44,12 +45,12 @@ func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 
 type MintFactJSONPacker struct {
 	jsonenc.HintedHead
-	H  valuehash.Hash      `json:"hash"`
-	TK []byte              `json:"token"`
-	SD base.Address        `json:"sender"`
-	CL nft.Symbol          `json:"collection"`
-	FO MintForm            `json:"form"`
-	CR currency.CurrencyID `json:"currency"`
+	H  valuehash.Hash       `json:"hash"`
+	TK []byte               `json:"token"`
+	SD base.Address         `json:"sender"`
+	CL extension.ContractID `json:"collection"`
+	FO MintForm             `json:"form"`
+	CR currency.CurrencyID  `json:"currency"`
 }
 
 func (fact MintFact) MarshalJSON() ([]byte, error) {

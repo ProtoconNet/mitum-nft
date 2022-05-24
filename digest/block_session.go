@@ -187,7 +187,7 @@ func (bs *BlockSession) prepareAccounts() error {
 				return err
 			}
 			balanceModels = append(balanceModels, j...)
-		case extension.IsStateContractAccountStatusKey(st.Key()):
+		case extension.IsStateContractAccountKey(st.Key()):
 			j, err := bs.handleContractAccountStatusState(st)
 			if err != nil {
 				return err

@@ -1,6 +1,9 @@
 package cmds
 
 import (
+	"net/url"
+
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 
@@ -24,7 +27,7 @@ type CollectionRegisterCommand struct {
 	Uri      string                      `name:"uri" help:"collection uri" optional:""`
 	sender   base.Address
 	target   base.Address
-	policy   collection.CollectionPolicy
+	design   nft.Design
 }
 
 func NewCollectionRegisterCommand() CollectionRegisterCommand {
@@ -77,7 +80,7 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		cmd.target = a
 	}
 
-	symbol := nft.Symbol(cmd.CSymbol)
+	symbol := extension.ContractID(cmd.CSymbol)
 	if err := symbol.IsValid(nil); err != nil {
 		return err
 	}
@@ -92,25 +95,30 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		return err
 	}
 
-	var uri = collection.CollectionUri(cmd.Uri)
-	if len(cmd.Uri) > 0 {
-		if err := uri.IsValid(nil); err != nil {
-			return err
-		}
+	var uri url.URL
+	if _uri, err := url.Parse(cmd.Uri); err != nil {
+		return err
+	} else {
+		uri = *_uri
 	}
 
-	policy := collection.NewCollectionPolicy(symbol, name, cmd.sender, royalty, uri)
+	policy := collection.NewPolicy(name, cmd.sender, royalty, uri)
 	if err := policy.IsValid(nil); err != nil {
 		return err
 	}
-	cmd.policy = policy
+
+	design := nft.NewDesign(symbol, policy)
+	if err := design.IsValid(nil); err != nil {
+		return err
+	}
+	cmd.design = design
 
 	return nil
 
 }
 
 func (cmd *CollectionRegisterCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.target, cmd.policy, cmd.Currency.CID)
+	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.target, cmd.design, cmd.Currency.CID)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

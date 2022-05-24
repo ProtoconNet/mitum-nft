@@ -1,6 +1,9 @@
 package collection
 
 import (
+	"net/url"
+
+	"github.com/ProtoconNet/mitum-account-extension/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/pkg/errors"
@@ -14,19 +17,22 @@ import (
 func (form *MintForm) unpack(
 	enc encoder.Encoder,
 	hash string,
-	uri string,
-	bCopyrighter []byte,
+	_uri string,
+	bCopyrighter base.AddressDecoder,
 ) error {
 	form.hash = nft.NFTHash(hash)
-	form.uri = nft.NFTUri(uri)
 
-	if hinter, err := enc.Decode(bCopyrighter); err != nil {
+	if uri, err := url.Parse(_uri); err != nil {
 		return err
-	} else if copyrighter, ok := hinter.(nft.Copyrighter); !ok {
-		return errors.Errorf("not Copyrighter; %T", hinter)
 	} else {
-		form.copyrighter = copyrighter
+		form.uri = *uri
 	}
+
+	copyrighter, err := bCopyrighter.Encode(enc)
+	if err != nil {
+		return err
+	}
+	form.copyrighter = copyrighter
 
 	return nil
 }
@@ -56,7 +62,7 @@ func (fact *MintFact) unpack(
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.collection = nft.Symbol(collection)
+	fact.collection = extension.ContractID(collection)
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil
