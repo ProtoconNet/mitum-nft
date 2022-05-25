@@ -3,7 +3,6 @@ package collection
 import (
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/spikeekips/mitum/base"
 	bsonenc "github.com/spikeekips/mitum/util/encoder/bson"
 )
 
@@ -12,25 +11,25 @@ func (p Policy) MarshalBSON() ([]byte, error) {
 		bsonenc.NewHintedDoc(p.Hint()),
 		bson.M{
 			"name":    p.name,
-			"creator": p.creator,
 			"royalty": p.royalty,
 			"uri":     p.uri.String(),
+			"limit":   p.limit.String(),
 		},
 	))
 }
 
-type CollectionPolicyBSONUnpacker struct {
-	NM string              `bson:"name"`
-	CE base.AddressDecoder `bson:"creator"`
-	RY uint                `bson:"royalty"`
-	UR string              `bson:"uri"`
+type PolicyBSONUnpacker struct {
+	NM string `bson:"name"`
+	RY uint   `bson:"royalty"`
+	UR string `bson:"uri"`
+	LI string `bson:"limit"`
 }
 
 func (p Policy) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var ucp CollectionPolicyBSONUnpacker
-	if err := enc.Unmarshal(b, &ucp); err != nil {
+	var up PolicyBSONUnpacker
+	if err := enc.Unmarshal(b, &up); err != nil {
 		return err
 	}
 
-	return p.unpack(enc, ucp.NM, ucp.CE, ucp.RY, ucp.UR)
+	return p.unpack(enc, up.NM, up.RY, up.UR, up.LI)
 }

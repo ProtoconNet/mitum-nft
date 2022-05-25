@@ -11,17 +11,11 @@ import (
 
 func (it *BaseTransferItem) unpack(
 	enc encoder.Encoder,
-	bFrom base.AddressDecoder,
-	bTo base.AddressDecoder,
+	bReceiver base.AddressDecoder,
 	bNFTs []byte,
 	cid string,
 ) error {
-	from, err := bFrom.Encode(enc)
-	if err != nil {
-		return err
-	}
-
-	to, err := bTo.Encode(enc)
+	receiver, err := bReceiver.Encode(enc)
 	if err != nil {
 		return err
 	}
@@ -41,8 +35,7 @@ func (it *BaseTransferItem) unpack(
 		nfts[i] = j
 	}
 
-	it.from = from
-	it.to = to
+	it.receiver = receiver
 	it.nfts = nfts
 	it.cid = currency.CurrencyID(cid)
 

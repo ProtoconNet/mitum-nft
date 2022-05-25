@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 
 	currencycmds "github.com/spikeekips/mitum-currency/cmds"
+	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
 	"github.com/spikeekips/mitum/util"
@@ -25,6 +26,7 @@ type CollectionRegisterCommand struct {
 	Name     string                      `arg:"" name:"name" help:"collection name" required:"true"`
 	Royalty  uint                        `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
 	Uri      string                      `name:"uri" help:"collection uri" optional:""`
+	Limit    string                      `arg:"" name:"limit" help:"limit number of nfts" required:"true"`
 	sender   base.Address
 	target   base.Address
 	design   nft.Design
@@ -75,7 +77,7 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Target.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid approved format; %q", cmd.Target.String())
+		return errors.Wrapf(err, "invalid target format; %q", cmd.Target.String())
 	} else {
 		cmd.target = a
 	}
@@ -102,12 +104,19 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		uri = *_uri
 	}
 
-	policy := collection.NewPolicy(name, cmd.sender, royalty, uri)
+	var limit currency.Big
+	if _limit, err := currency.NewBigFromString(cmd.Limit); err != nil {
+		return err
+	} else {
+		limit = _limit
+	}
+
+	policy := collection.NewPolicy(name, royalty, uri, limit)
 	if err := policy.IsValid(nil); err != nil {
 		return err
 	}
 
-	design := nft.NewDesign(symbol, policy)
+	design := nft.NewDesign(cmd.target, cmd.sender, symbol, policy)
 	if err := design.IsValid(nil); err != nil {
 		return err
 	}
@@ -118,7 +127,7 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 }
 
 func (cmd *CollectionRegisterCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.target, cmd.design, cmd.Currency.CID)
+	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.design, cmd.Currency.CID)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

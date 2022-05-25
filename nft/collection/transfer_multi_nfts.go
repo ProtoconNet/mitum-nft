@@ -25,9 +25,9 @@ type TransferItemMultiNFTs struct {
 	BaseTransferItem
 }
 
-func NewTransferItemMultiNFTs(from base.Address, to base.Address, nfts []nft.NFTID, cid currency.CurrencyID) TransferItemMultiNFTs {
+func NewTransferItemMultiNFTs(receiver base.Address, nfts []nft.NFTID, cid currency.CurrencyID) TransferItemMultiNFTs {
 	return TransferItemMultiNFTs{
-		BaseTransferItem: NewBaseTransferItem(TransferItemMultiNFTsHint, from, to, nfts, cid),
+		BaseTransferItem: NewBaseTransferItem(TransferItemMultiNFTsHint, receiver, nfts, cid),
 	}
 }
 

@@ -12,8 +12,7 @@ import (
 
 type TransferItemJSONPacker struct {
 	jsonenc.HintedHead
-	FR base.Address        `json:"from"`
-	TO base.Address        `json:"to"`
+	RC base.Address        `json:"receiver"`
 	NS []nft.NFTID         `json:"nfts"`
 	CR currency.CurrencyID `json:"currency"`
 }
@@ -21,16 +20,14 @@ type TransferItemJSONPacker struct {
 func (it BaseTransferItem) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(TransferItemJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(it.Hint()),
-		FR:         it.from,
-		TO:         it.to,
+		RC:         it.receiver,
 		NS:         it.nfts,
 		CR:         it.cid,
 	})
 }
 
 type TransferItemJSONUnpacker struct {
-	FR base.AddressDecoder `json:"from"`
-	TO base.AddressDecoder `json:"to"`
+	RC base.AddressDecoder `json:"receiver"`
 	NS json.RawMessage     `json:"nfts"`
 	CR string              `json:"currency"`
 }
@@ -41,5 +38,5 @@ func (it *BaseTransferItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return it.unpack(enc, utn.FR, utn.TO, utn.NS, utn.CR)
+	return it.unpack(enc, utn.RC, utn.NS, utn.CR)
 }

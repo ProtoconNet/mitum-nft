@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
-	"github.com/spikeekips/mitum/base"
+	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
@@ -47,23 +47,23 @@ var (
 type Policy struct {
 	hint.BaseHinter
 	name    CollectionName
-	creator base.Address
 	royalty nft.PaymentParameter
 	uri     url.URL
+	limit   currency.Big
 }
 
-func NewPolicy(name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri url.URL) Policy {
+func NewPolicy(name CollectionName, royalty nft.PaymentParameter, uri url.URL, limit currency.Big) Policy {
 	return Policy{
 		BaseHinter: hint.NewBaseHinter(PolicyHint),
 		name:       name,
-		creator:    creator,
 		royalty:    royalty,
 		uri:        uri,
+		limit:      limit,
 	}
 }
 
-func MustNewPolicy(name CollectionName, creator base.Address, royalty nft.PaymentParameter, uri url.URL) Policy {
-	policy := NewPolicy(name, creator, royalty, uri)
+func MustNewPolicy(name CollectionName, royalty nft.PaymentParameter, uri url.URL, limit currency.Big) Policy {
+	policy := NewPolicy(name, royalty, uri, limit)
 
 	if err := policy.IsValid(nil); err != nil {
 		panic(err)
@@ -75,17 +75,17 @@ func MustNewPolicy(name CollectionName, creator base.Address, royalty nft.Paymen
 func (policy Policy) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		policy.name.Bytes(),
-		policy.creator.Bytes(),
 		policy.royalty.Bytes(),
 		[]byte(policy.uri.String()),
+		policy.limit.Bytes(),
 	)
 }
 
 func (policy Policy) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false,
 		policy.name,
-		policy.creator,
-		policy.royalty); err != nil {
+		policy.royalty,
+		policy.limit); err != nil {
 		return err
 	}
 
@@ -96,16 +96,16 @@ func (policy Policy) Name() CollectionName {
 	return policy.name
 }
 
-func (policy Policy) Creator() base.Address {
-	return policy.creator
-}
-
 func (policy Policy) Royalty() nft.PaymentParameter {
 	return policy.royalty
 }
 
 func (policy Policy) Uri() url.URL {
 	return policy.uri
+}
+
+func (policy Policy) Limit() currency.Big {
+	return policy.limit
 }
 
 func (policy Policy) Rebuild() nft.BasePolicy {

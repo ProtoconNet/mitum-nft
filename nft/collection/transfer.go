@@ -31,8 +31,8 @@ type TransferItem interface {
 	isvalid.IsValider
 	NFTsItem
 	Bytes() []byte
-	From() base.Address
-	To() base.Address
+	Receiver() base.Address
+	Currency() currency.CurrencyID
 	Addresses() []base.Address
 	Rebuild() TransferItem
 }

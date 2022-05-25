@@ -23,6 +23,10 @@ func (mode DelegateMode) String() string {
 	return string(mode)
 }
 
+func (mode DelegateMode) Equal(cmode DelegateMode) bool {
+	return string(mode) == string(cmode)
+}
+
 func (mode DelegateMode) IsValid([]byte) error {
 	if !(mode == DelegateAllow || mode == DelegateCancel) {
 		return isvalid.InvalidError.Errorf("wrong delegate mode; %s", mode)

@@ -11,8 +11,7 @@ func (it BaseTransferItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(it.Hint()),
 			bson.M{
-				"from":     it.from,
-				"to":       it.to,
+				"receiver": it.receiver,
 				"nfts":     it.nfts,
 				"currency": it.cid,
 			}),
@@ -20,8 +19,7 @@ func (it BaseTransferItem) MarshalBSON() ([]byte, error) {
 }
 
 type BaseTransferItemBSONUnpacker struct {
-	FR base.AddressDecoder `bson:"from"`
-	TO base.AddressDecoder `bson:"to"`
+	RC base.AddressDecoder `bson:"receiver"`
 	NS bson.Raw            `bson:"nfts"`
 	CR string              `bson:"currency"`
 }
@@ -32,5 +30,5 @@ func (it *BaseTransferItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return it.unpack(enc, uit.FR, uit.TO, uit.NS, uit.CR)
+	return it.unpack(enc, uit.RC, uit.NS, uit.CR)
 }

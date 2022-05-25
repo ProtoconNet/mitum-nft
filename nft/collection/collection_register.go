@@ -24,17 +24,15 @@ type CollectionRegisterFact struct {
 	h      valuehash.Hash
 	token  []byte
 	sender base.Address
-	target base.Address
 	design nft.Design
 	cid    currency.CurrencyID
 }
 
-func NewCollectionRegisterFact(token []byte, sender base.Address, target base.Address, design nft.Design, cid currency.CurrencyID) CollectionRegisterFact {
+func NewCollectionRegisterFact(token []byte, sender base.Address, design nft.Design, cid currency.CurrencyID) CollectionRegisterFact {
 	fact := CollectionRegisterFact{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFactHint),
 		token:      token,
 		sender:     sender,
-		target:     target,
 		design:     design,
 		cid:        cid,
 	}
@@ -55,7 +53,6 @@ func (fact CollectionRegisterFact) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		fact.token,
 		fact.sender.Bytes(),
-		fact.target.Bytes(),
 		fact.design.Bytes(),
 		fact.cid.Bytes(),
 	)
@@ -78,7 +75,6 @@ func (fact CollectionRegisterFact) IsValid(b []byte) error {
 		nil, false,
 		fact.h,
 		fact.sender,
-		fact.target,
 		fact.design,
 		fact.cid); err != nil {
 		return err
@@ -99,19 +95,14 @@ func (fact CollectionRegisterFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact CollectionRegisterFact) Target() base.Address {
-	return fact.target
-}
-
 func (fact CollectionRegisterFact) Design() nft.Design {
 	return fact.design
 }
 
 func (fact CollectionRegisterFact) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, 2)
+	as := make([]base.Address, 1)
 
 	as[0] = fact.sender
-	as[1] = fact.target
 
 	return as, nil
 }

@@ -23,9 +23,9 @@ type TransferItemSingleNFT struct {
 	BaseTransferItem
 }
 
-func NewTransferItemSingleNFT(from, to base.Address, nftid nft.NFTID, cid currency.CurrencyID) TransferItemSingleNFT {
+func NewTransferItemSingleNFT(receiver base.Address, nftid nft.NFTID, cid currency.CurrencyID) TransferItemSingleNFT {
 	return TransferItemSingleNFT{
-		BaseTransferItem: NewBaseTransferItem(TransferItemSingleNFTHint, from, to, []nft.NFTID{nftid}, cid),
+		BaseTransferItem: NewBaseTransferItem(TransferItemSingleNFTHint, receiver, []nft.NFTID{nftid}, cid),
 	}
 }
 

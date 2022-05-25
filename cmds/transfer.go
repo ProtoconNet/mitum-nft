@@ -16,18 +16,16 @@ type TransferCommand struct {
 	OperationFlags
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	From     AddressFlag                 `arg:"" name:"from" help:"nft owner" required:"true"`
-	To       AddressFlag                 `arg:"" name:"to" help:"nft receiver" required:"true"`
+	Receiver AddressFlag                 `arg:"" name:"receiver" help:"nft owner" required:"true"`
 	NFTs     []NFTIDFlag                 `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
 	sender   base.Address
-	from     base.Address
-	to       base.Address
+	receiver base.Address
 	nfts     []nft.NFTID
 }
 
 func NewTransferCommand() TransferCommand {
 	return TransferCommand{
-		BaseCommand: NewBaseCommand("transfer-operation"),
+		BaseCommand: NewBaseCommand("transfer-nfts-operation"),
 	}
 }
 
@@ -69,16 +67,10 @@ func (cmd *TransferCommand) parseFlags() error {
 		cmd.sender = a
 	}
 
-	if a, err := cmd.From.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid from format; %q", cmd.From.String())
+	if a, err := cmd.Receiver.Encode(jenc); err != nil {
+		return errors.Wrapf(err, "invalid receiver format; %q", cmd.Receiver.String())
 	} else {
-		cmd.from = a
-	}
-
-	if a, err := cmd.To.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid to format; %q", cmd.To.String())
-	} else {
-		cmd.to = a
+		cmd.receiver = a
 	}
 
 	if len(cmd.NFTs) < 1 {
@@ -103,9 +95,9 @@ func (cmd *TransferCommand) createOperation() (operation.Operation, error) {
 	items := make([]collection.TransferItem, 1)
 
 	if len(cmd.nfts) > 1 {
-		items[0] = collection.NewTransferItemMultiNFTs(cmd.from, cmd.to, cmd.nfts, cmd.Currency.CID)
+		items[0] = collection.NewTransferItemMultiNFTs(cmd.receiver, cmd.nfts, cmd.Currency.CID)
 	} else {
-		items[0] = collection.NewTransferItemSingleNFT(cmd.from, cmd.to, cmd.nfts[0], cmd.Currency.CID)
+		items[0] = collection.NewTransferItemSingleNFT(cmd.receiver, cmd.nfts[0], cmd.Currency.CID)
 	}
 
 	fact := collection.NewTransferFact(

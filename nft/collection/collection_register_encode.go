@@ -14,16 +14,10 @@ func (fact *CollectionRegisterFact) unpack(
 	h valuehash.Hash,
 	token []byte,
 	bSender base.AddressDecoder,
-	bTarget base.AddressDecoder,
 	bDesign []byte,
 	cid string,
 ) error {
 	sender, err := bSender.Encode(enc)
-	if err != nil {
-		return err
-	}
-
-	target, err := bTarget.Encode(enc)
 	if err != nil {
 		return err
 	}
@@ -40,7 +34,6 @@ func (fact *CollectionRegisterFact) unpack(
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.target = target
 	fact.design = design
 	fact.cid = currency.CurrencyID(cid)
 

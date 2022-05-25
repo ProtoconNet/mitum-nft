@@ -14,6 +14,10 @@ import (
 
 var BLACKHOLE_ZERO = currency.NewAddress("blackhole-0")
 
+func isCollectionEqual(c1 extension.ContractID, c2 extension.ContractID) bool {
+	return c1.String() == c2.String()
+}
+
 var (
 	NFTIDType   = hint.Type("mitum-nft-nft-id")
 	NFTIDHint   = hint.NewHint(NFTIDType, "v0.0.1")
@@ -79,6 +83,10 @@ func (nid NFTID) String() string {
 	return fmt.Sprintf("%s-%s)", nid.collection.String(), nid.idx.String())
 }
 
+func (nid NFTID) Equal(cnid NFTID) bool {
+	return isCollectionEqual(nid.collection, cnid.collection) && nid.idx.Equal(cnid.idx)
+}
+
 type NFTHash string
 
 func (hs NFTHash) Bytes() []byte {
@@ -98,13 +106,7 @@ func (hs NFTHash) IsValid([]byte) error {
 }
 
 var (
-	CopyrighterType   = hint.Type("mitum-nft-copyrighter")
-	CopyrighterHint   = hint.NewHint(CopyrighterType, "v0.0.1")
-	CopyrighterHinter = NFT{BaseHinter: hint.NewBaseHinter(CopyrighterHint)}
-)
-
-var (
-	NFTType   = hint.Type("mitum-nft-post-info")
+	NFTType   = hint.Type("mitum-nft-nft")
 	NFTHint   = hint.NewHint(NFTType, "v0.0.1")
 	NFTHinter = NFT{BaseHinter: hint.NewBaseHinter(NFTHint)}
 )

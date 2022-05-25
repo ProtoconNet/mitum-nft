@@ -37,7 +37,7 @@ type NFTIDFlag struct {
 func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 	l := strings.SplitN(string(b), ",", 2)
 	if len(l) != 2 {
-		return fmt.Errorf("invalid nft id, %q", string(b))
+		return fmt.Errorf("invalid nft id; %q", string(b))
 	}
 
 	s, id := l[0], l[1]
@@ -49,7 +49,7 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 	v.collection = symbol
 
 	if idx, err := currency.NewBigFromString(id); err != nil {
-		return errors.Wrapf(err, "invalid big string, %q", string(b))
+		return errors.Wrapf(err, "invalid big string; %q", string(b))
 	} else if err := idx.IsValid(nil); err != nil {
 		return err
 	} else {

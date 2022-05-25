@@ -16,7 +16,6 @@ func (fact CollectionRegisterFact) MarshalBSON() ([]byte, error) {
 				"hash":     fact.h,
 				"token":    fact.token,
 				"sender":   fact.sender,
-				"target":   fact.target,
 				"design":   fact.design,
 				"currency": fact.cid,
 			}))
@@ -26,7 +25,6 @@ type CollectionRegisterFactBSONUnpacker struct {
 	H  valuehash.Bytes     `bson:"hash"`
 	TK []byte              `bson:"token"`
 	SD base.AddressDecoder `bson:"sender"`
-	TG base.AddressDecoder `bson:"target"`
 	DS bson.Raw            `bson:"design"`
 	CR string              `bson:"currency"`
 }
@@ -37,7 +35,7 @@ func (fact *CollectionRegisterFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) e
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.TG, ufact.DS, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.DS, ufact.CR)
 }
 
 func (op *CollectionRegister) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

@@ -14,17 +14,15 @@ import (
 
 type BaseTransferItem struct {
 	hint.BaseHinter
-	from base.Address
-	to   base.Address
-	nfts []nft.NFTID
-	cid  currency.CurrencyID
+	receiver base.Address
+	nfts     []nft.NFTID
+	cid      currency.CurrencyID
 }
 
-func NewBaseTransferItem(ht hint.Hint, from base.Address, to base.Address, nfts []nft.NFTID, cid currency.CurrencyID) BaseTransferItem {
+func NewBaseTransferItem(ht hint.Hint, receiver base.Address, nfts []nft.NFTID, cid currency.CurrencyID) BaseTransferItem {
 	return BaseTransferItem{
 		BaseHinter: hint.NewBaseHinter(ht),
-		from:       from,
-		to:         to,
+		receiver:   receiver,
 		nfts:       nfts,
 		cid:        cid,
 	}
@@ -38,15 +36,14 @@ func (it BaseTransferItem) Bytes() []byte {
 	}
 
 	return util.ConcatBytesSlice(
-		it.from.Bytes(),
-		it.to.Bytes(),
+		it.receiver.Bytes(),
 		it.cid.Bytes(),
 		util.ConcatBytesSlice(ns...),
 	)
 }
 
 func (it BaseTransferItem) IsValid([]byte) error {
-	if err := isvalid.Check(nil, false, it.BaseHinter, it.from, it.to, it.cid); err != nil {
+	if err := isvalid.Check(nil, false, it.BaseHinter, it.receiver, it.cid); err != nil {
 		return err
 	}
 
@@ -69,18 +66,13 @@ func (it BaseTransferItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it BaseTransferItem) From() base.Address {
-	return it.from
-}
-
-func (it BaseTransferItem) To() base.Address {
-	return it.to
+func (it BaseTransferItem) Receiver() base.Address {
+	return it.receiver
 }
 
 func (it BaseTransferItem) Addresses() []base.Address {
-	as := make([]base.Address, 2)
-	as[0] = it.From()
-	as[1] = it.To()
+	as := make([]base.Address, 1)
+	as[0] = it.receiver
 	return as
 }
 
