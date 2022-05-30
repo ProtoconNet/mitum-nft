@@ -264,10 +264,10 @@ func (opr *OperationProcessor) checkDuplication(op state.Processor) error { // n
 		did = t.Fact().(CollectionRegisterFact).Sender().String()
 		didtype = DuplicationTypeSender
 	case Mint:
-		did = t.Fact().(CollectionRegisterFact).Sender().String()
+		did = t.Fact().(MintFact).Sender().String()
 		didtype = DuplicationTypeSender
 	case Transfer:
-		did = t.Fact().(CollectionRegisterFact).Sender().String()
+		did = t.Fact().(TransferFact).Sender().String()
 		didtype = DuplicationTypeSender
 	default:
 		return nil
