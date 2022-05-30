@@ -89,7 +89,7 @@ func (abx *AgentBox) Sort(ascending bool) {
 }
 
 func (abx AgentBox) Exists(ag base.Address) bool {
-	if len(abx.agents) < 1 {
+	if abx.IsEmpty() {
 		return false
 	}
 	for i := range abx.agents {
@@ -116,6 +116,10 @@ func (abx *AgentBox) Append(ag base.Address) error {
 	if abx.Exists(ag) {
 		return errors.Errorf("agent %v already exists in agent box", ag)
 	}
+	if len(abx.agents) >= MaxAgents {
+		return errors.Errorf("Max agents; %v", ag)
+	}
+
 	abx.agents = append(abx.agents, ag)
 	return nil
 }
