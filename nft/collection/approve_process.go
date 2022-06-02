@@ -3,6 +3,7 @@ package collection
 import (
 	"sync"
 
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base/state"
@@ -23,14 +24,14 @@ func (Approve) Process(
 }
 
 type ApproveProcessor struct {
-	cp *currency.CurrencyPool
+	cp *extensioncurrency.CurrencyPool
 	Approve
 	sa  state.State
 	sb  currency.AmountState
 	fee currency.Big
 }
 
-func NewApproveProcessor(cp *currency.CurrencyPool) currency.GetNewProcessor {
+func NewApproveProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
 	return func(op state.Processor) (state.Processor, error) {
 		i, ok := op.(Approve)
 		if !ok {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
@@ -12,8 +12,8 @@ import (
 
 type NFTIDJSONPacker struct {
 	jsonenc.HintedHead
-	CL extension.ContractID `json:"collection"`
-	IX currency.Big         `json:"id"`
+	CL extensioncurrency.ContractID `json:"collection"`
+	IX currency.Big                 `json:"id"`
 }
 
 func (nid NFTID) MarshalJSON() ([]byte, error) {

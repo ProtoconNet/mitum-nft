@@ -3,17 +3,17 @@ package nft
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
 
 type DesignJSONPacker struct {
 	jsonenc.HintedHead
-	PR base.Address         `json:"parent"`
-	CR base.Address         `json:"creator"`
-	SB extension.ContractID `json:"symbol"`
-	PO BasePolicy           `json:"policy"`
+	PR base.Address                 `json:"parent"`
+	CR base.Address                 `json:"creator"`
+	SB extensioncurrency.ContractID `json:"symbol"`
+	PO BasePolicy                   `json:"policy"`
 }
 
 func (d Design) MarshalJSON() ([]byte, error) {

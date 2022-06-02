@@ -1,7 +1,7 @@
 package nft
 
 import (
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
@@ -37,11 +37,11 @@ type Design struct {
 	hint.BaseHinter
 	parent  base.Address
 	creator base.Address
-	symbol  extension.ContractID
+	symbol  extensioncurrency.ContractID
 	policy  BasePolicy
 }
 
-func NewDesign(parent base.Address, creator base.Address, symbol extension.ContractID, policy BasePolicy) Design {
+func NewDesign(parent base.Address, creator base.Address, symbol extensioncurrency.ContractID, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		parent:     parent,
@@ -51,7 +51,7 @@ func NewDesign(parent base.Address, creator base.Address, symbol extension.Contr
 	}
 }
 
-func MustNewDesign(parent base.Address, creator base.Address, symbol extension.ContractID, policy BasePolicy) Design {
+func MustNewDesign(parent base.Address, creator base.Address, symbol extensioncurrency.ContractID, policy BasePolicy) Design {
 	d := NewDesign(parent, creator, symbol, policy)
 	if err := d.IsValid(nil); err != nil {
 		panic(err)
@@ -76,7 +76,7 @@ func (d Design) Creator() base.Address {
 	return d.creator
 }
 
-func (d Design) Symbol() extension.ContractID {
+func (d Design) Symbol() extensioncurrency.ContractID {
 	return d.symbol
 }
 

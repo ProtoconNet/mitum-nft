@@ -3,7 +3,7 @@ package collection
 import (
 	"sync"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
@@ -31,7 +31,7 @@ func (Delegate) Process(
 }
 
 type DelegateItemProcessor struct {
-	cp     *currency.CurrencyPool
+	cp     *extensioncurrency.CurrencyPool
 	h      valuehash.Hash
 	box    *AgentBox
 	sender base.Address
@@ -93,7 +93,7 @@ func (ipp *DelegateItemProcessor) Close() error {
 }
 
 type DelegateProcessor struct {
-	cp *currency.CurrencyPool
+	cp *extensioncurrency.CurrencyPool
 	Delegate
 	box          AgentBox
 	boxState     state.State
@@ -102,7 +102,7 @@ type DelegateProcessor struct {
 	required     map[currency.CurrencyID][2]currency.Big
 }
 
-func NewDelegateProcessor(cp *currency.CurrencyPool) currency.GetNewProcessor {
+func NewDelegateProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
 	return func(op state.Processor) (state.Processor, error) {
 		i, ok := op.(Delegate)
 		if !ok {
@@ -137,7 +137,7 @@ func (opp *DelegateProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError(err.Error())
 	}
 
-	if err := checkNotExistsState(extension.StateKeyContractAccount(fact.Sender()), getState); err != nil {
+	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getState); err != nil {
 		return nil, operation.NewBaseReasonError("contract account cannot have agents; %q", fact.Sender())
 	}
 
@@ -251,7 +251,7 @@ func (opp *DelegateProcessor) calculateItemsFee() (map[currency.CurrencyID][2]cu
 	return CalculateDelegateItemsFee(opp.cp, items)
 }
 
-func CalculateDelegateItemsFee(cp *currency.CurrencyPool, items []DelegateItem) (map[currency.CurrencyID][2]currency.Big, error) {
+func CalculateDelegateItemsFee(cp *extensioncurrency.CurrencyPool, items []DelegateItem) (map[currency.CurrencyID][2]currency.Big, error) {
 	required := map[currency.CurrencyID][2]currency.Big{}
 
 	for i := range items {

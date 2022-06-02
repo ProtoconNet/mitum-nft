@@ -3,9 +3,8 @@ package collection
 import (
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
-
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -94,12 +93,12 @@ type MintFact struct {
 	h          valuehash.Hash
 	token      []byte
 	sender     base.Address
-	collection extension.ContractID
+	collection extensioncurrency.ContractID
 	form       MintForm
 	cid        currency.CurrencyID
 }
 
-func NewMintFact(token []byte, sender base.Address, collection extension.ContractID, form MintForm, cid currency.CurrencyID) MintFact {
+func NewMintFact(token []byte, sender base.Address, collection extensioncurrency.ContractID, form MintForm, cid currency.CurrencyID) MintFact {
 	fact := MintFact{
 		BaseHinter: hint.NewBaseHinter(MintFactHint),
 		token:      token,
@@ -169,7 +168,7 @@ func (fact MintFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) Collection() extension.ContractID {
+func (fact MintFact) Collection() extensioncurrency.ContractID {
 	return fact.collection
 }
 

@@ -25,6 +25,7 @@ genesis-operations:
           feeer:
             type: fixed
             amount: 1
+            exchange-min-amount: 1
 
 policy:
     threshold: 100

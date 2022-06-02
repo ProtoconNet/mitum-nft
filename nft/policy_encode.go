@@ -1,7 +1,7 @@
 package nft
 
 import (
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/encoder"
@@ -27,7 +27,7 @@ func (d *Design) unpack(
 	}
 	d.creator = creator
 
-	d.symbol = extension.ContractID(_symbol)
+	d.symbol = extensioncurrency.ContractID(_symbol)
 
 	var policy BasePolicy
 	if hinter, err := enc.Decode(bPolicy); err != nil {

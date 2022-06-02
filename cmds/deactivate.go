@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 
 	"github.com/spikeekips/mitum/base"
@@ -75,7 +75,7 @@ func (cmd *DeactivateCommand) parseFlags() error {
 }
 
 func (cmd *DeactivateCommand) createOperation() (operation.Operation, error) {
-	fact := extension.NewDeactivateFact(
+	fact := extensioncurrency.NewDeactivateFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.target,
@@ -89,7 +89,7 @@ func (cmd *DeactivateCommand) createOperation() (operation.Operation, error) {
 	}
 	fs = append(fs, base.NewBaseFactSign(cmd.Privatekey.Publickey(), sig))
 
-	op, err := extension.NewDeactivate(fact, fs, cmd.Memo)
+	op, err := extensioncurrency.NewDeactivate(fact, fs, cmd.Memo)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create key-updater operation")
 	}

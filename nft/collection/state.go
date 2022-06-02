@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
@@ -54,7 +54,7 @@ func SetStateAgentsValue(st state.State, box AgentBox) (state.State, error) {
 	}
 }
 
-func StateKeyCollection(id extension.ContractID) string {
+func StateKeyCollection(id extensioncurrency.ContractID) string {
 	return fmt.Sprintf("%s%s", StateKeyCollectionPrefix, id.String())
 }
 
@@ -141,7 +141,7 @@ func SetStateNFTValue(st state.State, n nft.NFT) (state.State, error) {
 	}
 }
 
-func StateKeyCollectionLastIDX(id extension.ContractID) string {
+func StateKeyCollectionLastIDX(id extensioncurrency.ContractID) string {
 	return fmt.Sprintf("%s%s", id.String(), StateKeyCollectionLastIDXSuffix)
 }
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/spikeekips/mitum-currency/currency"
@@ -936,7 +936,7 @@ func (st *Database) ContractAccountStatus(a base.Address) (base.Address, bool, b
 		}
 	}
 
-	v, err := extension.StateContractAccountValue(sta)
+	v, err := extensioncurrency.StateContractAccountValue(sta)
 	if err != nil {
 		return nil, false, lastHeight, previousHeight, err
 	}

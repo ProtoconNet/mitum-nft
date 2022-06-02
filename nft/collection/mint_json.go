@@ -3,7 +3,7 @@ package collection
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum-currency/currency"
@@ -45,12 +45,12 @@ func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 
 type MintFactJSONPacker struct {
 	jsonenc.HintedHead
-	H  valuehash.Hash       `json:"hash"`
-	TK []byte               `json:"token"`
-	SD base.Address         `json:"sender"`
-	CL extension.ContractID `json:"collection"`
-	FO MintForm             `json:"form"`
-	CR currency.CurrencyID  `json:"currency"`
+	H  valuehash.Hash               `json:"hash"`
+	TK []byte                       `json:"token"`
+	SD base.Address                 `json:"sender"`
+	CL extensioncurrency.ContractID `json:"collection"`
+	FO MintForm                     `json:"form"`
+	CR currency.CurrencyID          `json:"currency"`
 }
 
 func (fact MintFact) MarshalJSON() ([]byte, error) {

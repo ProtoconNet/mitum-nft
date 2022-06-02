@@ -3,7 +3,7 @@ package nft
 import (
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -15,7 +15,7 @@ func (nid *NFTID) unpack(
 	collection string,
 	idx currency.Big,
 ) error {
-	nid.collection = extension.ContractID(collection)
+	nid.collection = extensioncurrency.ContractID(collection)
 	nid.idx = idx
 
 	return nil

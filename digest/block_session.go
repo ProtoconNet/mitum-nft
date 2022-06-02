@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base/block"
@@ -187,7 +187,7 @@ func (bs *BlockSession) prepareAccounts() error {
 				return err
 			}
 			balanceModels = append(balanceModels, j...)
-		case extension.IsStateContractAccountKey(st.Key()):
+		case extensioncurrency.IsStateContractAccountKey(st.Key()):
 			j, err := bs.handleContractAccountStatusState(st)
 			if err != nil {
 				return err

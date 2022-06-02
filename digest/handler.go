@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/seal"
 	"github.com/spikeekips/mitum/launch/process"
@@ -93,7 +93,7 @@ type Handlers struct {
 	enc             encoder.Encoder
 	database        *Database
 	cache           Cache
-	cp              *currency.CurrencyPool
+	cp              *extensioncurrency.CurrencyPool
 	nodeInfoHandler network.NodeInfoHandler
 	send            func(interface{}) (seal.Seal, error)
 	router          *mux.Router
@@ -111,7 +111,7 @@ func NewHandlers(
 	enc encoder.Encoder,
 	st *Database,
 	cache Cache,
-	cp *currency.CurrencyPool,
+	cp *extensioncurrency.CurrencyPool,
 ) *Handlers {
 	return &Handlers{
 		Logging: logging.NewLogging(func(c zerolog.Context) zerolog.Context {

@@ -3,7 +3,7 @@ package collection
 import (
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/pkg/errors"
@@ -62,7 +62,7 @@ func (fact *MintFact) unpack(
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.collection = extension.ContractID(collection)
+	fact.collection = extensioncurrency.ContractID(collection)
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil

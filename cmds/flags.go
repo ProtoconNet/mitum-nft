@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -30,7 +30,7 @@ func (v *AddressFlag) Encode(enc encoder.Encoder) (base.Address, error) {
 }
 
 type NFTIDFlag struct {
-	collection extension.ContractID
+	collection extensioncurrency.ContractID
 	idx        currency.Big
 }
 
@@ -42,7 +42,7 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 
 	s, id := l[0], l[1]
 
-	symbol := extension.ContractID(s)
+	symbol := extensioncurrency.ContractID(s)
 	if err := symbol.IsValid(nil); err != nil {
 		return err
 	}

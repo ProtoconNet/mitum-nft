@@ -3,7 +3,7 @@ package cmds
 import (
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 
@@ -111,7 +111,7 @@ func (cmd *MintCommand) parseFlags() error {
 }
 
 func (cmd *MintCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, extension.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
+	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

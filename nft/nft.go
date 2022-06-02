@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/ProtoconNet/mitum-account-extension/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -14,7 +14,7 @@ import (
 
 var BLACKHOLE_ZERO = currency.NewAddress("blackhole-0")
 
-func isCollectionEqual(c1 extension.ContractID, c2 extension.ContractID) bool {
+func isCollectionEqual(c1 extensioncurrency.ContractID, c2 extensioncurrency.ContractID) bool {
 	return c1.String() == c2.String()
 }
 
@@ -26,11 +26,11 @@ var (
 
 type NFTID struct {
 	hint.BaseHinter
-	collection extension.ContractID
+	collection extensioncurrency.ContractID
 	idx        currency.Big
 }
 
-func NewNFTID(collection extension.ContractID, idx currency.Big) NFTID {
+func NewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFTID {
 	return NFTID{
 		BaseHinter: hint.NewBaseHinter(NFTIDHint),
 		collection: collection,
@@ -38,7 +38,7 @@ func NewNFTID(collection extension.ContractID, idx currency.Big) NFTID {
 	}
 }
 
-func MustNewNFTID(collection extension.ContractID, idx currency.Big) NFTID {
+func MustNewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFTID {
 	id := NewNFTID(collection, idx)
 
 	if err := id.IsValid(nil); err != nil {
@@ -71,7 +71,7 @@ func (nid NFTID) IsValid([]byte) error {
 	return nil
 }
 
-func (nid NFTID) Symbol() extension.ContractID {
+func (nid NFTID) Symbol() extensioncurrency.ContractID {
 	return nid.collection
 }
 
