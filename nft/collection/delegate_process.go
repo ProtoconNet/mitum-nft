@@ -23,7 +23,7 @@ var DelegateProcessorPool = sync.Pool{
 	},
 }
 
-func (op Delegate) Process(
+func (Delegate) Process(
 	func(key string) (state.State, bool, error),
 	func(valuehash.Hash, ...state.State) error,
 ) error {
@@ -120,7 +120,6 @@ func NewDelegateProcessor(cp *currency.CurrencyPool) currency.GetNewProcessor {
 		opp.required = nil
 
 		return opp, nil
-
 	}
 }
 
@@ -130,36 +129,40 @@ func (opp *DelegateProcessor) PreProcess(
 ) (state.Processor, error) {
 	fact := opp.Fact().(DelegateFact)
 
+	if err := fact.IsValid(nil); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	}
+
 	if err := checkExistsState(currency.StateKeyAccount(fact.Sender()), getState); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
 	}
 
 	if err := checkNotExistsState(extension.StateKeyContractAccount(fact.Sender()), getState); err != nil {
-		return nil, operation.NewBaseReasonError(err.Error())
+		return nil, operation.NewBaseReasonError("contract account cannot have agents; %q", fact.Sender())
 	}
 
-	switch boxState, found, err := getState(StateKeyAgents(fact.Sender())); {
+	switch st, found, err := getState(StateKeyAgents(fact.Sender())); {
 	case err != nil:
 		return nil, operation.NewBaseReasonError(err.Error())
 	case !found:
 		opp.box = NewAgentBox(nil)
-		opp.boxState = boxState
+		opp.boxState = st
 	default:
-		box, err := StateAgentsValue(boxState)
+		box, err := StateAgentsValue(st)
 		if err != nil {
 			return nil, operation.NewBaseReasonError(err.Error())
 		}
 		opp.box = box
-		opp.boxState = boxState
+		opp.boxState = st
 	}
 
 	if required, err := opp.calculateItemsFee(); err != nil {
 		return nil, operation.NewBaseReasonError("failed to calculate fee; %w", err)
-	} else if amountStates, err := CheckSenderEnoughBalance(fact.Sender(), required, getState); err != nil {
+	} else if sts, err := CheckSenderEnoughBalance(fact.Sender(), required, getState); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
 	} else {
 		opp.required = required
-		opp.amountStates = amountStates
+		opp.amountStates = sts
 	}
 
 	ipps := make([]*DelegateItemProcessor, len(fact.items))
@@ -205,10 +208,10 @@ func (opp *DelegateProcessor) Process(
 	}
 	opp.box.Sort(true)
 
-	if boxState, err := SetStateAgentsValue(opp.boxState, opp.box); err != nil {
+	if st, err := SetStateAgentsValue(opp.boxState, opp.box); err != nil {
 		return operation.NewBaseReasonError(err.Error())
 	} else {
-		states = append(states, boxState)
+		states = append(states, st)
 	}
 
 	for k := range opp.required {
