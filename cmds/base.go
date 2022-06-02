@@ -161,8 +161,6 @@ func AttachProposalProcessor(
 		return nil, err
 	} else if _, err := opr.SetProcessor(extensioncurrency.CreateContractAccountsHinter, extensioncurrency.NewCreateContractAccountsProcessor(cp)); err != nil {
 		return nil, err
-	} else if _, err := opr.SetProcessor(extensioncurrency.DeactivateHinter, extensioncurrency.NewDeactivateProcessor(cp)); err != nil {
-		return nil, err
 	} else if _, err := opr.SetProcessor(extensioncurrency.WithdrawsHinter, extensioncurrency.NewWithdrawsProcessor(cp)); err != nil {
 		return nil, err
 	} else if _, err := opr.SetProcessor(collection.DelegateHinter, collection.NewDelegateProcessor(cp)); err != nil {
@@ -235,7 +233,6 @@ func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationP
 		extensioncurrency.CurrencyRegisterHinter,
 		extensioncurrency.SuffrageInflationHinter,
 		extensioncurrency.CreateContractAccountsHinter,
-		extensioncurrency.DeactivateHinter,
 		extensioncurrency.WithdrawsHinter,
 		collection.DelegateHinter,
 		collection.ApproveHinter,

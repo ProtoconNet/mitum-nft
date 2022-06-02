@@ -9,7 +9,6 @@ type SealCommand struct {
 	Send                  SendCommand                                `cmd:"" name:"send" help:"send seal to remote mitum node"`
 	CreateAccount         currencycmds.CreateAccountCommand          `cmd:"" name:"create-account" help:"create new account"`
 	CreateContractAccount extensioncmds.CreateContractAccountCommand `cmd:"" name:"create-contract-account" help:"create new contract account"`
-	Deactivate            DeactivateCommand                          `cmd:"" name:"deactivate" help:"deactivate contract account"`
 	Withdraw              extensioncmds.WithdrawCommand              `cmd:"" name:"withdraw" help:"withdraw contract account"`
 	Delegate              DelegateCommand                            `cmd:"" name:"delegate" help:"delegate agent or cancel agent delegation"`
 	Approve               ApproveCommand                             `cmd:"" name:"approve" help:"approve account for nft"`
@@ -30,7 +29,6 @@ func NewSealCommand() SealCommand {
 		Send:                  NewSendCommand(),
 		CreateAccount:         currencycmds.NewCreateAccountCommand(),
 		CreateContractAccount: extensioncmds.NewCreateContractAccountCommand(),
-		Deactivate:            NewDeactivateCommand(),
 		Withdraw:              extensioncmds.NewWithdrawCommand(),
 		Delegate:              NewDelegateCommand(),
 		Approve:               NewApproveCommand(),
