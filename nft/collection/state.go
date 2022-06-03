@@ -7,7 +7,6 @@ import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/pkg/errors"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
 	"github.com/spikeekips/mitum/base/state"
@@ -16,6 +15,7 @@ import (
 
 var (
 	StateKeyCollectionPrefix = "collection:"
+	StateKeyNFTHashPrefix    = "nfthash:"
 )
 
 var (
@@ -83,8 +83,8 @@ func SetStateCollectionValue(st state.State, design nft.Design) (state.State, er
 	}
 }
 
-func StateKeyNFTs(addr base.Address) string {
-	return fmt.Sprintf("%s%s", addr.String(), StateKeyNFTsSuffix)
+func StateKeyNFTs(id extensioncurrency.ContractID) string {
+	return fmt.Sprintf("%s%s", id.String(), StateKeyNFTsSuffix)
 }
 
 func IsStateNFTsKey(key string) bool {
@@ -113,7 +113,7 @@ func SetStateNFTsValue(st state.State, box NFTBox) (state.State, error) {
 }
 
 func StateKeyNFT(id nft.NFTID) string {
-	return fmt.Sprintf("%s%s", id.String(), StateKeyNFTSuffix)
+	return fmt.Sprintf("%s%s", StateKeyNFTHashPrefix, id.String())
 }
 
 func IsStateNFTKey(key string) bool {
@@ -149,24 +149,53 @@ func IsStateCollectionLastIDXKey(key string) bool {
 	return strings.HasSuffix(key, StateKeyCollectionLastIDXSuffix)
 }
 
-func StateCollectionLastIDXValue(st state.State) (currency.Big, error) {
+func StateCollectionLastIDXValue(st state.State) (uint, error) {
 	value := st.Value()
 	if value == nil {
-		return currency.Big{}, util.NotFoundError.Errorf("collection idx not found in State")
+		return 0, util.NotFoundError.Errorf("collection idx not found in State")
 	}
 
-	if idx, ok := value.Interface().(currency.Big); !ok {
-		return currency.Big{}, errors.Errorf("invalid collection idx value found; %T", value.Interface())
+	if idx, ok := value.Interface().(uint); !ok {
+		return 0, errors.Errorf("invalid collection idx value found; %T", value.Interface())
 	} else {
 		return idx, nil
 	}
 }
 
-func SetStateCollectionLastIDXValue(st state.State, idx currency.Big) (state.State, error) {
+func SetStateCollectionLastIDXValue(st state.State, idx uint) (state.State, error) {
 	if vidx, err := state.NewNumberValue(idx); err != nil {
 		return nil, err
 	} else {
 		return st.SetValue(vidx)
+	}
+}
+
+func StateKeyIDFromNFTHash(h string) string {
+	return fmt.Sprintf("%s%s", StateKeyNFTHashPrefix, h)
+}
+
+func IsStateIDFromNFTHashKey(key string) bool {
+	return strings.HasPrefix(key, StateKeyNFTHashPrefix)
+}
+
+func StateIDFromNFTHashValue(st state.State) (nft.NFTID, error) {
+	value := st.Value()
+	if value == nil {
+		return nft.NFTID{}, util.NotFoundError.Errorf("nft hash not found in State")
+	}
+
+	if n, ok := value.Interface().(nft.NFTID); !ok {
+		return nft.NFTID{}, errors.Errorf("invalid nft value found; %T", value.Interface())
+	} else {
+		return n, nil
+	}
+}
+
+func SetStateIDFromNFTHashValue(st state.State, n nft.NFTID) (state.State, error) {
+	if vn, err := state.NewHintedValue(n); err != nil {
+		return nil, err
+	} else {
+		return st.SetValue(vn)
 	}
 }
 

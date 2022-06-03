@@ -1,8 +1,6 @@
 package cmds
 
 import (
-	"net/url"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
@@ -78,11 +76,9 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	var uri url.URL
-	if _uri, err := url.Parse(cmd.Uri); err != nil {
+	uri := nft.URI(cmd.Uri)
+	if err := uri.IsValid(nil); err != nil {
 		return err
-	} else {
-		uri = *_uri
 	}
 
 	var copyrighter base.Address

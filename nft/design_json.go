@@ -13,6 +13,7 @@ type DesignJSONPacker struct {
 	PR base.Address                 `json:"parent"`
 	CR base.Address                 `json:"creator"`
 	SB extensioncurrency.ContractID `json:"symbol"`
+	AC bool                         `json:"active"`
 	PO BasePolicy                   `json:"policy"`
 }
 
@@ -30,6 +31,7 @@ type DesignJSONUnpacker struct {
 	PR base.AddressDecoder `json:"parent"`
 	CR base.AddressDecoder `json:"creator"`
 	SB string              `json:"symbol"`
+	AC bool                `json:"active"`
 	PO json.RawMessage     `json:"policy"`
 }
 
@@ -39,5 +41,5 @@ func (d *Design) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return d.unpack(enc, ud.PR, ud.CR, ud.SB, ud.PO)
+	return d.unpack(enc, ud.PR, ud.CR, ud.SB, ud.AC, ud.PO)
 }

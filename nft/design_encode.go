@@ -12,6 +12,7 @@ func (d *Design) unpack(
 	bParent base.AddressDecoder,
 	bCreator base.AddressDecoder,
 	_symbol string,
+	active bool,
 	bPolicy []byte,
 ) error {
 
@@ -28,6 +29,7 @@ func (d *Design) unpack(
 	d.creator = creator
 
 	d.symbol = extensioncurrency.ContractID(_symbol)
+	d.active = active
 
 	var policy BasePolicy
 	if hinter, err := enc.Decode(bPolicy); err != nil {

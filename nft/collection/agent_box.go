@@ -117,7 +117,7 @@ func (abx *AgentBox) Append(ag base.Address) error {
 		return errors.Errorf("agent %v already exists in agent box", ag)
 	}
 	if len(abx.agents) >= MaxAgents {
-		return errors.Errorf("Max agents; %v", ag)
+		return errors.Errorf("max agents; %v", ag)
 	}
 
 	abx.agents = append(abx.agents, ag)

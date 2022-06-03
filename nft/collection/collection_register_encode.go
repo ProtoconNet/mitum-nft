@@ -1,6 +1,7 @@
 package collection
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -9,12 +10,34 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
+func (form *CollectionRegisterForm) unpack(
+	enc encoder.Encoder,
+	bTarget base.AddressDecoder,
+	symbol string,
+	name string,
+	royalty uint,
+	uri string,
+) error {
+	target, err := bTarget.Encode(enc)
+	if err != nil {
+		return err
+	}
+	form.target = target
+
+	form.symbol = extensioncurrency.ContractID(symbol)
+	form.name = CollectionName(name)
+	form.royalty = nft.PaymentParameter(royalty)
+	form.uri = nft.URI(uri)
+
+	return nil
+}
+
 func (fact *CollectionRegisterFact) unpack(
 	enc encoder.Encoder,
 	h valuehash.Hash,
 	token []byte,
 	bSender base.AddressDecoder,
-	bDesign []byte,
+	bForm []byte,
 	cid string,
 ) error {
 	sender, err := bSender.Encode(enc)
@@ -22,19 +45,19 @@ func (fact *CollectionRegisterFact) unpack(
 		return err
 	}
 
-	var design nft.Design
-	if hinter, err := enc.Decode(bDesign); err != nil {
+	var form CollectionRegisterForm
+	if hinter, err := enc.Decode(bForm); err != nil {
 		return err
-	} else if i, ok := hinter.(nft.Design); !ok {
-		return util.WrongTypeError.Errorf("not Design; %T", hinter)
+	} else if i, ok := hinter.(CollectionRegisterForm); !ok {
+		return util.WrongTypeError.Errorf("not CollectionRegisterForm; %T", hinter)
 	} else {
-		design = i
+		form = i
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.design = design
+	fact.form = form
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil

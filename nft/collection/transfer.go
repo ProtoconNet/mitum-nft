@@ -139,13 +139,13 @@ func (fact TransferFact) Items() []TransferItem {
 }
 
 func (fact TransferFact) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, len(fact.items)*2+1)
+	as := []base.Address{}
 
 	for i := range fact.items {
 		as = append(as, fact.items[i].Addresses()...)
 	}
 
-	as[len(fact.items)*2] = fact.Sender()
+	as = append(as, fact.Sender())
 
 	return as, nil
 }

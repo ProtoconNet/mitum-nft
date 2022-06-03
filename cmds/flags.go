@@ -2,11 +2,10 @@ package cmds
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
-	"github.com/pkg/errors"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util/encoder"
 )
@@ -31,7 +30,7 @@ func (v *AddressFlag) Encode(enc encoder.Encoder) (base.Address, error) {
 
 type NFTIDFlag struct {
 	collection extensioncurrency.ContractID
-	idx        currency.Big
+	idx        uint
 }
 
 func (v *NFTIDFlag) UnmarshalText(b []byte) error {
@@ -48,17 +47,16 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 	}
 	v.collection = symbol
 
-	if idx, err := currency.NewBigFromString(id); err != nil {
-		return errors.Wrapf(err, "invalid big string; %q", string(b))
-	} else if err := idx.IsValid(nil); err != nil {
+	if i, err := strconv.ParseUint(id, 10, 64); err != nil {
 		return err
 	} else {
-		v.idx = idx
+		v.idx = uint(i)
 	}
 
 	return nil
 }
 
 func (v *NFTIDFlag) String() string {
-	return v.collection.String() + "," + v.idx.String()
+	s := fmt.Sprintf("%s,%d", v.collection, v.idx)
+	return s
 }

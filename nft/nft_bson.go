@@ -3,7 +3,6 @@ package nft
 import (
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	bsonenc "github.com/spikeekips/mitum/util/encoder/bson"
 )
@@ -19,8 +18,8 @@ func (nid NFTID) MarshalBSON() ([]byte, error) {
 }
 
 type NFTIDBSONUnpacker struct {
-	CL string       `bson:"collection"`
-	IX currency.Big `bson:"id"`
+	CL string `bson:"collection"`
+	IX uint   `bson:"id"`
 }
 
 func (nid *NFTID) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

@@ -1,11 +1,10 @@
 package collection
 
 import (
-	"net/url"
 	"regexp"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
-	"github.com/spikeekips/mitum-currency/currency"
+	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
@@ -39,31 +38,29 @@ func (cn CollectionName) IsValid([]byte) error {
 }
 
 var (
-	PolicyType   = hint.Type("mitum-nft-policy")
-	PolicyHint   = hint.NewHint(PolicyType, "v0.0.1")
-	PolicyHinter = Policy{BaseHinter: hint.NewBaseHinter(PolicyHint)}
+	CollectionPolicyType   = hint.Type("mitum-nft-collection-policy")
+	CollectionPolicyHint   = hint.NewHint(CollectionPolicyType, "v0.0.1")
+	CollectionPolicyHinter = CollectionPolicy{BaseHinter: hint.NewBaseHinter(CollectionPolicyHint)}
 )
 
-type Policy struct {
+type CollectionPolicy struct {
 	hint.BaseHinter
 	name    CollectionName
 	royalty nft.PaymentParameter
-	uri     url.URL
-	limit   currency.Big
+	uri     nft.URI
 }
 
-func NewPolicy(name CollectionName, royalty nft.PaymentParameter, uri url.URL, limit currency.Big) Policy {
-	return Policy{
-		BaseHinter: hint.NewBaseHinter(PolicyHint),
+func NewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI) CollectionPolicy {
+	return CollectionPolicy{
+		BaseHinter: hint.NewBaseHinter(CollectionPolicyHint),
 		name:       name,
 		royalty:    royalty,
 		uri:        uri,
-		limit:      limit,
 	}
 }
 
-func MustNewPolicy(name CollectionName, royalty nft.PaymentParameter, uri url.URL, limit currency.Big) Policy {
-	policy := NewPolicy(name, royalty, uri, limit)
+func MustNewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI) CollectionPolicy {
+	policy := NewCollectionPolicy(name, royalty, uri)
 
 	if err := policy.IsValid(nil); err != nil {
 		panic(err)
@@ -72,42 +69,41 @@ func MustNewPolicy(name CollectionName, royalty nft.PaymentParameter, uri url.UR
 	return policy
 }
 
-func (policy Policy) Bytes() []byte {
+func (policy CollectionPolicy) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		policy.name.Bytes(),
 		policy.royalty.Bytes(),
-		[]byte(policy.uri.String()),
-		policy.limit.Bytes(),
+		policy.uri.Bytes(),
 	)
 }
 
-func (policy Policy) IsValid([]byte) error {
+func (policy CollectionPolicy) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false,
 		policy.name,
-		policy.royalty,
-		policy.limit); err != nil {
+		policy.royalty); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (policy Policy) Name() CollectionName {
+func (policy CollectionPolicy) Name() CollectionName {
 	return policy.name
 }
 
-func (policy Policy) Royalty() nft.PaymentParameter {
+func (policy CollectionPolicy) Royalty() nft.PaymentParameter {
 	return policy.royalty
 }
 
-func (policy Policy) Uri() url.URL {
+func (policy CollectionPolicy) Uri() nft.URI {
 	return policy.uri
 }
 
-func (policy Policy) Limit() currency.Big {
-	return policy.limit
+func (policy CollectionPolicy) Addresses() ([]base.Address, error) {
+	as := []base.Address{}
+	return as, nil
 }
 
-func (policy Policy) Rebuild() nft.BasePolicy {
+func (policy CollectionPolicy) Rebuild() nft.BasePolicy {
 	return policy
 }

@@ -1,8 +1,6 @@
 package collection
 
 import (
-	"net/url"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
@@ -17,22 +15,21 @@ import (
 func (form *MintForm) unpack(
 	enc encoder.Encoder,
 	hash string,
-	_uri string,
-	bCopyrighter base.AddressDecoder,
+	uri string,
+	_copyrighter string,
 ) error {
 	form.hash = nft.NFTHash(hash)
+	form.uri = nft.URI(uri)
 
-	if uri, err := url.Parse(_uri); err != nil {
-		return err
+	if len(_copyrighter) < 1 {
+		form.copyrighter = currency.Address{}
 	} else {
-		form.uri = *uri
+		copyrighter, err := base.DecodeAddressFromString(_copyrighter, enc)
+		if err != nil {
+			return err
+		}
+		form.copyrighter = copyrighter
 	}
-
-	copyrighter, err := bCopyrighter.Encode(enc)
-	if err != nil {
-		return err
-	}
-	form.copyrighter = copyrighter
 
 	return nil
 }

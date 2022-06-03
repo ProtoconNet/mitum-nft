@@ -2,7 +2,6 @@ package nft
 
 import (
 	"fmt"
-	"net/url"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
@@ -10,6 +9,7 @@ import (
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
+	"github.com/spikeekips/mitum/util/valuehash"
 )
 
 var BLACKHOLE_ZERO = currency.NewAddress("blackhole-0")
@@ -24,13 +24,15 @@ var (
 	NFTIDHinter = NFTID{BaseHinter: hint.NewBaseHinter(NFTIDHint)}
 )
 
+var MaxNFTsInCollection = 10000
+
 type NFTID struct {
 	hint.BaseHinter
 	collection extensioncurrency.ContractID
-	idx        currency.Big
+	idx        uint
 }
 
-func NewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFTID {
+func NewNFTID(collection extensioncurrency.ContractID, idx uint) NFTID {
 	return NFTID{
 		BaseHinter: hint.NewBaseHinter(NFTIDHint),
 		collection: collection,
@@ -38,7 +40,7 @@ func NewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFTID {
 	}
 }
 
-func MustNewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFTID {
+func MustNewNFTID(collection extensioncurrency.ContractID, idx uint) NFTID {
 	id := NewNFTID(collection, idx)
 
 	if err := id.IsValid(nil); err != nil {
@@ -51,19 +53,30 @@ func MustNewNFTID(collection extensioncurrency.ContractID, idx currency.Big) NFT
 func (nid NFTID) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		nid.collection.Bytes(),
-		nid.idx.Bytes(),
+		util.UintToBytes(nid.idx),
 	)
 }
 
+func (nid NFTID) Hint() hint.Hint {
+	return NFTIDHint
+}
+
+func (nid NFTID) Hash() valuehash.Hash {
+	return nid.GenerateHash()
+}
+
+func (nid NFTID) GenerateHash() valuehash.Hash {
+	return valuehash.NewSHA256(nid.Bytes())
+}
+
 func (nid NFTID) IsValid([]byte) error {
-	if !nid.idx.OverZero() {
-		return isvalid.InvalidError.Errorf("zero collection idx; %s", nid.idx.String())
+	if nid.idx > uint(MaxNFTsInCollection) {
+		return isvalid.InvalidError.Errorf("nft idx over max value; %d < %d", MaxNFTsInCollection, nid.idx)
 	}
 
 	if err := isvalid.Check(nil, false,
 		nid.BaseHinter,
 		nid.collection,
-		nid.idx,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft id; %w", err)
 	}
@@ -75,16 +88,16 @@ func (nid NFTID) Symbol() extensioncurrency.ContractID {
 	return nid.collection
 }
 
-func (nid NFTID) Idx() currency.Big {
+func (nid NFTID) Idx() uint {
 	return nid.idx
 }
 
 func (nid NFTID) String() string {
-	return fmt.Sprintf("%s-%s)", nid.collection.String(), nid.idx.String())
+	return fmt.Sprintf("%s-%d)", nid.collection.String(), nid.idx)
 }
 
 func (nid NFTID) Equal(cnid NFTID) bool {
-	return isCollectionEqual(nid.collection, cnid.collection) && nid.idx.Equal(cnid.idx)
+	return isCollectionEqual(nid.collection, cnid.collection) && nid.idx == cnid.idx
 }
 
 type NFTHash string
@@ -116,12 +129,12 @@ type NFT struct {
 	id          NFTID
 	owner       base.Address
 	hash        NFTHash
-	uri         url.URL
+	uri         URI
 	approved    base.Address
 	copyrighter base.Address
 }
 
-func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri url.URL, approved base.Address, copyrighter base.Address) NFT {
+func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, copyrighter base.Address) NFT {
 	return NFT{
 		BaseHinter:  hint.NewBaseHinter(NFTHint),
 		id:          id,
@@ -133,7 +146,7 @@ func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri url.URL, approved ba
 	}
 }
 
-func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri url.URL, approved base.Address, copyrighter base.Address) NFT {
+func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, copyrighter base.Address) NFT {
 	nft := NewNFT(id, owner, hash, uri, approved, copyrighter)
 
 	if err := nft.IsValid(nil); err != nil {
@@ -152,6 +165,18 @@ func (nft NFT) Bytes() []byte {
 		nft.approved.Bytes(),
 		nft.copyrighter.Bytes(),
 	)
+}
+
+func (nft NFT) Hint() hint.Hint {
+	return NFTHint
+}
+
+func (nft NFT) Hash() valuehash.Hash {
+	return nft.GenerateHash()
+}
+
+func (nft NFT) GenerateHash() valuehash.Hash {
+	return valuehash.NewSHA256(nft.Bytes())
 }
 
 func (nft NFT) IsValid([]byte) error {
@@ -185,11 +210,11 @@ func (nft NFT) Owner() base.Address {
 	return nft.owner
 }
 
-func (nft NFT) Hash() NFTHash {
+func (nft NFT) NftHash() NFTHash {
 	return nft.hash
 }
 
-func (nft NFT) Uri() url.URL {
+func (nft NFT) Uri() URI {
 	return nft.uri
 }
 
@@ -199,4 +224,8 @@ func (nft NFT) Approved() base.Address {
 
 func (nft NFT) Copyrighter() base.Address {
 	return nft.copyrighter
+}
+
+func (nft NFT) Equal(cnft NFT) bool {
+	return nft.ID().Equal(cnft.ID())
 }

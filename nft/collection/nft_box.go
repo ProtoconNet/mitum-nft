@@ -116,6 +116,9 @@ func (nbx *NFTBox) Append(n nft.NFTID) error {
 	if nbx.Exists(n) {
 		return errors.Errorf("nft %v already exists in nft box", n)
 	}
+	if len(nbx.nfts) >= nft.MaxNFTsInCollection {
+		return errors.Errorf("max nfts in collection; %v", n)
+	}
 	nbx.nfts = append(nbx.nfts, n)
 	return nil
 }

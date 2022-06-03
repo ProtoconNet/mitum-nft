@@ -1,8 +1,6 @@
 package collection
 
 import (
-	"net/url"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/pkg/errors"
@@ -23,11 +21,11 @@ var (
 type MintForm struct {
 	hint.BaseHinter
 	hash        nft.NFTHash
-	uri         url.URL
+	uri         nft.URI
 	copyrighter base.Address
 }
 
-func NewMintForm(hash nft.NFTHash, uri url.URL, copyrighter base.Address) MintForm {
+func NewMintForm(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
 	return MintForm{
 		BaseHinter:  hint.NewBaseHinter(MintFormHint),
 		hash:        hash,
@@ -36,7 +34,7 @@ func NewMintForm(hash nft.NFTHash, uri url.URL, copyrighter base.Address) MintFo
 	}
 }
 
-func MustNewMintform(hash nft.NFTHash, uri url.URL, copyrighter base.Address) MintForm {
+func MustNewMintform(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
 	form := NewMintForm(hash, uri, copyrighter)
 
 	if err := form.IsValid(nil); err != nil {
@@ -52,6 +50,18 @@ func (form MintForm) Bytes() []byte {
 		[]byte(form.uri.String()),
 		form.copyrighter.Bytes(),
 	)
+}
+
+func (form MintForm) Hash() nft.NFTHash {
+	return form.hash
+}
+
+func (form MintForm) Uri() nft.URI {
+	return form.uri
+}
+
+func (form MintForm) Copyrighter() base.Address {
+	return form.copyrighter
 }
 
 func (form MintForm) IsValid([]byte) error {

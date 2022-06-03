@@ -15,7 +15,7 @@ import (
 type MintFormJSONPacker struct {
 	jsonenc.HintedHead
 	HS nft.NFTHash  `json:"hash"`
-	UR string       `json:"uri"`
+	UR nft.URI      `json:"uri"`
 	CP base.Address `json:"copyrighter"`
 }
 
@@ -23,15 +23,15 @@ func (form MintForm) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(MintFormJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(form.Hint()),
 		HS:         form.hash,
-		UR:         form.uri.String(),
+		UR:         form.uri,
 		CP:         form.copyrighter,
 	})
 }
 
 type MintFormJSONUnpacker struct {
-	HS string              `json:"hash"`
-	UR string              `json:"uri"`
-	CP base.AddressDecoder `json:"copyrighter"`
+	HS string `json:"hash"`
+	UR string `json:"uri"`
+	CP string `json:"copyrighter"`
 }
 
 func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {

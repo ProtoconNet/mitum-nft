@@ -71,8 +71,12 @@ func (it BaseTransferItem) Receiver() base.Address {
 }
 
 func (it BaseTransferItem) Addresses() []base.Address {
-	as := make([]base.Address, 1)
-	as[0] = it.receiver
+	as := []base.Address{}
+
+	if !it.receiver.Equal(nft.BLACKHOLE_ZERO) {
+		as = append(as, it.receiver)
+	}
+
 	return as
 }
 

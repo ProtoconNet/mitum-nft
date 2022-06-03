@@ -1,10 +1,7 @@
 package nft
 
 import (
-	"net/url"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/encoder"
@@ -13,7 +10,7 @@ import (
 func (nid *NFTID) unpack(
 	enc encoder.Encoder,
 	collection string,
-	idx currency.Big,
+	idx uint,
 ) error {
 	nid.collection = extensioncurrency.ContractID(collection)
 	nid.idx = idx
@@ -26,7 +23,7 @@ func (nft *NFT) unpack(
 	bId []byte,
 	bOwner base.AddressDecoder,
 	hash string,
-	_uri string,
+	uri string,
 	bApproved base.AddressDecoder,
 	bCopyrighter base.AddressDecoder,
 ) error {
@@ -50,11 +47,7 @@ func (nft *NFT) unpack(
 	}
 	nft.approved = approved
 
-	if uri, err := url.Parse(_uri); err != nil {
-		return err
-	} else {
-		nft.uri = *uri
-	}
+	nft.uri = URI(uri)
 	nft.hash = NFTHash(hash)
 
 	copyrighter, err := bCopyrighter.Encode(enc)

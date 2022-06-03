@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"bytes"
-	"net/url"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
@@ -11,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 
 	currencycmds "github.com/spikeekips/mitum-currency/cmds"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/key"
 	"github.com/spikeekips/mitum/base/operation"
@@ -30,10 +28,9 @@ type CollectionRegisterCommand struct {
 	Name     string                      `arg:"" name:"name" help:"collection name" required:"true"`
 	Royalty  uint                        `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
 	Uri      string                      `name:"uri" help:"collection uri" optional:""`
-	Limit    string                      `arg:"" name:"limit" help:"limit number of nfts" required:"true"`
 	sender   base.Address
 	target   base.Address
-	design   nft.Design
+	form     collection.CollectionRegisterForm
 }
 
 func NewCollectionRegisterCommand() CollectionRegisterCommand {
@@ -101,37 +98,22 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		return err
 	}
 
-	var uri url.URL
-	if _uri, err := url.Parse(cmd.Uri); err != nil {
-		return err
-	} else {
-		uri = *_uri
-	}
-
-	var limit currency.Big
-	if _limit, err := currency.NewBigFromString(cmd.Limit); err != nil {
-		return err
-	} else {
-		limit = _limit
-	}
-
-	policy := collection.NewPolicy(name, royalty, uri, limit)
-	if err := policy.IsValid(nil); err != nil {
+	uri := nft.URI(cmd.Uri)
+	if err := uri.IsValid(nil); err != nil {
 		return err
 	}
 
-	design := nft.NewDesign(cmd.target, cmd.sender, symbol, policy)
-	if err := design.IsValid(nil); err != nil {
+	form := collection.NewCollectionRegisterForm(cmd.target, symbol, name, royalty, uri)
+	if err := form.IsValid(nil); err != nil {
 		return err
 	}
-	cmd.design = design
+	cmd.form = form
 
 	return nil
-
 }
 
 func (cmd *CollectionRegisterCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.design, cmd.Currency.CID)
+	fact := collection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.form, cmd.Currency.CID)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {
@@ -146,25 +128,6 @@ func (cmd *CollectionRegisterCommand) createOperation() (operation.Operation, er
 		return nil, errors.Wrap(err, "failed to create collection-register operation")
 	}
 	return op, nil
-}
-
-func loadOperations(b []byte, networkID base.NetworkID) ([]operation.Operation, error) {
-	if len(bytes.TrimSpace(b)) < 1 {
-		return nil, nil
-	}
-
-	var sl seal.Seal
-	if s, err := LoadSeal(b, networkID); err != nil {
-		return nil, err
-	} else if so, ok := s.(operation.Seal); !ok {
-		return nil, errors.Errorf("seal is not operation.Seal, %T", s)
-	} else if _, ok := so.(operation.SealUpdater); !ok {
-		return nil, errors.Errorf("seal is not operation.SealUpdater, %T", s)
-	} else {
-		sl = so
-	}
-
-	return sl.(operation.Seal).Operations(), nil
 }
 
 func LoadSeal(b []byte, networkID base.NetworkID) (seal.Seal, error) {

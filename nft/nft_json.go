@@ -2,10 +2,8 @@ package nft
 
 import (
 	"encoding/json"
-	"net/url"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
@@ -13,7 +11,7 @@ import (
 type NFTIDJSONPacker struct {
 	jsonenc.HintedHead
 	CL extensioncurrency.ContractID `json:"collection"`
-	IX currency.Big                 `json:"id"`
+	IX uint                         `json:"id"`
 }
 
 func (nid NFTID) MarshalJSON() ([]byte, error) {
@@ -25,8 +23,8 @@ func (nid NFTID) MarshalJSON() ([]byte, error) {
 }
 
 type NFTIDJSONUnpacker struct {
-	CL string       `json:"collection"`
-	IX currency.Big `json:"id"`
+	CL string `json:"collection"`
+	IX uint   `json:"id"`
 }
 
 func (nid *NFTID) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -43,7 +41,7 @@ type NFTJSONPacker struct {
 	ID NFTID        `json:"id"`
 	ON base.Address `json:"owner"`
 	HS NFTHash      `json:"hash"`
-	UR url.URL      `json:"uri"`
+	UR URI          `json:"uri"`
 	AP base.Address `json:"approved"`
 	CP base.Address `json:"copyrighter"`
 }

@@ -14,6 +14,7 @@ func (d Design) MarshalBSON() ([]byte, error) {
 				"parent":  d.parent,
 				"creator": d.creator,
 				"symbol":  d.symbol,
+				"active":  d.active,
 				"policy":  d.policy,
 			}))
 }
@@ -22,6 +23,7 @@ type DesignBSONUnpacker struct {
 	PR base.AddressDecoder `bson:"parent"`
 	CR base.AddressDecoder `bson:"creator"`
 	SB string              `bson:"symbol"`
+	AC bool                `bson:"active"`
 	PO bson.Raw            `bson:"policy"`
 }
 
@@ -31,5 +33,5 @@ func (d *Design) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return d.unpack(enc, ud.PR, ud.CR, ud.SB, ud.PO)
+	return d.unpack(enc, ud.PR, ud.CR, ud.SB, ud.AC, ud.PO)
 }
