@@ -149,20 +149,20 @@ func IsStateCollectionLastIDXKey(key string) bool {
 	return strings.HasSuffix(key, StateKeyCollectionLastIDXSuffix)
 }
 
-func StateCollectionLastIDXValue(st state.State) (uint, error) {
+func StateCollectionLastIDXValue(st state.State) (uint64, error) {
 	value := st.Value()
 	if value == nil {
 		return 0, util.NotFoundError.Errorf("collection idx not found in State")
 	}
 
-	if idx, ok := value.Interface().(uint); !ok {
+	if idx, ok := value.Interface().(uint64); !ok {
 		return 0, errors.Errorf("invalid collection idx value found; %T", value.Interface())
 	} else {
 		return idx, nil
 	}
 }
 
-func SetStateCollectionLastIDXValue(st state.State, idx uint) (state.State, error) {
+func SetStateCollectionLastIDXValue(st state.State, idx uint64) (state.State, error) {
 	if vidx, err := state.NewNumberValue(idx); err != nil {
 		return nil, err
 	} else {

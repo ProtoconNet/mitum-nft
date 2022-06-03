@@ -1,9 +1,6 @@
 package nft
 
 import (
-	"fmt"
-
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -13,92 +10,6 @@ import (
 )
 
 var BLACKHOLE_ZERO = currency.NewAddress("blackhole-0")
-
-func isCollectionEqual(c1 extensioncurrency.ContractID, c2 extensioncurrency.ContractID) bool {
-	return c1.String() == c2.String()
-}
-
-var (
-	NFTIDType   = hint.Type("mitum-nft-nft-id")
-	NFTIDHint   = hint.NewHint(NFTIDType, "v0.0.1")
-	NFTIDHinter = NFTID{BaseHinter: hint.NewBaseHinter(NFTIDHint)}
-)
-
-var MaxNFTsInCollection = 10000
-
-type NFTID struct {
-	hint.BaseHinter
-	collection extensioncurrency.ContractID
-	idx        uint
-}
-
-func NewNFTID(collection extensioncurrency.ContractID, idx uint) NFTID {
-	return NFTID{
-		BaseHinter: hint.NewBaseHinter(NFTIDHint),
-		collection: collection,
-		idx:        idx,
-	}
-}
-
-func MustNewNFTID(collection extensioncurrency.ContractID, idx uint) NFTID {
-	id := NewNFTID(collection, idx)
-
-	if err := id.IsValid(nil); err != nil {
-		panic(err)
-	}
-
-	return id
-}
-
-func (nid NFTID) Bytes() []byte {
-	return util.ConcatBytesSlice(
-		nid.collection.Bytes(),
-		util.UintToBytes(nid.idx),
-	)
-}
-
-func (nid NFTID) Hint() hint.Hint {
-	return NFTIDHint
-}
-
-func (nid NFTID) Hash() valuehash.Hash {
-	return nid.GenerateHash()
-}
-
-func (nid NFTID) GenerateHash() valuehash.Hash {
-	return valuehash.NewSHA256(nid.Bytes())
-}
-
-func (nid NFTID) IsValid([]byte) error {
-	if nid.idx > uint(MaxNFTsInCollection) {
-		return isvalid.InvalidError.Errorf("nft idx over max value; %d < %d", MaxNFTsInCollection, nid.idx)
-	}
-
-	if err := isvalid.Check(nil, false,
-		nid.BaseHinter,
-		nid.collection,
-	); err != nil {
-		return isvalid.InvalidError.Errorf("invalid nft id; %w", err)
-	}
-
-	return nil
-}
-
-func (nid NFTID) Symbol() extensioncurrency.ContractID {
-	return nid.collection
-}
-
-func (nid NFTID) Idx() uint {
-	return nid.idx
-}
-
-func (nid NFTID) String() string {
-	return fmt.Sprintf("%s-%d)", nid.collection.String(), nid.idx)
-}
-
-func (nid NFTID) Equal(cnid NFTID) bool {
-	return isCollectionEqual(nid.collection, cnid.collection) && nid.idx == cnid.idx
-}
 
 type NFTHash string
 

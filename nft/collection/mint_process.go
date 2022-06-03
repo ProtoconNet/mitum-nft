@@ -33,7 +33,7 @@ type MintProcessor struct {
 	nftState        state.State
 	nboxState       state.State
 	nftIdHStates    state.State
-	idx             uint
+	idx             uint64
 	design          nft.Design
 	n               nft.NFT
 	box             NFTBox

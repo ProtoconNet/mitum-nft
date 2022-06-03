@@ -30,7 +30,7 @@ func (v *AddressFlag) Encode(enc encoder.Encoder) (base.Address, error) {
 
 type NFTIDFlag struct {
 	collection extensioncurrency.ContractID
-	idx        uint
+	idx        uint64
 }
 
 func (v *NFTIDFlag) UnmarshalText(b []byte) error {
@@ -50,7 +50,7 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 	if i, err := strconv.ParseUint(id, 10, 64); err != nil {
 		return err
 	} else {
-		v.idx = uint(i)
+		v.idx = i
 	}
 
 	return nil

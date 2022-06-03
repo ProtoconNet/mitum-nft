@@ -7,30 +7,6 @@ import (
 	bsonenc "github.com/spikeekips/mitum/util/encoder/bson"
 )
 
-func (nid NFTID) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(bsonenc.MergeBSONM(
-		bsonenc.NewHintedDoc(nid.Hint()),
-		bson.M{
-			"collection": nid.collection,
-			"idx":        nid.idx,
-		}),
-	)
-}
-
-type NFTIDBSONUnpacker struct {
-	CL string `bson:"collection"`
-	IX uint   `bson:"id"`
-}
-
-func (nid *NFTID) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var unid NFTIDBSONUnpacker
-	if err := enc.Unmarshal(b, &unid); err != nil {
-		return err
-	}
-
-	return nid.unpack(enc, unid.CL, unid.IX)
-}
-
 func (nft NFT) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bsonenc.MergeBSONM(
 		bsonenc.NewHintedDoc(nft.Hint()),
