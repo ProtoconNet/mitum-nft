@@ -4,11 +4,19 @@ import (
 	"sync"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
-	"github.com/pkg/errors"
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum-currency/currency"
+	"github.com/spikeekips/mitum/base"
+	"github.com/spikeekips/mitum/base/operation"
 	"github.com/spikeekips/mitum/base/state"
 	"github.com/spikeekips/mitum/util/valuehash"
 )
+
+var ApproveItemProcessorPool = sync.Pool{
+	New: func() interface{} {
+		return new(ApproveItemProcessor)
+	},
+}
 
 var ApproveProcessorPool = sync.Pool{
 	New: func() interface{} {
@@ -23,60 +31,266 @@ func (Approve) Process(
 	return nil
 }
 
+type ApproveItemProcessor struct {
+	cp        *extensioncurrency.CurrencyPool
+	h         valuehash.Hash
+	ns        []nft.NFT
+	nftStates map[nft.NFTID]state.State
+	sender    base.Address
+	item      ApproveItem
+}
+
+func (ipp *ApproveItemProcessor) PreProcess(
+	getState func(key string) (state.State, bool, error),
+	_ func(valuehash.Hash, ...state.State) error,
+) error {
+
+	if err := ipp.item.IsValid(nil); err != nil {
+		return operation.NewBaseReasonError(err.Error())
+	}
+
+	if !ipp.item.Approved().Equal(nft.BLACKHOLE_ZERO) {
+		if err := checkExistsState(currency.StateKeyAccount(ipp.item.Approved()), getState); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		}
+		if ipp.item.Approved().Equal(ipp.sender) {
+			return operation.NewBaseReasonError("sender cannot be approved account itself; %q", ipp.item.Approved().String())
+		}
+	}
+
+	var n nft.NFT
+	var nftState state.State
+	nfts := ipp.item.NFTs()
+	for i := range nfts {
+		if err := nfts[i].IsValid(nil); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		}
+
+		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else if _n, err := StateNFTValue(st); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else {
+			n = _n
+			nftState = st
+		}
+
+		if !n.Owner().Equal(ipp.sender) {
+			if err := checkExistsState(currency.StateKeyAccount(n.Owner()), getState); err != nil {
+				return operation.NewBaseReasonError(err.Error())
+			} else if st, err := existsState(StateKeyAgents(n.Owner()), "agents", getState); err != nil {
+				return operation.NewBaseReasonError("unathorized sender; %q", ipp.sender)
+			} else if box, err := StateAgentsValue(st); err != nil {
+				return operation.NewBaseReasonError(err.Error())
+			} else if !box.Exists(ipp.sender) {
+				return operation.NewBaseReasonError("unathorized sender; %q", ipp.sender)
+			}
+		}
+
+		ipp.ns = append(ipp.ns, n)
+		ipp.nftStates[n.ID()] = nftState
+	}
+
+	return nil
+}
+
+func (ipp *ApproveItemProcessor) Process(
+	_ func(key string) (state.State, bool, error),
+	_ func(valuehash.Hash, ...state.State) error,
+) ([]state.State, error) {
+
+	var states []state.State
+
+	ns := []nft.NFT{}
+	for i := range ipp.ns {
+		n := nft.NewNFT(ipp.ns[i].ID(), ipp.ns[i].Owner(), ipp.ns[i].NftHash(), ipp.ns[i].Uri(), ipp.item.Approved(), ipp.ns[i].Copyrighter())
+		if err := n.IsValid(nil); err != nil {
+			return nil, operation.NewBaseReasonError(err.Error())
+		}
+		ns = append(ns, n)
+	}
+	ipp.ns = ns
+
+	for i := range ipp.ns {
+		if st, err := SetStateNFTValue(ipp.nftStates[ipp.ns[i].ID()], ipp.ns[i]); err != nil {
+			return nil, operation.NewBaseReasonError(err.Error())
+		} else {
+			states = append(states, st)
+		}
+	}
+
+	return states, nil
+}
+
+func (ipp *ApproveItemProcessor) Close() error {
+	ipp.cp = nil
+	ipp.h = nil
+	ipp.ns = nil
+	ipp.nftStates = nil
+	ipp.sender = nil
+	ipp.item = BaseApproveItem{}
+	ApproveItemProcessorPool.Put(ipp)
+
+	return nil
+}
+
 type ApproveProcessor struct {
 	cp *extensioncurrency.CurrencyPool
 	Approve
-	sa  state.State
-	sb  currency.AmountState
-	fee currency.Big
+	amountStates map[currency.CurrencyID]currency.AmountState
+	ipps         []*ApproveItemProcessor
+	required     map[currency.CurrencyID][2]currency.Big
 }
 
 func NewApproveProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
 	return func(op state.Processor) (state.Processor, error) {
 		i, ok := op.(Approve)
 		if !ok {
-			return nil, errors.Errorf("not Approve; %T", op)
+			return nil, operation.NewBaseReasonError("not Approve; %T", op)
 		}
 
 		opp := ApproveProcessorPool.Get().(*ApproveProcessor)
 
 		opp.cp = cp
 		opp.Approve = i
-		opp.sa = nil
-		opp.sb = currency.AmountState{}
-		opp.fee = currency.ZeroBig
+		opp.amountStates = nil
+		opp.ipps = nil
+		opp.required = nil
 
 		return opp, nil
+
 	}
 }
 
 func (opp *ApproveProcessor) PreProcess(
-	getState func(string) (state.State, bool, error),
-	_ func(valuehash.Hash, ...state.State) error,
+	getState func(key string) (state.State, bool, error),
+	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
+	fact := opp.Fact().(ApproveFact)
+
+	if err := checkExistsState(currency.StateKeyAccount(fact.Sender()), getState); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	}
+
+	ipps := make([]*ApproveItemProcessor, len(fact.items))
+	for i := range fact.items {
+
+		c := ApproveItemProcessorPool.Get().(*ApproveItemProcessor)
+		c.cp = opp.cp
+		c.h = opp.Hash()
+		c.sender = fact.Sender()
+		c.item = fact.items[i]
+		c.ns = []nft.NFT{}
+		c.nftStates = map[nft.NFTID]state.State{}
+
+		if err := c.PreProcess(getState, setState); err != nil {
+			return nil, operation.NewBaseReasonError(err.Error())
+		}
+
+		ipps[i] = c
+	}
+
+	if required, err := opp.calculateItemsFee(); err != nil {
+		return nil, operation.NewBaseReasonError("failed to calculate fee; %w", err)
+	} else if sts, err := CheckSenderEnoughBalance(fact.Sender(), required, getState); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	} else {
+		opp.required = required
+		opp.amountStates = sts
+	}
+
+	if err := checkFactSignsByState(fact.Sender(), opp.Signs(), getState); err != nil {
+		return nil, operation.NewBaseReasonError("invalid signing; %w", err)
+	}
+
+	opp.ipps = ipps
 
 	return opp, nil
 }
 
 func (opp *ApproveProcessor) Process(
-	_ func(key string) (state.State, bool, error),
+	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
 	fact := opp.Fact().(ApproveFact)
 
-	var sts []state.State
+	var states []state.State
 
-	return setState(fact.Hash(), sts...)
+	for i := range opp.ipps {
+		if s, err := opp.ipps[i].Process(getState, setState); err != nil {
+			return operation.NewBaseReasonError("failed to process approve item; %w", err)
+		} else {
+			states = append(states, s...)
+		}
+	}
+
+	for k := range opp.required {
+		rq := opp.required[k]
+		states = append(states, opp.amountStates[k].Sub(rq[0]).AddFee(rq[1]))
+	}
+
+	return setState(fact.Hash(), states...)
 }
 
 func (opp *ApproveProcessor) Close() error {
+	for i := range opp.ipps {
+		_ = opp.ipps[i].Close()
+	}
+
 	opp.cp = nil
 	opp.Approve = Approve{}
-	opp.sa = nil
-	opp.sb = currency.AmountState{}
-	opp.fee = currency.ZeroBig
+	opp.amountStates = nil
+	opp.required = nil
+	opp.ipps = nil
 
 	ApproveProcessorPool.Put(opp)
 
 	return nil
+}
+
+func (opp *ApproveProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
+	fact := opp.Fact().(ApproveFact)
+
+	items := make([]ApproveItem, len(fact.items))
+	for i := range fact.items {
+		items[i] = fact.items[i]
+	}
+
+	return CalculateApproveItemsFee(opp.cp, items)
+}
+
+func CalculateApproveItemsFee(cp *extensioncurrency.CurrencyPool, items []ApproveItem) (map[currency.CurrencyID][2]currency.Big, error) {
+	required := map[currency.CurrencyID][2]currency.Big{}
+
+	for i := range items {
+		it := items[i]
+
+		rq := [2]currency.Big{currency.ZeroBig, currency.ZeroBig}
+
+		if k, found := required[it.Currency()]; found {
+			rq = k
+		}
+
+		if cp == nil {
+			required[it.Currency()] = [2]currency.Big{rq[0], rq[1]}
+
+			continue
+		}
+
+		feeer, found := cp.Feeer(it.Currency())
+		if !found {
+			return nil, operation.NewBaseReasonError("unknown currency id found, %q", it.Currency())
+		}
+		switch k, err := feeer.Fee(currency.ZeroBig); {
+		case err != nil:
+			return nil, err
+		case !k.OverZero():
+			required[it.Currency()] = [2]currency.Big{rq[0], rq[1]}
+		default:
+			required[it.Currency()] = [2]currency.Big{rq[0].Add(k), rq[1].Add(k)}
+		}
+
+	}
+
+	return required, nil
 }
