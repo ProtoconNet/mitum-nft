@@ -15,7 +15,6 @@ import (
 
 var (
 	StateKeyCollectionPrefix = "collection:"
-	StateKeyNFTHashPrefix    = "nfthash:"
 )
 
 var (
@@ -113,7 +112,7 @@ func SetStateNFTsValue(st state.State, box NFTBox) (state.State, error) {
 }
 
 func StateKeyNFT(id nft.NFTID) string {
-	return fmt.Sprintf("%s%s", StateKeyNFTHashPrefix, id.String())
+	return fmt.Sprintf("%s%s", id.String(), StateKeyNFTSuffix)
 }
 
 func IsStateNFTKey(key string) bool {
@@ -167,35 +166,6 @@ func SetStateCollectionLastIDXValue(st state.State, idx uint64) (state.State, er
 		return nil, err
 	} else {
 		return st.SetValue(vidx)
-	}
-}
-
-func StateKeyIDFromNFTHash(h string) string {
-	return fmt.Sprintf("%s%s", StateKeyNFTHashPrefix, h)
-}
-
-func IsStateIDFromNFTHashKey(key string) bool {
-	return strings.HasPrefix(key, StateKeyNFTHashPrefix)
-}
-
-func StateIDFromNFTHashValue(st state.State) (nft.NFTID, error) {
-	value := st.Value()
-	if value == nil {
-		return nft.NFTID{}, util.NotFoundError.Errorf("nft hash not found in State")
-	}
-
-	if n, ok := value.Interface().(nft.NFTID); !ok {
-		return nft.NFTID{}, errors.Errorf("invalid nft value found; %T", value.Interface())
-	} else {
-		return n, nil
-	}
-}
-
-func SetStateIDFromNFTHashValue(st state.State, n nft.NFTID) (state.State, error) {
-	if vn, err := state.NewHintedValue(n); err != nil {
-		return nil, err
-	} else {
-		return st.SetValue(vn)
 	}
 }
 

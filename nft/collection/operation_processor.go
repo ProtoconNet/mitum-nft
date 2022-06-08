@@ -155,7 +155,8 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		*ApproveProcessor,
 		*CollectionRegisterProcessor,
 		*MintProcessor,
-		*TransferProcessor:
+		*TransferProcessor,
+		*BurnProcessor:
 		return opr.process(op)
 	case currency.Transfers,
 		currency.CreateAccounts,
@@ -170,7 +171,8 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		Approve,
 		CollectionRegister,
 		Mint,
-		Transfer:
+		Transfer,
+		Burn:
 		pr, err := opr.PreProcess(op)
 		if err != nil {
 			return err
@@ -204,6 +206,8 @@ func (opr *OperationProcessor) process(op state.Processor) error {
 	case *MintProcessor:
 		sp = t
 	case *TransferProcessor:
+		sp = t
+	case *BurnProcessor:
 		sp = t
 	default:
 		return op.Process(opr.pool.Get, opr.pool.Set)
@@ -262,6 +266,9 @@ func (opr *OperationProcessor) checkDuplication(op state.Processor) error { // n
 		didtype = DuplicationTypeSender
 	case Transfer:
 		did = t.Fact().(TransferFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case Burn:
+		did = t.Fact().(BurnFact).Sender().String()
 		didtype = DuplicationTypeSender
 	default:
 		return nil
@@ -354,7 +361,8 @@ func (opr *OperationProcessor) getNewProcessor(op state.Processor) (state.Proces
 		Approve,
 		CollectionRegister,
 		Mint,
-		Transfer:
+		Transfer,
+		Burn:
 
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:

@@ -29,9 +29,9 @@ type AgentBox struct {
 
 func NewAgentBox(agents []base.Address) AgentBox {
 	if agents == nil {
-		return AgentBox{agents: []base.Address{}}
+		return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), agents: []base.Address{}}
 	}
-	return AgentBox{agents: agents}
+	return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), agents: agents}
 }
 
 func (abx AgentBox) Bytes() []byte {

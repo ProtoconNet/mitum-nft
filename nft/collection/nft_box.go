@@ -29,9 +29,9 @@ type NFTBox struct {
 
 func NewNFTBox(nfts []nft.NFTID) NFTBox {
 	if nfts == nil {
-		return NFTBox{nfts: []nft.NFTID{}}
+		return NFTBox{BaseHinter: hint.NewBaseHinter(NFTBoxHint), nfts: []nft.NFTID{}}
 	}
-	return NFTBox{nfts: nfts}
+	return NFTBox{BaseHinter: hint.NewBaseHinter(NFTBoxHint), nfts: nfts}
 }
 
 func (nbx NFTBox) Bytes() []byte {
@@ -124,6 +124,9 @@ func (nbx *NFTBox) Append(n nft.NFTID) error {
 }
 
 func (nbx *NFTBox) Remove(n nft.NFTID) error {
+	if err := n.IsValid(nil); err != nil {
+		return err
+	}
 	if !nbx.Exists(n) {
 		return errors.Errorf("nft %v not found in nft box", n)
 	}

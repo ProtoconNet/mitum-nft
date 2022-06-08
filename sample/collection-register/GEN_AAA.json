@@ -1,0 +1,38 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "AzdpEhw78EGFQMP1BHxieczdTSpbuJf81hsYEqjZQu8D",
+    "body_hash": "4vCQV72Wzbjx9tM5K3UgAxAbm4LtkusmH5SAYPza7JSb",
+    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+    "signature": "AN1rKvt7PBe5uvkrzECpQGTxDnx9UfzVqTH1dvcLt6NqcCxgZJgbxCPJ9u6xMqVR9AyqiRVTWBm5kgRxVoWgugvU4YpsYcW4n",
+    "signed_at": "2022-06-08T05:29:53.120903Z",
+    "operations": [
+        {
+            "memo": "",
+            "_hint": "mitum-nft-collection-register-operation-v0.0.1",
+            "hash": "GumF4KymqQuwR6jk5GkV39MryTkn3tVysoZ2A9qF6gzx",
+            "fact": {
+                "_hint": "mitum-nft-collection-register-operation-fact-v0.0.1",
+                "hash": "G5ur8VywtsHiQ6yMVeDqmvGnj43v3C3HALPtRZ3CWhNV",
+                "token": "MjAyMi0wNi0wOFQwNToyOTo1My4xMjA1ODVa",
+                "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
+                "form": {
+                    "_hint": "mitum-nft-collection-register-form-v0.0.1",
+                    "target": "4rRNULRfGFLPTfZrhFzGqvbQ2cweiJuEZFNqrsMA353hmca",
+                    "symbol": "AAA",
+                    "name": "First Collection",
+                    "royalty": 1,
+                    "uri": ""
+                },
+                "currency": "MCC"
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+                    "signature": "AN1rKvtWeKioBFdb8dLqVuMu3GUS8fNkwnYedjiZB423M9Qck83eMqq9kpHJKKDnSMriH2oo8cJGmRrGfwLEtB9TjSqw7GB8L",
+                    "signed_at": "2022-06-08T05:29:53.120876Z"
+                }
+            ]
+        }
+    ]
+}

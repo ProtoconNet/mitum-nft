@@ -107,7 +107,12 @@ func (cmd *MintCommand) parseFlags() error {
 }
 
 func (cmd *MintCommand) createOperation() (operation.Operation, error) {
-	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
+	item := collection.NewMintItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
+	if err := item.IsValid(nil); err != nil {
+		return nil, err
+	}
+
+	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
 	if err != nil {

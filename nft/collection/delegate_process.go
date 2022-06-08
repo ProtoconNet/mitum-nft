@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
+	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
@@ -44,15 +45,15 @@ func (ipp *DelegateItemProcessor) PreProcess(
 ) error {
 
 	if err := ipp.item.IsValid(nil); err != nil {
-		return operation.NewBaseReasonError(err.Error())
+		return err
 	}
 
 	if err := checkExistsState(currency.StateKeyAccount(ipp.item.Agent()), getState); err != nil {
-		return operation.NewBaseReasonError(err.Error())
+		return err
 	}
 
 	if ipp.sender.Equal(ipp.item.Agent()) {
-		return operation.NewBaseReasonError("sender cannot be agent itself; %q", ipp.item.Agent().String())
+		return errors.Errorf("sender cannot be agent itself; %q", ipp.item.Agent().String())
 	}
 
 	return nil
@@ -66,15 +67,14 @@ func (ipp *DelegateItemProcessor) Process(
 	switch ipp.item.Mode() {
 	case DelegateAllow:
 		if err := ipp.box.Append(ipp.item.Agent()); err != nil {
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		}
 	case DelegateCancel:
 		if err := ipp.box.Remove(ipp.item.Agent()); err != nil {
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		}
 	default:
-		return nil, operation.NewBaseReasonError(
-			"wrong mode for delegate item; mode must be [\"allow\": delegate | \"cancel\": cancel delegation]")
+		return nil, errors.Errorf("wrong mode for delegate item; mode must be [\"allow\": delegate | \"cancel\": cancel delegation]")
 	}
 
 	return nil, nil
@@ -270,11 +270,11 @@ func CalculateDelegateItemsFee(cp *extensioncurrency.CurrencyPool, items []Deleg
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, operation.NewBaseReasonError("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		case !k.OverZero():
 			required[it.Currency()] = [2]currency.Big{rq[0], rq[1]}
 		default:
@@ -298,17 +298,16 @@ func CheckSenderEnoughBalance(
 
 		st, err := existsState(currency.StateKeyBalance(holder, cid), "currency of holder", getState)
 		if err != nil {
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		}
 
 		am, err := currency.StateBalanceValue(st)
 		if err != nil {
-			return nil, operation.NewBaseReasonError("insufficient balance of sender; %w", err)
+			return nil, errors.Errorf("insufficient balance of sender; %w", err)
 		}
 
 		if am.Big().Compare(rq[0]) < 0 {
-			return nil, operation.NewBaseReasonError(
-				"insufficient balance of sender, %s; %d !> %d", holder.String(), am.Big(), rq[0])
+			return nil, errors.Errorf("insufficient balance of sender, %s; %d !> %d", holder.String(), am.Big(), rq[0])
 		} else {
 			sb[cid] = currency.NewAmountState(st, cid)
 		}

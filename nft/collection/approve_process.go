@@ -5,6 +5,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
@@ -46,15 +47,15 @@ func (ipp *ApproveItemProcessor) PreProcess(
 ) error {
 
 	if err := ipp.item.IsValid(nil); err != nil {
-		return operation.NewBaseReasonError(err.Error())
+		return err
 	}
 
-	if !ipp.item.Approved().Equal(nft.BLACKHOLE_ZERO) {
+	if ipp.item.Approved().String() != "" {
 		if err := checkExistsState(currency.StateKeyAccount(ipp.item.Approved()), getState); err != nil {
-			return operation.NewBaseReasonError(err.Error())
+			return err
 		}
 		if ipp.item.Approved().Equal(ipp.sender) {
-			return operation.NewBaseReasonError("sender cannot be approved account itself; %q", ipp.item.Approved().String())
+			return errors.Errorf("sender cannot be approved account itself; %q", ipp.item.Approved().String())
 		}
 	}
 
@@ -63,27 +64,31 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	nfts := ipp.item.NFTs()
 	for i := range nfts {
 		if err := nfts[i].IsValid(nil); err != nil {
-			return operation.NewBaseReasonError(err.Error())
+			return err
 		}
 
 		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
-			return operation.NewBaseReasonError(err.Error())
+			return err
 		} else if _n, err := StateNFTValue(st); err != nil {
-			return operation.NewBaseReasonError(err.Error())
+			return err
 		} else {
 			n = _n
 			nftState = st
 		}
 
+		if n.Owner().String() == "" {
+			return errors.Errorf("dead nft; %q", n.ID())
+		}
+
 		if !n.Owner().Equal(ipp.sender) {
 			if err := checkExistsState(currency.StateKeyAccount(n.Owner()), getState); err != nil {
-				return operation.NewBaseReasonError(err.Error())
+				return err
 			} else if st, err := existsState(StateKeyAgents(n.Owner()), "agents", getState); err != nil {
-				return operation.NewBaseReasonError("unathorized sender; %q", ipp.sender)
+				return errors.Errorf("unathorized sender; %q", ipp.sender)
 			} else if box, err := StateAgentsValue(st); err != nil {
-				return operation.NewBaseReasonError(err.Error())
+				return err
 			} else if !box.Exists(ipp.sender) {
-				return operation.NewBaseReasonError("unathorized sender; %q", ipp.sender)
+				return errors.Errorf("unathorized sender; %q", ipp.sender)
 			}
 		}
 
@@ -105,7 +110,7 @@ func (ipp *ApproveItemProcessor) Process(
 	for i := range ipp.ns {
 		n := nft.NewNFT(ipp.ns[i].ID(), ipp.ns[i].Owner(), ipp.ns[i].NftHash(), ipp.ns[i].Uri(), ipp.item.Approved(), ipp.ns[i].Copyrighter())
 		if err := n.IsValid(nil); err != nil {
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		}
 		ns = append(ns, n)
 	}
@@ -113,7 +118,7 @@ func (ipp *ApproveItemProcessor) Process(
 
 	for i := range ipp.ns {
 		if st, err := SetStateNFTValue(ipp.nftStates[ipp.ns[i].ID()], ipp.ns[i]); err != nil {
-			return nil, operation.NewBaseReasonError(err.Error())
+			return nil, err
 		} else {
 			states = append(states, st)
 		}
@@ -279,7 +284,7 @@ func CalculateApproveItemsFee(cp *extensioncurrency.CurrencyPool, items []Approv
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, operation.NewBaseReasonError("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:

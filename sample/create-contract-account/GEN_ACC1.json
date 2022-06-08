@@ -1,0 +1,53 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "J2an6v9f3X71NRteu2FCWsWQJzNAp9Yb93d7Ke9tKo6x",
+    "body_hash": "AqReCwsGwNkv5YZeHCLvLdL5y2ukLBGrDhyqd6G84RGK",
+    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+    "signature": "381yXZ4f4FagBuY3FURbc3AmJp3vBCc79DYYRNkJvKp3BsApNLkjX9n6nngN5fxDjv8yu4HxWwMMQ5WZquogZoJeNmR9X9Pm",
+    "signed_at": "2022-06-08T05:25:19.844641Z",
+    "operations": [
+        {
+            "memo": "",
+            "_hint": "mitum-currency-create-contract-accounts-operation-v0.0.1",
+            "hash": "HE3yot6aQEWDpzv8UPZDM6e8yPHrSpg7uykK6LtySznv",
+            "fact": {
+                "_hint": "mitum-currency-create-contract-accounts-operation-fact-v0.0.1",
+                "hash": "9g5QNKrf8XZSCufHxSexgtpgMPHY73APgu9a6P3BLn3Q",
+                "token": "MjAyMi0wNi0wOFQwNToyNToxOS44NDQzMjha",
+                "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
+                "items": [
+                    {
+                        "_hint": "mitum-currency-create-contract-accounts-multiple-amounts-v0.0.1",
+                        "keys": {
+                            "_hint": "mitum-currency-keys-v0.0.1",
+                            "hash": "4rRNULRfGFLPTfZrhFzGqvbQ2cweiJuEZFNqrsMA353h",
+                            "keys": [
+                                {
+                                    "_hint": "mitum-currency-key-v0.0.1",
+                                    "weight": 100,
+                                    "key": "2Ay6QBu11vZ63AxAE7dDwE8CUFbWydLPJkKiUuutfE2p5mpu"
+                                }
+                            ],
+                            "threshold": 100
+                        },
+                        "amounts": [
+                            {
+                                "_hint": "mitum-currency-amount-v0.0.1",
+                                "amount": "10000000000000000",
+                                "currency": "MCC"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+                    "signature": "AN1rKvtQQX9FKcJLdjHEF4KEQobY48N5sz319pi162pQD5HG6Sz3m8MLZrNZbGazc9mVwoSRRFc7QvcMGMVMURSYmXT5ALdPF",
+                    "signed_at": "2022-06-08T05:25:19.844622Z"
+                }
+            ]
+        }
+    ]
+}

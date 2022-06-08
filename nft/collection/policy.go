@@ -13,7 +13,7 @@ import (
 var (
 	MinLengthCollectionName = 3
 	MaxLengthCollectionName = 30
-	ReValidCollectionName   = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+	ReValidCollectionName   = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9\s]+$`)
 )
 
 type CollectionName string

@@ -9,41 +9,14 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-func (form MintForm) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(
-		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(form.Hint()),
-			bson.M{
-				"hash":        form.hash,
-				"uri":         form.uri,
-				"copyrighter": form.copyrighter,
-			}))
-}
-
-type MintFormBSONUnpacker struct {
-	HS string `bson:"hash"`
-	UR string `bson:"uri"`
-	CP string `bson:"copyrighter"`
-}
-
-func (form *MintForm) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var ufo MintFormBSONUnpacker
-	if err := bson.Unmarshal(b, &ufo); err != nil {
-		return err
-	}
-
-	return form.unpack(enc, ufo.HS, ufo.UR, ufo.CP)
-}
-
 func (fact MintFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(fact.Hint()),
 			bson.M{
-				"hash":       fact.h,
-				"token":      fact.token,
-				"sender":     fact.sender,
-				"collection": fact.collection,
-				"form":       fact.form,
-				"currency":   fact.cid,
+				"hash":   fact.h,
+				"token":  fact.token,
+				"sender": fact.sender,
+				"items":  fact.items,
 			}))
 }
 
@@ -51,9 +24,7 @@ type MintFactBSONUnpacker struct {
 	H  valuehash.Bytes     `bson:"hash"`
 	TK []byte              `bson:"token"`
 	SD base.AddressDecoder `bson:"sender"`
-	CL string              `bson:"collection"`
-	FO bson.Raw            `bson:"form"`
-	CR string              `bson:"currency"`
+	IT bson.Raw            `bson:"items"`
 }
 
 func (fact *MintFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -62,7 +33,7 @@ func (fact *MintFact) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.CL, ufact.FO, ufact.CR)
+	return fact.unpack(enc, ufact.H, ufact.TK, ufact.SD, ufact.IT)
 }
 
 func (op *Mint) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {

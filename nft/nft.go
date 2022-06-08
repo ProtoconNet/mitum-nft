@@ -1,15 +1,12 @@
 package nft
 
 import (
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
 	"github.com/spikeekips/mitum/util/valuehash"
 )
-
-var BLACKHOLE_ZERO = currency.NewAddress("blackhole-0")
 
 type NFTHash string
 
@@ -22,10 +19,6 @@ func (hs NFTHash) String() string {
 }
 
 func (hs NFTHash) IsValid([]byte) error {
-	if len(hs) == 0 {
-		return isvalid.InvalidError.Errorf("empty nft hash")
-	}
-
 	return nil
 }
 
@@ -95,8 +88,14 @@ func (nft NFT) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty uri")
 	}
 
-	if len(nft.copyrighter.String()) > 1 {
+	if len(nft.copyrighter.String()) > 0 {
 		if err := nft.copyrighter.IsValid(nil); err != nil {
+			return err
+		}
+	}
+
+	if len(nft.approved.String()) > 0 {
+		if err := nft.approved.IsValid(nil); err != nil {
 			return err
 		}
 	}
@@ -104,9 +103,7 @@ func (nft NFT) IsValid([]byte) error {
 	if err := isvalid.Check(
 		nil, false,
 		nft.id,
-		nft.owner,
 		nft.hash,
-		nft.approved,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}

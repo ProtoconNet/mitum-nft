@@ -173,6 +173,8 @@ func AttachProposalProcessor(
 		return nil, err
 	} else if _, err := opr.SetProcessor(collection.TransferHinter, collection.NewTransferProcessor(cp)); err != nil {
 		return nil, err
+	} else if _, err := opr.SetProcessor(collection.BurnHinter, collection.NewBurnProcessor(cp)); err != nil {
+		return nil, err
 	}
 
 	threshold, err := base.NewThreshold(uint(len(suffrage.Nodes())), policy.ThresholdRatio())
@@ -239,6 +241,7 @@ func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationP
 		collection.CollectionRegisterHinter,
 		collection.MintHinter,
 		collection.TransferHinter,
+		collection.BurnHinter,
 	} {
 		if err := oprs.Add(hinter, opr); err != nil {
 			return ctx, err

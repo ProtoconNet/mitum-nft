@@ -12,81 +12,18 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-var (
-	MintFormType   = hint.Type("mitum-nft-mint-form")
-	MintFormHint   = hint.NewHint(MintFormType, "v0.0.1")
-	MintFormHinter = MintForm{BaseHinter: hint.NewBaseHinter(MintFormHint)}
-)
+var MaxMintItems uint = 10
 
-type MintForm struct {
-	hint.BaseHinter
-	hash        nft.NFTHash
-	uri         nft.URI
-	copyrighter base.Address
-}
-
-func NewMintForm(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
-	return MintForm{
-		BaseHinter:  hint.NewBaseHinter(MintFormHint),
-		hash:        hash,
-		uri:         uri,
-		copyrighter: copyrighter,
-	}
-}
-
-func MustNewMintform(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
-	form := NewMintForm(hash, uri, copyrighter)
-
-	if err := form.IsValid(nil); err != nil {
-		panic(err)
-	}
-
-	return form
-}
-
-func (form MintForm) Bytes() []byte {
-	return util.ConcatBytesSlice(
-		form.hash.Bytes(),
-		[]byte(form.uri.String()),
-		form.copyrighter.Bytes(),
-	)
-}
-
-func (form MintForm) Hash() nft.NFTHash {
-	return form.hash
-}
-
-func (form MintForm) Uri() nft.URI {
-	return form.uri
-}
-
-func (form MintForm) Copyrighter() base.Address {
-	return form.copyrighter
-}
-
-func (form MintForm) IsValid([]byte) error {
-	if err := form.BaseHinter.IsValid(nil); err != nil {
-		return err
-	}
-
-	if len(form.uri.String()) < 1 {
-		return isvalid.InvalidError.Errorf("empty uri")
-	}
-
-	if len(form.copyrighter.String()) > 1 {
-		if err := form.copyrighter.IsValid(nil); err != nil {
-			return err
-		}
-	}
-
-	if err := isvalid.Check(
-		nil, false,
-		form.BaseHinter,
-		form.hash); err != nil {
-		return err
-	}
-
-	return nil
+type MintItem interface {
+	hint.Hinter
+	isvalid.IsValider
+	Bytes() []byte
+	Collection() extensioncurrency.ContractID
+	Currency() currency.CurrencyID
+	Forms() []MintForm
+	Hashes() []nft.NFTHash
+	Addresses() []base.Address
+	Rebuild() MintItem
 }
 
 var (
@@ -100,22 +37,18 @@ var (
 
 type MintFact struct {
 	hint.BaseHinter
-	h          valuehash.Hash
-	token      []byte
-	sender     base.Address
-	collection extensioncurrency.ContractID
-	form       MintForm
-	cid        currency.CurrencyID
+	h      valuehash.Hash
+	token  []byte
+	sender base.Address
+	items  []MintItem
 }
 
-func NewMintFact(token []byte, sender base.Address, collection extensioncurrency.ContractID, form MintForm, cid currency.CurrencyID) MintFact {
+func NewMintFact(token []byte, sender base.Address, items []MintItem) MintFact {
 	fact := MintFact{
 		BaseHinter: hint.NewBaseHinter(MintFactHint),
 		token:      token,
 		sender:     sender,
-		collection: collection,
-		form:       form,
-		cid:        cid,
+		items:      items,
 	}
 	fact.h = fact.GenerateHash()
 
@@ -131,12 +64,16 @@ func (fact MintFact) GenerateHash() valuehash.Hash {
 }
 
 func (fact MintFact) Bytes() []byte {
+	is := make([][]byte, len(fact.items))
+
+	for i := range fact.items {
+		is[i] = fact.items[i].Bytes()
+	}
+
 	return util.ConcatBytesSlice(
 		fact.token,
 		fact.sender.Bytes(),
-		fact.collection.Bytes(),
-		fact.form.Bytes(),
-		fact.cid.Bytes(),
+		util.ConcatBytesSlice(is...),
 	)
 }
 
@@ -156,11 +93,32 @@ func (fact MintFact) IsValid(b []byte) error {
 	if err := isvalid.Check(
 		nil, false,
 		fact.h,
-		fact.sender,
-		fact.collection,
-		fact.form,
-		fact.cid); err != nil {
+		fact.sender); err != nil {
 		return err
+	}
+
+	foundHash := map[nft.NFTHash]bool{}
+	foundCollection := map[extensioncurrency.ContractID]bool{}
+	for i := range fact.items {
+
+		if err := fact.items[i].IsValid(nil); err != nil {
+			return err
+		}
+
+		hs := fact.items[i].Hashes()
+		for j := range hs {
+			h := hs[j]
+			if _, found := foundHash[h]; found {
+				return errors.Errorf("duplicated nft hash found; %s", h)
+			}
+			foundHash[h] = true
+		}
+
+		c := fact.items[i].Collection()
+		if _, found := foundCollection[c]; found {
+			return errors.Errorf("duplicated collection found; %s", c)
+		}
+		foundCollection[c] = true
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {
@@ -178,23 +136,26 @@ func (fact MintFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) Collection() extensioncurrency.ContractID {
-	return fact.collection
-}
-
-func (fact MintFact) Form() MintForm {
-	return fact.form
-}
-
 func (fact MintFact) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, 1)
-	as[0] = fact.Sender()
+	as := []base.Address{}
+
+	for i := range fact.items {
+		as = append(as, fact.items[i].Addresses()...)
+	}
+
+	as = append(as, fact.sender)
 
 	return as, nil
 }
 
-func (fact MintFact) Currency() currency.CurrencyID {
-	return fact.cid
+func (fact MintFact) Currencies() []currency.CurrencyID {
+	cs := make([]currency.CurrencyID, len(fact.items))
+
+	for i := range fact.items {
+		cs[i] = fact.items[i].Currency()
+	}
+
+	return cs
 }
 
 func (fact MintFact) Rebuild() MintFact {
