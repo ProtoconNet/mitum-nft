@@ -303,11 +303,12 @@ func CheckSenderEnoughBalance(
 
 		am, err := currency.StateBalanceValue(st)
 		if err != nil {
-			return nil, errors.Errorf("insufficient balance of sender; %w", err)
+			return nil, operation.NewBaseReasonError("insufficient balance of sender: %w", err)
 		}
 
 		if am.Big().Compare(rq[0]) < 0 {
-			return nil, errors.Errorf("insufficient balance of sender, %s; %d !> %d", holder.String(), am.Big(), rq[0])
+			return nil, operation.NewBaseReasonError(
+				"insufficient balance of sender, %s; %d !> %d", holder.String(), am.Big(), rq[0])
 		} else {
 			sb[cid] = currency.NewAmountState(st, cid)
 		}
