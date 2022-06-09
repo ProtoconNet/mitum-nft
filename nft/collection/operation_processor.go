@@ -165,7 +165,6 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		extensioncurrency.CurrencyPolicyUpdater,
 		extensioncurrency.SuffrageInflation,
 		extensioncurrency.CreateContractAccounts,
-		extensioncurrency.Deactivate,
 		extensioncurrency.Withdraws,
 		Delegate,
 		Approve,
