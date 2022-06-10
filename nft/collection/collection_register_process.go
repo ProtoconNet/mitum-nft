@@ -75,8 +75,12 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError("contract account cannot register a collection; %q", fact.Sender())
 	}
 
-	if err := checkExistsState(extensioncurrency.StateKeyContractAccount(fact.Form().Target()), getState); err != nil {
+	if st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Form().Target()), "contract account", getState); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
+	} else if ca, err := extensioncurrency.StateContractAccountValue(st); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	} else if !ca.Owner().Equal(fact.Sender()) {
+		return nil, operation.NewBaseReasonError("not owner of contract account; %q", fact.Form().Target())
 	}
 
 	if st, err := notExistsState(StateKeyCollection(fact.Form().Symbol()), "design", getState); err != nil {
@@ -101,11 +105,6 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError(err.Error())
 	}
 	opp.design = design
-
-	if !fact.Sender().Equal(design.Creator()) {
-		return nil, operation.NewBaseReasonError(
-			"collection creator must be sender; creator: %q", design.Creator().String())
-	}
 
 	if err := checkFactSignsByState(fact.Sender(), opp.Signs(), getState); err != nil {
 		return nil, operation.NewBaseReasonError("invalid signing; %w", err)
