@@ -12,7 +12,6 @@ func (r RightHolder) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"account": r.account,
 			"signed":  r.signed,
-			"clue":    r.clue,
 		}),
 	)
 }
@@ -20,7 +19,6 @@ func (r RightHolder) MarshalBSON() ([]byte, error) {
 type RightHolderBSONUnpacker struct {
 	AC base.AddressDecoder `bson:"account"`
 	SG bool                `bson:"signed"`
-	CU string              `bson:"clue"`
 }
 
 func (r *RightHolder) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -29,5 +27,5 @@ func (r *RightHolder) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return r.unpack(enc, ur.AC, ur.SG, ur.CU)
+	return r.unpack(enc, ur.AC, ur.SG)
 }

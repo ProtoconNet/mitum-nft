@@ -17,20 +17,18 @@ type RightHolder struct {
 	hint.BaseHinter
 	account base.Address
 	signed  bool
-	clue    string
 }
 
-func NewRightHolder(account base.Address, signed bool, clue string) RightHolder {
+func NewRightHolder(account base.Address, signed bool) RightHolder {
 	return RightHolder{
 		BaseHinter: hint.NewBaseHinter(RightHolderHint),
 		account:    account,
 		signed:     signed,
-		clue:       clue,
 	}
 }
 
 func MustNewRightHolder(account base.Address, signed bool, clue string) RightHolder {
-	r := NewRightHolder(account, signed, clue)
+	r := NewRightHolder(account, signed)
 
 	if err := r.IsValid(nil); err != nil {
 		panic(err)
@@ -50,7 +48,6 @@ func (r RightHolder) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		r.account.Bytes(),
 		bs,
-		[]byte(r.clue),
 	)
 }
 
@@ -68,8 +65,4 @@ func (r RightHolder) Account() base.Address {
 
 func (r RightHolder) Signed() bool {
 	return r.signed
-}
-
-func (r RightHolder) Clue() string {
-	return r.clue
 }

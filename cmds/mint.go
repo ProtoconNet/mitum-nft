@@ -21,8 +21,8 @@ type MintCommand struct {
 	CSymbol     string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
 	Hash        string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri         string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Creator     RightHolderFlag             `name:"creator" help:"nft contents creator; \"<address>,<certificate>\"" optional:""`
-	Copyrighter RightHolderFlag             `name:"copyrighter" help:"nft contents copyrighter; \"<address>,<certificate>\"" optional:""`
+	Creator     AddressFlag                 `name:"creator" help:"nft contents creator" optional:""`
+	Copyrighter AddressFlag                 `name:"copyrighter" help:"nft contents copyrighter>" optional:""`
 	sender      base.Address
 	form        collection.MintForm
 }
@@ -81,22 +81,30 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	creators := []nft.RightHolder{}
-	if len(cmd.Creator.address) > 0 {
-		r, err := cmd.Creator.Encode(jenc)
-		if err != nil {
-			return err
+	var creators = []nft.RightHolder{}
+	if len(cmd.Creator.s) > 0 {
+		if a, err := cmd.Creator.Encode(jenc); err != nil {
+			return errors.Wrapf(err, "invalid creator format; %q", cmd.Creator)
+		} else {
+			r := nft.NewRightHolder(a, false)
+			if err = r.IsValid(nil); err != nil {
+				return err
+			}
+			creators = append(creators, r)
 		}
-		creators = append(creators, r)
 	}
 
-	copyrighters := []nft.RightHolder{}
-	if len(cmd.Copyrighter.address) > 0 {
-		r, err := cmd.Copyrighter.Encode(jenc)
-		if err != nil {
-			return err
+	var copyrighters = []nft.RightHolder{}
+	if len(cmd.Copyrighter.s) > 0 {
+		if a, err := cmd.Copyrighter.Encode(jenc); err != nil {
+			return errors.Wrapf(err, "invalid creator format; %q", &cmd.Copyrighter)
+		} else {
+			r := nft.NewRightHolder(a, false)
+			if err = r.IsValid(nil); err != nil {
+				return err
+			}
+			copyrighters = append(copyrighters, r)
 		}
-		copyrighters = append(copyrighters, r)
 	}
 
 	form := collection.NewMintForm(hash, uri, creators, copyrighters)

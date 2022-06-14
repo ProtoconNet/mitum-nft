@@ -9,7 +9,6 @@ type RightHolderJSONPacker struct {
 	jsonenc.HintedHead
 	AC base.Address `json:"account"`
 	SG bool         `json:"signed"`
-	CU string       `json:"clue"`
 }
 
 func (r RightHolder) MarshalJSON() ([]byte, error) {
@@ -17,14 +16,12 @@ func (r RightHolder) MarshalJSON() ([]byte, error) {
 		HintedHead: jsonenc.NewHintedHead(r.Hint()),
 		AC:         r.account,
 		SG:         r.signed,
-		CU:         r.clue,
 	})
 }
 
 type RightHolderJSONUnpacker struct {
 	AC base.AddressDecoder `json:"account"`
 	SG bool                `json:"signed"`
-	CU string              `json:"clue"`
 }
 
 func (r *RightHolder) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -33,5 +30,5 @@ func (r *RightHolder) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return r.unpack(enc, ur.AC, ur.SG, ur.CU)
+	return r.unpack(enc, ur.AC, ur.SG)
 }

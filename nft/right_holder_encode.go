@@ -9,7 +9,6 @@ func (r *RightHolder) unpack(
 	enc encoder.Encoder,
 	ba base.AddressDecoder,
 	signed bool,
-	clue string,
 ) error {
 	a, err := ba.Encode(enc)
 	if err != nil {
@@ -18,7 +17,6 @@ func (r *RightHolder) unpack(
 	r.account = a
 
 	r.signed = signed
-	r.clue = clue
 
 	return nil
 }

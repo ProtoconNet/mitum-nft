@@ -1,17 +1,16 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "6zz6XJtELbvcs3dxbmYy8qSettwfs58gx8vZeZKqbvsX",
-    "body_hash": "3Sxib9XHUguuj8hkPfA8kFVi5x7ayLUkbEofSCsYZ6Ey",
+    "hash": "EzsHcNk7a15UG1i1gcoZuhGEHhpJfGNjGc63KFZV1zP3",
+    "body_hash": "BXtr5PA3ysQBgPUsijDoo3A3gbi3Aofi9umE5Fk9VyfD",
     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-    "signature": "381yXZE66J5jB9fxUMZbPNsw2CrKjv3H2FSxVeh1Fg9cpAwNjNsjjcexPFt1yq9Q4LyYAGGNH5VxZHH51tV4vLwT7ynxnaM3",
-    "signed_at": "2022-06-14T09:35:32.4604Z",
+    "signature": "AN1rKvtWFyzBBwSYVRGPRAzv9bFdpofmGotV5LNN2kg4M6tQdqWzBhHUc8hRuf25cU9Ewo877vsx225M8JgrWg3AAEEJUATak",
+    "signed_at": "2022-06-14T12:18:15.062988Z",
     "operations": [
         {
-            "hash": "FZ1NhzqPSDoXPzh9rTTWFxso3CRqwsfnk9MQ3nDuK3SX",
             "fact": {
                 "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
-                "hash": "7CGjAcfaFfRfqmTWo9XN2R7V2qS3EjaQszLdSqbqdj7k",
-                "token": "MjAyMi0wNi0xNFQwOTozNTozMi40NjAwNjNa",
+                "hash": "3dknsqCC6eYvNCUk6QqCSPKT4fWyD5aXzoqMPyQzhqFM",
+                "token": "MjAyMi0wNi0xNFQxMjoxODoxNS4wNjI2Mzla",
                 "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
                 "items": [
                     {
@@ -34,12 +33,13 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-                    "signature": "AN1rKvtdEzDcZkptRLKoQaEB3rQZZb4g6TVLcerCfuExrhzCu1kk7bEQZ4XprGkSr8Gur9XANcVKRvxvWbDjGH3ZexoRW2TYg",
-                    "signed_at": "2022-06-14T09:35:32.460365Z"
+                    "signature": "381yXZBdi4XidrGQNFEa2Cct8CN57Sj5BoEcDFrZL4KfzW3csM6VNF1vdLWE8Q6CHqy8TrYtnE7xNXQxfP6QZ6b68BBpodzB",
+                    "signed_at": "2022-06-14T12:18:15.062954Z"
                 }
             ],
             "memo": "",
-            "_hint": "mitum-nft-mint-operation-v0.0.1"
+            "_hint": "mitum-nft-mint-operation-v0.0.1",
+            "hash": "5bXgMTMVSfkzdogLxXcxR3gtfxfqhmHVCuArXq8ebV3Q"
         }
     ]
 }
