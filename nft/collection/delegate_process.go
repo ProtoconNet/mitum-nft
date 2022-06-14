@@ -270,7 +270,7 @@ func CalculateDelegateItemsFee(cp *extensioncurrency.CurrencyPool, items []Deleg
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found; %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:
@@ -303,7 +303,7 @@ func CheckSenderEnoughBalance(
 
 		am, err := currency.StateBalanceValue(st)
 		if err != nil {
-			return nil, operation.NewBaseReasonError("insufficient balance of sender: %w", err)
+			return nil, operation.NewBaseReasonError("insufficient balance of sender; %w", err)
 		}
 
 		if am.Big().Compare(rq[0]) < 0 {

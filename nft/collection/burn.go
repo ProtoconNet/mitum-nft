@@ -2,6 +2,7 @@ package collection
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
+	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -82,17 +83,17 @@ func (fact BurnFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if n := len(fact.items); n < 1 {
+	if l := len(fact.items); l < 1 {
 		return isvalid.InvalidError.Errorf("empty items for BurnFact")
-	} else if n > int(MaxBurnItems) {
-		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", n, MaxBurnItems)
+	} else if l > int(MaxBurnItems) {
+		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", l, MaxBurnItems)
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
 		return err
 	}
 
-	foundNFT := map[string]bool{}
+	foundNFT := map[nft.NFTID]bool{}
 	for i := range fact.items {
 		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
@@ -105,12 +106,12 @@ func (fact BurnFact) IsValid(b []byte) error {
 				return err
 			}
 
-			nft := nfts[j].String()
-			if _, found := foundNFT[nft]; found {
-				return isvalid.InvalidError.Errorf("duplicated nft found; %s", nft)
+			n := nfts[j]
+			if _, found := foundNFT[n]; found {
+				return isvalid.InvalidError.Errorf("duplicated nft found; %s", n)
 			}
 
-			foundNFT[nft] = true
+			foundNFT[n] = true
 		}
 	}
 

@@ -21,8 +21,8 @@ type MintItem interface {
 	Collection() extensioncurrency.ContractID
 	Currency() currency.CurrencyID
 	Forms() []MintForm
-	Hashes() []nft.NFTHash
-	Addresses() []base.Address
+	NftHashes() []nft.NFTHash
+	Addresses() ([]base.Address, error)
 	Rebuild() MintItem
 }
 
@@ -97,7 +97,6 @@ func (fact MintFact) IsValid(b []byte) error {
 		return err
 	}
 
-	foundHash := map[nft.NFTHash]bool{}
 	foundCollection := map[extensioncurrency.ContractID]bool{}
 	for i := range fact.items {
 
@@ -105,18 +104,9 @@ func (fact MintFact) IsValid(b []byte) error {
 			return err
 		}
 
-		hs := fact.items[i].Hashes()
-		for j := range hs {
-			h := hs[j]
-			if _, found := foundHash[h]; found {
-				return errors.Errorf("duplicated nft hash found; %s", h)
-			}
-			foundHash[h] = true
-		}
-
 		c := fact.items[i].Collection()
 		if _, found := foundCollection[c]; found {
-			return errors.Errorf("duplicated collection found; %s", c)
+			return errors.Errorf("duplicated collection found; %q", c)
 		}
 		foundCollection[c] = true
 	}
@@ -140,7 +130,11 @@ func (fact MintFact) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
 	for i := range fact.items {
-		as = append(as, fact.items[i].Addresses()...)
+		if ads, err := fact.items[i].Addresses(); err != nil {
+			return nil, err
+		} else {
+			as = append(as, ads...)
+		}
 	}
 
 	as = append(as, fact.sender)

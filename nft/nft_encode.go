@@ -6,43 +6,66 @@ import (
 	"github.com/spikeekips/mitum/util/encoder"
 )
 
-func (nft *NFT) unpack(
+func (n *NFT) unpack(
 	enc encoder.Encoder,
-	bId []byte,
-	bOwner base.AddressDecoder,
+	bid []byte,
+	bo base.AddressDecoder,
 	hash string,
 	uri string,
-	bApproved base.AddressDecoder,
-	bCopyrighter base.AddressDecoder,
+	bap base.AddressDecoder,
+	bcrs []byte,
+	bcps []byte,
 ) error {
-	if hinter, err := enc.Decode(bId); err != nil {
+	if hinter, err := enc.Decode(bid); err != nil {
 		return err
 	} else if id, ok := hinter.(NFTID); !ok {
 		return util.WrongTypeError.Errorf("not NFTID; %T", hinter)
 	} else {
-		nft.id = id
+		n.id = id
 	}
 
-	owner, err := bOwner.Encode(enc)
+	owner, err := bo.Encode(enc)
 	if err != nil {
 		return err
 	}
-	nft.owner = owner
+	n.owner = owner
 
-	approved, err := bApproved.Encode(enc)
+	approved, err := bap.Encode(enc)
 	if err != nil {
 		return err
 	}
-	nft.approved = approved
+	n.approved = approved
 
-	nft.uri = URI(uri)
-	nft.hash = NFTHash(hash)
+	n.uri = URI(uri)
+	n.hash = NFTHash(hash)
 
-	copyrighter, err := bCopyrighter.Encode(enc)
+	hcrs, err := enc.DecodeSlice(bcrs)
 	if err != nil {
 		return err
 	}
-	nft.copyrighter = copyrighter
+	crs := make([]Righter, len(hcrs))
+	for i := range hcrs {
+		r, ok := hcrs[i].(Righter)
+		if !ok {
+			return util.WrongTypeError.Errorf("not Righter; %T", hcrs[i])
+		}
+		crs[i] = r
+	}
+	n.creators = crs
+
+	hcps, err := enc.DecodeSlice(bcps)
+	if err != nil {
+		return err
+	}
+	cps := make([]Righter, len(hcps))
+	for i := range hcps {
+		r, ok := hcps[i].(Righter)
+		if !ok {
+			return util.WrongTypeError.Errorf("not Righter; %T", hcps[i])
+		}
+		cps[i] = r
+	}
+	n.copyrighters = cps
 
 	return nil
 }

@@ -29,16 +29,16 @@ func NewBaseTransferItem(ht hint.Hint, receiver base.Address, nfts []nft.NFTID, 
 }
 
 func (it BaseTransferItem) Bytes() []byte {
-	ns := make([][]byte, len(it.nfts))
+	bns := make([][]byte, len(it.nfts))
 
 	for i := range it.nfts {
-		ns[i] = it.nfts[i].Bytes()
+		bns[i] = it.nfts[i].Bytes()
 	}
 
 	return util.ConcatBytesSlice(
 		it.receiver.Bytes(),
 		it.cid.Bytes(),
-		util.ConcatBytesSlice(ns...),
+		util.ConcatBytesSlice(bns...),
 	)
 }
 
@@ -51,16 +51,16 @@ func (it BaseTransferItem) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty nfts for BaseTransferItem")
 	}
 
-	foundNFT := map[string]bool{}
+	foundNFT := map[nft.NFTID]bool{}
 	for i := range it.nfts {
 		if err := it.nfts[i].IsValid(nil); err != nil {
 			return err
 		}
-		nft := it.nfts[i].String()
-		if _, found := foundNFT[nft]; found {
-			return errors.Errorf("duplicated nft found; %s", nft)
+		n := it.nfts[i]
+		if _, found := foundNFT[n]; found {
+			return errors.Errorf("duplicated nft found; %s", n)
 		}
-		foundNFT[nft] = true
+		foundNFT[n] = true
 	}
 
 	return nil
@@ -70,14 +70,10 @@ func (it BaseTransferItem) Receiver() base.Address {
 	return it.receiver
 }
 
-func (it BaseTransferItem) Addresses() []base.Address {
-	as := []base.Address{}
-
-	if it.receiver.String() != "" {
-		as = append(as, it.receiver)
-	}
-
-	return as
+func (it BaseTransferItem) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
+	as[0] = it.receiver
+	return as, nil
 }
 
 func (it BaseTransferItem) NFTs() []nft.NFTID {

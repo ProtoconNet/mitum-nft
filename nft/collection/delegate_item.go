@@ -81,10 +81,10 @@ func (it DelegateItem) Mode() DelegateMode {
 	return it.mode
 }
 
-func (it DelegateItem) Addresses() []base.Address {
+func (it DelegateItem) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 1)
 	as[0] = it.agent
-	return as
+	return as, nil
 }
 
 func (it DelegateItem) Currency() currency.CurrencyID {

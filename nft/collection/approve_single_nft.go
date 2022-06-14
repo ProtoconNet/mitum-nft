@@ -23,9 +23,9 @@ type ApproveItemSingleNFT struct {
 	BaseApproveItem
 }
 
-func NewApproveItemSingleNFT(approved base.Address, nftid nft.NFTID, cid currency.CurrencyID) ApproveItemSingleNFT {
+func NewApproveItemSingleNFT(approved base.Address, n nft.NFTID, cid currency.CurrencyID) ApproveItemSingleNFT {
 	return ApproveItemSingleNFT{
-		BaseApproveItem: NewBaseApproveItem(ApproveItemSingleNFTHint, approved, []nft.NFTID{nftid}, cid),
+		BaseApproveItem: NewBaseApproveItem(ApproveItemSingleNFTHint, approved, []nft.NFTID{n}, cid),
 	}
 }
 
@@ -34,8 +34,8 @@ func (it ApproveItemSingleNFT) IsValid([]byte) error {
 		return err
 	}
 
-	if n := len(it.nfts); n != 1 {
-		return isvalid.InvalidError.Errorf("only one nft allowed; %d", n)
+	if l := len(it.nfts); l != 1 {
+		return isvalid.InvalidError.Errorf("only one nft allowed; %d", l)
 	}
 
 	return nil

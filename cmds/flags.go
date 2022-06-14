@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util/encoder"
 )
@@ -59,4 +60,41 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 func (v *NFTIDFlag) String() string {
 	s := fmt.Sprintf("%s,%d", v.collection, v.idx)
 	return s
+}
+
+type RighterFlag struct {
+	address string
+	clue    string
+}
+
+func (v *RighterFlag) UnmarshalText(b []byte) error {
+	l := strings.SplitN(string(b), ",", 2)
+	if len(l) != 2 {
+		return fmt.Errorf("invalid righter; %q", string(b))
+	}
+	v.address, v.clue = l[0], l[1]
+
+	return nil
+}
+
+func (v *RighterFlag) String() string {
+	if len(v.address) > 0 || len(v.clue) > 0 {
+		return ""
+	}
+	s := fmt.Sprintf("%s,%s", v.address, v.clue)
+	return s
+}
+
+func (v *RighterFlag) Encode(enc encoder.Encoder) (nft.Righter, error) {
+	account, err := base.DecodeAddressFromString(v.address, enc)
+	if err != nil {
+		return nft.Righter{}, err
+	}
+
+	r := nft.NewRighter(account, false, v.clue)
+	if err != nil {
+		return nft.Righter{}, err
+	}
+
+	return r, nil
 }

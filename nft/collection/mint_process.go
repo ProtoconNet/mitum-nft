@@ -109,15 +109,25 @@ func (ipp *MintItemProcessor) PreProcess(
 			ipp.nStates[id] = st
 		}
 
-		if forms[i].Copyrighter().String() != "" {
-			if err := checkExistsState(currency.StateKeyAccount(forms[i].Copyrighter()), getState); err != nil {
+		for j := range forms[i].Creators() {
+			creator := forms[i].Creators()[j].Account()
+			if err := checkExistsState(currency.StateKeyAccount(creator), getState); err != nil {
 				return err
-			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(forms[i].Copyrighter()), getState); err != nil {
-				return errors.Errorf("contract account cannot be copyrighter; %q", forms[i].Copyrighter())
+			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
+				return errors.Errorf("contract account cannot be a creator; %q", creator)
 			}
 		}
 
-		n = nft.NewNFT(id, ipp.sender, forms[i].NftHash(), forms[i].Uri(), currency.Address{}, forms[i].Copyrighter())
+		for j := range forms[i].Copyrighters() {
+			copyrighter := forms[i].Copyrighters()[j].Account()
+			if err := checkExistsState(currency.StateKeyAccount(copyrighter), getState); err != nil {
+				return err
+			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
+				return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
+			}
+		}
+
+		n = nft.NewNFT(id, ipp.sender, forms[i].NftHash(), forms[i].Uri(), currency.Address{}, forms[i].Creators(), forms[i].Copyrighters())
 		if err := n.IsValid(nil); err != nil {
 			return operation.NewBaseReasonError(err.Error())
 		}
@@ -335,7 +345,7 @@ func CalculateMintItemsFee(cp *extensioncurrency.CurrencyPool, items []MintItem)
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found; %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:

@@ -18,9 +18,9 @@ type BurnCommand struct {
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	CSymbol  string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
-	NFTs     []NFTIDFlag                 `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
+	NFT      NFTIDFlag                   `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
 	sender   base.Address
-	nfts     []nft.NFTID
+	nft      nft.NFTID
 }
 
 func NewBurnCommand() BurnCommand {
@@ -62,42 +62,28 @@ func (cmd *BurnCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	if len(cmd.NFTs) < 1 {
-		return errors.Errorf("empty nfts; at least one nft is necessary")
+	n := nft.NewNFTID(cmd.NFT.collection, cmd.NFT.idx)
+	if err := n.IsValid(nil); err != nil {
+		return err
 	}
-
-	nfts := make([]nft.NFTID, len(cmd.NFTs))
-	for i := range cmd.NFTs {
-		nft := nft.NewNFTID(cmd.NFTs[i].collection, cmd.NFTs[i].idx)
-		if err := nft.IsValid(nil); err != nil {
-			return err
-		}
-		nfts[i] = nft
-	}
-	cmd.nfts = nfts
+	cmd.nft = n
 
 	return nil
 
 }
 
 func (cmd *BurnCommand) createOperation() (operation.Operation, error) {
-	items := make([]collection.BurnItem, 1)
-
-	if len(cmd.nfts) > 1 {
-		items[0] = collection.NewBurnItemMultiNFTs(extensioncurrency.ContractID(cmd.CSymbol), cmd.nfts, cmd.Currency.CID)
-	} else {
-		items[0] = collection.NewBurnItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.nfts[0], cmd.Currency.CID)
-	}
+	item := collection.NewBurnItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.nft, cmd.Currency.CID)
 
 	fact := collection.NewBurnFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		items,
+		[]collection.BurnItem{item},
 	)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())

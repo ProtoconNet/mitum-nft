@@ -30,110 +30,135 @@ var (
 
 type NFT struct {
 	hint.BaseHinter
-	id          NFTID
-	owner       base.Address
-	hash        NFTHash
-	uri         URI
-	approved    base.Address
-	copyrighter base.Address
+	id           NFTID
+	owner        base.Address
+	hash         NFTHash
+	uri          URI
+	approved     base.Address
+	creators     []Righter
+	copyrighters []Righter
 }
 
-func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, copyrighter base.Address) NFT {
+func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Righter, copyrighters []Righter) NFT {
 	return NFT{
-		BaseHinter:  hint.NewBaseHinter(NFTHint),
-		id:          id,
-		owner:       owner,
-		hash:        hash,
-		uri:         uri,
-		approved:    approved,
-		copyrighter: copyrighter,
+		BaseHinter:   hint.NewBaseHinter(NFTHint),
+		id:           id,
+		owner:        owner,
+		hash:         hash,
+		uri:          uri,
+		approved:     approved,
+		creators:     creators,
+		copyrighters: copyrighters,
 	}
 }
 
-func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, copyrighter base.Address) NFT {
-	nft := NewNFT(id, owner, hash, uri, approved, copyrighter)
+func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Righter, copyrighters []Righter) NFT {
+	n := NewNFT(id, owner, hash, uri, approved, creators, copyrighters)
 
-	if err := nft.IsValid(nil); err != nil {
+	if err := n.IsValid(nil); err != nil {
 		panic(err)
 	}
 
-	return nft
+	return n
 }
 
-func (nft NFT) Bytes() []byte {
+func (n NFT) Bytes() []byte {
+	bcrs := [][]byte{}
+	bcps := [][]byte{}
+
+	for i := range n.creators {
+		bcrs = append(bcrs, n.creators[i].Bytes())
+	}
+
+	for i := range n.copyrighters {
+		bcps = append(bcrs, n.copyrighters[i].Bytes())
+	}
+
 	return util.ConcatBytesSlice(
-		nft.id.Bytes(),
-		nft.owner.Bytes(),
-		nft.hash.Bytes(),
-		[]byte(nft.uri.String()),
-		nft.approved.Bytes(),
-		nft.copyrighter.Bytes(),
+		n.id.Bytes(),
+		n.owner.Bytes(),
+		n.hash.Bytes(),
+		[]byte(n.uri.String()),
+		n.approved.Bytes(),
+		util.ConcatBytesSlice(bcrs...),
+		util.ConcatBytesSlice(bcps...),
 	)
 }
 
-func (nft NFT) Hint() hint.Hint {
+func (NFT) Hint() hint.Hint {
 	return NFTHint
 }
 
-func (nft NFT) Hash() valuehash.Hash {
-	return nft.GenerateHash()
+func (n NFT) Hash() valuehash.Hash {
+	return n.GenerateHash()
 }
 
-func (nft NFT) GenerateHash() valuehash.Hash {
-	return valuehash.NewSHA256(nft.Bytes())
+func (n NFT) GenerateHash() valuehash.Hash {
+	return valuehash.NewSHA256(n.Bytes())
 }
 
-func (nft NFT) IsValid([]byte) error {
-	if len(nft.uri.String()) < 1 {
+func (n NFT) IsValid([]byte) error {
+	if len(n.uri.String()) < 1 {
 		return isvalid.InvalidError.Errorf("empty uri")
 	}
 
-	if len(nft.copyrighter.String()) > 0 {
-		if err := nft.copyrighter.IsValid(nil); err != nil {
+	for i := range n.creators {
+		if err := n.creators[i].IsValid(nil); err != nil {
 			return err
 		}
 	}
 
-	if len(nft.approved.String()) > 0 {
-		if err := nft.approved.IsValid(nil); err != nil {
+	for i := range n.copyrighters {
+		if err := n.copyrighters[i].IsValid(nil); err != nil {
+			return err
+		}
+	}
+
+	if len(n.approved.String()) > 0 {
+		if err := n.approved.IsValid(nil); err != nil {
 			return err
 		}
 	}
 
 	if err := isvalid.Check(
 		nil, false,
-		nft.id,
-		nft.hash,
+		n.id,
+		n.hash,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}
+
 	return nil
 }
 
-func (nft NFT) ID() NFTID {
-	return nft.id
+func (n NFT) ID() NFTID {
+	return n.id
 }
 
-func (nft NFT) Owner() base.Address {
-	return nft.owner
+func (n NFT) Owner() base.Address {
+	return n.owner
 }
 
-func (nft NFT) NftHash() NFTHash {
-	return nft.hash
+func (n NFT) NftHash() NFTHash {
+	return n.hash
 }
 
-func (nft NFT) Uri() URI {
-	return nft.uri
+func (n NFT) Uri() URI {
+	return n.uri
 }
 
-func (nft NFT) Approved() base.Address {
-	return nft.approved
+func (n NFT) Approved() base.Address {
+	return n.approved
 }
 
-func (nft NFT) Copyrighter() base.Address {
-	return nft.copyrighter
+func (n NFT) Creators() []Righter {
+	return n.creators
 }
 
-func (nft NFT) Equal(cnft NFT) bool {
-	return nft.ID().Equal(cnft.ID())
+func (n NFT) Copyrighters() []Righter {
+	return n.copyrighters
+}
+
+func (n NFT) Equal(cn NFT) bool {
+	return n.ID().Equal(cn.ID())
 }

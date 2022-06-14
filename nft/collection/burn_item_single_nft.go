@@ -23,9 +23,9 @@ type BurnItemSingleNFT struct {
 	BaseBurnItem
 }
 
-func NewBurnItemSingleNFT(collection extensioncurrency.ContractID, nftid nft.NFTID, cid currency.CurrencyID) BurnItemSingleNFT {
+func NewBurnItemSingleNFT(collection extensioncurrency.ContractID, n nft.NFTID, cid currency.CurrencyID) BurnItemSingleNFT {
 	return BurnItemSingleNFT{
-		BaseBurnItem: NewBaseBurnItem(BurnItemSingleNFTHint, collection, []nft.NFTID{nftid}, cid),
+		BaseBurnItem: NewBaseBurnItem(BurnItemSingleNFTHint, collection, []nft.NFTID{n}, cid),
 	}
 }
 
@@ -34,8 +34,8 @@ func (it BurnItemSingleNFT) IsValid([]byte) error {
 		return err
 	}
 
-	if n := len(it.nfts); n != 1 {
-		return isvalid.InvalidError.Errorf("only one nft allowed; %d", n)
+	if l := len(it.nfts); l != 1 {
+		return isvalid.InvalidError.Errorf("only one nft allowed; %d", l)
 	}
 
 	return nil

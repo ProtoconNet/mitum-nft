@@ -16,10 +16,10 @@ type DelegateCommand struct {
 	OperationFlags
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Agents   []AddressFlag               `arg:"" name:"agent" help:"agent account address"`
+	Agent    AddressFlag                 `arg:"" name:"agent" help:"agent account address"`
 	Mode     string                      `name:"mode" help:"delegate mode" optional:""`
 	sender   base.Address
-	agents   []base.Address
+	agent    base.Address
 	mode     collection.DelegateMode
 }
 
@@ -62,24 +62,16 @@ func (cmd *DelegateCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	if len(cmd.Agents) < 1 {
-		return errors.Errorf("empty agents; at least one agent is necessary")
+	if a, err := cmd.Agent.Encode(jenc); err != nil {
+		return errors.Wrapf(err, "invalid agent format; %q", cmd.Agent)
+	} else {
+		cmd.agent = a
 	}
-
-	agents := make([]base.Address, len(cmd.Agents))
-	for i := range cmd.Agents {
-		if a, err := cmd.Agents[i].Encode(jenc); err != nil {
-			return errors.Wrapf(err, "invalid agent format; %q", cmd.Agents[i].String())
-		} else {
-			agents[i] = a
-		}
-	}
-	cmd.agents = agents
 
 	if len(cmd.Mode) < 1 {
 		cmd.mode = collection.DelegateAllow
@@ -96,7 +88,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 }
 
 func (cmd *DelegateCommand) createOperation() (operation.Operation, error) {
-	items := []collection.DelegateItem{collection.NewDelegateItem(cmd.agents[0], cmd.mode, cmd.Currency.CID)}
+	items := []collection.DelegateItem{collection.NewDelegateItem(cmd.agent, cmd.mode, cmd.Currency.CID)}
 
 	fact := collection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 

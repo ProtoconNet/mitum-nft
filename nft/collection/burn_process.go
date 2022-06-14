@@ -37,7 +37,8 @@ type BurnItemProcessor struct {
 	h        valuehash.Hash
 	box      NFTBox
 	boxState state.State
-	ns       map[nft.NFT]state.State
+	ns       []nft.NFT
+	nStates  map[nft.NFTID]state.State
 	sender   base.Address
 	item     BurnItem
 }
@@ -80,19 +81,20 @@ func (ipp *BurnItemProcessor) PreProcess(
 		// check nft
 		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
 			return err
-		} else if _n, err := StateNFTValue(st); err != nil {
+		} else if nv, err := StateNFTValue(st); err != nil {
 			return err
-		} else if _n.ID().Collection() != ipp.item.Collection() {
-			return errors.Errorf("another collection found; %q", _n.ID())
+		} else if nv.ID().Collection() != ipp.item.Collection() {
+			return errors.Errorf("another collection found; %q", nv.ID())
 		} else {
-			approved = _n.Approved()
-			owner = _n.Owner()
+			approved = nv.Approved()
+			owner = nv.Owner()
 
-			n := nft.NewNFT(_n.ID(), currency.Address{}, _n.NftHash(), _n.Uri(), currency.Address{}, _n.Copyrighter())
+			n := nft.NewNFT(nv.ID(), currency.Address{}, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
 			if err := n.IsValid(nil); err != nil {
 				return err
 			}
-			ipp.ns[n] = st
+			ipp.ns = append(ipp.ns, n)
+			ipp.nStates[n.ID()] = st
 		}
 
 		// check owner
@@ -129,9 +131,10 @@ func (ipp *BurnItemProcessor) Process(
 
 	var states []state.State
 
-	// set nfts
-	for k, v := range ipp.ns {
-		if st, err := SetStateNFTValue(v, k); err != nil {
+	for i := range ipp.ns {
+		if st, found := ipp.nStates[ipp.ns[i].ID()]; !found {
+			return nil, errors.Errorf("wrong nft id; %q", ipp.ns[i].ID())
+		} else if st, err := SetStateNFTValue(st, ipp.ns[i]); err != nil {
 			return nil, err
 		} else {
 			states = append(states, st)
@@ -159,6 +162,7 @@ func (ipp *BurnItemProcessor) Process(
 func (ipp *BurnItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
+	ipp.nStates = nil
 	ipp.ns = nil
 	ipp.box = NFTBox{}
 	ipp.boxState = nil
@@ -226,7 +230,8 @@ func (opp *BurnProcessor) PreProcess(
 		c.h = opp.Hash()
 		c.box = NFTBox{}
 		c.boxState = nil
-		c.ns = map[nft.NFT]state.State{}
+		c.ns = []nft.NFT{}
+		c.nStates = map[nft.NFTID]state.State{}
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
 
@@ -325,7 +330,7 @@ func CalculateBurnItemsFee(cp *extensioncurrency.CurrencyPool, items []BurnItem)
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found; %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:

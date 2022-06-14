@@ -25,7 +25,7 @@ var (
 )
 
 func StateKeyAgents(addr base.Address) string {
-	return fmt.Sprintf("%s%s", addr.String(), StateKeyAgentsSuffix)
+	return fmt.Sprintf("%s%s", addr, StateKeyAgentsSuffix)
 }
 
 func IsStateAgentKey(key string) bool {
@@ -54,7 +54,7 @@ func SetStateAgentsValue(st state.State, box AgentBox) (state.State, error) {
 }
 
 func StateKeyCollection(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", StateKeyCollectionPrefix, id.String())
+	return fmt.Sprintf("%s%s", StateKeyCollectionPrefix, id)
 }
 
 func IsStateCollectionKey(key string) bool {
@@ -83,7 +83,7 @@ func SetStateCollectionValue(st state.State, design nft.Design) (state.State, er
 }
 
 func StateKeyNFTs(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", id.String(), StateKeyNFTsSuffix)
+	return fmt.Sprintf("%s%s", id, StateKeyNFTsSuffix)
 }
 
 func IsStateNFTsKey(key string) bool {
@@ -112,7 +112,7 @@ func SetStateNFTsValue(st state.State, box NFTBox) (state.State, error) {
 }
 
 func StateKeyNFT(id nft.NFTID) string {
-	return fmt.Sprintf("%s%s", id.String(), StateKeyNFTSuffix)
+	return fmt.Sprintf("%s%s", id, StateKeyNFTSuffix)
 }
 
 func IsStateNFTKey(key string) bool {
@@ -141,7 +141,7 @@ func SetStateNFTValue(st state.State, n nft.NFT) (state.State, error) {
 }
 
 func StateKeyCollectionLastIDX(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", id.String(), StateKeyCollectionLastIDXSuffix)
+	return fmt.Sprintf("%s%s", id, StateKeyCollectionLastIDXSuffix)
 }
 
 func IsStateCollectionLastIDXKey(key string) bool {

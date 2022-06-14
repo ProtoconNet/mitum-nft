@@ -23,9 +23,9 @@ type TransferItemSingleNFT struct {
 	BaseTransferItem
 }
 
-func NewTransferItemSingleNFT(receiver base.Address, nftid nft.NFTID, cid currency.CurrencyID) TransferItemSingleNFT {
+func NewTransferItemSingleNFT(receiver base.Address, n nft.NFTID, cid currency.CurrencyID) TransferItemSingleNFT {
 	return TransferItemSingleNFT{
-		BaseTransferItem: NewBaseTransferItem(TransferItemSingleNFTHint, receiver, []nft.NFTID{nftid}, cid),
+		BaseTransferItem: NewBaseTransferItem(TransferItemSingleNFTHint, receiver, []nft.NFTID{n}, cid),
 	}
 }
 
@@ -34,8 +34,8 @@ func (it TransferItemSingleNFT) IsValid([]byte) error {
 		return err
 	}
 
-	if n := len(it.nfts); n != 1 {
-		return isvalid.InvalidError.Errorf("only one nft allowed; %d", n)
+	if l := len(it.nfts); l != 1 {
+		return isvalid.InvalidError.Errorf("only one nft allowed; %d", l)
 	}
 
 	return nil

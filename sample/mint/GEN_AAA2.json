@@ -1,18 +1,19 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "9VU51aFfc5CXDMiXeqiFkmjkBU12ZQYCmR1j5hgWcekP",
-    "body_hash": "EwxAcy5MzSaCQPmn4qsE6dvH8fQdsbjTzHKezHoTwMh7",
+    "hash": "9Zn8WNRaaNsKLvYZXAVFxoxZ11ju8GkkKyWQ7Yea1qoS",
+    "body_hash": "2k3ud6vDJ53SNdTWMeLSQVsfuhoDDjZ53QAD17N47AHo",
     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-    "signature": "381yXZ53CGSsAwQP2mroa3bmHBQH2qF5iVFvzGmYKofhFpFAGETL1C673xS4uS196y8nTHdeoSUMwz4srzL4gFyhRvt5Dis8",
-    "signed_at": "2022-06-08T06:04:44.596271Z",
+    "signature": "381yXZCRuNRowXZFeoEi1ZHCGCAsh2QSC3M7GnGGsxjhgH5bXiz7HbmmSLZamGNZBn12BW91kFh5WTG8XfCxbP78Z2C2dw73",
+    "signed_at": "2022-06-14T08:00:16.555214Z",
     "operations": [
         {
+            "memo": "",
             "_hint": "mitum-nft-mint-operation-v0.0.1",
-            "hash": "21efaUE37T3LnCe6T66ifFYhtz5hqgXLXLvrj5eVvf13",
+            "hash": "ELun5QvFVe4MqR5btgQJCKssobCppfRheHdSq5FciMwr",
             "fact": {
                 "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
-                "hash": "4FL5PsAw6gjP4T9u7ZfbfcwSweW71qpXdXZNxSyJxghF",
-                "token": "MjAyMi0wNi0wOFQwNjowNDo0NC41OTU5NzFa",
+                "hash": "9NPinGrBuoZSufC7783vo8QeBuBmzmoVre8Q9GDgvQrG",
+                "token": "MjAyMi0wNi0xNFQwODowMDoxNi41NTQ3NDha",
                 "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
                 "items": [
                     {
@@ -21,9 +22,24 @@
                         "forms": [
                             {
                                 "_hint": "mitum-nft-mint-form-v0.0.1",
-                                "hash": "lsdkfjlweknwbv",
+                                "hash": "laskefoweifsadlfkejf",
                                 "uri": "https://localhost:5000/AAA/2",
-                                "copyrighter": ""
+                                "creators": [
+                                    {
+                                        "_hint": "mitum-nft-righter-v0.0.1",
+                                        "account": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                                        "signed": false,
+                                        "clue": ""
+                                    }
+                                ],
+                                "copyrighters": [
+                                    {
+                                        "_hint": "mitum-nft-righter-v0.0.1",
+                                        "account": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                                        "signed": false,
+                                        "clue": ""
+                                    }
+                                ]
                             }
                         ],
                         "currency": "MCC"
@@ -34,11 +50,10 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-                    "signature": "381yXZEGf86cwp8ygkg6LzL1XNSuoSLRpgmXnTQyugLTdeX7ieKDCgksTXDU1XuPSrCYp1AvdRMuEKQEybQGvu5xMJHiwXk2",
-                    "signed_at": "2022-06-08T06:04:44.59624Z"
+                    "signature": "AN1rKvt4ZK58eeeKhAxoCbTGrmMUn5k69djLix9Ug8tH2QpJdhtDuWS2hmgMoE8vqTaoMBMhzhTk8KVGrAXeQpehSto9TUSZk",
+                    "signed_at": "2022-06-14T08:00:16.55516Z"
                 }
-            ],
-            "memo": ""
+            ]
         }
     ]
 }

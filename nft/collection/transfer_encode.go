@@ -11,33 +11,33 @@ func (fact *TransferFact) unpack(
 	enc encoder.Encoder,
 	h valuehash.Hash,
 	token []byte,
-	bSender base.AddressDecoder,
-	bItems []byte,
+	bs base.AddressDecoder,
+	bits []byte,
 ) error {
-	sender, err := bSender.Encode(enc)
+	sender, err := bs.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	hits, err := enc.DecodeSlice(bItems)
+	hits, err := enc.DecodeSlice(bits)
 	if err != nil {
 		return err
 	}
 
-	its := make([]TransferItem, len(hits))
+	items := make([]TransferItem, len(hits))
 	for i := range hits {
-		j, ok := hits[i].(TransferItem)
+		item, ok := hits[i].(TransferItem)
 		if !ok {
 			return util.WrongTypeError.Errorf("not TransferItem; %T", hits[i])
 		}
 
-		its[i] = j
+		items[i] = item
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.items = its
+	fact.items = items
 
 	return nil
 }

@@ -77,9 +77,10 @@ func (form CollectionRegisterForm) Uri() nft.URI {
 	return form.uri
 }
 
-func (form CollectionRegisterForm) Addresses() []base.Address {
-	as := []base.Address{form.target}
-	return as
+func (form CollectionRegisterForm) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
+	as[0] = form.target
+	return as, nil
 }
 
 func (form CollectionRegisterForm) IsValid([]byte) error {
@@ -192,9 +193,7 @@ func (fact CollectionRegisterFact) Form() CollectionRegisterForm {
 
 func (fact CollectionRegisterFact) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 1)
-
 	as[0] = fact.sender
-
 	return as, nil
 }
 

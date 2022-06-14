@@ -82,7 +82,7 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	foundAgent := map[string]bool{}
+	foundAgent := map[base.Address]bool{}
 	for i := range fact.items {
 		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
@@ -93,10 +93,10 @@ func (fact DelegateFact) IsValid(b []byte) error {
 			return err
 		}
 
-		if _, found := foundAgent[agent.String()]; found {
-			return isvalid.InvalidError.Errorf("duplicated agent found; %s", agent)
+		if _, found := foundAgent[agent]; found {
+			return isvalid.InvalidError.Errorf("duplicated agent found; %q", agent)
 		}
-		foundAgent[agent.String()] = true
+		foundAgent[agent] = true
 	}
 
 	return nil

@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 
 	currencycmds "github.com/spikeekips/mitum-currency/cmds"
-	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/operation"
 	"github.com/spikeekips/mitum/util"
@@ -22,7 +21,8 @@ type MintCommand struct {
 	CSymbol     string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
 	Hash        string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri         string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Copyrighter AddressFlag                 `name:"copyrighter" help:"nft copyrighter" optional:""`
+	Creator     RighterFlag                 `name:"creator" help:"nft contents creator; \"<address>,<certificate>\"" optional:""`
+	Copyrighter RighterFlag                 `name:"copyrighter" help:"nft contents copyrighter; \"<address>,<certificate>\"" optional:""`
 	sender      base.Address
 	form        collection.MintForm
 }
@@ -66,7 +66,7 @@ func (cmd *MintCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
@@ -81,22 +81,25 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	var copyrighter base.Address
-	if len(cmd.Copyrighter.String()) < 1 {
-		copyrighter = currency.Address{}
-	} else {
-		if a, err := cmd.Copyrighter.Encode(jenc); err != nil {
-			return errors.Wrapf(err, "invalid copyrighter format; %q", cmd.Copyrighter.String())
-		} else {
-			copyrighter = a
-		}
-
-		if err := copyrighter.IsValid(nil); err != nil {
+	creators := []nft.Righter{}
+	if len(cmd.Creator.address) > 0 {
+		r, err := cmd.Creator.Encode(jenc)
+		if err != nil {
 			return err
 		}
+		creators = append(creators, r)
 	}
 
-	form := collection.NewMintForm(hash, uri, copyrighter)
+	copyrighters := []nft.Righter{}
+	if len(cmd.Copyrighter.address) > 0 {
+		r, err := cmd.Copyrighter.Encode(jenc)
+		if err != nil {
+			return err
+		}
+		copyrighters = append(copyrighters, r)
+	}
+
+	form := collection.NewMintForm(hash, uri, creators, copyrighters)
 	if err := form.IsValid(nil); err != nil {
 		return err
 	}
@@ -108,9 +111,6 @@ func (cmd *MintCommand) parseFlags() error {
 
 func (cmd *MintCommand) createOperation() (operation.Operation, error) {
 	item := collection.NewMintItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
-	if err := item.IsValid(nil); err != nil {
-		return nil, err
-	}
 
 	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
 

@@ -35,12 +35,12 @@ func NewAgentBox(agents []base.Address) AgentBox {
 }
 
 func (abx AgentBox) Bytes() []byte {
-	bs := make([][]byte, len(abx.agents))
+	bas := make([][]byte, len(abx.agents))
 	for i := range abx.agents {
-		bs[i] = abx.agents[i].Bytes()
+		bas[i] = abx.agents[i].Bytes()
 	}
 
-	return util.ConcatBytesSlice(bs...)
+	return util.ConcatBytesSlice(bas...)
 }
 
 func (abx AgentBox) Hint() hint.Hint {
@@ -160,12 +160,12 @@ type AgentBoxJSONUnpacker struct {
 }
 
 func (abx *AgentBox) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var uag AgentBoxJSONUnpacker
-	if err := enc.Unmarshal(b, &uag); err != nil {
+	var ubox AgentBoxJSONUnpacker
+	if err := enc.Unmarshal(b, &ubox); err != nil {
 		return err
 	}
 
-	return abx.unpack(enc, uag.AG)
+	return abx.unpack(enc, ubox.AG)
 }
 
 type AgentBoxBSONPacker struct {
@@ -186,22 +186,22 @@ type AgentBoxBSONUnpacker struct {
 }
 
 func (abx *AgentBox) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var uag AgentBoxBSONUnpacker
-	if err := bsonenc.Unmarshal(b, &uag); err != nil {
+	var ubox AgentBoxBSONUnpacker
+	if err := bsonenc.Unmarshal(b, &ubox); err != nil {
 		return err
 	}
 
-	return abx.unpack(enc, uag.AG)
+	return abx.unpack(enc, ubox.AG)
 }
 
 func (abx *AgentBox) unpack(
 	enc encoder.Encoder,
-	bAgents []base.AddressDecoder, // base.Addresss
+	bags []base.AddressDecoder, // base.Addresss
 ) error {
 
-	agents := make([]base.Address, len(bAgents))
+	agents := make([]base.Address, len(bags))
 	for i := range agents {
-		agent, err := bAgents[i].Encode(enc)
+		agent, err := bags[i].Encode(enc)
 		if err != nil {
 			return err
 		}

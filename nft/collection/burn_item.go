@@ -29,16 +29,16 @@ func NewBaseBurnItem(ht hint.Hint, collection extensioncurrency.ContractID, nfts
 }
 
 func (it BaseBurnItem) Bytes() []byte {
-	ns := make([][]byte, len(it.nfts))
+	bns := make([][]byte, len(it.nfts))
 
 	for i := range it.nfts {
-		ns[i] = it.nfts[i].Bytes()
+		bns[i] = it.nfts[i].Bytes()
 	}
 
 	return util.ConcatBytesSlice(
 		it.collection.Bytes(),
 		it.cid.Bytes(),
-		util.ConcatBytesSlice(ns...),
+		util.ConcatBytesSlice(bns...),
 	)
 }
 
@@ -51,16 +51,18 @@ func (it BaseBurnItem) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty nfts for BaseBurnItem")
 	}
 
-	foundNFT := map[string]bool{}
+	foundNFT := map[nft.NFTID]bool{}
 	for i := range it.nfts {
 		if err := it.nfts[i].IsValid(nil); err != nil {
 			return err
 		}
-		nft := it.nfts[i].String()
-		if _, found := foundNFT[nft]; found {
-			return errors.Errorf("duplicated nft found; %s", nft)
+
+		n := it.nfts[i]
+		if _, found := foundNFT[n]; found {
+			return errors.Errorf("duplicated nft found; %q", n)
 		}
-		foundNFT[nft] = true
+
+		foundNFT[n] = true
 	}
 
 	return nil

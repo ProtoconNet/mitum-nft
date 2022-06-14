@@ -35,12 +35,12 @@ func NewNFTBox(nfts []nft.NFTID) NFTBox {
 }
 
 func (nbx NFTBox) Bytes() []byte {
-	bs := make([][]byte, len(nbx.nfts))
+	bns := make([][]byte, len(nbx.nfts))
 	for i := range nbx.nfts {
-		bs[i] = nbx.nfts[i].Bytes()
+		bns[i] = nbx.nfts[i].Bytes()
 	}
 
-	return util.ConcatBytesSlice(bs...)
+	return util.ConcatBytesSlice(bns...)
 }
 
 func (nbx NFTBox) Hint() hint.Hint {
@@ -128,7 +128,7 @@ func (nbx *NFTBox) Remove(n nft.NFTID) error {
 		return err
 	}
 	if !nbx.Exists(n) {
-		return errors.Errorf("nft %v not found in nft box", n)
+		return errors.Errorf("nft not found in owner's nft box; %v", n)
 	}
 	for i := range nbx.nfts {
 		if n.Equal(nbx.nfts[i]) {
@@ -198,22 +198,22 @@ func (nbx *NFTBox) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 
 func (nbx *NFTBox) unpack(
 	enc encoder.Encoder,
-	bNFTs []byte,
+	bns []byte,
 ) error {
 
-	hNFTs, err := enc.DecodeSlice(bNFTs)
+	hns, err := enc.DecodeSlice(bns)
 	if err != nil {
 		return err
 	}
 
-	nfts := make([]nft.NFTID, len(hNFTs))
-	for i := range hNFTs {
-		j, ok := hNFTs[i].(nft.NFTID)
+	nfts := make([]nft.NFTID, len(hns))
+	for i := range hns {
+		n, ok := hns[i].(nft.NFTID)
 		if !ok {
-			return util.WrongTypeError.Errorf("not NFTID; %T", hNFTs[i])
+			return util.WrongTypeError.Errorf("not NFTID; %T", hns[i])
 		}
 
-		nfts[i] = j
+		nfts[i] = n
 	}
 
 	nbx.nfts = nfts

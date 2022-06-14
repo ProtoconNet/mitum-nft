@@ -11,32 +11,32 @@ import (
 
 func (it *BaseTransferItem) unpack(
 	enc encoder.Encoder,
-	bReceiver base.AddressDecoder,
-	bNFTs []byte,
+	br base.AddressDecoder,
+	bns []byte,
 	cid string,
 ) error {
-	receiver, err := bReceiver.Encode(enc)
+	receiver, err := br.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	hNFTs, err := enc.DecodeSlice(bNFTs)
+	hns, err := enc.DecodeSlice(bns)
 	if err != nil {
 		return err
 	}
 
-	nfts := make([]nft.NFTID, len(hNFTs))
-	for i := range hNFTs {
-		j, ok := hNFTs[i].(nft.NFTID)
+	nfts := make([]nft.NFTID, len(hns))
+	for i := range hns {
+		n, ok := hns[i].(nft.NFTID)
 		if !ok {
-			return util.WrongTypeError.Errorf("not NFTID; %T", hNFTs[i])
+			return util.WrongTypeError.Errorf("not NFTID; %T", hns[i])
 		}
 
-		nfts[i] = j
+		nfts[i] = n
 	}
+	it.nfts = nfts
 
 	it.receiver = receiver
-	it.nfts = nfts
 	it.cid = currency.CurrencyID(cid)
 
 	return nil

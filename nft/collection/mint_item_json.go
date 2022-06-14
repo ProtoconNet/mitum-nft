@@ -7,15 +7,15 @@ import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum-currency/currency"
-	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
 
 type MintFormJSONPacker struct {
 	jsonenc.HintedHead
-	HS nft.NFTHash  `json:"hash"`
-	UR nft.URI      `json:"uri"`
-	CP base.Address `json:"copyrighter"`
+	HS nft.NFTHash   `json:"hash"`
+	UR nft.URI       `json:"uri"`
+	CR []nft.Righter `json:"creators"`
+	CP []nft.Righter `json:"copyrighters"`
 }
 
 func (form MintForm) MarshalJSON() ([]byte, error) {
@@ -23,14 +23,16 @@ func (form MintForm) MarshalJSON() ([]byte, error) {
 		HintedHead: jsonenc.NewHintedHead(form.Hint()),
 		HS:         form.hash,
 		UR:         form.uri,
-		CP:         form.copyrighter,
+		CR:         form.creators,
+		CP:         form.copyrighters,
 	})
 }
 
 type MintFormJSONUnpacker struct {
-	HS string `json:"hash"`
-	UR string `json:"uri"`
-	CP string `json:"copyrighter"`
+	HS string          `json:"hash"`
+	UR string          `json:"uri"`
+	CR json.RawMessage `json:"creators"`
+	CP json.RawMessage `json:"copyrighters"`
 }
 
 func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -39,7 +41,7 @@ func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return form.unpack(enc, ufo.HS, ufo.UR, ufo.CP)
+	return form.unpack(enc, ufo.HS, ufo.UR, ufo.CR, ufo.CP)
 }
 
 type MintItemJSONPacker struct {
@@ -65,10 +67,10 @@ type MintItemJSONUnpacker struct {
 }
 
 func (it *BaseMintItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var utn MintItemJSONUnpacker
-	if err := jsonenc.Unmarshal(b, &utn); err != nil {
+	var uit MintItemJSONUnpacker
+	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, utn.CL, utn.FO, utn.CR)
+	return it.unpack(enc, uit.CL, uit.FO, uit.CR)
 }

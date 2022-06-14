@@ -8,16 +8,16 @@ import (
 
 func (it *DelegateItem) unpack(
 	enc encoder.Encoder,
-	bAgent base.AddressDecoder,
+	bag base.AddressDecoder,
 	mode string,
 	cid string,
 ) error {
-	agent, err := bAgent.Encode(enc)
+	agent, err := bag.Encode(enc)
 	if err != nil {
 		return err
 	}
-
 	it.agent = agent
+
 	it.mode = DelegateMode(mode)
 	it.cid = currency.CurrencyID(cid)
 

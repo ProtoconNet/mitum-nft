@@ -33,11 +33,12 @@ func (Transfer) Process(
 }
 
 type TransferItemProcessor struct {
-	cp     *extensioncurrency.CurrencyPool
-	h      valuehash.Hash
-	ns     map[nft.NFT]state.State
-	sender base.Address
-	item   TransferItem
+	cp      *extensioncurrency.CurrencyPool
+	h       valuehash.Hash
+	ns      []nft.NFT
+	nStates map[nft.NFTID]state.State
+	sender  base.Address
+	item    TransferItem
 }
 
 func (ipp *TransferItemProcessor) PreProcess(
@@ -69,17 +70,18 @@ func (ipp *TransferItemProcessor) PreProcess(
 		// check nft
 		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
 			return err
-		} else if _n, err := StateNFTValue(st); err != nil {
+		} else if nv, err := StateNFTValue(st); err != nil {
 			return err
 		} else {
-			approved = _n.Approved()
-			owner = _n.Owner()
+			approved = nv.Approved()
+			owner = nv.Owner()
 
-			n = nft.NewNFT(_n.ID(), receiver, _n.NftHash(), _n.Uri(), currency.Address{}, _n.Copyrighter())
+			n = nft.NewNFT(nv.ID(), receiver, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
 			if err := n.IsValid(nil); err != nil {
 				return err
 			}
-			ipp.ns[n] = st
+			ipp.ns = append(ipp.ns, n)
+			ipp.nStates[n.ID()] = st
 		}
 
 		// check owner
@@ -126,11 +128,13 @@ func (ipp *TransferItemProcessor) Process(
 	var states []state.State
 
 	// set nfts
-	for k, v := range ipp.ns {
-		if st, err := SetStateNFTValue(v, k); err != nil {
+	for i := range ipp.ns {
+		if st, found := ipp.nStates[ipp.ns[i].ID()]; !found {
+			return nil, errors.Errorf("wrong nft id; %q", ipp.ns[i].ID())
+		} else if stt, err := SetStateNFTValue(st, ipp.ns[i]); err != nil {
 			return nil, err
 		} else {
-			states = append(states, st)
+			states = append(states, stt)
 		}
 	}
 
@@ -141,6 +145,7 @@ func (ipp *TransferItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
 	ipp.ns = nil
+	ipp.nStates = nil
 	ipp.sender = nil
 	ipp.item = BaseTransferItem{}
 	TransferItemProcessorPool.Put(ipp)
@@ -203,7 +208,8 @@ func (opp *TransferProcessor) PreProcess(
 		c := TransferItemProcessorPool.Get().(*TransferItemProcessor)
 		c.cp = opp.cp
 		c.h = opp.Hash()
-		c.ns = map[nft.NFT]state.State{}
+		c.ns = []nft.NFT{}
+		c.nStates = map[nft.NFTID]state.State{}
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
 

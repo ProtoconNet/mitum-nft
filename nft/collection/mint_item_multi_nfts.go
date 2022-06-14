@@ -34,8 +34,8 @@ func (it MintItemMultiNFTs) IsValid([]byte) error {
 		return err
 	}
 
-	if n := len(it.forms); n > MaxNFTsMintItemMultiNFTs {
-		return isvalid.InvalidError.Errorf("forms over allowed; %d > %d", n, MaxNFTsMintItemMultiNFTs)
+	if l := len(it.forms); l > MaxNFTsMintItemMultiNFTs {
+		return isvalid.InvalidError.Errorf("forms over allowed; %d > %d", l, MaxNFTsMintItemMultiNFTs)
 	}
 
 	return nil

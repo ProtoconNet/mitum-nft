@@ -29,16 +29,16 @@ func NewBaseApproveItem(ht hint.Hint, approved base.Address, nfts []nft.NFTID, c
 }
 
 func (it BaseApproveItem) Bytes() []byte {
-	ns := make([][]byte, len(it.nfts))
+	bns := make([][]byte, len(it.nfts))
 
 	for i := range it.nfts {
-		ns[i] = it.nfts[i].Bytes()
+		bns[i] = it.nfts[i].Bytes()
 	}
 
 	return util.ConcatBytesSlice(
 		it.approved.Bytes(),
 		it.cid.Bytes(),
-		util.ConcatBytesSlice(ns...),
+		util.ConcatBytesSlice(bns...),
 	)
 }
 
@@ -51,16 +51,16 @@ func (it BaseApproveItem) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty nfts for BaseApproveItem")
 	}
 
-	foundNFT := map[string]bool{}
+	foundNFT := map[nft.NFTID]bool{}
 	for i := range it.nfts {
 		if err := it.nfts[i].IsValid(nil); err != nil {
 			return err
 		}
-		nft := it.nfts[i].String()
-		if _, found := foundNFT[nft]; found {
-			return errors.Errorf("duplicated nft found; %s", nft)
+		n := it.nfts[i]
+		if _, found := foundNFT[n]; found {
+			return errors.Errorf("duplicated nft found; %q", n)
 		}
-		foundNFT[nft] = true
+		foundNFT[n] = true
 	}
 
 	return nil
@@ -70,10 +70,10 @@ func (it BaseApproveItem) Approved() base.Address {
 	return it.approved
 }
 
-func (it BaseApproveItem) Addresses() []base.Address {
+func (it BaseApproveItem) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 1)
 	as[0] = it.approved
-	return as
+	return as, nil
 }
 
 func (it BaseApproveItem) NFTs() []nft.NFTID {

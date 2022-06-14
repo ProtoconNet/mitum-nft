@@ -17,10 +17,10 @@ type ApproveCommand struct {
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Approved AddressFlag                 `arg:"" name:"approved" help:"approved account address" required:"true"`
-	NFTs     []NFTIDFlag                 `arg:"" name:"nft" help:"target nft to approve; \"<symbol>,<idx>\""`
+	NFT      NFTIDFlag                   `arg:"" name:"nft" help:"target nft to approve; \"<symbol>,<idx>\""`
 	sender   base.Address
 	approved base.Address
-	nfts     []nft.NFTID
+	nft      nft.NFTID
 }
 
 func NewApproveCommand() ApproveCommand {
@@ -62,48 +62,34 @@ func (cmd *ApproveCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
 	if a, err := cmd.Approved.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid approved format; %q", cmd.Approved.String())
+		return errors.Wrapf(err, "invalid approved format; %q", cmd.Approved)
 	} else {
 		cmd.approved = a
 	}
 
-	if len(cmd.NFTs) < 1 {
-		return errors.Errorf("empty nfts; at least one nft is necessary")
+	n := nft.NewNFTID(cmd.NFT.collection, cmd.NFT.idx)
+	if err := n.IsValid(nil); err != nil {
+		return err
 	}
-
-	nfts := make([]nft.NFTID, len(cmd.NFTs))
-	for i := range cmd.NFTs {
-		nft := nft.NewNFTID(cmd.NFTs[i].collection, cmd.NFTs[i].idx)
-		if err := nft.IsValid(nil); err != nil {
-			return err
-		}
-		nfts[i] = nft
-	}
-	cmd.nfts = nfts
+	cmd.nft = n
 
 	return nil
 
 }
 
 func (cmd *ApproveCommand) createOperation() (operation.Operation, error) {
-	items := make([]collection.ApproveItem, 1)
-
-	if len(cmd.nfts) > 1 {
-		items[0] = collection.NewApproveItemMultiNFTs(cmd.approved, cmd.nfts, cmd.Currency.CID)
-	} else {
-		items[0] = collection.NewApproveItemSingleNFT(cmd.approved, cmd.nfts[0], cmd.Currency.CID)
-	}
+	item := collection.NewApproveItemSingleNFT(cmd.approved, cmd.nft, cmd.Currency.CID)
 
 	fact := collection.NewApproveFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		items,
+		[]collection.ApproveItem{item},
 	)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
@@ -118,5 +104,6 @@ func (cmd *ApproveCommand) createOperation() (operation.Operation, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create approve operation")
 	}
+
 	return op, nil
 }

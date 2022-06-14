@@ -1,18 +1,18 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "EUSwqepJ51wdXcumwjxxyS2npppGFAW359sHAxtqJMjV",
-    "body_hash": "7wxwLbFQmzehBRgvLaUUuLRNgYd1yAgb5L3GtchYZQR4",
+    "hash": "4iP8FGTiviyzTajZbWutQ2SEs766uYcLuxwD5GbraZVZ",
+    "body_hash": "3b2H4FNmQz2hXwPnikNYR1TBnvEHd6KhCFyNAfssS8Ab",
     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-    "signature": "381yXYob6RHzPbu2NvG5vWPKBdzTFFb8fLpg2JYJH6A9SwY339DWEyGqoKzZ6Db686E8gU1WxNhLFwkAu1ZdCnApKwciQFfr",
-    "signed_at": "2022-06-08T06:07:22.807957Z",
+    "signature": "381yXZ9pt5kZr7KJoxzfCiKfa7Gij5swZXLuA4cnbtbG976j9Q9af9RKku586bwVocY6zWgZpDxZ8ME64gQuSC8dzYGyjT39",
+    "signed_at": "2022-06-14T06:43:51.535131Z",
     "operations": [
         {
             "_hint": "mitum-nft-mint-operation-v0.0.1",
-            "hash": "HLeZv4GXVyaV43LAeRzx1QL6n1PKSikfp7APRn7pCUSx",
+            "hash": "9QG5yV45R7VfweMV85uyesJ8PDibrn97adYW4kvagYzt",
             "fact": {
                 "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
-                "hash": "EqC2DNbkmrUNpA8k1KrEMrVFSdSBhiJJaqNcSEZXZ9dg",
-                "token": "MjAyMi0wNi0wOFQwNjowNzoyMi44MDc2Nlo=",
+                "hash": "EbzEyC2PyYvvQEY37x2weSuUM6X9Jc6LJcGokcHK8zhg",
+                "token": "MjAyMi0wNi0xNFQwNjo0Mzo1MS41MzQ3NTha",
                 "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
                 "items": [
                     {
@@ -21,9 +21,10 @@
                         "forms": [
                             {
                                 "_hint": "mitum-nft-mint-form-v0.0.1",
-                                "hash": "",
+                                "hash": "laskefoweifnlwkejf",
                                 "uri": "https://localhost:5000/AAA/1",
-                                "copyrighter": ""
+                                "creators": [],
+                                "copyrighters": []
                             }
                         ],
                         "currency": "MCC"
@@ -34,8 +35,8 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-                    "signature": "AN1rKvtKfnQufKVNis3Z63FxqTBPxkQr4eNFMjvgddNTDSBQxZf9398UAUeLjS2Z8RwkYPcWRaPkYwMLFrVWvETwuY55SRpvE",
-                    "signed_at": "2022-06-08T06:07:22.807927Z"
+                    "signature": "381yXZBdx9YbB6kci81cmGZvGaYutNssbnZuqWGXXyzFNqJ7qAiarVN8iazZHYgRYpcdS4dSeQvcZG8tcC1GbK8TpZzDyXaR",
+                    "signed_at": "2022-06-14T06:43:51.535092Z"
                 }
             ],
             "memo": ""

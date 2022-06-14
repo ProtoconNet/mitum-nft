@@ -33,8 +33,8 @@ func (it MintItemSingleNFT) IsValid([]byte) error {
 		return err
 	}
 
-	if n := len(it.forms); n != 1 {
-		return isvalid.InvalidError.Errorf("only one nft allowed; %d", n)
+	if l := len(it.forms); l != 1 {
+		return isvalid.InvalidError.Errorf("only one nft allowed; %d", l)
 	}
 
 	return nil

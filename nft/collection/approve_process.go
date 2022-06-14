@@ -33,12 +33,12 @@ func (Approve) Process(
 }
 
 type ApproveItemProcessor struct {
-	cp        *extensioncurrency.CurrencyPool
-	h         valuehash.Hash
-	ns        []nft.NFT
-	nftStates map[nft.NFTID]state.State
-	sender    base.Address
-	item      ApproveItem
+	cp      *extensioncurrency.CurrencyPool
+	h       valuehash.Hash
+	ns      []nft.NFT
+	nStates map[nft.NFTID]state.State
+	sender  base.Address
+	item    ApproveItem
 }
 
 func (ipp *ApproveItemProcessor) PreProcess(
@@ -55,12 +55,12 @@ func (ipp *ApproveItemProcessor) PreProcess(
 			return err
 		}
 		if ipp.item.Approved().Equal(ipp.sender) {
-			return errors.Errorf("sender cannot be approved account itself; %q", ipp.item.Approved().String())
+			return errors.Errorf("sender cannot be approved account itself; %q", ipp.item.Approved())
 		}
 	}
 
 	var n nft.NFT
-	var nftState state.State
+	var nst state.State
 	nfts := ipp.item.NFTs()
 	for i := range nfts {
 		if err := nfts[i].IsValid(nil); err != nil {
@@ -69,11 +69,11 @@ func (ipp *ApproveItemProcessor) PreProcess(
 
 		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
 			return err
-		} else if _n, err := StateNFTValue(st); err != nil {
+		} else if nv, err := StateNFTValue(st); err != nil {
 			return err
 		} else {
-			n = _n
-			nftState = st
+			n = nv
+			nst = st
 		}
 
 		if n.Owner().String() == "" {
@@ -93,7 +93,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		}
 
 		ipp.ns = append(ipp.ns, n)
-		ipp.nftStates[n.ID()] = nftState
+		ipp.nStates[n.ID()] = nst
 	}
 
 	return nil
@@ -106,21 +106,20 @@ func (ipp *ApproveItemProcessor) Process(
 
 	var states []state.State
 
-	ns := []nft.NFT{}
 	for i := range ipp.ns {
-		n := nft.NewNFT(ipp.ns[i].ID(), ipp.ns[i].Owner(), ipp.ns[i].NftHash(), ipp.ns[i].Uri(), ipp.item.Approved(), ipp.ns[i].Copyrighter())
+		n := nft.NewNFT(
+			ipp.ns[i].ID(), ipp.ns[i].Owner(), ipp.ns[i].NftHash(),
+			ipp.ns[i].Uri(), ipp.item.Approved(), ipp.ns[i].Creators(), ipp.ns[i].Copyrighters(),
+		)
 		if err := n.IsValid(nil); err != nil {
 			return nil, err
 		}
-		ns = append(ns, n)
-	}
-	ipp.ns = ns
-
-	for i := range ipp.ns {
-		if st, err := SetStateNFTValue(ipp.nftStates[ipp.ns[i].ID()], ipp.ns[i]); err != nil {
+		if st, found := ipp.nStates[n.ID()]; !found {
+			return nil, errors.Errorf("wrong nft id; %q", n.ID())
+		} else if stt, err := SetStateNFTValue(st, n); err != nil {
 			return nil, err
 		} else {
-			states = append(states, st)
+			states = append(states, stt)
 		}
 	}
 
@@ -131,7 +130,7 @@ func (ipp *ApproveItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
 	ipp.ns = nil
-	ipp.nftStates = nil
+	ipp.nStates = nil
 	ipp.sender = nil
 	ipp.item = BaseApproveItem{}
 	ApproveItemProcessorPool.Put(ipp)
@@ -186,7 +185,7 @@ func (opp *ApproveProcessor) PreProcess(
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
 		c.ns = []nft.NFT{}
-		c.nftStates = map[nft.NFTID]state.State{}
+		c.nStates = map[nft.NFTID]state.State{}
 
 		if err := c.PreProcess(getState, setState); err != nil {
 			return nil, operation.NewBaseReasonError(err.Error())
@@ -284,7 +283,7 @@ func CalculateApproveItemsFee(cp *extensioncurrency.CurrencyPool, items []Approv
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found; %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:

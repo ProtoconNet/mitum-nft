@@ -14,18 +14,20 @@ type NFTJSONPacker struct {
 	HS NFTHash      `json:"hash"`
 	UR URI          `json:"uri"`
 	AP base.Address `json:"approved"`
-	CP base.Address `json:"copyrighter"`
+	CR []Righter    `json:"creators"`
+	CP []Righter    `json:"copyrighters"`
 }
 
-func (nft NFT) MarshalJSON() ([]byte, error) {
+func (n NFT) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(NFTJSONPacker{
-		HintedHead: jsonenc.NewHintedHead(nft.Hint()),
-		ID:         nft.id,
-		ON:         nft.owner,
-		HS:         nft.hash,
-		UR:         nft.uri,
-		AP:         nft.approved,
-		CP:         nft.copyrighter,
+		HintedHead: jsonenc.NewHintedHead(n.Hint()),
+		ID:         n.id,
+		ON:         n.owner,
+		HS:         n.hash,
+		UR:         n.uri,
+		AP:         n.approved,
+		CR:         n.creators,
+		CP:         n.copyrighters,
 	})
 }
 
@@ -35,14 +37,15 @@ type NFTJSONUnpacker struct {
 	HS string              `json:"hash"`
 	UR string              `json:"uri"`
 	AP base.AddressDecoder `json:"approved"`
-	CP base.AddressDecoder `json:"copyrighter"`
+	CR json.RawMessage     `json:"creators"`
+	CP json.RawMessage     `json:"copyrighters"`
 }
 
-func (nft *NFT) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var unft NFTJSONUnpacker
-	if err := enc.Unmarshal(b, &unft); err != nil {
+func (n *NFT) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+	var un NFTJSONUnpacker
+	if err := enc.Unmarshal(b, &un); err != nil {
 		return err
 	}
 
-	return nft.unpack(enc, unft.ID, unft.ON, unft.HS, unft.UR, unft.AP, unft.CP)
+	return n.unpack(enc, un.ID, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
 }

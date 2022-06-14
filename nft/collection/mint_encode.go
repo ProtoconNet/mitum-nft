@@ -11,33 +11,33 @@ func (fact *MintFact) unpack(
 	enc encoder.Encoder,
 	h valuehash.Hash,
 	token []byte,
-	bSender base.AddressDecoder,
-	bItems []byte,
+	bs base.AddressDecoder,
+	bits []byte,
 ) error {
-	sender, err := bSender.Encode(enc)
+	sender, err := bs.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	hits, err := enc.DecodeSlice(bItems)
+	hits, err := enc.DecodeSlice(bits)
 	if err != nil {
 		return err
 	}
 
-	its := make([]MintItem, len(hits))
+	items := make([]MintItem, len(hits))
 	for i := range hits {
-		j, ok := hits[i].(MintItem)
+		item, ok := hits[i].(MintItem)
 		if !ok {
 			return util.WrongTypeError.Errorf("not MintItem; %T", hits[i])
 		}
 
-		its[i] = j
+		items[i] = item
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.items = its
+	fact.items = items
 
 	return nil
 }

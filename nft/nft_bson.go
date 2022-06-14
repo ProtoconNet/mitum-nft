@@ -7,16 +7,17 @@ import (
 	bsonenc "github.com/spikeekips/mitum/util/encoder/bson"
 )
 
-func (nft NFT) MarshalBSON() ([]byte, error) {
+func (n NFT) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bsonenc.MergeBSONM(
-		bsonenc.NewHintedDoc(nft.Hint()),
+		bsonenc.NewHintedDoc(n.Hint()),
 		bson.M{
-			"id":          nft.id,
-			"owner":       nft.owner,
-			"hash":        nft.hash,
-			"uri":         nft.uri,
-			"approved":    nft.approved,
-			"copyrighter": nft.copyrighter,
+			"id":           n.id,
+			"owner":        n.owner,
+			"hash":         n.hash,
+			"uri":          n.uri,
+			"approved":     n.approved,
+			"creators":     n.creators,
+			"copyrighters": n.copyrighters,
 		}),
 	)
 }
@@ -27,14 +28,15 @@ type NFTBSONUnpacker struct {
 	HS string              `bson:"hash"`
 	UR string              `bson:"uri"`
 	AP base.AddressDecoder `bson:"approved"`
-	CP base.AddressDecoder `bson:"copyrighter"`
+	CR bson.Raw            `bson:"creators"`
+	CP bson.Raw            `bson:"copyrighters"`
 }
 
-func (nft *NFT) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var unft NFTBSONUnpacker
-	if err := enc.Unmarshal(b, &unft); err != nil {
+func (n *NFT) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
+	var un NFTBSONUnpacker
+	if err := enc.Unmarshal(b, &un); err != nil {
 		return err
 	}
 
-	return nft.unpack(enc, unft.ID, unft.ON, unft.HS, unft.UR, unft.AP, unft.CP)
+	return n.unpack(enc, un.ID, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
 }

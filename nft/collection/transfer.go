@@ -33,7 +33,7 @@ type TransferItem interface {
 	Bytes() []byte
 	Receiver() base.Address
 	Currency() currency.CurrencyID
-	Addresses() []base.Address
+	Addresses() ([]base.Address, error)
 	Rebuild() TransferItem
 }
 
@@ -87,17 +87,17 @@ func (fact TransferFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if n := len(fact.items); n < 1 {
+	if l := len(fact.items); l < 1 {
 		return isvalid.InvalidError.Errorf("empty items for TransferFact")
-	} else if n > int(MaxTransferItems) {
-		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", n, MaxTransferItems)
+	} else if l > int(MaxTransferItems) {
+		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", l, MaxTransferItems)
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
 		return err
 	}
 
-	foundNFT := map[string]bool{}
+	foundNFT := map[nft.NFTID]bool{}
 	for i := range fact.items {
 		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
@@ -110,12 +110,12 @@ func (fact TransferFact) IsValid(b []byte) error {
 				return err
 			}
 
-			nft := nfts[j].String()
-			if _, found := foundNFT[nft]; found {
-				return isvalid.InvalidError.Errorf("duplicated nft found; %s", nft)
+			n := nfts[j]
+			if _, found := foundNFT[n]; found {
+				return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
 			}
 
-			foundNFT[nft] = true
+			foundNFT[n] = true
 		}
 	}
 
@@ -142,7 +142,11 @@ func (fact TransferFact) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
 	for i := range fact.items {
-		as = append(as, fact.items[i].Addresses()...)
+		if ads, err := fact.items[i].Addresses(); err != nil {
+			return nil, err
+		} else {
+			as = append(as, ads...)
+		}
 	}
 
 	as = append(as, fact.Sender())

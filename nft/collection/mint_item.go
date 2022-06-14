@@ -4,8 +4,6 @@ import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
-	"github.com/pkg/errors"
-
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -21,22 +19,24 @@ var (
 
 type MintForm struct {
 	hint.BaseHinter
-	hash        nft.NFTHash
-	uri         nft.URI
-	copyrighter base.Address
+	hash         nft.NFTHash
+	uri          nft.URI
+	creators     []nft.Righter
+	copyrighters []nft.Righter
 }
 
-func NewMintForm(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
+func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.Righter, copyrighters []nft.Righter) MintForm {
 	return MintForm{
-		BaseHinter:  hint.NewBaseHinter(MintFormHint),
-		hash:        hash,
-		uri:         uri,
-		copyrighter: copyrighter,
+		BaseHinter:   hint.NewBaseHinter(MintFormHint),
+		hash:         hash,
+		uri:          uri,
+		creators:     creators,
+		copyrighters: copyrighters,
 	}
 }
 
-func MustNewMintform(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) MintForm {
-	form := NewMintForm(hash, uri, copyrighter)
+func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators []nft.Righter, copyrighters []nft.Righter) MintForm {
+	form := NewMintForm(hash, uri, creators, copyrighters)
 
 	if err := form.IsValid(nil); err != nil {
 		panic(err)
@@ -46,10 +46,22 @@ func MustNewMintform(hash nft.NFTHash, uri nft.URI, copyrighter base.Address) Mi
 }
 
 func (form MintForm) Bytes() []byte {
+	bcrs := [][]byte{}
+	bcps := [][]byte{}
+
+	for i := range form.creators {
+		bcrs = append(bcrs, form.creators[i].Bytes())
+	}
+
+	for i := range form.copyrighters {
+		bcps = append(bcps, form.copyrighters[i].Bytes())
+	}
+
 	return util.ConcatBytesSlice(
 		form.hash.Bytes(),
 		[]byte(form.uri.String()),
-		form.copyrighter.Bytes(),
+		util.ConcatBytesSlice(bcrs...),
+		util.ConcatBytesSlice(bcps...),
 	)
 }
 
@@ -61,8 +73,30 @@ func (form MintForm) Uri() nft.URI {
 	return form.uri
 }
 
-func (form MintForm) Copyrighter() base.Address {
-	return form.copyrighter
+func (form MintForm) Creators() []nft.Righter {
+	return form.creators
+}
+
+func (form MintForm) Copyrighters() []nft.Righter {
+	return form.copyrighters
+}
+
+func (form MintForm) Addresses() ([]base.Address, error) {
+	as := []base.Address{}
+
+	if len(form.creators) > 1 {
+		for i := range form.creators {
+			as = append(as, form.creators[i].Account())
+		}
+	}
+
+	if len(form.copyrighters) > 1 {
+		for i := range form.copyrighters {
+			as = append(as, form.copyrighters[i].Account())
+		}
+	}
+
+	return as, nil
 }
 
 func (form MintForm) IsValid([]byte) error {
@@ -74,8 +108,14 @@ func (form MintForm) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty uri")
 	}
 
-	if len(form.copyrighter.String()) > 0 {
-		if err := form.copyrighter.IsValid(nil); err != nil {
+	for i := range form.creators {
+		if err := form.creators[i].IsValid(nil); err != nil {
+			return err
+		}
+	}
+
+	for i := range form.copyrighters {
+		if err := form.copyrighters[i].IsValid(nil); err != nil {
 			return err
 		}
 	}
@@ -129,16 +169,10 @@ func (it BaseMintItem) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty forms for BaseMintItem")
 	}
 
-	foundHash := map[nft.NFTHash]bool{}
 	for i := range it.forms {
 		if err := it.forms[i].IsValid(nil); err != nil {
 			return err
 		}
-		h := it.forms[i].NftHash()
-		if _, found := foundHash[h]; found {
-			return errors.Errorf("duplicated nft hash found; %s", h)
-		}
-		foundHash[h] = true
 	}
 
 	return nil
@@ -148,19 +182,21 @@ func (it BaseMintItem) Collection() extensioncurrency.ContractID {
 	return it.collection
 }
 
-func (it BaseMintItem) Addresses() []base.Address {
+func (it BaseMintItem) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
 	for i := range it.forms {
-		if len(it.forms[i].Copyrighter().String()) > 0 {
-			as = append(as, it.forms[i].Copyrighter())
+		if adr, err := it.forms[i].Addresses(); err != nil {
+			return nil, err
+		} else {
+			as = append(as, adr...)
 		}
 	}
 
-	return as
+	return as, nil
 }
 
-func (it BaseMintItem) Hashes() []nft.NFTHash {
+func (it BaseMintItem) NftHashes() []nft.NFTHash {
 	hs := make([]nft.NFTHash, len(it.forms))
 
 	for i := range it.forms {

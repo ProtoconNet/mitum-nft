@@ -72,13 +72,13 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
 	if a, err := cmd.Target.Encode(jenc); err != nil {
-		return errors.Wrapf(err, "invalid target format; %q", cmd.Target.String())
+		return errors.Wrapf(err, "invalid target format; %q", cmd.Target)
 	} else {
 		cmd.target = a
 	}

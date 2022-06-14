@@ -12,13 +12,13 @@ import (
 
 func (form *CollectionRegisterForm) unpack(
 	enc encoder.Encoder,
-	bTarget base.AddressDecoder,
+	bt base.AddressDecoder,
 	symbol string,
 	name string,
 	royalty uint,
 	uri string,
 ) error {
-	target, err := bTarget.Encode(enc)
+	target, err := bt.Encode(enc)
 	if err != nil {
 		return err
 	}
@@ -36,28 +36,26 @@ func (fact *CollectionRegisterFact) unpack(
 	enc encoder.Encoder,
 	h valuehash.Hash,
 	token []byte,
-	bSender base.AddressDecoder,
-	bForm []byte,
+	bs base.AddressDecoder,
+	bf []byte,
 	cid string,
 ) error {
-	sender, err := bSender.Encode(enc)
+	sender, err := bs.Encode(enc)
 	if err != nil {
 		return err
 	}
 
-	var form CollectionRegisterForm
-	if hinter, err := enc.Decode(bForm); err != nil {
+	if hinter, err := enc.Decode(bf); err != nil {
 		return err
-	} else if i, ok := hinter.(CollectionRegisterForm); !ok {
+	} else if form, ok := hinter.(CollectionRegisterForm); !ok {
 		return util.WrongTypeError.Errorf("not CollectionRegisterForm; %T", hinter)
 	} else {
-		form = i
+		fact.form = form
 	}
 
 	fact.h = h
 	fact.token = token
 	fact.sender = sender
-	fact.form = form
 	fact.cid = currency.CurrencyID(cid)
 
 	return nil

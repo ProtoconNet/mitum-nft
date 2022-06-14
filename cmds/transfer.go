@@ -17,10 +17,10 @@ type TransferCommand struct {
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Receiver AddressFlag                 `arg:"" name:"receiver" help:"nft owner" required:"true"`
-	NFTs     []NFTIDFlag                 `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
+	NFT      NFTIDFlag                   `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
 	sender   base.Address
 	receiver base.Address
-	nfts     []nft.NFTID
+	nft      nft.NFTID
 }
 
 func NewTransferCommand() TransferCommand {
@@ -73,37 +73,23 @@ func (cmd *TransferCommand) parseFlags() error {
 		cmd.receiver = a
 	}
 
-	if len(cmd.NFTs) < 1 {
-		return errors.Errorf("empty nfts; at least one nft is necessary")
+	n := nft.NewNFTID(cmd.NFT.collection, cmd.NFT.idx)
+	if err := n.IsValid(nil); err != nil {
+		return err
 	}
-
-	nfts := make([]nft.NFTID, len(cmd.NFTs))
-	for i := range cmd.NFTs {
-		nft := nft.NewNFTID(cmd.NFTs[i].collection, cmd.NFTs[i].idx)
-		if err := nft.IsValid(nil); err != nil {
-			return err
-		}
-		nfts[i] = nft
-	}
-	cmd.nfts = nfts
+	cmd.nft = n
 
 	return nil
 
 }
 
 func (cmd *TransferCommand) createOperation() (operation.Operation, error) {
-	items := make([]collection.TransferItem, 1)
-
-	if len(cmd.nfts) > 1 {
-		items[0] = collection.NewTransferItemMultiNFTs(cmd.receiver, cmd.nfts, cmd.Currency.CID)
-	} else {
-		items[0] = collection.NewTransferItemSingleNFT(cmd.receiver, cmd.nfts[0], cmd.Currency.CID)
-	}
+	item := collection.NewTransferItemSingleNFT(cmd.receiver, cmd.nft, cmd.Currency.CID)
 
 	fact := collection.NewTransferFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		items,
+		[]collection.TransferItem{item},
 	)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())

@@ -21,7 +21,7 @@ genesis-operations:
       currencies:
         - currency: MCC
           new-account-min-balance: "33"
-          balance: "99999999999999999999"
+          balance: "9999999999999999999999999999999999999999"
           feeer:
             type: fixed
             amount: 1

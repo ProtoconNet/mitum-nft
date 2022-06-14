@@ -33,10 +33,10 @@ type BurnItemJSONUnpacker struct {
 }
 
 func (it *BaseBurnItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var utn BurnItemJSONUnpacker
-	if err := jsonenc.Unmarshal(b, &utn); err != nil {
+	var uit BurnItemJSONUnpacker
+	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, utn.CL, utn.NS, utn.CR)
+	return it.unpack(enc, uit.CL, uit.NS, uit.CR)
 }

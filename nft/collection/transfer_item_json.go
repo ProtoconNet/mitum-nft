@@ -33,10 +33,10 @@ type TransferItemJSONUnpacker struct {
 }
 
 func (it *BaseTransferItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var utn TransferItemJSONUnpacker
-	if err := jsonenc.Unmarshal(b, &utn); err != nil {
+	var uit TransferItemJSONUnpacker
+	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, utn.RC, utn.NS, utn.CR)
+	return it.unpack(enc, uit.RC, uit.NS, uit.CR)
 }

@@ -9,37 +9,35 @@ import (
 
 func (d *Design) unpack(
 	enc encoder.Encoder,
-	bParent base.AddressDecoder,
-	bCreator base.AddressDecoder,
-	_symbol string,
+	bpr base.AddressDecoder,
+	bc base.AddressDecoder,
+	symbol string,
 	active bool,
-	bPolicy []byte,
+	bpo []byte,
 ) error {
 
-	parent, err := bParent.Encode(enc)
+	parent, err := bpr.Encode(enc)
 	if err != nil {
 		return err
 	}
 	d.parent = parent
 
-	creator, err := bCreator.Encode(enc)
+	creator, err := bc.Encode(enc)
 	if err != nil {
 		return err
 	}
 	d.creator = creator
 
-	d.symbol = extensioncurrency.ContractID(_symbol)
+	d.symbol = extensioncurrency.ContractID(symbol)
 	d.active = active
 
-	var policy BasePolicy
-	if hinter, err := enc.Decode(bPolicy); err != nil {
+	if hinter, err := enc.Decode(bpo); err != nil {
 		return err
-	} else if i, ok := hinter.(BasePolicy); !ok {
+	} else if policy, ok := hinter.(BasePolicy); !ok {
 		return util.WrongTypeError.Errorf("not BasePolicy; %T", hinter)
 	} else {
-		policy = i
+		d.policy = policy
 	}
-	d.policy = policy
 
 	return nil
 }
