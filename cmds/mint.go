@@ -21,8 +21,8 @@ type MintCommand struct {
 	CSymbol     string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
 	Hash        string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri         string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Creator     RightHolerFlag              `name:"creator" help:"nft contents creator; \"<address>,<certificate>\"" optional:""`
-	Copyrighter RightHolerFlag              `name:"copyrighter" help:"nft contents copyrighter; \"<address>,<certificate>\"" optional:""`
+	Creator     RightHolderFlag             `name:"creator" help:"nft contents creator; \"<address>,<certificate>\"" optional:""`
+	Copyrighter RightHolderFlag             `name:"copyrighter" help:"nft contents copyrighter; \"<address>,<certificate>\"" optional:""`
 	sender      base.Address
 	form        collection.MintForm
 }
@@ -81,7 +81,7 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	creators := []nft.RightHoler{}
+	creators := []nft.RightHolder{}
 	if len(cmd.Creator.address) > 0 {
 		r, err := cmd.Creator.Encode(jenc)
 		if err != nil {
@@ -90,7 +90,7 @@ func (cmd *MintCommand) parseFlags() error {
 		creators = append(creators, r)
 	}
 
-	copyrighters := []nft.RightHoler{}
+	copyrighters := []nft.RightHolder{}
 	if len(cmd.Copyrighter.address) > 0 {
 		r, err := cmd.Copyrighter.Encode(jenc)
 		if err != nil {

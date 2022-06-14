@@ -5,15 +5,15 @@ import (
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
 
-type RightHolerJSONPacker struct {
+type RightHolderJSONPacker struct {
 	jsonenc.HintedHead
 	AC base.Address `json:"account"`
 	SG bool         `json:"signed"`
 	CU string       `json:"clue"`
 }
 
-func (r RightHoler) MarshalJSON() ([]byte, error) {
-	return jsonenc.Marshal(RightHolerJSONPacker{
+func (r RightHolder) MarshalJSON() ([]byte, error) {
+	return jsonenc.Marshal(RightHolderJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(r.Hint()),
 		AC:         r.account,
 		SG:         r.signed,
@@ -21,14 +21,14 @@ func (r RightHoler) MarshalJSON() ([]byte, error) {
 	})
 }
 
-type RightHolerJSONUnpacker struct {
+type RightHolderJSONUnpacker struct {
 	AC base.AddressDecoder `json:"account"`
 	SG bool                `json:"signed"`
 	CU string              `json:"clue"`
 }
 
-func (r *RightHoler) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
-	var ur RightHolerJSONUnpacker
+func (r *RightHolder) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+	var ur RightHolderJSONUnpacker
 	if err := enc.Unmarshal(b, &ur); err != nil {
 		return err
 	}

@@ -35,11 +35,11 @@ type NFT struct {
 	hash         NFTHash
 	uri          URI
 	approved     base.Address
-	creators     []RightHoler
-	copyrighters []RightHoler
+	creators     []RightHolder
+	copyrighters []RightHolder
 }
 
-func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []RightHoler, copyrighters []RightHoler) NFT {
+func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []RightHolder, copyrighters []RightHolder) NFT {
 	return NFT{
 		BaseHinter:   hint.NewBaseHinter(NFTHint),
 		id:           id,
@@ -52,7 +52,7 @@ func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.A
 	}
 }
 
-func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []RightHoler, copyrighters []RightHoler) NFT {
+func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []RightHolder, copyrighters []RightHolder) NFT {
 	n := NewNFT(id, owner, hash, uri, approved, creators, copyrighters)
 
 	if err := n.IsValid(nil); err != nil {
@@ -151,11 +151,11 @@ func (n NFT) Approved() base.Address {
 	return n.approved
 }
 
-func (n NFT) Creators() []RightHoler {
+func (n NFT) Creators() []RightHolder {
 	return n.creators
 }
 
-func (n NFT) Copyrighters() []RightHoler {
+func (n NFT) Copyrighters() []RightHolder {
 	return n.copyrighters
 }
 

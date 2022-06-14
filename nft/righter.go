@@ -8,29 +8,29 @@ import (
 )
 
 var (
-	RightHolerType   = hint.Type("mitum-nft-right-holder")
-	RightHolerHint   = hint.NewHint(RightHolerType, "v0.0.1")
-	RightHolerHinter = RightHoler{BaseHinter: hint.NewBaseHinter(RightHolerHint)}
+	RightHolderType   = hint.Type("mitum-nft-right-holder")
+	RightHolderHint   = hint.NewHint(RightHolderType, "v0.0.1")
+	RightHolderHinter = RightHolder{BaseHinter: hint.NewBaseHinter(RightHolderHint)}
 )
 
-type RightHoler struct {
+type RightHolder struct {
 	hint.BaseHinter
 	account base.Address
 	signed  bool
 	clue    string
 }
 
-func NewRightHoler(account base.Address, signed bool, clue string) RightHoler {
-	return RightHoler{
-		BaseHinter: hint.NewBaseHinter(RightHolerHint),
+func NewRightHolder(account base.Address, signed bool, clue string) RightHolder {
+	return RightHolder{
+		BaseHinter: hint.NewBaseHinter(RightHolderHint),
 		account:    account,
 		signed:     signed,
 		clue:       clue,
 	}
 }
 
-func MustNewRightHoler(account base.Address, signed bool, clue string) RightHoler {
-	r := NewRightHoler(account, signed, clue)
+func MustNewRightHolder(account base.Address, signed bool, clue string) RightHolder {
+	r := NewRightHolder(account, signed, clue)
 
 	if err := r.IsValid(nil); err != nil {
 		panic(err)
@@ -39,7 +39,7 @@ func MustNewRightHoler(account base.Address, signed bool, clue string) RightHole
 	return r
 }
 
-func (r RightHoler) Bytes() []byte {
+func (r RightHolder) Bytes() []byte {
 	bs := []byte{}
 	if r.signed {
 		bs = append(bs, 1)
@@ -54,7 +54,7 @@ func (r RightHoler) Bytes() []byte {
 	)
 }
 
-func (r RightHoler) IsValid([]byte) error {
+func (r RightHolder) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false, r.BaseHinter, r.account); err != nil {
 		return err
 	}
@@ -62,14 +62,14 @@ func (r RightHoler) IsValid([]byte) error {
 	return nil
 }
 
-func (r RightHoler) Account() base.Address {
+func (r RightHolder) Account() base.Address {
 	return r.account
 }
 
-func (r RightHoler) Signed() bool {
+func (r RightHolder) Signed() bool {
 	return r.signed
 }
 
-func (r RightHoler) Clue() string {
+func (r RightHolder) Clue() string {
 	return r.clue
 }
