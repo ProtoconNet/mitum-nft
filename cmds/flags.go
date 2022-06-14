@@ -62,22 +62,22 @@ func (v *NFTIDFlag) String() string {
 	return s
 }
 
-type RighterFlag struct {
+type RightHolerFlag struct {
 	address string
 	clue    string
 }
 
-func (v *RighterFlag) UnmarshalText(b []byte) error {
+func (v *RightHolerFlag) UnmarshalText(b []byte) error {
 	l := strings.SplitN(string(b), ",", 2)
 	if len(l) != 2 {
-		return fmt.Errorf("invalid righter; %q", string(b))
+		return fmt.Errorf("invalid right holder; %q", string(b))
 	}
 	v.address, v.clue = l[0], l[1]
 
 	return nil
 }
 
-func (v *RighterFlag) String() string {
+func (v *RightHolerFlag) String() string {
 	if len(v.address) > 0 || len(v.clue) > 0 {
 		return ""
 	}
@@ -85,15 +85,15 @@ func (v *RighterFlag) String() string {
 	return s
 }
 
-func (v *RighterFlag) Encode(enc encoder.Encoder) (nft.Righter, error) {
+func (v *RightHolerFlag) Encode(enc encoder.Encoder) (nft.RightHoler, error) {
 	account, err := base.DecodeAddressFromString(v.address, enc)
 	if err != nil {
-		return nft.Righter{}, err
+		return nft.RightHoler{}, err
 	}
 
-	r := nft.NewRighter(account, false, v.clue)
+	r := nft.NewRightHoler(account, false, v.clue)
 	if err != nil {
-		return nft.Righter{}, err
+		return nft.RightHoler{}, err
 	}
 
 	return r, nil

@@ -23,11 +23,11 @@ func (form *MintForm) unpack(
 	if err != nil {
 		return err
 	}
-	crs := make([]nft.Righter, len(hcrs))
+	crs := make([]nft.RightHoler, len(hcrs))
 	for i := range hcrs {
-		r, ok := hcrs[i].(nft.Righter)
+		r, ok := hcrs[i].(nft.RightHoler)
 		if !ok {
-			return util.WrongTypeError.Errorf("not Righter; %T", hcrs[i])
+			return util.WrongTypeError.Errorf("not RightHoler; %T", hcrs[i])
 		}
 		crs[i] = r
 	}
@@ -37,11 +37,11 @@ func (form *MintForm) unpack(
 	if err != nil {
 		return err
 	}
-	cps := make([]nft.Righter, len(hcps))
+	cps := make([]nft.RightHoler, len(hcps))
 	for i := range hcps {
-		r, ok := hcps[i].(nft.Righter)
+		r, ok := hcps[i].(nft.RightHoler)
 		if !ok {
-			return util.WrongTypeError.Errorf("not Righter; %T", hcps[i])
+			return util.WrongTypeError.Errorf("not RightHoler; %T", hcps[i])
 		}
 		cps[i] = r
 	}

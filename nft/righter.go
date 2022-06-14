@@ -8,38 +8,38 @@ import (
 )
 
 var (
-	RighterType   = hint.Type("mitum-nft-righter")
-	RighterHint   = hint.NewHint(RighterType, "v0.0.1")
-	RighterHinter = Righter{BaseHinter: hint.NewBaseHinter(RighterHint)}
+	RightHolerType   = hint.Type("mitum-nft-right-holder")
+	RightHolerHint   = hint.NewHint(RightHolerType, "v0.0.1")
+	RightHolerHinter = RightHoler{BaseHinter: hint.NewBaseHinter(RightHolerHint)}
 )
 
-type Righter struct {
+type RightHoler struct {
 	hint.BaseHinter
 	account base.Address
 	signed  bool
 	clue    string
 }
 
-func NewRighter(account base.Address, signed bool, clue string) Righter {
-	return Righter{
-		BaseHinter: hint.NewBaseHinter(RighterHint),
+func NewRightHoler(account base.Address, signed bool, clue string) RightHoler {
+	return RightHoler{
+		BaseHinter: hint.NewBaseHinter(RightHolerHint),
 		account:    account,
 		signed:     signed,
 		clue:       clue,
 	}
 }
 
-func MustNewRighter(account base.Address, signed bool, clue string) Righter {
-	righter := NewRighter(account, signed, clue)
+func MustNewRightHoler(account base.Address, signed bool, clue string) RightHoler {
+	r := NewRightHoler(account, signed, clue)
 
-	if err := righter.IsValid(nil); err != nil {
+	if err := r.IsValid(nil); err != nil {
 		panic(err)
 	}
 
-	return righter
+	return r
 }
 
-func (r Righter) Bytes() []byte {
+func (r RightHoler) Bytes() []byte {
 	bs := []byte{}
 	if r.signed {
 		bs = append(bs, 1)
@@ -54,7 +54,7 @@ func (r Righter) Bytes() []byte {
 	)
 }
 
-func (r Righter) IsValid([]byte) error {
+func (r RightHoler) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false, r.BaseHinter, r.account); err != nil {
 		return err
 	}
@@ -62,14 +62,14 @@ func (r Righter) IsValid([]byte) error {
 	return nil
 }
 
-func (r Righter) Account() base.Address {
+func (r RightHoler) Account() base.Address {
 	return r.account
 }
 
-func (r Righter) Signed() bool {
+func (r RightHoler) Signed() bool {
 	return r.signed
 }
 
-func (r Righter) Clue() string {
+func (r RightHoler) Clue() string {
 	return r.clue
 }

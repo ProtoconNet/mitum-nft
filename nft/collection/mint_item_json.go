@@ -12,10 +12,10 @@ import (
 
 type MintFormJSONPacker struct {
 	jsonenc.HintedHead
-	HS nft.NFTHash   `json:"hash"`
-	UR nft.URI       `json:"uri"`
-	CR []nft.Righter `json:"creators"`
-	CP []nft.Righter `json:"copyrighters"`
+	HS nft.NFTHash      `json:"hash"`
+	UR nft.URI          `json:"uri"`
+	CR []nft.RightHoler `json:"creators"`
+	CP []nft.RightHoler `json:"copyrighters"`
 }
 
 func (form MintForm) MarshalJSON() ([]byte, error) {

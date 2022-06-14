@@ -5,7 +5,7 @@ import (
 	"github.com/spikeekips/mitum/util/encoder"
 )
 
-func (r *Righter) unpack(
+func (r *RightHoler) unpack(
 	enc encoder.Encoder,
 	ba base.AddressDecoder,
 	signed bool,

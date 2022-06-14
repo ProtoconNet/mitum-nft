@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r Righter) MarshalBSON() ([]byte, error) {
+func (r RightHoler) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bsonenc.MergeBSONM(
 		bsonenc.NewHintedDoc(r.Hint()),
 		bson.M{
@@ -17,14 +17,14 @@ func (r Righter) MarshalBSON() ([]byte, error) {
 	)
 }
 
-type RighterBSONUnpacker struct {
+type RightHolerBSONUnpacker struct {
 	AC base.AddressDecoder `bson:"account"`
 	SG bool                `bson:"signed"`
 	CU string              `bson:"clue"`
 }
 
-func (r *Righter) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var ur RighterBSONUnpacker
+func (r *RightHoler) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
+	var ur RightHolerBSONUnpacker
 	if err := enc.Unmarshal(b, &ur); err != nil {
 		return err
 	}

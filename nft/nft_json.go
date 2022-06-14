@@ -14,8 +14,8 @@ type NFTJSONPacker struct {
 	HS NFTHash      `json:"hash"`
 	UR URI          `json:"uri"`
 	AP base.Address `json:"approved"`
-	CR []Righter    `json:"creators"`
-	CP []Righter    `json:"copyrighters"`
+	CR []RightHoler `json:"creators"`
+	CP []RightHoler `json:"copyrighters"`
 }
 
 func (n NFT) MarshalJSON() ([]byte, error) {

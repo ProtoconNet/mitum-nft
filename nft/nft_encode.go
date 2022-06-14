@@ -43,11 +43,11 @@ func (n *NFT) unpack(
 	if err != nil {
 		return err
 	}
-	crs := make([]Righter, len(hcrs))
+	crs := make([]RightHoler, len(hcrs))
 	for i := range hcrs {
-		r, ok := hcrs[i].(Righter)
+		r, ok := hcrs[i].(RightHoler)
 		if !ok {
-			return util.WrongTypeError.Errorf("not Righter; %T", hcrs[i])
+			return util.WrongTypeError.Errorf("not RightHoler; %T", hcrs[i])
 		}
 		crs[i] = r
 	}
@@ -57,11 +57,11 @@ func (n *NFT) unpack(
 	if err != nil {
 		return err
 	}
-	cps := make([]Righter, len(hcps))
+	cps := make([]RightHoler, len(hcps))
 	for i := range hcps {
-		r, ok := hcps[i].(Righter)
+		r, ok := hcps[i].(RightHoler)
 		if !ok {
-			return util.WrongTypeError.Errorf("not Righter; %T", hcps[i])
+			return util.WrongTypeError.Errorf("not RightHoler; %T", hcps[i])
 		}
 		cps[i] = r
 	}
