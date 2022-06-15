@@ -50,28 +50,21 @@ func (form *MintForm) unpack(
 	return nil
 }
 
-func (it *BaseMintItem) unpack(
+func (it *MintItem) unpack(
 	enc encoder.Encoder,
 	collection string,
-	bfs []byte,
+	bf []byte,
 	cid string,
 ) error {
 	it.collection = extensioncurrency.ContractID(collection)
 
-	hfs, err := enc.DecodeSlice(bfs)
-	if err != nil {
+	if hinter, err := enc.Decode(bf); err != nil {
 		return err
+	} else if form, ok := hinter.(MintForm); !ok {
+		return util.WrongTypeError.Errorf("not MintForm; %T", hinter)
+	} else {
+		it.form = form
 	}
-
-	forms := make([]MintForm, len(hfs))
-	for i := range hfs {
-		form, ok := hfs[i].(MintForm)
-		if !ok {
-			return util.WrongTypeError.Errorf("not MintForm; %T", hfs[i])
-		}
-		forms[i] = form
-	}
-	it.forms = forms
 
 	it.cid = currency.CurrencyID(cid)
 

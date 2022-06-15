@@ -33,12 +33,12 @@ func (Transfer) Process(
 }
 
 type TransferItemProcessor struct {
-	cp      *extensioncurrency.CurrencyPool
-	h       valuehash.Hash
-	ns      []nft.NFT
-	nStates map[nft.NFTID]state.State
-	sender  base.Address
-	item    TransferItem
+	cp     *extensioncurrency.CurrencyPool
+	h      valuehash.Hash
+	nft    nft.NFT
+	nst    state.State
+	sender base.Address
+	item   TransferItem
 }
 
 func (ipp *TransferItemProcessor) PreProcess(
@@ -59,61 +59,58 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return errors.Errorf("contract account cannot receive nfts; %q", receiver)
 	}
 
-	nfts := ipp.item.NFTs()
-	for i := range nfts {
-		var n nft.NFT
-		var (
-			approved base.Address
-			owner    base.Address
-		)
+	nid := ipp.item.NFT()
+	if st, err := existsState(StateKeyCollection(nid.Collection()), "design", getState); err != nil {
+		return errors.Errorf("%v; %q", err.Error(), nid.Collection())
+	} else if design, err := StateCollectionValue(st); err != nil {
+		return err
+	} else if !design.Active() {
+		return errors.Errorf("dead collection; %q", design.Symbol())
+	}
 
-		// check nft
-		if st, err := existsState(StateKeyNFT(nfts[i]), "nft", getState); err != nil {
-			return err
-		} else if nv, err := StateNFTValue(st); err != nil {
-			return err
-		} else {
-			approved = nv.Approved()
-			owner = nv.Owner()
+	var (
+		approved base.Address
+		owner    base.Address
+	)
 
-			n = nft.NewNFT(nv.ID(), receiver, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
-			if err := n.IsValid(nil); err != nil {
-				return err
-			}
-			ipp.ns = append(ipp.ns, n)
-			ipp.nStates[n.ID()] = st
-		}
+	// check nft
+	if st, err := existsState(StateKeyNFT(nid), "nft", getState); err != nil {
+		return err
+	} else if nv, err := StateNFTValue(st); err != nil {
+		return err
+	} else {
+		approved = nv.Approved()
+		owner = nv.Owner()
 
-		// check owner
-		if owner.String() == "" {
-			return errors.Errorf("dead nft; %q", n.ID())
-		}
-		if err := checkExistsState(currency.StateKeyAccount(owner), getState); err != nil {
-			return err
-		}
-		if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(owner), getState); err != nil {
+		n := nft.NewNFT(nid, receiver, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
+		if err := n.IsValid(nil); err != nil {
 			return err
 		}
 
-		// check collection
-		if st, err := existsState(StateKeyCollection(n.ID().Collection()), "design", getState); err != nil {
-			return errors.Errorf("%v; %q", err.Error(), n.ID().Collection())
-		} else if design, err := StateCollectionValue(st); err != nil {
-			return err
-		} else if !design.Active() {
-			return errors.Errorf("dead collection; %q", design.Symbol())
-		}
+		ipp.nft = n
+		ipp.nst = st
+	}
 
-		// check authorization
-		if !(owner.Equal(ipp.sender) || approved.Equal(ipp.sender)) {
-			// check agent
-			if st, err := existsState(StateKeyAgents(owner), "agents", getState); err != nil {
-				return errors.Errorf("unauthorized sender; %q", ipp.sender)
-			} else if box, err := StateAgentsValue(st); err != nil {
-				return err
-			} else if !box.Exists(ipp.sender) {
-				return errors.Errorf("unauthorized sender; %q", ipp.sender)
-			}
+	// check owner
+	if owner.String() == "" {
+		return errors.Errorf("dead nft; %q", nid)
+	}
+	if err := checkExistsState(currency.StateKeyAccount(owner), getState); err != nil {
+		return err
+	}
+	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(owner), getState); err != nil {
+		return err
+	}
+
+	// check authorization
+	if !(owner.Equal(ipp.sender) || approved.Equal(ipp.sender)) {
+		// check agent
+		if st, err := existsState(StateKeyAgents(owner), "agents", getState); err != nil {
+			return errors.Errorf("unauthorized sender; %q", ipp.sender)
+		} else if box, err := StateAgentsValue(st); err != nil {
+			return err
+		} else if !box.Exists(ipp.sender) {
+			return errors.Errorf("unauthorized sender; %q", ipp.sender)
 		}
 	}
 
@@ -127,15 +124,10 @@ func (ipp *TransferItemProcessor) Process(
 
 	var states []state.State
 
-	// set nfts
-	for i := range ipp.ns {
-		if st, found := ipp.nStates[ipp.ns[i].ID()]; !found {
-			return nil, errors.Errorf("wrong nft id; %q", ipp.ns[i].ID())
-		} else if stt, err := SetStateNFTValue(st, ipp.ns[i]); err != nil {
-			return nil, err
-		} else {
-			states = append(states, stt)
-		}
+	if st, err := SetStateNFTValue(ipp.nst, ipp.nft); err != nil {
+		return nil, err
+	} else {
+		states = append(states, st)
 	}
 
 	return states, nil
@@ -144,10 +136,10 @@ func (ipp *TransferItemProcessor) Process(
 func (ipp *TransferItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
-	ipp.ns = nil
-	ipp.nStates = nil
+	ipp.nft = nft.NFT{}
+	ipp.nst = nil
 	ipp.sender = nil
-	ipp.item = BaseTransferItem{}
+	ipp.item = TransferItem{}
 	TransferItemProcessorPool.Put(ipp)
 
 	return nil
@@ -208,8 +200,8 @@ func (opp *TransferProcessor) PreProcess(
 		c := TransferItemProcessorPool.Get().(*TransferItemProcessor)
 		c.cp = opp.cp
 		c.h = opp.Hash()
-		c.ns = []nft.NFT{}
-		c.nStates = map[nft.NFTID]state.State{}
+		c.nft = nft.NFT{}
+		c.nst = nil
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
 

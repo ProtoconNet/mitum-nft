@@ -84,7 +84,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 }
 
 func (cmd *ApproveCommand) createOperation() (operation.Operation, error) {
-	item := collection.NewApproveItemSingleNFT(cmd.approved, cmd.nft, cmd.Currency.CID)
+	item := collection.NewApproveItem(cmd.approved, cmd.nft, cmd.Currency.CID)
 
 	fact := collection.NewApproveFact(
 		[]byte(cmd.Token),

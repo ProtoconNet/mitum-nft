@@ -39,8 +39,8 @@ type MintItemProcessor struct {
 	idx      uint64
 	boxState state.State
 	box      NFTBox
-	nStates  map[nft.NFTID]state.State
-	ns       []nft.NFT
+	nft      nft.NFT
+	nst      state.State
 	sender   base.Address
 	item     MintItem
 }
@@ -63,14 +63,13 @@ func (ipp *MintItemProcessor) PreProcess(
 		return errors.Errorf("sender must be collection creator; creator: %q", design.Creator().String())
 	}
 
-	ipp.idx = uint64(0)
 	if st, err := existsState(StateKeyCollectionLastIDX(ipp.item.Collection()), "collection idx", getState); err != nil {
 		return err
 	} else if idx, err := StateCollectionLastIDXValue(st); err != nil {
 		return err
 	} else {
 		ipp.idxState = st
-		ipp.idx = idx
+		ipp.idx = idx + 1
 	}
 
 	switch st, found, err := getState(StateKeyNFTs(ipp.item.Collection())); {
@@ -88,51 +87,42 @@ func (ipp *MintItemProcessor) PreProcess(
 		ipp.boxState = st
 	}
 
-	var id nft.NFTID
-	var n nft.NFT
-	forms := ipp.item.Forms()
-	for i := range forms {
-
-		if err := forms[i].IsValid(nil); err != nil {
-			return err
-		}
-
-		ipp.idx += 1
-		id = nft.NewNFTID(ipp.item.Collection(), ipp.idx)
-		if err := id.IsValid(nil); err != nil {
-			return err
-		}
-
-		if st, err := notExistsState(StateKeyNFT(id), "nft", getState); err != nil {
-			return err
-		} else {
-			ipp.nStates[id] = st
-		}
-
-		for j := range forms[i].Creators() {
-			creator := forms[i].Creators()[j].Account()
-			if err := checkExistsState(currency.StateKeyAccount(creator), getState); err != nil {
-				return err
-			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
-				return errors.Errorf("contract account cannot be a creator; %q", creator)
-			}
-		}
-
-		for j := range forms[i].Copyrighters() {
-			copyrighter := forms[i].Copyrighters()[j].Account()
-			if err := checkExistsState(currency.StateKeyAccount(copyrighter), getState); err != nil {
-				return err
-			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
-				return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
-			}
-		}
-
-		n = nft.NewNFT(id, ipp.sender, forms[i].NftHash(), forms[i].Uri(), currency.Address{}, forms[i].Creators(), forms[i].Copyrighters())
-		if err := n.IsValid(nil); err != nil {
-			return operation.NewBaseReasonError(err.Error())
-		}
-		ipp.ns = append(ipp.ns, n)
+	id := nft.NewNFTID(ipp.item.Collection(), ipp.idx)
+	if err := id.IsValid(nil); err != nil {
+		return err
 	}
+
+	if st, err := notExistsState(StateKeyNFT(id), "nft", getState); err != nil {
+		return err
+	} else {
+		ipp.nst = st
+	}
+
+	form := ipp.item.Form()
+	for j := range form.Creators() {
+		creator := form.Creators()[j].Account()
+		if err := checkExistsState(currency.StateKeyAccount(creator), getState); err != nil {
+			return err
+		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
+			return errors.Errorf("contract account cannot be a creator; %q", creator)
+		}
+	}
+
+	for j := range form.Copyrighters() {
+		copyrighter := form.Copyrighters()[j].Account()
+		if err := checkExistsState(currency.StateKeyAccount(copyrighter), getState); err != nil {
+			return err
+		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
+			return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
+		}
+	}
+
+	n := nft.NewNFT(id, ipp.sender, form.NftHash(), form.Uri(), currency.Address{}, form.Creators(), form.Copyrighters())
+	if err := n.IsValid(nil); err != nil {
+		return operation.NewBaseReasonError(err.Error())
+	}
+	ipp.nft = n
+
 	return nil
 }
 
@@ -149,16 +139,14 @@ func (ipp *MintItemProcessor) Process(
 		states = append(states, st)
 	}
 
-	for i := range ipp.ns {
-		if err := ipp.box.Append(ipp.ns[i].ID()); err != nil {
-			return nil, err
-		}
+	if err := ipp.box.Append(ipp.nft.ID()); err != nil {
+		return nil, err
+	}
 
-		if st, err := SetStateNFTValue(ipp.nStates[ipp.ns[i].ID()], ipp.ns[i]); err != nil {
-			return nil, err
-		} else {
-			states = append(states, st)
-		}
+	if st, err := SetStateNFTValue(ipp.nst, ipp.nft); err != nil {
+		return nil, err
+	} else {
+		states = append(states, st)
 	}
 
 	if st, err := SetStateNFTsValue(ipp.boxState, ipp.box); err != nil {
@@ -177,10 +165,10 @@ func (ipp *MintItemProcessor) Close() error {
 	ipp.idx = 0
 	ipp.boxState = nil
 	ipp.box = NFTBox{}
-	ipp.nStates = nil
-	ipp.ns = nil
+	ipp.nft = nft.NFT{}
+	ipp.nst = nil
 	ipp.sender = nil
-	ipp.item = BaseMintItem{}
+	ipp.item = MintItem{}
 	MintItemProcessorPool.Put(ipp)
 
 	return nil
@@ -245,8 +233,8 @@ func (opp *MintProcessor) PreProcess(
 		c.idx = 0
 		c.boxState = nil
 		c.box = NFTBox{}
-		c.ns = []nft.NFT{}
-		c.nStates = map[nft.NFTID]state.State{}
+		c.nft = nft.NFT{}
+		c.nst = nil
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
 

@@ -9,34 +9,26 @@ import (
 	"github.com/spikeekips/mitum/util/encoder"
 )
 
-func (it *BaseApproveItem) unpack(
+func (it *ApproveItem) unpack(
 	enc encoder.Encoder,
 	bap base.AddressDecoder,
-	bns []byte,
+	bn []byte,
 	cid string,
 ) error {
 	approved, err := bap.Encode(enc)
 	if err != nil {
 		return err
 	}
-
-	hns, err := enc.DecodeSlice(bns)
-	if err != nil {
-		return err
-	}
-
-	nfts := make([]nft.NFTID, len(hns))
-	for i := range hns {
-		n, ok := hns[i].(nft.NFTID)
-		if !ok {
-			return util.WrongTypeError.Errorf("not NFTID; %T", hns[i])
-		}
-
-		nfts[i] = n
-	}
-
 	it.approved = approved
-	it.nfts = nfts
+
+	if hinter, err := enc.Decode(bn); err != nil {
+		return err
+	} else if n, ok := hinter.(nft.NFTID); !ok {
+		return util.WrongTypeError.Errorf("not NFTID; %T", hinter)
+	} else {
+		it.nft = n
+	}
+
 	it.cid = currency.CurrencyID(cid)
 
 	return nil

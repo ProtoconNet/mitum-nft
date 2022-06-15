@@ -12,17 +12,6 @@ import (
 
 var MaxApproveItems = 10
 
-type ApproveItem interface {
-	hint.Hinter
-	isvalid.IsValider
-	NFTsItem
-	Bytes() []byte
-	Approved() base.Address
-	Addresses() ([]base.Address, error)
-	Currency() currency.CurrencyID
-	Rebuild() ApproveItem
-}
-
 var (
 	ApproveFactType   = hint.Type("mitum-nft-approve-operation-fact")
 	ApproveFactHint   = hint.NewHint(ApproveFactType, "v0.0.1")
@@ -98,20 +87,16 @@ func (fact ApproveFact) IsValid(b []byte) error {
 			return err
 		}
 
-		nfts := fact.items[i].NFTs()
-
-		for j := range nfts {
-			if err := nfts[j].IsValid(nil); err != nil {
-				return err
-			}
-
-			n := nfts[j]
-			if _, found := foundNFT[n]; found {
-				return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
-			}
-
-			foundNFT[n] = true
+		n := fact.items[i].NFT()
+		if err := n.IsValid(nil); err != nil {
+			return err
 		}
+
+		if _, found := foundNFT[n]; found {
+			return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
+		}
+
+		foundNFT[n] = true
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {
@@ -129,11 +114,15 @@ func (fact ApproveFact) Sender() base.Address {
 	return fact.sender
 }
 
+func (fact ApproveFact) Items() []ApproveItem {
+	return fact.items
+}
+
 func (fact ApproveFact) NFTs() []nft.NFTID {
-	ns := []nft.NFTID{}
+	ns := make([]nft.NFTID, len(fact.items))
 
 	for i := range fact.items {
-		ns = append(ns, fact.items[i].NFTs()...)
+		ns[i] = fact.items[i].NFT()
 	}
 
 	return ns

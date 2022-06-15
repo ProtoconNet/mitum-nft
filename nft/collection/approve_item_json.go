@@ -13,30 +13,30 @@ import (
 type ApproveItemJSONPacker struct {
 	jsonenc.HintedHead
 	AP base.Address        `json:"approved"`
-	NS []nft.NFTID         `json:"nfts"`
+	NF nft.NFTID           `json:"nft"`
 	CR currency.CurrencyID `json:"currency"`
 }
 
-func (it BaseApproveItem) MarshalJSON() ([]byte, error) {
+func (it ApproveItem) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(ApproveItemJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(it.Hint()),
 		AP:         it.approved,
-		NS:         it.nfts,
+		NF:         it.nft,
 		CR:         it.cid,
 	})
 }
 
 type ApproveItemJSONUnpacker struct {
 	AP base.AddressDecoder `json:"approved"`
-	NS json.RawMessage     `json:"nfts"`
+	NF json.RawMessage     `json:"nft"`
 	CR string              `json:"currency"`
 }
 
-func (it *BaseApproveItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+func (it *ApproveItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 	var uit ApproveItemJSONUnpacker
 	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, uit.AP, uit.NS, uit.CR)
+	return it.unpack(enc, uit.AP, uit.NF, uit.CR)
 }

@@ -3,8 +3,6 @@ package collection
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 
-	"github.com/pkg/errors"
-
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -12,84 +10,66 @@ import (
 	"github.com/spikeekips/mitum/util/isvalid"
 )
 
-type BaseApproveItem struct {
+var (
+	ApproveItemType   = hint.Type("mitum-nft-approve-item")
+	ApproveItemHint   = hint.NewHint(ApproveItemType, "v0.0.1")
+	ApproveItemHinter = ApproveItem{BaseHinter: hint.NewBaseHinter(ApproveItemHint)}
+)
+
+type ApproveItem struct {
 	hint.BaseHinter
 	approved base.Address
-	nfts     []nft.NFTID
+	nft      nft.NFTID
 	cid      currency.CurrencyID
 }
 
-func NewBaseApproveItem(ht hint.Hint, approved base.Address, nfts []nft.NFTID, cid currency.CurrencyID) BaseApproveItem {
-	return BaseApproveItem{
-		BaseHinter: hint.NewBaseHinter(ht),
+func NewApproveItem(approved base.Address, n nft.NFTID, cid currency.CurrencyID) ApproveItem {
+	return ApproveItem{
+		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		approved:   approved,
-		nfts:       nfts,
+		nft:        n,
 		cid:        cid,
 	}
 }
 
-func (it BaseApproveItem) Bytes() []byte {
-	bns := make([][]byte, len(it.nfts))
-
-	for i := range it.nfts {
-		bns[i] = it.nfts[i].Bytes()
-	}
-
+func (it ApproveItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.approved.Bytes(),
+		it.nft.Bytes(),
 		it.cid.Bytes(),
-		util.ConcatBytesSlice(bns...),
 	)
 }
 
-func (it BaseApproveItem) IsValid([]byte) error {
-	if err := isvalid.Check(nil, false, it.BaseHinter, it.approved, it.cid); err != nil {
+func (it ApproveItem) IsValid([]byte) error {
+	if err := isvalid.Check(
+		nil, false,
+		it.BaseHinter,
+		it.approved,
+		it.nft,
+		it.cid); err != nil {
 		return err
 	}
-
-	if len(it.nfts) < 1 {
-		return isvalid.InvalidError.Errorf("empty nfts for BaseApproveItem")
-	}
-
-	foundNFT := map[nft.NFTID]bool{}
-	for i := range it.nfts {
-		if err := it.nfts[i].IsValid(nil); err != nil {
-			return err
-		}
-		n := it.nfts[i]
-		if _, found := foundNFT[n]; found {
-			return errors.Errorf("duplicated nft found; %q", n)
-		}
-		foundNFT[n] = true
-	}
-
 	return nil
 }
 
-func (it BaseApproveItem) Approved() base.Address {
+func (it ApproveItem) Approved() base.Address {
 	return it.approved
 }
 
-func (it BaseApproveItem) Addresses() ([]base.Address, error) {
+func (it ApproveItem) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 1)
 	as[0] = it.approved
 	return as, nil
 }
 
-func (it BaseApproveItem) NFTs() []nft.NFTID {
-	return it.nfts
+func (it ApproveItem) NFT() nft.NFTID {
+	return it.nft
 }
 
-func (it BaseApproveItem) Currency() currency.CurrencyID {
+func (it ApproveItem) Currency() currency.CurrencyID {
 	return it.cid
 }
 
-func (it BaseApproveItem) Rebuild() ApproveItem {
-	nfts := make([]nft.NFTID, len(it.nfts))
-	for i := range it.nfts {
-		nfts[i] = it.nfts[i]
-	}
-	it.nfts = nfts
-
+func (it ApproveItem) Rebuild() ApproveItem {
 	return it
 }

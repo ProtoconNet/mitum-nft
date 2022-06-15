@@ -1,30 +1,28 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "9WVQs6cSXTdfgtUBzMQeLt3QuU3FzqVeLmHnTN6bQ7JW",
-    "body_hash": "2LSjPTr33XK968N8FPsRxSBBLUHamGcAQcQxYmCWhrRy",
+    "hash": "ZUgh4Nrg5YwXuhfreaKnbbkpwvwMn9qow4DccZ5p4yW",
+    "body_hash": "EV8NWC7fzHFnXg2wz7fx3djPoJFxC42kUhijXs4odMdL",
     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-    "signature": "AN1rKvtEVonQAmUJDvbBJFayFRvW64F3ZGtfN6CNw42AZFLfVuRf1yEk2Z4TWwF64NEPQGRXm7CecxBurV51xS6dLhzMVGwdp",
-    "signed_at": "2022-06-08T05:37:41.151293Z",
+    "signature": "381yXZM6vLyeirzEJgJyY2Cn4cJHX6JuWxvHJJCBKxZuA8X6RNAhAEnNcbByKrxsfi77vGL3Jp1JaE6Ks8YFP3eY6ARjqudr",
+    "signed_at": "2022-06-15T05:06:20.348871Z",
     "operations": [
         {
             "_hint": "mitum-nft-transfer-operation-v0.0.1",
-            "hash": "EqDMuNPUsbaFVfF1nk15wPmt8DfiJE65QjkbekdbrsiL",
+            "hash": "6QuceLxR7BWbc76M79D8xq1qAcJTkY6sDcUXCravdnoa",
             "fact": {
                 "_hint": "mitum-nft-tranfer-operation-fact-v0.0.1",
-                "hash": "CYq9Ggy9gcyow7kxEGHLdpjz3irovxscfsvvufPK9XjG",
-                "token": "MjAyMi0wNi0wOFQwNTozNzo0MS4xNTA5ODla",
+                "hash": "AWDMGnETMUV3pSHTiPWMQTwbg5M5Z1ytR6FTzipkWRn2",
+                "token": "MjAyMi0wNi0xNVQwNTowNjoyMC4zNDg2Wg==",
                 "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
                 "items": [
                     {
-                        "_hint": "mitum-nft-tranfer-single-nft-v0.0.1",
+                        "_hint": "mitum-nft-transfer-item-v0.0.1",
                         "receiver": "9MBW3xRBbkPSa5JVv2kMgnsXvGj9scSupZcSZ99cNPbwmca",
-                        "nfts": [
-                            {
-                                "_hint": "mitum-nft-nft-id-v0.0.1",
-                                "collection": "AAA",
-                                "idx": 2
-                            }
-                        ],
+                        "nft": {
+                            "_hint": "mitum-nft-nft-id-v0.0.1",
+                            "collection": "AAA",
+                            "idx": 2
+                        },
                         "currency": "MCC"
                     }
                 ]
@@ -33,8 +31,8 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-                    "signature": "AN1rKvtnpNmzTHGZJm8qFf14knDqYHmA8JNyretsiMFaoDfjZ6bbm3NEFh3TD52UPBksy9eCdYhQ9fgRv6UP1R3qxaWUPJX3m",
-                    "signed_at": "2022-06-08T05:37:41.151266Z"
+                    "signature": "381yXYzeGjP2EAs1nyEDqCjy9DWaH4EaK742JKjfXk1tyshmdZy2UgmbRXp58m7ewH3azDqzf4zL9BrDeyqSKQKXtU8ifGaF",
+                    "signed_at": "2022-06-15T05:06:20.348838Z"
                 }
             ],
             "memo": ""

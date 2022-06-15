@@ -118,8 +118,7 @@ func (cmd *MintCommand) parseFlags() error {
 }
 
 func (cmd *MintCommand) createOperation() (operation.Operation, error) {
-	item := collection.NewMintItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
-
+	item := collection.NewMintItem(extensioncurrency.ContractID(cmd.CSymbol), cmd.form, cmd.Currency.CID)
 	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())

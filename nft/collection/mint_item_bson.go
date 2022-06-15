@@ -33,25 +33,25 @@ func (form *MintForm) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 	return form.unpack(enc, ufo.HS, ufo.UR, ufo.CR, ufo.CP)
 }
 
-func (it BaseMintItem) MarshalBSON() ([]byte, error) {
+func (it MintItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(it.Hint()),
 			bson.M{
 				"collection": it.collection,
-				"forms":      it.forms,
+				"form":       it.form,
 				"currency":   it.cid,
 			}),
 	)
 }
 
-type BaseMintItemBSONUnpacker struct {
+type MintItemBSONUnpacker struct {
 	CL string   `bson:"collection"`
-	FO bson.Raw `bson:"forms"`
+	FO bson.Raw `bson:"form"`
 	CR string   `bson:"currency"`
 }
 
-func (it *BaseMintItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var uit BaseMintItemBSONUnpacker
+func (it *MintItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
+	var uit MintItemBSONUnpacker
 	if err := enc.Unmarshal(b, &uit); err != nil {
 		return err
 	}

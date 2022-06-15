@@ -130,96 +130,60 @@ func (form MintForm) IsValid([]byte) error {
 	return nil
 }
 
-type BaseMintItem struct {
+var (
+	MintItemType   = hint.Type("mitum-nft-mint-item")
+	MintItemHint   = hint.NewHint(MintItemType, "v0.0.1")
+	MintItemHinter = MintItem{BaseHinter: hint.NewBaseHinter(MintItemHint)}
+)
+
+type MintItem struct {
 	hint.BaseHinter
 	collection extensioncurrency.ContractID
-	forms      []MintForm
+	form       MintForm
 	cid        currency.CurrencyID
 }
 
-func NewBaseMintItem(ht hint.Hint, collection extensioncurrency.ContractID, forms []MintForm, cid currency.CurrencyID) BaseMintItem {
-	return BaseMintItem{
-		BaseHinter: hint.NewBaseHinter(ht),
+func NewMintItem(collection extensioncurrency.ContractID, form MintForm, cid currency.CurrencyID) MintItem {
+	return MintItem{
+		BaseHinter: hint.NewBaseHinter(MintItemHint),
 		collection: collection,
-		forms:      forms,
+		form:       form,
 		cid:        cid,
 	}
 }
 
-func (it BaseMintItem) Bytes() []byte {
-	bf := make([][]byte, len(it.forms))
-
-	for i := range it.forms {
-		bf[i] = it.forms[i].Bytes()
-	}
-
+func (it MintItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.collection.Bytes(),
+		it.form.Bytes(),
 		it.cid.Bytes(),
-		util.ConcatBytesSlice(bf...),
 	)
 }
 
-func (it BaseMintItem) IsValid([]byte) error {
-	if err := isvalid.Check(nil, false, it.BaseHinter, it.collection, it.cid); err != nil {
+func (it MintItem) IsValid([]byte) error {
+	if err := isvalid.Check(nil, false, it.BaseHinter, it.collection, it.form, it.cid); err != nil {
 		return err
-	}
-
-	if len(it.forms) < 1 {
-		return isvalid.InvalidError.Errorf("empty forms for BaseMintItem")
-	}
-
-	for i := range it.forms {
-		if err := it.forms[i].IsValid(nil); err != nil {
-			return err
-		}
 	}
 
 	return nil
 }
 
-func (it BaseMintItem) Collection() extensioncurrency.ContractID {
+func (it MintItem) Collection() extensioncurrency.ContractID {
 	return it.collection
 }
 
-func (it BaseMintItem) Addresses() ([]base.Address, error) {
-	as := []base.Address{}
-
-	for i := range it.forms {
-		if adr, err := it.forms[i].Addresses(); err != nil {
-			return nil, err
-		} else {
-			as = append(as, adr...)
-		}
-	}
-
-	return as, nil
+func (it MintItem) Addresses() ([]base.Address, error) {
+	return it.form.Addresses()
 }
 
-func (it BaseMintItem) NftHashes() []nft.NFTHash {
-	hs := make([]nft.NFTHash, len(it.forms))
-
-	for i := range it.forms {
-		hs[i] = it.forms[i].NftHash()
-	}
-
-	return hs
+func (it MintItem) Form() MintForm {
+	return it.form
 }
 
-func (it BaseMintItem) Forms() []MintForm {
-	return it.forms
-}
-
-func (it BaseMintItem) Currency() currency.CurrencyID {
+func (it MintItem) Currency() currency.CurrencyID {
 	return it.cid
 }
 
-func (it BaseMintItem) Rebuild() MintItem {
-	forms := make([]MintForm, len(it.forms))
-	for i := range it.forms {
-		forms[i] = it.forms[i]
-	}
-	it.forms = forms
-
+func (it MintItem) Rebuild() MintItem {
 	return it
 }

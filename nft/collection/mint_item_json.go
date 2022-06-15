@@ -47,26 +47,26 @@ func (form *MintForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 type MintItemJSONPacker struct {
 	jsonenc.HintedHead
 	CL extensioncurrency.ContractID `json:"collection"`
-	FO []MintForm                   `json:"forms"`
+	FO MintForm                     `json:"form"`
 	CR currency.CurrencyID          `json:"currency"`
 }
 
-func (it BaseMintItem) MarshalJSON() ([]byte, error) {
+func (it MintItem) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(MintItemJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(it.Hint()),
 		CL:         it.collection,
-		FO:         it.forms,
+		FO:         it.form,
 		CR:         it.cid,
 	})
 }
 
 type MintItemJSONUnpacker struct {
 	CL string          `json:"collection"`
-	FO json.RawMessage `json:"forms"`
+	FO json.RawMessage `json:"form"`
 	CR string          `json:"currency"`
 }
 
-func (it *BaseMintItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+func (it *MintItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 	var uit MintItemJSONUnpacker
 	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err

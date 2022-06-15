@@ -2,7 +2,6 @@ package collection
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -13,18 +12,6 @@ import (
 )
 
 var MaxMintItems uint = 10
-
-type MintItem interface {
-	hint.Hinter
-	isvalid.IsValider
-	Bytes() []byte
-	Collection() extensioncurrency.ContractID
-	Currency() currency.CurrencyID
-	Forms() []MintForm
-	NftHashes() []nft.NFTHash
-	Addresses() ([]base.Address, error)
-	Rebuild() MintItem
-}
 
 var (
 	MintFactType   = hint.Type("mitum-nft-mint-operation-fact")

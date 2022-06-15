@@ -22,21 +22,6 @@ var (
 
 var MaxTransferItems uint = 10
 
-type NFTsItem interface {
-	NFTs() []nft.NFTID
-}
-
-type TransferItem interface {
-	hint.Hinter
-	isvalid.IsValider
-	NFTsItem
-	Bytes() []byte
-	Receiver() base.Address
-	Currency() currency.CurrencyID
-	Addresses() ([]base.Address, error)
-	Rebuild() TransferItem
-}
-
 type TransferFact struct {
 	hint.BaseHinter
 	h      valuehash.Hash
@@ -103,20 +88,16 @@ func (fact TransferFact) IsValid(b []byte) error {
 			return err
 		}
 
-		nfts := fact.items[i].NFTs()
-
-		for j := range nfts {
-			if err := nfts[j].IsValid(nil); err != nil {
-				return err
-			}
-
-			n := nfts[j]
-			if _, found := foundNFT[n]; found {
-				return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
-			}
-
-			foundNFT[n] = true
+		n := fact.items[i].NFT()
+		if err := n.IsValid(nil); err != nil {
+			return err
 		}
+
+		if _, found := foundNFT[n]; found {
+			return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
+		}
+
+		foundNFT[n] = true
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {

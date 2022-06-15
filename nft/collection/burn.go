@@ -1,7 +1,6 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/spikeekips/mitum-currency/currency"
@@ -22,16 +21,6 @@ var (
 )
 
 var MaxBurnItems uint = 10
-
-type BurnItem interface {
-	hint.Hinter
-	isvalid.IsValider
-	NFTsItem
-	Bytes() []byte
-	Collection() extensioncurrency.ContractID
-	Currency() currency.CurrencyID
-	Rebuild() BurnItem
-}
 
 type BurnFact struct {
 	hint.BaseHinter
@@ -99,20 +88,16 @@ func (fact BurnFact) IsValid(b []byte) error {
 			return err
 		}
 
-		nfts := fact.items[i].NFTs()
-
-		for j := range nfts {
-			if err := nfts[j].IsValid(nil); err != nil {
-				return err
-			}
-
-			n := nfts[j]
-			if _, found := foundNFT[n]; found {
-				return isvalid.InvalidError.Errorf("duplicated nft found; %s", n)
-			}
-
-			foundNFT[n] = true
+		n := fact.items[i].NFT()
+		if err := n.IsValid(nil); err != nil {
+			return err
 		}
+
+		if _, found := foundNFT[n]; found {
+			return isvalid.InvalidError.Errorf("duplicated nft found; %s", n)
+		}
+
+		foundNFT[n] = true
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {
@@ -132,6 +117,16 @@ func (fact BurnFact) Sender() base.Address {
 
 func (fact BurnFact) Items() []BurnItem {
 	return fact.items
+}
+
+func (fact BurnFact) NFTs() []nft.NFTID {
+	ns := make([]nft.NFTID, len(fact.items))
+
+	for i := range fact.items {
+		ns[i] = fact.items[i].NFT()
+	}
+
+	return ns
 }
 
 func (fact BurnFact) Addresses() ([]base.Address, error) {

@@ -84,8 +84,7 @@ func (cmd *TransferCommand) parseFlags() error {
 }
 
 func (cmd *TransferCommand) createOperation() (operation.Operation, error) {
-	item := collection.NewTransferItemSingleNFT(cmd.receiver, cmd.nft, cmd.Currency.CID)
-
+	item := collection.NewTransferItem(cmd.receiver, cmd.nft, cmd.Currency.CID)
 	fact := collection.NewTransferFact(
 		[]byte(cmd.Token),
 		cmd.sender,

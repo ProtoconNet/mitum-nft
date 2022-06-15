@@ -7,28 +7,28 @@ import (
 	bsonenc "github.com/spikeekips/mitum/util/encoder/bson"
 )
 
-func (it BaseTransferItem) MarshalBSON() ([]byte, error) {
+func (it TransferItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(it.Hint()),
 			bson.M{
 				"receiver": it.receiver,
-				"nfts":     it.nfts,
+				"nft":      it.nft,
 				"currency": it.cid,
 			}),
 	)
 }
 
-type BaseTransferItemBSONUnpacker struct {
+type TransferItemBSONUnpacker struct {
 	RC base.AddressDecoder `bson:"receiver"`
-	NS bson.Raw            `bson:"nfts"`
+	NF bson.Raw            `bson:"nft"`
 	CR string              `bson:"currency"`
 }
 
-func (it *BaseTransferItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
-	var uit BaseTransferItemBSONUnpacker
+func (it *TransferItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
+	var uit TransferItemBSONUnpacker
 	if err := enc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, uit.RC, uit.NS, uit.CR)
+	return it.unpack(enc, uit.RC, uit.NF, uit.CR)
 }

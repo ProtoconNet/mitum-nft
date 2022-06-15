@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
@@ -17,7 +16,6 @@ type BurnCommand struct {
 	OperationFlags
 	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
 	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	CSymbol  string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
 	NFT      NFTIDFlag                   `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
 	sender   base.Address
 	nft      nft.NFTID
@@ -78,7 +76,7 @@ func (cmd *BurnCommand) parseFlags() error {
 }
 
 func (cmd *BurnCommand) createOperation() (operation.Operation, error) {
-	item := collection.NewBurnItemSingleNFT(extensioncurrency.ContractID(cmd.CSymbol), cmd.nft, cmd.Currency.CID)
+	item := collection.NewBurnItem(cmd.nft, cmd.Currency.CID)
 
 	fact := collection.NewBurnFact(
 		[]byte(cmd.Token),

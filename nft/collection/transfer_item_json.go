@@ -13,30 +13,30 @@ import (
 type TransferItemJSONPacker struct {
 	jsonenc.HintedHead
 	RC base.Address        `json:"receiver"`
-	NS []nft.NFTID         `json:"nfts"`
+	NF nft.NFTID           `json:"nft"`
 	CR currency.CurrencyID `json:"currency"`
 }
 
-func (it BaseTransferItem) MarshalJSON() ([]byte, error) {
+func (it TransferItem) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(TransferItemJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(it.Hint()),
 		RC:         it.receiver,
-		NS:         it.nfts,
+		NF:         it.nft,
 		CR:         it.cid,
 	})
 }
 
 type TransferItemJSONUnpacker struct {
 	RC base.AddressDecoder `json:"receiver"`
-	NS json.RawMessage     `json:"nfts"`
+	NF json.RawMessage     `json:"nft"`
 	CR string              `json:"currency"`
 }
 
-func (it *BaseTransferItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
+func (it *TransferItem) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 	var uit TransferItemJSONUnpacker
 	if err := jsonenc.Unmarshal(b, &uit); err != nil {
 		return err
 	}
 
-	return it.unpack(enc, uit.RC, uit.NS, uit.CR)
+	return it.unpack(enc, uit.RC, uit.NF, uit.CR)
 }
