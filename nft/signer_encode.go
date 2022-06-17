@@ -5,7 +5,7 @@ import (
 	"github.com/spikeekips/mitum/util/encoder"
 )
 
-func (r *RightHolder) unpack(
+func (signer *Signer) unpack(
 	enc encoder.Encoder,
 	ba base.AddressDecoder,
 	signed bool,
@@ -14,9 +14,9 @@ func (r *RightHolder) unpack(
 	if err != nil {
 		return err
 	}
-	r.account = a
+	signer.account = a
 
-	r.signed = signed
+	signer.signed = signed
 
 	return nil
 }

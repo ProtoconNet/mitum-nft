@@ -81,12 +81,12 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	var creators = []nft.RightHolder{}
+	var creators = []nft.Signer{}
 	if len(cmd.Creator.s) > 0 {
 		if a, err := cmd.Creator.Encode(jenc); err != nil {
 			return errors.Wrapf(err, "invalid creator format; %q", cmd.Creator)
 		} else {
-			r := nft.NewRightHolder(a, false)
+			r := nft.NewSigner(a, false)
 			if err = r.IsValid(nil); err != nil {
 				return err
 			}
@@ -94,12 +94,12 @@ func (cmd *MintCommand) parseFlags() error {
 		}
 	}
 
-	var copyrighters = []nft.RightHolder{}
+	var copyrighters = []nft.Signer{}
 	if len(cmd.Copyrighter.s) > 0 {
 		if a, err := cmd.Copyrighter.Encode(jenc); err != nil {
 			return errors.Wrapf(err, "invalid creator format; %q", &cmd.Copyrighter)
 		} else {
-			r := nft.NewRightHolder(a, false)
+			r := nft.NewSigner(a, false)
 			if err = r.IsValid(nil); err != nil {
 				return err
 			}

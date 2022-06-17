@@ -13,35 +13,35 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-var TransferItemProcessorPool = sync.Pool{
+var SignItemProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(TransferItemProcessor)
+		return new(SignItemProcessor)
 	},
 }
 
-var TransferProcessorPool = sync.Pool{
+var SignProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(TransferProcessor)
+		return new(SignProcessor)
 	},
 }
 
-func (Transfer) Process(
+func (Sign) Process(
 	func(key string) (state.State, bool, error),
 	func(valuehash.Hash, ...state.State) error,
 ) error {
 	return nil
 }
 
-type TransferItemProcessor struct {
+type SignItemProcessor struct {
 	cp     *extensioncurrency.CurrencyPool
 	h      valuehash.Hash
 	nft    nft.NFT
 	nst    state.State
 	sender base.Address
-	item   TransferItem
+	item   SignItem
 }
 
-func (ipp *TransferItemProcessor) PreProcess(
+func (ipp *SignItemProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) error {
@@ -50,28 +50,19 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return err
 	}
 
-	// check receiver
-	receiver := ipp.item.Receiver()
-	if err := checkExistsState(currency.StateKeyAccount(receiver), getState); err != nil {
-		return err
-	}
-	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(receiver), getState); err != nil {
-		return errors.Errorf("contract account cannot receive nfts; %q", receiver)
-	}
-
 	nid := ipp.item.NFT()
+
+	// check collection
 	if st, err := existsState(StateKeyCollection(nid.Collection()), "design", getState); err != nil {
-		return errors.Errorf("%v; %q", err.Error(), nid.Collection())
+		return err
 	} else if design, err := StateCollectionValue(st); err != nil {
 		return err
 	} else if !design.Active() {
-		return errors.Errorf("dead collection; %q", design.Symbol())
+		return errors.Errorf("dead collection; %q", nid.Collection())
 	}
 
-	var (
-		approved base.Address
-		owner    base.Address
-	)
+	var holders []nft.Signer
+	var n nft.NFT
 
 	// check nft
 	if st, err := existsState(StateKeyNFT(nid), "nft", getState); err != nil {
@@ -79,39 +70,55 @@ func (ipp *TransferItemProcessor) PreProcess(
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
 	} else {
-		approved = nv.Approved()
-		owner = nv.Owner()
-
-		n := nft.NewNFT(nid, receiver, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
-		if err := n.IsValid(nil); err != nil {
-			return err
+		switch ipp.item.Qualification() {
+		case CreatorQualification:
+			holders = nv.Creators()
+		case CopyrighterQualification:
+			holders = nv.Copyrighters()
+		default:
+			return errors.Errorf("wrong qualification; %q", ipp.item.Qualification())
 		}
-
-		ipp.nft = n
+		n = nv
 		ipp.nst = st
 	}
 
 	// check owner
-	if owner.String() == "" {
+	if n.Owner().String() == "" {
 		return errors.Errorf("dead nft; %q", nid)
 	}
 
-	// check authorization
-	if !(owner.Equal(ipp.sender) || approved.Equal(ipp.sender)) {
-		// check agent
-		if st, err := existsState(StateKeyAgents(owner), "agents", getState); err != nil {
-			return errors.Errorf("unauthorized sender; %q", ipp.sender)
-		} else if box, err := StateAgentsValue(st); err != nil {
-			return err
-		} else if !box.Exists(ipp.sender) {
-			return errors.Errorf("unauthorized sender; %q", ipp.sender)
+	var idx = -1
+	for i := range holders {
+		if holders[i].Account().Equal(ipp.sender) {
+			idx = i
+			break
 		}
 	}
+	if idx < 0 {
+		return errors.Errorf("not right holder of nft; %q, %q", ipp.sender, n.ID())
+	}
+
+	holder := nft.NewSigner(ipp.sender, true)
+	if err := holder.IsValid(nil); err != nil {
+		return err
+	}
+	holders[idx] = holder
+
+	if ipp.item.Qualification() == CreatorQualification {
+		n = nft.NewNFT(n.ID(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), holders, n.Copyrighters())
+	} else {
+		n = nft.NewNFT(n.ID(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), n.Creators(), holders)
+	}
+
+	if err := n.IsValid(nil); err != nil {
+		return err
+	}
+	ipp.nft = n
 
 	return nil
 }
 
-func (ipp *TransferItemProcessor) Process(
+func (ipp *SignItemProcessor) Process(
 	_ func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) ([]state.State, error) {
@@ -127,37 +134,37 @@ func (ipp *TransferItemProcessor) Process(
 	return states, nil
 }
 
-func (ipp *TransferItemProcessor) Close() error {
+func (ipp *SignItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
 	ipp.nft = nft.NFT{}
 	ipp.nst = nil
 	ipp.sender = nil
-	ipp.item = TransferItem{}
-	TransferItemProcessorPool.Put(ipp)
+	ipp.item = SignItem{}
+	SignItemProcessorPool.Put(ipp)
 
 	return nil
 }
 
-type TransferProcessor struct {
+type SignProcessor struct {
 	cp *extensioncurrency.CurrencyPool
-	Transfer
-	ipps         []*TransferItemProcessor
+	Sign
+	ipps         []*SignItemProcessor
 	amountStates map[currency.CurrencyID]currency.AmountState
 	required     map[currency.CurrencyID][2]currency.Big
 }
 
-func NewTransferProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
+func NewSignProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
 	return func(op state.Processor) (state.Processor, error) {
-		i, ok := op.(Transfer)
+		i, ok := op.(Sign)
 		if !ok {
-			return nil, errors.Errorf("not Transfer; %T", op)
+			return nil, errors.Errorf("not Sign; %T", op)
 		}
 
-		opp := TransferProcessorPool.Get().(*TransferProcessor)
+		opp := SignProcessorPool.Get().(*SignProcessor)
 
 		opp.cp = cp
-		opp.Transfer = i
+		opp.Sign = i
 		opp.ipps = nil
 		opp.amountStates = nil
 		opp.required = nil
@@ -166,11 +173,11 @@ func NewTransferProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewPro
 	}
 }
 
-func (opp *TransferProcessor) PreProcess(
+func (opp *SignProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(TransferFact)
+	fact := opp.Fact().(SignFact)
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -181,17 +188,17 @@ func (opp *TransferProcessor) PreProcess(
 	}
 
 	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getState); err != nil {
-		return nil, operation.NewBaseReasonError("contract account cannot transfer nfts; %q", fact.Sender())
+		return nil, operation.NewBaseReasonError("contract account cannot sign nfts; %q", fact.Sender())
 	}
 
 	if err := checkFactSignsByState(fact.Sender(), opp.Signs(), getState); err != nil {
 		return nil, operation.NewBaseReasonError("invalid signing; %w", err)
 	}
 
-	ipps := make([]*TransferItemProcessor, len(fact.items))
+	ipps := make([]*SignItemProcessor, len(fact.items))
 	for i := range fact.items {
 
-		c := TransferItemProcessorPool.Get().(*TransferItemProcessor)
+		c := SignItemProcessorPool.Get().(*SignItemProcessor)
 		c.cp = opp.cp
 		c.h = opp.Hash()
 		c.nft = nft.NFT{}
@@ -224,17 +231,17 @@ func (opp *TransferProcessor) PreProcess(
 	return opp, nil
 }
 
-func (opp *TransferProcessor) Process(
+func (opp *SignProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(TransferFact)
+	fact := opp.Fact().(SignFact)
 
 	var states []state.State
 
 	for i := range opp.ipps {
 		if sts, err := opp.ipps[i].Process(getState, setState); err != nil {
-			return operation.NewBaseReasonError("failed to process transfer item; %w", err)
+			return operation.NewBaseReasonError("failed to process sign item; %w", err)
 		} else {
 			states = append(states, sts...)
 		}
@@ -248,34 +255,34 @@ func (opp *TransferProcessor) Process(
 	return setState(fact.Hash(), states...)
 }
 
-func (opp *TransferProcessor) Close() error {
+func (opp *SignProcessor) Close() error {
 	for i := range opp.ipps {
 		_ = opp.ipps[i].Close()
 	}
 
 	opp.cp = nil
-	opp.Transfer = Transfer{}
+	opp.Sign = Sign{}
 	opp.ipps = nil
 	opp.amountStates = nil
 	opp.required = nil
 
-	TransferProcessorPool.Put(opp)
+	SignProcessorPool.Put(opp)
 
 	return nil
 }
 
-func (opp *TransferProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(TransferFact)
+func (opp *SignProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
+	fact := opp.Fact().(SignFact)
 
-	items := make([]TransferItem, len(fact.items))
+	items := make([]SignItem, len(fact.items))
 	for i := range fact.items {
 		items[i] = fact.items[i]
 	}
 
-	return CalculateTransferItemsFee(opp.cp, items)
+	return CalculateSignItemsFee(opp.cp, items)
 }
 
-func CalculateTransferItemsFee(cp *extensioncurrency.CurrencyPool, items []TransferItem) (map[currency.CurrencyID][2]currency.Big, error) {
+func CalculateSignItemsFee(cp *extensioncurrency.CurrencyPool, items []SignItem) (map[currency.CurrencyID][2]currency.Big, error) {
 	required := map[currency.CurrencyID][2]currency.Big{}
 
 	for i := range items {
@@ -294,7 +301,7 @@ func CalculateTransferItemsFee(cp *extensioncurrency.CurrencyPool, items []Trans
 
 		feeer, found := cp.Feeer(it.Currency())
 		if !found {
-			return nil, errors.Errorf("unknown currency id found, %q", it.Currency())
+			return nil, errors.Errorf("unknown currency id found; %q", it.Currency())
 		}
 		switch k, err := feeer.Fee(currency.ZeroBig); {
 		case err != nil:

@@ -11,23 +11,25 @@ import (
 	"github.com/spikeekips/mitum/util"
 )
 
-type BurnCommand struct {
+type SignCommand struct {
 	*BaseCommand
 	OperationFlags
-	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	NFT      NFTIDFlag                   `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
-	sender   base.Address
-	nft      nft.NFTID
+	Sender        AddressFlag                 `arg:"" name:"sender" help:"sender address; nft owner or agent" required:"true"`
+	Currency      currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	NFT           NFTIDFlag                   `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
+	Qualification string                      `name:"qualification" help:"target qualification; creator | copyrighter" optional:""`
+	sender        base.Address
+	nft           nft.NFTID
+	qualification collection.Qualification
 }
 
-func NewBurnCommand() BurnCommand {
-	return BurnCommand{
-		BaseCommand: NewBaseCommand("burn-operation"),
+func NewSignCommand() SignCommand {
+	return SignCommand{
+		BaseCommand: NewBaseCommand("sign-operation"),
 	}
 }
 
-func (cmd *BurnCommand) Run(version util.Version) error {
+func (cmd *SignCommand) Run(version util.Version) error {
 	if err := cmd.Initialize(cmd, version); err != nil {
 		return errors.Wrap(err, "failed to initialize command")
 	}
@@ -54,7 +56,7 @@ func (cmd *BurnCommand) Run(version util.Version) error {
 	return nil
 }
 
-func (cmd *BurnCommand) parseFlags() error {
+func (cmd *SignCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -71,17 +73,27 @@ func (cmd *BurnCommand) parseFlags() error {
 	}
 	cmd.nft = n
 
+	if cmd.Qualification == "" {
+		cmd.qualification = collection.CreatorQualification
+	} else {
+		q := collection.Qualification(cmd.Qualification)
+		if err := q.IsValid(nil); err != nil {
+			return err
+		}
+		cmd.qualification = q
+	}
+
 	return nil
 
 }
 
-func (cmd *BurnCommand) createOperation() (operation.Operation, error) {
-	item := collection.NewBurnItem(cmd.nft, cmd.Currency.CID)
+func (cmd *SignCommand) createOperation() (operation.Operation, error) {
+	item := collection.NewSignItem(cmd.qualification, cmd.nft, cmd.Currency.CID)
 
-	fact := collection.NewBurnFact(
+	fact := collection.NewSignFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		[]collection.BurnItem{item},
+		[]collection.SignItem{item},
 	)
 
 	sig, err := base.NewFactSignature(cmd.Privatekey, fact, cmd.NetworkID.NetworkID())
@@ -92,9 +104,10 @@ func (cmd *BurnCommand) createOperation() (operation.Operation, error) {
 		base.NewBaseFactSign(cmd.Privatekey.Publickey(), sig),
 	}
 
-	op, err := collection.NewBurn(fact, fs, cmd.Memo)
+	op, err := collection.NewSign(fact, fs, cmd.Memo)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create burn operation")
+		return nil, errors.Wrap(err, "failed to create sign operation")
 	}
+
 	return op, nil
 }

@@ -43,11 +43,11 @@ func (n *NFT) unpack(
 	if err != nil {
 		return err
 	}
-	crs := make([]RightHolder, len(hcrs))
+	crs := make([]Signer, len(hcrs))
 	for i := range hcrs {
-		r, ok := hcrs[i].(RightHolder)
+		r, ok := hcrs[i].(Signer)
 		if !ok {
-			return util.WrongTypeError.Errorf("not RightHolder; %T", hcrs[i])
+			return util.WrongTypeError.Errorf("not Signer; %T", hcrs[i])
 		}
 		crs[i] = r
 	}
@@ -57,11 +57,11 @@ func (n *NFT) unpack(
 	if err != nil {
 		return err
 	}
-	cps := make([]RightHolder, len(hcps))
+	cps := make([]Signer, len(hcps))
 	for i := range hcps {
-		r, ok := hcps[i].(RightHolder)
+		r, ok := hcps[i].(Signer)
 		if !ok {
-			return util.WrongTypeError.Errorf("not RightHolder; %T", hcps[i])
+			return util.WrongTypeError.Errorf("not Signer; %T", hcps[i])
 		}
 		cps[i] = r
 	}

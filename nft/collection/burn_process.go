@@ -97,13 +97,7 @@ func (ipp *BurnItemProcessor) PreProcess(
 
 	// check owner
 	if owner.String() == "" {
-		return errors.Errorf("no owner in nft; %q", nid)
-	}
-	if err := checkExistsState(currency.StateKeyAccount(owner), getState); err != nil {
-		return err
-	}
-	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(owner), getState); err != nil {
-		return err
+		return errors.Errorf("dead nft; %q", nid)
 	}
 
 	// check authorization
@@ -203,7 +197,7 @@ func (opp *BurnProcessor) PreProcess(
 	}
 
 	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getState); err != nil {
-		return nil, operation.NewBaseReasonError("contract account cannot Burn nfts; %q", fact.Sender())
+		return nil, operation.NewBaseReasonError("contract account cannot burn nfts; %q", fact.Sender())
 	}
 
 	if err := checkFactSignsByState(fact.Sender(), opp.Signs(), getState); err != nil {
@@ -258,7 +252,7 @@ func (opp *BurnProcessor) Process(
 
 	for i := range opp.ipps {
 		if sts, err := opp.ipps[i].Process(getState, setState); err != nil {
-			return operation.NewBaseReasonError("failed to process Burn item; %w", err)
+			return operation.NewBaseReasonError("failed to process burn item; %w", err)
 		} else {
 			states = append(states, sts...)
 		}

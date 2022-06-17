@@ -22,14 +22,14 @@
                             "uri": "https://localhost:5000/AAA/2",
                             "creators": [
                                 {
-                                    "_hint": "mitum-nft-right-holder-v0.0.1",
+                                    "_hint": "mitum-nft-signer-v0.0.1",
                                     "account": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
                                     "signed": false
                                 }
                             ],
                             "copyrighters": [
                                 {
-                                    "_hint": "mitum-nft-right-holder-v0.0.1",
+                                    "_hint": "mitum-nft-signer-v0.0.1",
                                     "account": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
                                     "signed": false
                                 }

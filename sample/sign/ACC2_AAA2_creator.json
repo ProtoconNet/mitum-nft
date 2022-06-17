@@ -1,0 +1,41 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "4FzPJZoWUmjXdJrecybvHeuDZwMNca9K9GQQLCiNhiwd",
+    "body_hash": "9EDHSNyfbgvYSi7m4Lfw2iP1s3WM7yvadgBQWhPc1ryU",
+    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+    "signature": "381yXZ9cdrYEYE8VwVAET91MvWTZ5k1w8AbgEtCxtp5GKUMhEjqk7xBVpZ9iyQtP7cK6k8Q7ynM3WSBRAxP4RCavmxMBKjj5",
+    "signed_at": "2022-06-15T06:33:38.478304Z",
+    "operations": [
+        {
+            "_hint": "mitum-nft-sign-operation-v0.0.1",
+            "hash": "324qSUyjFFzVmhtWwv1rWQTbNDeMS7PtNNuesaMTiXmS",
+            "fact": {
+                "_hint": "mitum-nft-sign-operation-fact-v0.0.1",
+                "hash": "C43u3zKdB9NG3VZHEKzSuEWYsrW448D8LWYzMLvP4T8R",
+                "token": "MjAyMi0wNi0xNVQwNjozMzozOC40Nzc5NzVa",
+                "sender": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                "items": [
+                    {
+                        "_hint": "mitum-nft-sign-item-v0.0.1",
+                        "qualification": "creator",
+                        "nft": {
+                            "_hint": "mitum-nft-nft-id-v0.0.1",
+                            "collection": "AAA",
+                            "idx": 2
+                        },
+                        "currency": "MCC"
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+                    "signature": "381yXZG29p53xZRyMUJxyuLX9mQzCGwxJJFDNXPTsh6EfjM9yUbLH6Tg4HTejUQ3yazE8zXrU3rLpud3jvkAiGqgcVUx7LwG",
+                    "signed_at": "2022-06-15T06:33:38.47826Z"
+                }
+            ],
+            "memo": ""
+        }
+    ]
+}

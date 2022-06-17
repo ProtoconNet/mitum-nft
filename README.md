@@ -53,6 +53,8 @@ Just try sending operations in the order listed below.
 - [approve/ACC2_GEN_AAA2.json](sample/approve/ACC2_GEN_AAA2.json)
 - [transfer/GEN_ACC4_AAA2_approved.json](sample/transfer/GEN_ACC4_AAA2_approved.json)
 - [delegate/ACC2_ACC4_cancel.json](sample/delegate/ACC2_ACC4_cancel.json)
+- [sign/ACC2_AAA2_creator.json](sample/sign/ACC2_AAA2_creator.json)
+- [sign/ACC2_AAA2_copyrighter.json](sample/sign/ACC2_AAA2_copyrighter.json)
 - [burn/ACC4_AAA1.json](sample/burn/ACC4_AAA1.json)
 - [burn/ACC4_AAA2.json](sample/burn/ACC4_AAA2.json)
 

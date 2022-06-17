@@ -9,13 +9,13 @@ import (
 
 type NFTJSONPacker struct {
 	jsonenc.HintedHead
-	ID NFTID         `json:"id"`
-	ON base.Address  `json:"owner"`
-	HS NFTHash       `json:"hash"`
-	UR URI           `json:"uri"`
-	AP base.Address  `json:"approved"`
-	CR []RightHolder `json:"creators"`
-	CP []RightHolder `json:"copyrighters"`
+	ID NFTID        `json:"id"`
+	ON base.Address `json:"owner"`
+	HS NFTHash      `json:"hash"`
+	UR URI          `json:"uri"`
+	AP base.Address `json:"approved"`
+	CR []Signer     `json:"creators"`
+	CP []Signer     `json:"copyrighters"`
 }
 
 func (n NFT) MarshalJSON() ([]byte, error) {

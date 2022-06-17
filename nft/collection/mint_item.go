@@ -21,11 +21,11 @@ type MintForm struct {
 	hint.BaseHinter
 	hash         nft.NFTHash
 	uri          nft.URI
-	creators     []nft.RightHolder
-	copyrighters []nft.RightHolder
+	creators     []nft.Signer
+	copyrighters []nft.Signer
 }
 
-func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.RightHolder, copyrighters []nft.RightHolder) MintForm {
+func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyrighters []nft.Signer) MintForm {
 	return MintForm{
 		BaseHinter:   hint.NewBaseHinter(MintFormHint),
 		hash:         hash,
@@ -35,7 +35,7 @@ func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.RightHolder, copy
 	}
 }
 
-func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators []nft.RightHolder, copyrighters []nft.RightHolder) MintForm {
+func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyrighters []nft.Signer) MintForm {
 	form := NewMintForm(hash, uri, creators, copyrighters)
 
 	if err := form.IsValid(nil); err != nil {
@@ -73,11 +73,11 @@ func (form MintForm) Uri() nft.URI {
 	return form.uri
 }
 
-func (form MintForm) Creators() []nft.RightHolder {
+func (form MintForm) Creators() []nft.Signer {
 	return form.creators
 }
 
-func (form MintForm) Copyrighters() []nft.RightHolder {
+func (form MintForm) Copyrighters() []nft.Signer {
 	return form.copyrighters
 }
 

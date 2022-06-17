@@ -16,6 +16,7 @@ type SealCommand struct {
 	Mint                  MintCommand                                `cmd:"" name:"mint" help:"mint nft to collection"`
 	TransferNFTs          TransferCommand                            `cmd:"" name:"transfer-nfts" help:"transfer nfts"`
 	Burn                  BurnCommand                                `cmd:"" name:"burn" help:"burn nfts"`
+	SignNFTs              SignCommand                                `cmd:"" name:"sign-nfts" help:"sign nfts; creator | copyrighter"`
 	Transfer              currencycmds.TransferCommand               `cmd:"" name:"transfer" help:"transfer big"`
 	KeyUpdater            currencycmds.KeyUpdaterCommand             `cmd:"" name:"key-updater" help:"update keys"`
 	CurrencyRegister      extensioncmds.CurrencyRegisterCommand      `cmd:"" name:"currency-register" help:"register new currency"`
@@ -37,6 +38,7 @@ func NewSealCommand() SealCommand {
 		Mint:                  NewMintCommand(),
 		TransferNFTs:          NewTransferCommand(),
 		Burn:                  NewBurnCommand(),
+		SignNFTs:              NewSignCommand(),
 		Transfer:              currencycmds.NewTransferCommand(),
 		KeyUpdater:            currencycmds.NewKeyUpdaterCommand(),
 		CurrencyRegister:      extensioncmds.NewCurrencyRegisterCommand(),

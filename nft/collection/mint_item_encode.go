@@ -23,11 +23,11 @@ func (form *MintForm) unpack(
 	if err != nil {
 		return err
 	}
-	crs := make([]nft.RightHolder, len(hcrs))
+	crs := make([]nft.Signer, len(hcrs))
 	for i := range hcrs {
-		r, ok := hcrs[i].(nft.RightHolder)
+		r, ok := hcrs[i].(nft.Signer)
 		if !ok {
-			return util.WrongTypeError.Errorf("not RightHolder; %T", hcrs[i])
+			return util.WrongTypeError.Errorf("not Signer; %T", hcrs[i])
 		}
 		crs[i] = r
 	}
@@ -37,11 +37,11 @@ func (form *MintForm) unpack(
 	if err != nil {
 		return err
 	}
-	cps := make([]nft.RightHolder, len(hcps))
+	cps := make([]nft.Signer, len(hcps))
 	for i := range hcps {
-		r, ok := hcps[i].(nft.RightHolder)
+		r, ok := hcps[i].(nft.Signer)
 		if !ok {
-			return util.WrongTypeError.Errorf("not RightHolder; %T", hcps[i])
+			return util.WrongTypeError.Errorf("not Signer; %T", hcps[i])
 		}
 		cps[i] = r
 	}
