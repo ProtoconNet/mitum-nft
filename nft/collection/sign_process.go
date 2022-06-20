@@ -95,7 +95,7 @@ func (ipp *SignItemProcessor) PreProcess(
 		}
 	}
 	if idx < 0 {
-		return errors.Errorf("not right holder of nft; %q, %q", ipp.sender, n.ID())
+		return errors.Errorf("not signer of nft; %q, %q", ipp.sender, n.ID())
 	}
 
 	holder := nft.NewSigner(ipp.sender, true)

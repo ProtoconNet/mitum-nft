@@ -108,6 +108,14 @@ func (form MintForm) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("empty uri")
 	}
 
+	if l := len(form.creators); l > nft.MaxCreators {
+		return isvalid.InvalidError.Errorf("creators over allowed; %d > %d", l, nft.MaxCreators)
+	}
+
+	if l := len(form.copyrighters); l > nft.MaxCopyrighters {
+		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, nft.MaxCopyrighters)
+	}
+
 	for i := range form.creators {
 		if err := form.creators[i].IsValid(nil); err != nil {
 			return err

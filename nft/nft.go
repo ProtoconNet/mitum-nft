@@ -28,6 +28,11 @@ var (
 	NFTHinter = NFT{BaseHinter: hint.NewBaseHinter(NFTHint)}
 )
 
+var (
+	MaxCreators     = 10
+	MaxCopyrighters = 10
+)
+
 type NFT struct {
 	hint.BaseHinter
 	id           NFTID
@@ -100,6 +105,14 @@ func (n NFT) GenerateHash() valuehash.Hash {
 func (n NFT) IsValid([]byte) error {
 	if len(n.uri.String()) < 1 {
 		return isvalid.InvalidError.Errorf("empty uri")
+	}
+
+	if l := len(n.creators); l > MaxCreators {
+		return isvalid.InvalidError.Errorf("creators over allowed; %d > %d", l, MaxCreators)
+	}
+
+	if l := len(n.copyrighters); l > MaxCopyrighters {
+		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, MaxCopyrighters)
 	}
 
 	for i := range n.creators {
