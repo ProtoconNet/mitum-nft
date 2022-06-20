@@ -100,7 +100,11 @@ func (form MintForm) Addresses() ([]base.Address, error) {
 }
 
 func (form MintForm) IsValid([]byte) error {
-	if err := form.BaseHinter.IsValid(nil); err != nil {
+	if err := isvalid.Check(
+		nil, false,
+		form.BaseHinter,
+		form.hash,
+		form.uri); err != nil {
 		return err
 	}
 
@@ -116,23 +120,32 @@ func (form MintForm) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, nft.MaxCopyrighters)
 	}
 
+	foundSigner := map[base.Address]bool{}
 	for i := range form.creators {
-		if err := form.creators[i].IsValid(nil); err != nil {
+		creator := form.creators[i].Account()
+		if err := creator.IsValid(nil); err != nil {
 			return err
 		}
+
+		if _, found := foundSigner[creator]; found {
+			return isvalid.InvalidError.Errorf("duplicate creator found; %q", creator)
+		}
+
+		foundSigner[creator] = true
 	}
 
+	foundSigner = map[base.Address]bool{}
 	for i := range form.copyrighters {
-		if err := form.copyrighters[i].IsValid(nil); err != nil {
+		copyrighter := form.copyrighters[i].Account()
+		if err := copyrighter.IsValid(nil); err != nil {
 			return err
 		}
-	}
 
-	if err := isvalid.Check(
-		nil, false,
-		form.BaseHinter,
-		form.hash); err != nil {
-		return err
+		if _, found := foundSigner[copyrighter]; found {
+			return isvalid.InvalidError.Errorf("duplicate copyrighter found; %q", copyrighter)
+		}
+
+		foundSigner[copyrighter] = true
 	}
 
 	return nil

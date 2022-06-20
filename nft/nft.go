@@ -103,6 +103,15 @@ func (n NFT) GenerateHash() valuehash.Hash {
 }
 
 func (n NFT) IsValid([]byte) error {
+	if err := isvalid.Check(
+		nil, false,
+		n.id,
+		n.hash,
+		n.uri,
+	); err != nil {
+		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
+	}
+
 	if len(n.uri.String()) < 1 {
 		return isvalid.InvalidError.Errorf("empty uri")
 	}
@@ -115,30 +124,38 @@ func (n NFT) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, MaxCopyrighters)
 	}
 
+	foundSigner := map[base.Address]bool{}
 	for i := range n.creators {
-		if err := n.creators[i].IsValid(nil); err != nil {
+		creator := n.creators[i].Account()
+		if err := creator.IsValid(nil); err != nil {
 			return err
 		}
+
+		if _, found := foundSigner[creator]; found {
+			return isvalid.InvalidError.Errorf("duplicate creator found; %q", creator)
+		}
+
+		foundSigner[creator] = true
 	}
 
+	foundSigner = map[base.Address]bool{}
 	for i := range n.copyrighters {
-		if err := n.copyrighters[i].IsValid(nil); err != nil {
+		copyrighter := n.copyrighters[i].Account()
+		if err := copyrighter.IsValid(nil); err != nil {
 			return err
 		}
+
+		if _, found := foundSigner[copyrighter]; found {
+			return isvalid.InvalidError.Errorf("duplicate copyrighter found; %q", copyrighter)
+		}
+
+		foundSigner[copyrighter] = true
 	}
 
 	if len(n.approved.String()) > 0 {
 		if err := n.approved.IsValid(nil); err != nil {
 			return err
 		}
-	}
-
-	if err := isvalid.Check(
-		nil, false,
-		n.id,
-		n.hash,
-	); err != nil {
-		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}
 
 	return nil
