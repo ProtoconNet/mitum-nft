@@ -84,7 +84,7 @@ func (fact MintFact) IsValid(b []byte) error {
 		return err
 	}
 
-	foundCollection := map[extensioncurrency.ContractID]bool{}
+	founds := map[extensioncurrency.ContractID]struct{}{}
 	for i := range fact.items {
 
 		if err := fact.items[i].IsValid(nil); err != nil {
@@ -92,10 +92,10 @@ func (fact MintFact) IsValid(b []byte) error {
 		}
 
 		c := fact.items[i].Collection()
-		if _, found := foundCollection[c]; found {
+		if _, found := founds[c]; found {
 			return errors.Errorf("duplicated collection found; %q", c)
 		}
-		foundCollection[c] = true
+		founds[c] = struct{}{}
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {

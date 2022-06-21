@@ -82,7 +82,7 @@ func (fact BurnFact) IsValid(b []byte) error {
 		return err
 	}
 
-	foundNFT := map[nft.NFTID]bool{}
+	founds := map[nft.NFTID]struct{}{}
 	for i := range fact.items {
 		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
@@ -93,11 +93,11 @@ func (fact BurnFact) IsValid(b []byte) error {
 			return err
 		}
 
-		if _, found := foundNFT[n]; found {
+		if _, found := founds[n]; found {
 			return isvalid.InvalidError.Errorf("duplicated nft found; %s", n)
 		}
 
-		foundNFT[n] = true
+		founds[n] = struct{}{}
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {

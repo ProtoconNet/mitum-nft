@@ -38,8 +38,8 @@ There are [sample operation files](sample/) in the repository.
 
 Just try sending operations in the order listed below.
 
-- [create-account/GEN_ACC2](sample/create-account/GEN_ACC2.json)
-- [create-account/GEN_ACC4](sample/create-account/GEN_ACC4.json)
+- [create-account/GEN_ACC2.json](sample/create-account/GEN_ACC2.json)
+- [create-account/GEN_ACC4.json](sample/create-account/GEN_ACC4.json)
 - [create-contract-account/GEN_ACC1.json](sample/create-contract-account/GEN_ACC1.json)
 - [collection-register/GEN_AAA.json](sample/collection-register/GEN_AAA.json)
 - [collection-register/GEN_BBB.json](sample/collection-register/GEN_BBB.json)

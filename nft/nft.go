@@ -124,32 +124,32 @@ func (n NFT) IsValid([]byte) error {
 		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, MaxCopyrighters)
 	}
 
-	foundSigner := map[base.Address]bool{}
+	founds := map[base.Address]struct{}{}
 	for i := range n.creators {
 		creator := n.creators[i].Account()
 		if err := creator.IsValid(nil); err != nil {
 			return err
 		}
 
-		if _, found := foundSigner[creator]; found {
+		if _, found := founds[creator]; found {
 			return isvalid.InvalidError.Errorf("duplicate creator found; %q", creator)
 		}
 
-		foundSigner[creator] = true
+		founds[creator] = struct{}{}
 	}
 
-	foundSigner = map[base.Address]bool{}
+	founds = map[base.Address]struct{}{}
 	for i := range n.copyrighters {
 		copyrighter := n.copyrighters[i].Account()
 		if err := copyrighter.IsValid(nil); err != nil {
 			return err
 		}
 
-		if _, found := foundSigner[copyrighter]; found {
+		if _, found := founds[copyrighter]; found {
 			return isvalid.InvalidError.Errorf("duplicate copyrighter found; %q", copyrighter)
 		}
 
-		foundSigner[copyrighter] = true
+		founds[copyrighter] = struct{}{}
 	}
 
 	if len(n.approved.String()) > 0 {
