@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 
 	"github.com/pkg/errors"
@@ -14,13 +15,15 @@ import (
 type DelegateCommand struct {
 	*BaseCommand
 	OperationFlags
-	Sender   AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Agent    AddressFlag                 `arg:"" name:"agent" help:"agent account address"`
-	Mode     string                      `name:"mode" help:"delegate mode" optional:""`
-	sender   base.Address
-	agent    base.Address
-	mode     collection.DelegateMode
+	Sender     AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
+	Currency   currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Collection string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
+	Agent      AddressFlag                 `arg:"" name:"agent" help:"agent account address"`
+	Mode       string                      `name:"mode" help:"delegate mode" optional:""`
+	sender     base.Address
+	symbol     extensioncurrency.ContractID
+	agent      base.Address
+	mode       collection.DelegateMode
 }
 
 func NewDelegateCommand() DelegateCommand {
@@ -67,6 +70,12 @@ func (cmd *DelegateCommand) parseFlags() error {
 		cmd.sender = a
 	}
 
+	symbol := extensioncurrency.ContractID(cmd.Collection)
+	if err := symbol.IsValid(nil); err != nil {
+		return err
+	}
+	cmd.symbol = symbol
+
 	if a, err := cmd.Agent.Encode(jenc); err != nil {
 		return errors.Wrapf(err, "invalid agent format; %q", cmd.Agent)
 	} else {
@@ -88,7 +97,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 }
 
 func (cmd *DelegateCommand) createOperation() (operation.Operation, error) {
-	items := []collection.DelegateItem{collection.NewDelegateItem(cmd.agent, cmd.mode, cmd.Currency.CID)}
+	items := []collection.DelegateItem{collection.NewDelegateItem(cmd.symbol, cmd.agent, cmd.mode, cmd.Currency.CID)}
 
 	fact := collection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 

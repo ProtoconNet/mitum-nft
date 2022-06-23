@@ -85,7 +85,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	if !ipp.nft.Owner().Equal(ipp.sender) {
 		if err := checkExistsState(currency.StateKeyAccount(ipp.nft.Owner()), getState); err != nil {
 			return err
-		} else if st, err := existsState(StateKeyAgents(ipp.nft.Owner()), "agents", getState); err != nil {
+		} else if st, err := existsState(StateKeyAgents(ipp.nft.Owner(), ipp.nft.ID().Collection()), "agents", getState); err != nil {
 			return errors.Errorf("unathorized sender; %q", ipp.sender)
 		} else if box, err := StateAgentsValue(st); err != nil {
 			return err

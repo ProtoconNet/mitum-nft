@@ -1,6 +1,7 @@
 package collection
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -43,14 +44,16 @@ var (
 
 type DelegateItem struct {
 	hint.BaseHinter
-	agent base.Address
-	mode  DelegateMode
-	cid   currency.CurrencyID
+	collection extensioncurrency.ContractID
+	agent      base.Address
+	mode       DelegateMode
+	cid        currency.CurrencyID
 }
 
-func NewDelegateItem(agent base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateItem {
+func NewDelegateItem(collection extensioncurrency.ContractID, agent base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
+		collection: collection,
 		agent:      agent,
 		mode:       mode,
 		cid:        cid,
@@ -59,6 +62,7 @@ func NewDelegateItem(agent base.Address, mode DelegateMode, cid currency.Currenc
 
 func (it DelegateItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
+		it.collection.Bytes(),
 		it.agent.Bytes(),
 		it.mode.Bytes(),
 		it.cid.Bytes(),
@@ -66,11 +70,20 @@ func (it DelegateItem) Bytes() []byte {
 }
 
 func (it DelegateItem) IsValid([]byte) error {
-	if err := isvalid.Check(nil, false, it.BaseHinter, it.agent, it.mode, it.cid); err != nil {
+	if err := isvalid.Check(nil, false,
+		it.BaseHinter,
+		it.collection,
+		it.agent,
+		it.mode,
+		it.cid); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (it DelegateItem) Collection() extensioncurrency.ContractID {
+	return it.collection
 }
 
 func (it DelegateItem) Agent() base.Address {

@@ -1,22 +1,23 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "9i3HmZkqgJBt77XR5hrXjLShVsmsVbMDFMfCpETQetjj",
-    "body_hash": "7TETzFHRxi8HPaKvkaLptXveKeLKAxoF5gA2hRTEzVMM",
+    "hash": "5caPjQJejCkWe4zAuXTB5iT3bZXGRcRmNtbKdhEy7J4i",
+    "body_hash": "Dn5VyLUZUUof9wroFEZg3gXPdXe9vMmhuJLoqS45dKAQ",
     "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
-    "signature": "AN1rKvtKeQugrCnmKhQZnvEu9d2da4pphcUL3rmGMCLbBTx1QwsrS6sQnjcC2Fv3VDukEnKkBbrFZKm9hCHocykooDpZm78JJ",
-    "signed_at": "2022-06-08T05:35:05.007325Z",
+    "signature": "381yXYrqkkXzVBcYCnofAoSsERSJoE6YwqKxWypJxA5ndKWnKdrzNoD5NAjhoHoxo83tqq52rwttVBipcXWsAFEsHCyCbiTJ",
+    "signed_at": "2022-06-22T07:15:37.157449Z",
     "operations": [
         {
             "_hint": "mitum-nft-delegate-operation-v0.0.1",
-            "hash": "DpTYD398XPJZ5HkfXT7Xym4Xj3hEGCuPNEyCPJHWm7kU",
+            "hash": "C2izeCbG87AQq5rWzAz2mBcu4yUJuQXAyap4WrdaKQpj",
             "fact": {
                 "_hint": "mitum-nft-delegate-operation-fact-v0.0.1",
-                "hash": "7Hx65oZZKqgrRcQX5aFKhFj3C8ZUTxYgq7st1KuzvKR1",
-                "token": "MjAyMi0wNi0wOFQwNTozNTowNS4wMDcwMjda",
+                "hash": "GY4qkFTJqJGLXCS4kepoJbgnLZ2GUg8q5bND1GvVAnHz",
+                "token": "MjAyMi0wNi0yMlQwNzoxNTozNy4xNTcxNjJa",
                 "sender": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
                 "items": [
                     {
                         "_hint": "mitum-nft-delegate-item-v0.0.1",
+                        "collection": "AAA",
                         "agent": "9MBW3xRBbkPSa5JVv2kMgnsXvGj9scSupZcSZ99cNPbwmca",
                         "mode": "cancel",
                         "currency": "MCC"
@@ -27,8 +28,8 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
-                    "signature": "AN1rKvtY42jCXkkoJUKPhgvxYU1bwFHZYaLLA6Fhwg6LsU39tejVs7vfLxTfeyqGGG3Mw2zk3H4vRAaNGapdEYLFw8JZB1Gk4",
-                    "signed_at": "2022-06-08T05:35:05.00729Z"
+                    "signature": "AN1rKvt18h1KBnCjrZrczpNR1zTRwxVknfNzMRFTRxCNgjPesUa3yZmfmHEXDXSn4o13XVoBnYXo7nbWfeXfg7odyjoe3QH3D",
+                    "signed_at": "2022-06-22T07:15:37.157418Z"
                 }
             ],
             "memo": ""

@@ -1,20 +1,22 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "FXe9krPdZdokbiXgsCUbCZssmZcVjF9W25kf82q48aWt",
-    "body_hash": "HLHXsihRdkMMaSQ1uW4krHm7V5EUTmS6U15kKuKfr9Na",
+    "hash": "HPxgEt5FGn9iUH66PUPgVzR6AoLPsTCLdPktXL6dmu1m",
+    "body_hash": "EuPJL1cFBjmcHcC1Fq4mz2nvrpy4xFbkQo32f9ZnjA13",
     "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
-    "signature": "AN1rKvtUqYiPEknaTnRWxMTFMjMFV9ndy2ohKf3sfrpxqgX4YiqgJs7FKNF95StV61GmLpCUmFRi6hcHEkpYXziP9GjSdMhvy",
-    "signed_at": "2022-06-08T05:34:41.884233Z",
+    "signature": "381yXZU3aNt8RSX7JmzvdmkiZ6ZuGwCVVaNEfBjhdEuyeF6X6r8ti6Fd93Zmfr2Fu6JhfpNMgxKg3UrEJvecdVVMAi62hqbQ",
+    "signed_at": "2022-06-22T07:15:20.486308Z",
     "operations": [
         {
+            "hash": "9UjRQ4N2ieim7QWAaVNRJWQgaYY5QpkgLCnichv9yiH1",
             "fact": {
                 "_hint": "mitum-nft-delegate-operation-fact-v0.0.1",
-                "hash": "HGXVY65i2NLxCEwUDjsJzbR9Sa6G8qeLhPmqKa7dG9qT",
-                "token": "MjAyMi0wNi0wOFQwNTozNDo0MS44ODM2NTda",
+                "hash": "2ZGBpeXeJwzK8V4m6dFf7vvtRjfBn55Yr82AvxL5CCnV",
+                "token": "MjAyMi0wNi0yMlQwNzoxNToyMC40ODYwMjJa",
                 "sender": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
                 "items": [
                     {
                         "_hint": "mitum-nft-delegate-item-v0.0.1",
+                        "collection": "AAA",
                         "agent": "9MBW3xRBbkPSa5JVv2kMgnsXvGj9scSupZcSZ99cNPbwmca",
                         "mode": "allow",
                         "currency": "MCC"
@@ -25,13 +27,12 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
-                    "signature": "AN1rKvtR297EcRHjnpamZHUpW7FmQkkwMDEGyKLMFFhHWCJt7DowHZnpn3RVEzqPNsEzXUjrnGppBTRqL3XYzUfCy8mMaa2rS",
-                    "signed_at": "2022-06-08T05:34:41.884148Z"
+                    "signature": "AN1rKvtPTUH6ChMjDrs96qSnZoX7YpuLPJRunpcwVzt4qW253QUTYS11XyqPFeByVTsrBBQt82KD4451xnPQ6uum132fF74dT",
+                    "signed_at": "2022-06-22T07:15:20.486279Z"
                 }
             ],
             "memo": "",
-            "_hint": "mitum-nft-delegate-operation-v0.0.1",
-            "hash": "6vKV1i699icGJ4H5k4SXNfwqfSwZWUMXUNeguP9jKGmh"
+            "_hint": "mitum-nft-delegate-operation-v0.0.1"
         }
     ]
 }

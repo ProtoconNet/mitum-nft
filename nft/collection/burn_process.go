@@ -103,7 +103,7 @@ func (ipp *BurnItemProcessor) PreProcess(
 	// check authorization
 	if !(owner.Equal(ipp.sender) || approved.Equal(ipp.sender)) {
 		// check agent
-		if st, err := existsState(StateKeyAgents(owner), "agents", getState); err != nil {
+		if st, err := existsState(StateKeyAgents(owner, ipp.nft.ID().Collection()), "agents", getState); err != nil {
 			return errors.Errorf("unauthorized sender; %q", ipp.sender)
 		} else if box, err := StateAgentsValue(st); err != nil {
 			return err

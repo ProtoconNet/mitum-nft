@@ -11,14 +11,16 @@ func (it DelegateItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bsonenc.MergeBSONM(bsonenc.NewHintedDoc(it.Hint()),
 			bson.M{
-				"agent":    it.agent,
-				"mode":     it.mode,
-				"currency": it.cid,
+				"collection": it.collection,
+				"agent":      it.agent,
+				"mode":       it.mode,
+				"currency":   it.cid,
 			}),
 	)
 }
 
 type DelegateItemBSONUnpacker struct {
+	CL string              `bson:"collection"`
 	AG base.AddressDecoder `bson:"agent"`
 	MD string              `bson:"mode"`
 	CR string              `bson:"currency"`
@@ -30,5 +32,5 @@ func (it *DelegateItem) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return it.unpack(enc, uit.AG, uit.MD, uit.CR)
+	return it.unpack(enc, uit.CL, uit.AG, uit.MD, uit.CR)
 }

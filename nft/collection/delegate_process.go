@@ -77,6 +77,8 @@ func (ipp *DelegateItemProcessor) Process(
 		return nil, errors.Errorf("wrong mode for delegate item; mode must be [\"allow\": delegate | \"cancel\": cancel delegation]")
 	}
 
+	ipp.box.Sort(true)
+
 	return nil, nil
 }
 
@@ -95,8 +97,8 @@ func (ipp *DelegateItemProcessor) Close() error {
 type DelegateProcessor struct {
 	cp *extensioncurrency.CurrencyPool
 	Delegate
-	box          AgentBox
-	boxState     state.State
+	box          map[extensioncurrency.ContractID]*AgentBox
+	boxState     map[extensioncurrency.ContractID]state.State
 	amountStates map[currency.CurrencyID]currency.AmountState
 	ipps         []*DelegateItemProcessor
 	required     map[currency.CurrencyID][2]currency.Big
@@ -113,7 +115,7 @@ func NewDelegateProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewPro
 
 		opp.cp = cp
 		opp.Delegate = i
-		opp.box = AgentBox{}
+		opp.box = nil
 		opp.boxState = nil
 		opp.amountStates = nil
 		opp.ipps = nil
@@ -141,19 +143,34 @@ func (opp *DelegateProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError("contract account cannot have agents; %q", fact.Sender())
 	}
 
-	switch st, found, err := getState(StateKeyAgents(fact.Sender())); {
-	case err != nil:
-		return nil, operation.NewBaseReasonError(err.Error())
-	case !found:
-		opp.box = NewAgentBox(nil)
-		opp.boxState = st
-	default:
-		box, err := StateAgentsValue(st)
-		if err != nil {
+	opp.box = map[extensioncurrency.ContractID]*AgentBox{}
+	opp.boxState = map[extensioncurrency.ContractID]state.State{}
+	for i := range fact.items {
+		item := fact.items[i]
+
+		if st, err := existsState(StateKeyCollection(item.Collection()), "design", getState); err != nil {
 			return nil, operation.NewBaseReasonError(err.Error())
+		} else if design, err := StateCollectionValue(st); err != nil {
+			return nil, operation.NewBaseReasonError(err.Error())
+		} else if !design.Active() {
+			return nil, operation.NewBaseReasonError("dead collection; %q", item.Collection())
 		}
-		opp.box = box
-		opp.boxState = st
+
+		var box AgentBox
+		switch st, found, err := getState(StateKeyAgents(fact.Sender(), item.Collection())); {
+		case err != nil:
+			return nil, operation.NewBaseReasonError(err.Error())
+		case !found:
+			box = NewAgentBox(nil)
+			opp.boxState[item.Collection()] = st
+		default:
+			box, err = StateAgentsValue(st)
+			if err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			}
+			opp.boxState[item.Collection()] = st
+		}
+		opp.box[item.Collection()] = &box
 	}
 
 	if required, err := opp.calculateItemsFee(); err != nil {
@@ -173,7 +190,7 @@ func (opp *DelegateProcessor) PreProcess(
 		c.h = opp.Hash()
 		c.sender = fact.Sender()
 		c.item = fact.items[i]
-		c.box = &opp.box
+		c.box = opp.box[fact.items[i].Collection()]
 
 		if err := c.PreProcess(getState, setState); err != nil {
 			return nil, operation.NewBaseReasonError(err.Error())
@@ -206,12 +223,13 @@ func (opp *DelegateProcessor) Process(
 			states = append(states, s...)
 		}
 	}
-	opp.box.Sort(true)
 
-	if st, err := SetStateAgentsValue(opp.boxState, opp.box); err != nil {
-		return operation.NewBaseReasonError(err.Error())
-	} else {
-		states = append(states, st)
+	for k, v := range opp.box {
+		if st, err := SetStateAgentsValue(opp.boxState[k], *v); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else {
+			states = append(states, st)
+		}
 	}
 
 	for k := range opp.required {
@@ -229,7 +247,7 @@ func (opp *DelegateProcessor) Close() error {
 
 	opp.cp = nil
 	opp.Delegate = Delegate{}
-	opp.box = AgentBox{}
+	opp.box = nil
 	opp.boxState = nil
 	opp.amountStates = nil
 	opp.ipps = nil
