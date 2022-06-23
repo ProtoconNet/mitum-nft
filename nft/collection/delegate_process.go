@@ -161,7 +161,7 @@ func (opp *DelegateProcessor) PreProcess(
 		case err != nil:
 			return nil, operation.NewBaseReasonError(err.Error())
 		case !found:
-			box = NewAgentBox(nil)
+			box = NewAgentBox(item.Collection(), nil)
 			opp.boxState[item.Collection()] = st
 		default:
 			box, err = StateAgentsValue(st)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"sort"
 
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -24,14 +25,15 @@ var (
 
 type AgentBox struct {
 	hint.BaseHinter
-	agents []base.Address
+	collection extensioncurrency.ContractID
+	agents     []base.Address
 }
 
-func NewAgentBox(agents []base.Address) AgentBox {
+func NewAgentBox(symbol extensioncurrency.ContractID, agents []base.Address) AgentBox {
 	if agents == nil {
-		return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), agents: []base.Address{}}
+		return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), collection: symbol, agents: []base.Address{}}
 	}
-	return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), agents: agents}
+	return AgentBox{BaseHinter: hint.NewBaseHinter(AgentBoxHint), collection: symbol, agents: agents}
 }
 
 func (abx AgentBox) Bytes() []byte {

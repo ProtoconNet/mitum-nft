@@ -24,8 +24,8 @@ var (
 	StateKeyNFTSuffix               = ":nft"
 )
 
-func StateKeyAgents(addr base.Address, collection extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s-%s%s", addr, collection, StateKeyAgentsSuffix)
+func StateKeyAgents(addr base.Address, symbol extensioncurrency.ContractID) string {
+	return fmt.Sprintf("%s-%s%s", addr, symbol, StateKeyAgentsSuffix)
 }
 
 func IsStateAgentKey(key string) bool {

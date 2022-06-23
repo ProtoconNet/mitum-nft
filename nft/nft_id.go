@@ -24,16 +24,16 @@ type NFTID struct {
 	idx        uint64
 }
 
-func NewNFTID(collection extensioncurrency.ContractID, idx uint64) NFTID {
+func NewNFTID(symbol extensioncurrency.ContractID, idx uint64) NFTID {
 	return NFTID{
 		BaseHinter: hint.NewBaseHinter(NFTIDHint),
-		collection: collection,
+		collection: symbol,
 		idx:        idx,
 	}
 }
 
-func MustNewNFTID(collection extensioncurrency.ContractID, idx uint64) NFTID {
-	id := NewNFTID(collection, idx)
+func MustNewNFTID(symbol extensioncurrency.ContractID, idx uint64) NFTID {
+	id := NewNFTID(symbol, idx)
 
 	if err := id.IsValid(nil); err != nil {
 		panic(err)

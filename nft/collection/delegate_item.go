@@ -50,10 +50,10 @@ type DelegateItem struct {
 	cid        currency.CurrencyID
 }
 
-func NewDelegateItem(collection extensioncurrency.ContractID, agent base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateItem {
+func NewDelegateItem(symbol extensioncurrency.ContractID, agent base.Address, mode DelegateMode, cid currency.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
-		collection: collection,
+		collection: symbol,
 		agent:      agent,
 		mode:       mode,
 		cid:        cid,

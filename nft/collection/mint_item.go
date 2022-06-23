@@ -164,10 +164,10 @@ type MintItem struct {
 	cid        currency.CurrencyID
 }
 
-func NewMintItem(collection extensioncurrency.ContractID, form MintForm, cid currency.CurrencyID) MintItem {
+func NewMintItem(symbol extensioncurrency.ContractID, form MintForm, cid currency.CurrencyID) MintItem {
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
-		collection: collection,
+		collection: symbol,
 		form:       form,
 		cid:        cid,
 	}
