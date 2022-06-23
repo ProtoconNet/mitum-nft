@@ -2,6 +2,7 @@ package nft
 
 import (
 	"fmt"
+	"strconv"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum/util"
@@ -10,7 +11,7 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-var MaxNFTsInCollection = 10000
+var MaxNFTIdx = 10000
 
 var (
 	NFTIDType   = hint.Type("mitum-nft-nft-id")
@@ -74,12 +75,19 @@ func (nid NFTID) Equal(cnid NFTID) bool {
 }
 
 func (nid NFTID) String() string {
-	return fmt.Sprintf("%s-%d", nid.collection, nid.idx)
+	idx := strconv.FormatUint(nid.idx, 10)
+
+	l := len(strconv.FormatUint(uint64(MaxNFTIdx), 10)) - len(idx)
+	for i := 0; i < l; i++ {
+		idx = "0" + idx
+	}
+
+	return fmt.Sprintf("%s-%s", nid.collection, idx)
 }
 
 func (nid NFTID) IsValid([]byte) error {
-	if nid.idx > uint64(MaxNFTsInCollection) {
-		return isvalid.InvalidError.Errorf("nid idx over max; %d > %d", nid.idx, MaxNFTsInCollection)
+	if nid.idx > uint64(MaxNFTIdx) {
+		return isvalid.InvalidError.Errorf("nid idx over max; %d > %d", nid.idx, MaxNFTIdx)
 	}
 	if err := nid.collection.IsValid(nil); err != nil {
 		return err
