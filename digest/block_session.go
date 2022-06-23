@@ -7,6 +7,7 @@ import (
 	"time"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
+	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base/block"
@@ -24,14 +25,17 @@ var bulkWriteLimit = 500
 
 type BlockSession struct {
 	sync.RWMutex
-	block                       block.Block
-	st                          *Database
-	opsTreeNodes                map[string]operation.FixedTreeNode
-	operationModels             []mongo.WriteModel
-	accountModels               []mongo.WriteModel
-	balanceModels               []mongo.WriteModel
-	contractAccountStatusModels []mongo.WriteModel
-	statesValue                 *sync.Map
+	block                 block.Block
+	st                    *Database
+	opsTreeNodes          map[string]operation.FixedTreeNode
+	operationModels       []mongo.WriteModel
+	accountModels         []mongo.WriteModel
+	balanceModels         []mongo.WriteModel
+	contractAccountModels []mongo.WriteModel
+	nftCollectionModels   []mongo.WriteModel
+	nftModels             []mongo.WriteModel
+	nftAgentModels        []mongo.WriteModel
+	statesValue           *sync.Map
 }
 
 func NewBlockSession(st *Database, blk block.Block) (*BlockSession, error) {
@@ -89,8 +93,26 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		return err
 	}
 
-	if len(bs.contractAccountStatusModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameExtension, bs.contractAccountStatusModels); err != nil {
+	if len(bs.contractAccountModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameExtension, bs.contractAccountModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.nftCollectionModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.nftModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.nftAgentModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameNFTAgent, bs.nftAgentModels); err != nil {
 			return err
 		}
 	}
@@ -171,7 +193,10 @@ func (bs *BlockSession) prepareAccounts() error {
 
 	var accountModels []mongo.WriteModel
 	var balanceModels []mongo.WriteModel
-	var contractAccountStatusModels []mongo.WriteModel
+	var contractAccountModels []mongo.WriteModel
+	var nftCollectionModels []mongo.WriteModel
+	var nftModels []mongo.WriteModel
+	var nftAgentModels []mongo.WriteModel
 	for i := range bs.block.States() {
 		st := bs.block.States()[i]
 		switch {
@@ -188,11 +213,29 @@ func (bs *BlockSession) prepareAccounts() error {
 			}
 			balanceModels = append(balanceModels, j...)
 		case extensioncurrency.IsStateContractAccountKey(st.Key()):
-			j, err := bs.handleContractAccountStatusState(st)
+			j, err := bs.handleContractAccountState(st)
 			if err != nil {
 				return err
 			}
-			contractAccountStatusModels = append(contractAccountStatusModels, j...)
+			contractAccountModels = append(contractAccountModels, j...)
+		case collection.IsStateCollectionKey(st.Key()):
+			j, err := bs.handleNFTCollectionState(st)
+			if err != nil {
+				return err
+			}
+			nftCollectionModels = append(nftCollectionModels, j...)
+		case collection.IsStateNFTKey(st.Key()):
+			j, err := bs.handleNFTState(st)
+			if err != nil {
+				return err
+			}
+			nftModels = append(nftModels, j...)
+		case collection.IsStateAgentKey(st.Key()):
+			j, err := bs.handleNFTAgentState(st)
+			if err != nil {
+				return err
+			}
+			nftAgentModels = append(nftAgentModels, j...)
 		default:
 			continue
 		}
@@ -201,8 +244,18 @@ func (bs *BlockSession) prepareAccounts() error {
 	bs.accountModels = accountModels
 	bs.balanceModels = balanceModels
 
-	if len(contractAccountStatusModels) > 0 {
-		bs.contractAccountStatusModels = contractAccountStatusModels
+	if len(contractAccountModels) > 0 {
+		bs.contractAccountModels = contractAccountModels
+	}
+	if len(nftCollectionModels) > 0 {
+		bs.nftCollectionModels = nftCollectionModels
+	}
+	if len(nftModels) > 0 {
+		bs.nftModels = nftModels
+	}
+
+	if len(nftAgentModels) > 0 {
+		bs.nftAgentModels = nftAgentModels
 	}
 
 	return nil
@@ -226,11 +279,38 @@ func (bs *BlockSession) handleBalanceState(st state.State) ([]mongo.WriteModel, 
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
-func (bs *BlockSession) handleContractAccountStatusState(st state.State) ([]mongo.WriteModel, error) {
-	doc, err := NewContractAccountStatusDoc(st, bs.st.database.Encoder())
+func (bs *BlockSession) handleContractAccountState(st state.State) ([]mongo.WriteModel, error) {
+	doc, err := NewContractAccountDoc(st, bs.st.database.Encoder())
 	if err != nil {
 		return nil, err
 	}
+	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
+}
+
+func (bs *BlockSession) handleNFTCollectionState(st state.State) ([]mongo.WriteModel, error) {
+	doc, err := NewNFTCollectionDoc(st, bs.st.database.Encoder())
+	if err != nil {
+		return nil, err
+	}
+
+	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
+}
+
+func (bs *BlockSession) handleNFTState(st state.State) ([]mongo.WriteModel, error) {
+	doc, err := NewNFTDoc(st, bs.st.database.Encoder())
+	if err != nil {
+		return nil, err
+	}
+
+	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
+}
+
+func (bs *BlockSession) handleNFTAgentState(st state.State) ([]mongo.WriteModel, error) {
+	doc, err := NewNFTAgentDoc(st, bs.st.database.Encoder())
+	if err != nil {
+		return nil, err
+	}
+
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
@@ -283,6 +363,10 @@ func (bs *BlockSession) close() error {
 	bs.operationModels = nil
 	bs.accountModels = nil
 	bs.balanceModels = nil
+	bs.contractAccountModels = nil
+	bs.nftCollectionModels = nil
+	bs.nftModels = nil
+	bs.nftAgentModels = nil
 
 	return bs.st.Close()
 }

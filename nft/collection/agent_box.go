@@ -70,6 +70,10 @@ func (abx AgentBox) IsValid([]byte) error {
 	return nil
 }
 
+func (abx AgentBox) ID() extensioncurrency.ContractID {
+	return abx.collection
+}
+
 func (abx AgentBox) Equal(b AgentBox) bool {
 	abx.Sort(true)
 	b.Sort(true)

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
@@ -271,6 +272,18 @@ func (hd *Handlers) buildOperationHal(va OperationValue) (Hal, error) {
 			}
 		}
 	}
+
+	return hal, nil
+}
+
+func (hd *Handlers) buildNFTAgentHal(va collection.AgentBox, address base.Address, symbol string) (Hal, error) {
+	var hal Hal
+
+	h, err := hd.combineURL(HandlerPathAccountNFTAgent, "address", address.String(), "symbol", symbol)
+	if err != nil {
+		return nil, err
+	}
+	hal = NewBaseHal(va, NewHalLink(h, nil))
 
 	return hal, nil
 }

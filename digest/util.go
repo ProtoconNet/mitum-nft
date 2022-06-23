@@ -199,3 +199,17 @@ func HTTP2HandleError(w http.ResponseWriter, err error) {
 
 	HTTP2ProblemWithError(w, err, status)
 }
+
+func parseContractIDFromPath(s string) (string, error) {
+	s = strings.TrimSpace(s)
+	if len(s) < 1 {
+		return "", errors.Errorf("empty id")
+	}
+
+	//	h, err := document.ParseDocID(s)
+	//	if err != nil {
+	//		return "", err
+	//	}
+
+	return s, nil
+}

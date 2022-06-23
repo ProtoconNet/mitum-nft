@@ -1,8 +1,6 @@
 package digest
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum/base/state"
 	mongodbstorage "github.com/spikeekips/mitum/storage/mongodb"
@@ -77,12 +75,28 @@ func LoadContractAccountStatus(decoder func(interface{}) error, encs *encoder.En
 	}
 
 	if _, hinter, err := mongodbstorage.LoadDataFromDoc(b, encs); err != nil {
-		fmt.Println(err)
 		return nil, err
 	} else if st, ok := hinter.(state.State); !ok {
-		fmt.Printf("not ContractAccountStatus : %T", hinter)
 		return nil, errors.Errorf("not ContractAccountStatus : %T", hinter)
 	} else {
 		return st, nil
 	}
+}
+
+func LoadState(decoder func(interface{}) error, encs *encoder.Encoders) (state.State, error) {
+	var b bson.Raw
+	if err := decoder(&b); err != nil {
+		return nil, err
+	}
+	_, hinter, err := mongodbstorage.LoadDataFromDoc(b, encs)
+	if err != nil {
+		return nil, err
+	}
+
+	rs, ok := hinter.(state.State)
+	if !ok {
+		return nil, errors.Errorf("not state.State: %T", hinter)
+	}
+
+	return rs, nil
 }

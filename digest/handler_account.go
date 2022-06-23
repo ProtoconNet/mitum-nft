@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum/base"
@@ -429,4 +430,77 @@ func (hd *Handlers) accountsByPublickey(
 	}
 
 	return offsetHeight, items, lastaddress, nil
+}
+
+func (hd *Handlers) handleAccountNFTAgent(w http.ResponseWriter, r *http.Request) {
+	cachekey := CacheKeyPath(r)
+	if err := LoadFromCache(hd.cache, cachekey, w); err == nil {
+		return
+	}
+
+	var address base.Address
+	if a, err := base.DecodeAddressFromString(strings.TrimSpace(mux.Vars(r)["address"]), hd.enc); err != nil {
+		HTTP2ProblemWithError(w, err, http.StatusBadRequest)
+
+		return
+	} else if err := a.IsValid(nil); err != nil {
+		HTTP2ProblemWithError(w, err, http.StatusBadRequest)
+		return
+	} else {
+		address = a
+	}
+
+	s, err := parseContractIDFromPath(mux.Vars(r)["symbol"])
+	if err != nil {
+		HTTP2ProblemWithError(
+			w,
+			errors.Errorf("invalid collection symbol for nftagent by address and symbol: %q", err),
+			http.StatusBadRequest,
+		)
+
+		return
+	}
+
+	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
+		i, err := hd.handleAccountNFTAgentInGroup(address, s)
+
+		return i, err
+	}); err != nil {
+		HTTP2HandleError(w, err)
+	} else {
+		b := v.([]byte)
+
+		HTTP2WriteHalBytes(hd.enc, w, b, http.StatusOK)
+
+		if !shared {
+			HTTP2WriteCache(w, cachekey, time.Second*2)
+		}
+	}
+}
+
+func (hd *Handlers) handleAccountNFTAgentInGroup(
+	address base.Address,
+	symnbolstring string,
+) ([]byte, error) {
+	var vas Hal
+	if err := hd.database.NFTAgentByAddressAndSymbol(
+		address,
+		symnbolstring,
+		func(va collection.AgentBox) (bool, error) {
+			hal, err := hd.buildNFTAgentHal(va, address, symnbolstring)
+			if err != nil {
+				return false, err
+			}
+			vas = hal
+
+			return true, nil
+		},
+	); err != nil {
+		return nil, err
+	} else if vas == nil {
+		return nil, util.NotFoundError.Errorf("agent not found")
+	}
+
+	b, err := hd.enc.Marshal(vas)
+	return b, err
 }

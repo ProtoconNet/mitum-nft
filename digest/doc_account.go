@@ -100,8 +100,8 @@ type ContractAccountStatusDoc struct {
 	st state.State
 }
 
-// NewContractAccountStatusDoc gets the State of contract account status
-func NewContractAccountStatusDoc(st state.State, enc encoder.Encoder) (ContractAccountStatusDoc, error) {
+// NewContractAccountDoc gets the State of contract account status
+func NewContractAccountDoc(st state.State, enc encoder.Encoder) (ContractAccountStatusDoc, error) {
 	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return ContractAccountStatusDoc{}, err

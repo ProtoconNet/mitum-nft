@@ -42,6 +42,9 @@ var (
 	HandlerPathAccount                    = `/account/{address:(?i)` + base.REStringAddressString + `}`            // revive:disable-line:line-length-limit
 	HandlerPathAccountOperations          = `/account/{address:(?i)` + base.REStringAddressString + `}/operations` // revive:disable-line:line-length-limit
 	HandlerPathAccounts                   = `/accounts`
+	HandlerPathAccountNFTAgent            = `/account/{address:(?i)` + base.REStringAddressString + `}/nftagent/{symbol:.*}` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection              = `/nft/collection/{symbol:.*}`
+	HandlerPathNFT                        = `/nft/{id:.*}`
 	HandlerPathOperationBuildFactTemplate = `/builder/operation/fact/template/{fact:[\w][\w\-]*}`
 	HandlerPathOperationBuildFact         = `/builder/operation/fact`
 	HandlerPathOperationBuildSign         = `/builder/operation/sign`
@@ -64,6 +67,9 @@ var RateLimitHandlerMap = map[string]string{
 	"account":                         HandlerPathAccount,
 	"account-operations":              HandlerPathAccountOperations,
 	"accounts":                        HandlerPathAccounts,
+	"account-nftagent":                HandlerPathAccountNFTAgent,
+	"nft-collection":                  HandlerPathNFTCollection,
+	"nft":                             HandlerPathNFT,
 	"builder-operation-fact-template": HandlerPathOperationBuildFactTemplate,
 	"builder-operation-fact":          HandlerPathOperationBuildFact,
 	"builder-operation-sign":          HandlerPathOperationBuildSign,
@@ -189,7 +195,13 @@ func (hd *Handlers) setHandlers() {
 		Methods(http.MethodOptions, "GET")
 	hd.setHandler(HandlerPathAccountOperations, hd.handleAccountOperations, true).
 		Methods(http.MethodOptions, "GET")
+	hd.setHandler(HandlerPathAccountNFTAgent, hd.handleAccountNFTAgent, true).
+		Methods(http.MethodOptions, "GET")
 	hd.setHandler(HandlerPathAccounts, hd.handleAccounts, true).
+		Methods(http.MethodOptions, "GET")
+	hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true).
+		Methods(http.MethodOptions, "GET")
+	hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
 		Methods(http.MethodOptions, "GET")
 	hd.setHandler(HandlerPathOperationBuildFactTemplate, hd.handleOperationBuildFactTemplate, true).
 		Methods(http.MethodOptions, "GET")

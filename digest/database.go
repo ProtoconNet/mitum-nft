@@ -10,6 +10,8 @@ import (
 	"sync"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
+	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/spikeekips/mitum-currency/currency"
@@ -31,10 +33,13 @@ import (
 var maxLimit int64 = 50
 
 var (
-	defaultColNameAccount   = "digest_ac"
-	defaultColNameExtension = "digest_et"
-	defaultColNameBalance   = "digest_bl"
-	defaultColNameOperation = "digest_op"
+	defaultColNameAccount       = "digest_ac"
+	defaultColNameExtension     = "digest_et"
+	defaultColNameBalance       = "digest_bl"
+	defaultColNameOperation     = "digest_op"
+	defaultColNameNFTCollection = "digest_nftcollection"
+	defaultColNameNFT           = "digest_nft"
+	defaultColNameNFTAgent      = "digest_nftagent"
 )
 
 var AllCollections = []string{
@@ -42,6 +47,9 @@ var AllCollections = []string{
 	defaultColNameExtension,
 	defaultColNameBalance,
 	defaultColNameOperation,
+	defaultColNameNFTCollection,
+	defaultColNameNFT,
+	defaultColNameNFTAgent,
 }
 
 var DigestStorageLastBlockKey = "digest_last_block"
@@ -547,6 +555,44 @@ end:
 	return nil
 }
 
+func (st *Database) NFTAgentByAddressAndSymbol(
+	address base.Address,
+	symbol string,
+	callback func(collection.AgentBox) (bool, error),
+) error {
+	filter, err := buildNFTAgentsFilterByAddressAndSymbol(address, symbol)
+	if err != nil {
+		return err
+	}
+
+	sr := -1
+
+	opt := options.Find().SetSort(
+		util.NewBSONFilter("height", sr).D(),
+	)
+
+	var sta state.State
+	return st.database.Client().Find(
+		context.Background(),
+		defaultColNameNFTAgent,
+		filter,
+		func(cursor *mongo.Cursor) (bool, error) {
+			i, err := LoadState(cursor.Decode, st.database.Encoders())
+			if err != nil {
+				return false, err
+			}
+			sta = i
+			va, err := collection.StateAgentsValue(sta)
+			if err != nil {
+				return false, err
+			}
+
+			return callback(va)
+		},
+		opt,
+	)
+}
+
 func (st *Database) balance(a base.Address) ([]currency.Amount, base.Height, base.Height, error) {
 	lastHeight, previousHeight := base.NilHeight, base.NilHeight
 	var cids []string
@@ -826,6 +872,19 @@ func buildOperationsFilterByAddress(address base.Address, offset string, reverse
 	return filter, nil
 }
 
+func buildNFTAgentsFilterByAddressAndSymbol(address base.Address, symbol string) (bson.D, error) {
+	filter := bson.D{
+		{"$and",
+			bson.A{
+				bson.D{{"address", bson.D{{"$in", []string{address.String()}}}}},
+				bson.D{{"collectionid", bson.D{{"$in", []string{symbol}}}}},
+			},
+		},
+	}
+
+	return filter, nil
+}
+
 func parseOffsetByString(s string) (base.Height, string, error) {
 	var a, b string
 	switch n := strings.SplitN(s, ",", 2); {
@@ -947,4 +1006,58 @@ func (st *Database) ContractAccountStatus(a base.Address) (base.Address, bool, b
 	}
 
 	return v.Owner(), v.IsActive(), lastHeight, previousHeight, nil
+}
+
+func (st *Database) NFTCollection(symbol string) (nft.Design, base.Height, base.Height, error) {
+	lastHeight, previousHeight := base.NilHeight, base.NilHeight
+	var sta state.State
+	if err := st.database.Client().GetByFilter(
+		defaultColNameNFTCollection,
+		util.NewBSONFilter("symbol", symbol).D(),
+		func(res *mongo.SingleResult) error {
+			i, err := LoadState(res.Decode, st.database.Encoders())
+			if err != nil {
+				return err
+			}
+			sta = i
+
+			return nil
+		},
+		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
+	); err != nil {
+		return nft.Design{}, lastHeight, previousHeight, err
+	}
+
+	i, err := collection.StateCollectionValue(sta)
+	if err != nil {
+		return nft.Design{}, lastHeight, previousHeight, err
+	}
+	return i, lastHeight, previousHeight, nil
+}
+
+func (st *Database) NFT(symbol string) (nft.NFT, base.Height, base.Height, error) {
+	lastHeight, previousHeight := base.NilHeight, base.NilHeight
+	var sta state.State
+	if err := st.database.Client().GetByFilter(
+		defaultColNameNFT,
+		util.NewBSONFilter("nftid", symbol).D(),
+		func(res *mongo.SingleResult) error {
+			i, err := LoadState(res.Decode, st.database.Encoders())
+			if err != nil {
+				return err
+			}
+			sta = i
+
+			return nil
+		},
+		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
+	); err != nil {
+		return nft.NFT{}, lastHeight, previousHeight, err
+	}
+
+	i, err := collection.StateNFTValue(sta)
+	if err != nil {
+		return nft.NFT{}, lastHeight, previousHeight, err
+	}
+	return i, lastHeight, previousHeight, nil
 }
