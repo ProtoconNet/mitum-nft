@@ -78,22 +78,19 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return err
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
+	} else if !nv.Active() {
+		return errors.Errorf("dead nft; %q", nid)
 	} else {
 		approved = nv.Approved()
 		owner = nv.Owner()
 
-		n := nft.NewNFT(nid, receiver, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
+		n := nft.NewNFT(nid, nv.Active(), receiver, nv.NftHash(), nv.Uri(), receiver, nv.Creators(), nv.Copyrighters())
 		if err := n.IsValid(nil); err != nil {
 			return err
 		}
 
 		ipp.nft = n
 		ipp.nst = st
-	}
-
-	// check owner
-	if owner.String() == "" {
-		return errors.Errorf("dead nft; %q", nid)
 	}
 
 	// check authorization

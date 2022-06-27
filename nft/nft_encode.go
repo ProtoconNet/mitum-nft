@@ -9,6 +9,7 @@ import (
 func (n *NFT) unpack(
 	enc encoder.Encoder,
 	bid []byte,
+	active bool,
 	bo base.AddressDecoder,
 	hash string,
 	uri string,
@@ -23,6 +24,8 @@ func (n *NFT) unpack(
 	} else {
 		n.id = id
 	}
+
+	n.active = active
 
 	owner, err := bo.Encode(enc)
 	if err != nil {

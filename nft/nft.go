@@ -36,6 +36,7 @@ var (
 type NFT struct {
 	hint.BaseHinter
 	id           NFTID
+	active       bool
 	owner        base.Address
 	hash         NFTHash
 	uri          URI
@@ -44,10 +45,11 @@ type NFT struct {
 	copyrighters []Signer
 }
 
-func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
+func NewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
 	return NFT{
 		BaseHinter:   hint.NewBaseHinter(NFTHint),
 		id:           id,
+		active:       active,
 		owner:        owner,
 		hash:         hash,
 		uri:          uri,
@@ -57,8 +59,8 @@ func NewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.A
 	}
 }
 
-func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
-	n := NewNFT(id, owner, hash, uri, approved, creators, copyrighters)
+func MustNewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
+	n := NewNFT(id, active, owner, hash, uri, approved, creators, copyrighters)
 
 	if err := n.IsValid(nil); err != nil {
 		panic(err)
@@ -68,8 +70,15 @@ func MustNewNFT(id NFTID, owner base.Address, hash NFTHash, uri URI, approved ba
 }
 
 func (n NFT) Bytes() []byte {
+	ba := make([]byte, 1)
 	bcrs := [][]byte{}
 	bcps := [][]byte{}
+
+	if n.active {
+		ba[0] = 1
+	} else {
+		ba[0] = 0
+	}
 
 	for i := range n.creators {
 		bcrs = append(bcrs, n.creators[i].Bytes())
@@ -81,6 +90,7 @@ func (n NFT) Bytes() []byte {
 
 	return util.ConcatBytesSlice(
 		n.id.Bytes(),
+		ba,
 		n.owner.Bytes(),
 		n.hash.Bytes(),
 		[]byte(n.uri.String()),
@@ -106,8 +116,10 @@ func (n NFT) IsValid([]byte) error {
 	if err := isvalid.Check(
 		nil, false,
 		n.id,
+		n.owner,
 		n.hash,
 		n.uri,
+		n.approved,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}
@@ -152,17 +164,15 @@ func (n NFT) IsValid([]byte) error {
 		founds[copyrighter] = struct{}{}
 	}
 
-	if len(n.approved.String()) > 0 {
-		if err := n.approved.IsValid(nil); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func (n NFT) ID() NFTID {
 	return n.id
+}
+
+func (n NFT) Active() bool {
+	return n.active
 }
 
 func (n NFT) Owner() base.Address {
@@ -191,4 +201,8 @@ func (n NFT) Copyrighters() []Signer {
 
 func (n NFT) Equal(cn NFT) bool {
 	return n.ID().Equal(cn.ID())
+}
+
+func (n NFT) ExistsApproved() bool {
+	return !n.approved.Equal(n.owner)
 }

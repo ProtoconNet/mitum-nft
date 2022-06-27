@@ -117,7 +117,7 @@ func (ipp *MintItemProcessor) PreProcess(
 		}
 	}
 
-	n := nft.NewNFT(id, ipp.sender, form.NftHash(), form.Uri(), currency.Address{}, form.Creators(), form.Copyrighters())
+	n := nft.NewNFT(id, true, ipp.sender, form.NftHash(), form.Uri(), ipp.sender, form.Creators(), form.Copyrighters())
 	if err := n.IsValid(nil); err != nil {
 		return operation.NewBaseReasonError(err.Error())
 	}

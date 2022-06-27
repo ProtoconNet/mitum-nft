@@ -82,22 +82,19 @@ func (ipp *BurnItemProcessor) PreProcess(
 		return err
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
+	} else if !nv.Active() {
+		return errors.Errorf("dead nft; %q", nid)
 	} else {
 		approved = nv.Approved()
 		owner = nv.Owner()
 
-		n := nft.NewNFT(nv.ID(), currency.Address{}, nv.NftHash(), nv.Uri(), currency.Address{}, nv.Creators(), nv.Copyrighters())
+		n := nft.NewNFT(nv.ID(), false, nv.Owner(), nv.NftHash(), nv.Uri(), nv.Owner(), nv.Creators(), nv.Copyrighters())
 		if err := n.IsValid(nil); err != nil {
 			return err
 		}
 
 		ipp.nft = n
 		ipp.nst = st
-	}
-
-	// check owner
-	if owner.String() == "" {
-		return errors.Errorf("dead nft; %q", nid)
 	}
 
 	// check authorization

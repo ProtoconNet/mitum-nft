@@ -50,13 +50,8 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return err
 	}
 
-	if ipp.item.Approved().String() != "" {
-		if err := checkExistsState(currency.StateKeyAccount(ipp.item.Approved()), getState); err != nil {
-			return err
-		}
-		if ipp.item.Approved().Equal(ipp.sender) {
-			return errors.Errorf("sender cannot be approved account itself; %q", ipp.item.Approved())
-		}
+	if err := checkExistsState(currency.StateKeyAccount(ipp.item.Approved()), getState); err != nil {
+		return err
 	}
 
 	nid := ipp.item.NFT()
@@ -73,15 +68,12 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return err
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
+	} else if !nv.Active() {
+		return errors.Errorf("dead nft; %q", nid)
 	} else {
 		ipp.nft = nv
 		ipp.nst = st
 	}
-
-	if ipp.nft.Owner().String() == "" {
-		return errors.Errorf("dead nft; %q", nid)
-	}
-
 	if !ipp.nft.Owner().Equal(ipp.sender) {
 		if err := checkExistsState(currency.StateKeyAccount(ipp.nft.Owner()), getState); err != nil {
 			return err
@@ -94,8 +86,12 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		}
 	}
 
+	if ipp.nft.Approved().Equal(ipp.item.Approved()) {
+		return errors.Errorf("nft owner is already same with target approved account; %q", ipp.nft.Approved())
+	}
+
 	n := nft.NewNFT(
-		nid, ipp.nft.Owner(), ipp.nft.NftHash(),
+		nid, ipp.nft.Active(), ipp.nft.Owner(), ipp.nft.NftHash(),
 		ipp.nft.Uri(), ipp.item.Approved(), ipp.nft.Creators(), ipp.nft.Copyrighters(),
 	)
 	if err := n.IsValid(nil); err != nil {

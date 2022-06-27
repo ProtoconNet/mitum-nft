@@ -69,6 +69,8 @@ func (ipp *SignItemProcessor) PreProcess(
 		return err
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
+	} else if !nv.Active() {
+		return errors.Errorf("dead nft; %q", nid)
 	} else {
 		switch ipp.item.Qualification() {
 		case CreatorQualification:
@@ -80,11 +82,6 @@ func (ipp *SignItemProcessor) PreProcess(
 		}
 		n = nv
 		ipp.nst = st
-	}
-
-	// check owner
-	if n.Owner().String() == "" {
-		return errors.Errorf("dead nft; %q", nid)
 	}
 
 	var idx = -1
@@ -109,9 +106,9 @@ func (ipp *SignItemProcessor) PreProcess(
 	signers[idx] = signer
 
 	if ipp.item.Qualification() == CreatorQualification {
-		n = nft.NewNFT(n.ID(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), signers, n.Copyrighters())
+		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), signers, n.Copyrighters())
 	} else {
-		n = nft.NewNFT(n.ID(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), n.Creators(), signers)
+		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), n.Creators(), signers)
 	}
 
 	if err := n.IsValid(nil); err != nil {

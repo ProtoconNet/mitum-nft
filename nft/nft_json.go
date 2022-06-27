@@ -10,6 +10,7 @@ import (
 type NFTJSONPacker struct {
 	jsonenc.HintedHead
 	ID NFTID        `json:"id"`
+	AC bool         `json:"active"`
 	ON base.Address `json:"owner"`
 	HS NFTHash      `json:"hash"`
 	UR URI          `json:"uri"`
@@ -22,6 +23,7 @@ func (n NFT) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(NFTJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(n.Hint()),
 		ID:         n.id,
+		AC:         n.active,
 		ON:         n.owner,
 		HS:         n.hash,
 		UR:         n.uri,
@@ -33,6 +35,7 @@ func (n NFT) MarshalJSON() ([]byte, error) {
 
 type NFTJSONUnpacker struct {
 	ID json.RawMessage     `json:"id"`
+	AC bool                `json:"active"`
 	ON base.AddressDecoder `json:"owner"`
 	HS string              `json:"hash"`
 	UR string              `json:"uri"`
@@ -47,5 +50,5 @@ func (n *NFT) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return n.unpack(enc, un.ID, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
+	return n.unpack(enc, un.ID, un.AC, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
 }

@@ -12,6 +12,7 @@ func (n NFT) MarshalBSON() ([]byte, error) {
 		bsonenc.NewHintedDoc(n.Hint()),
 		bson.M{
 			"id":           n.id,
+			"active":       n.active,
 			"owner":        n.owner,
 			"hash":         n.hash,
 			"uri":          n.uri,
@@ -24,6 +25,7 @@ func (n NFT) MarshalBSON() ([]byte, error) {
 
 type NFTBSONUnpacker struct {
 	ID bson.Raw            `bson:"id"`
+	AC bool                `bson:"active"`
 	ON base.AddressDecoder `bson:"owner"`
 	HS string              `bson:"hash"`
 	UR string              `bson:"uri"`
@@ -38,5 +40,5 @@ func (n *NFT) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return n.unpack(enc, un.ID, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
+	return n.unpack(enc, un.ID, un.AC, un.ON, un.HS, un.UR, un.AP, un.CR, un.CP)
 }
