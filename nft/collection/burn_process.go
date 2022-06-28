@@ -60,7 +60,7 @@ func (ipp *BurnItemProcessor) PreProcess(
 	} else if design, err := StateCollectionValue(st); err != nil {
 		return err
 	} else if !design.Active() {
-		return errors.Errorf("dead collection; %q", nid.Collection())
+		return errors.Errorf("deactivated collection; %q", nid.Collection())
 	}
 
 	if st, err := existsState(StateKeyNFTs(nid.Collection()), "nfts", getState); err != nil {
@@ -83,7 +83,7 @@ func (ipp *BurnItemProcessor) PreProcess(
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
 	} else if !nv.Active() {
-		return errors.Errorf("dead nft; %q", nid)
+		return errors.Errorf("burned nft; %q", nid)
 	} else {
 		approved = nv.Approved()
 		owner = nv.Owner()

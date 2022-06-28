@@ -153,7 +153,7 @@ func (opp *DelegateProcessor) PreProcess(
 		} else if design, err := StateCollectionValue(st); err != nil {
 			return nil, operation.NewBaseReasonError(err.Error())
 		} else if !design.Active() {
-			return nil, operation.NewBaseReasonError("dead collection; %q", item.Collection())
+			return nil, operation.NewBaseReasonError("deactivated collection; %q", item.Collection())
 		}
 
 		var box AgentBox

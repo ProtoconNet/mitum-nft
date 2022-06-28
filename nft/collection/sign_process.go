@@ -58,7 +58,7 @@ func (ipp *SignItemProcessor) PreProcess(
 	} else if design, err := StateCollectionValue(st); err != nil {
 		return err
 	} else if !design.Active() {
-		return errors.Errorf("dead collection; %q", nid.Collection())
+		return errors.Errorf("deactivated collection; %q", nid.Collection())
 	}
 
 	var signers []nft.Signer
@@ -70,7 +70,7 @@ func (ipp *SignItemProcessor) PreProcess(
 	} else if nv, err := StateNFTValue(st); err != nil {
 		return err
 	} else if !nv.Active() {
-		return errors.Errorf("dead nft; %q", nid)
+		return errors.Errorf("burned nft; %q", nid)
 	} else {
 		switch ipp.item.Qualification() {
 		case CreatorQualification:

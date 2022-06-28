@@ -58,7 +58,7 @@ func (ipp *MintItemProcessor) PreProcess(
 	} else if design, err := StateCollectionValue(st); err != nil {
 		return err
 	} else if !design.Active() {
-		return errors.Errorf("dead collection; %q", design.Symbol())
+		return errors.Errorf("deactivated collection; %q", design.Symbol())
 	} else if !ipp.sender.Equal(design.Creator()) {
 		return errors.Errorf("sender must be collection creator; creator: %q", design.Creator().String())
 	}
