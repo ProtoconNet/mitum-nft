@@ -504,3 +504,15 @@ func (hd *Handlers) handleAccountNFTAgentInGroup(
 	b, err := hd.enc.Marshal(vas)
 	return b, err
 }
+
+func (hd *Handlers) buildNFTAgentHal(va collection.AgentBox, address base.Address, symbol string) (Hal, error) {
+	var hal Hal
+
+	h, err := hd.combineURL(HandlerPathAccountNFTAgent, "address", address.String(), "symbol", symbol)
+	if err != nil {
+		return nil, err
+	}
+	hal = NewBaseHal(va, NewHalLink(h, nil))
+
+	return hal, nil
+}
