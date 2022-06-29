@@ -109,8 +109,8 @@ func (doc NFTAgentDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	address := doc.st.Key()[:len(doc.st.Key())-len(doc.agents.ID().String())-len(collection.StateKeyAgentsSuffix)-1]
-	m["collectionid"] = doc.agents.ID().String()
+	address := doc.st.Key()[:len(doc.st.Key())-len(doc.agents.Collection().String())-len(collection.StateKeyAgentsSuffix)-1]
+	m["collectionid"] = doc.agents.Collection().String()
 	m["address"] = address
 	m["height"] = doc.st.Height()
 

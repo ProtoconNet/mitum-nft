@@ -70,7 +70,7 @@ func (abx AgentBox) IsValid([]byte) error {
 	return nil
 }
 
-func (abx AgentBox) ID() extensioncurrency.ContractID {
+func (abx AgentBox) Collection() extensioncurrency.ContractID {
 	return abx.collection
 }
 
