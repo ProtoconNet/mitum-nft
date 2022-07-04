@@ -61,10 +61,11 @@ func NewHTTP2Server(bind, host string, certs []tls.Certificate) (*HTTP2Server, e
 
 func newHTTP2Server(sv *HTTP2Server, certs []tls.Certificate) (*http.Server, error) {
 	srv := &http.Server{
-		Addr:         sv.bind,
-		ReadTimeout:  time.Second * 10,
-		WriteTimeout: time.Minute * 1,
-		IdleTimeout:  sv.idleTimeout,
+		Addr:              sv.bind,
+		ReadTimeout:       time.Second * 10,
+		WriteTimeout:      time.Minute * 1,
+		IdleTimeout:       sv.idleTimeout,
+		ReadHeaderTimeout: time.Second * 2,
 		TLSConfig: &tls.Config{
 			Certificates: certs,
 			MinVersion:   tls.VersionTLS12,
