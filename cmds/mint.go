@@ -16,15 +16,17 @@ import (
 type MintCommand struct {
 	*BaseCommand
 	OperationFlags
-	Sender      AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
-	Currency    currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	CSymbol     string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
-	Hash        string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
-	Uri         string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Creator     AddressFlag                 `name:"creator" help:"nft contents creator" optional:""`
-	Copyrighter AddressFlag                 `name:"copyrighter" help:"nft contents copyrighter>" optional:""`
-	sender      base.Address
-	form        collection.MintForm
+	Sender           AddressFlag                 `arg:"" name:"sender" help:"sender address" required:"true"`
+	Currency         currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	CSymbol          string                      `arg:"" name:"collection" help:"collection symbol" required:"true"`
+	Hash             string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
+	Uri              string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
+	Creator          SignerFlag                  `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
+	Copyrighter      SignerFlag                  `name:"copyrighter" help:"nft contents copyrighter \"<address>,<share>\"" optional:""`
+	CreatorTotal     uint                        `name:"creator-total" help:"creators total share" optional:""`
+	CopyrighterTotal uint                        `name:"copyrighter-total" help:"copyrighters total share" optional:""`
+	sender           base.Address
+	form             collection.MintForm
 }
 
 func NewMintCommand() MintCommand {
@@ -81,30 +83,40 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	var creators = []nft.Signer{}
-	if len(cmd.Creator.s) > 0 {
+	var crts = []nft.Signer{}
+	if len(cmd.Creator.address) > 0 {
 		if a, err := cmd.Creator.Encode(jenc); err != nil {
 			return errors.Wrapf(err, "invalid creator format; %q", cmd.Creator)
 		} else {
-			r := nft.NewSigner(a, false)
-			if err = r.IsValid(nil); err != nil {
+			signer := nft.NewSigner(a, cmd.Creator.share, false)
+			if err = signer.IsValid(nil); err != nil {
 				return err
 			}
-			creators = append(creators, r)
+			crts = append(crts, signer)
 		}
 	}
 
-	var copyrighters = []nft.Signer{}
-	if len(cmd.Copyrighter.s) > 0 {
+	var cprs = []nft.Signer{}
+	if len(cmd.Copyrighter.address) > 0 {
 		if a, err := cmd.Copyrighter.Encode(jenc); err != nil {
-			return errors.Wrapf(err, "invalid creator format; %q", &cmd.Copyrighter)
+			return errors.Wrapf(err, "invalid copyrighter format; %q", cmd.Copyrighter)
 		} else {
-			r := nft.NewSigner(a, false)
-			if err = r.IsValid(nil); err != nil {
+			signer := nft.NewSigner(a, cmd.Copyrighter.share, false)
+			if err = signer.IsValid(nil); err != nil {
 				return err
 			}
-			copyrighters = append(copyrighters, r)
+			cprs = append(cprs, signer)
 		}
+	}
+
+	creators := nft.NewSigners(cmd.CreatorTotal, crts)
+	if err := creators.IsValid(nil); err != nil {
+		return err
+	}
+
+	copyrighters := nft.NewSigners(cmd.CopyrighterTotal, cprs)
+	if err := copyrighters.IsValid(nil); err != nil {
+		return err
 	}
 
 	form := collection.NewMintForm(hash, uri, creators, copyrighters)

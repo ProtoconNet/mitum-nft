@@ -61,7 +61,7 @@ func (ipp *SignItemProcessor) PreProcess(
 		return errors.Errorf("deactivated collection; %q", nid.Collection())
 	}
 
-	var signers []nft.Signer
+	var signers nft.Signers
 	var n nft.NFT
 
 	// check nft
@@ -84,31 +84,29 @@ func (ipp *SignItemProcessor) PreProcess(
 		ipp.nst = st
 	}
 
-	var idx = -1
-	for i := range signers {
-		if signers[i].Account().Equal(ipp.sender) {
-			idx = i
-			break
-		}
-	}
+	idx := signers.IndexByAddress(ipp.sender)
 	if idx < 0 {
 		return errors.Errorf("not signer of nft; %q, %q", ipp.sender, n.ID())
 	}
 
-	if signers[idx].Signed() {
-		return errors.Errorf("this signer has already signed nft; %q", signers[idx].Account())
+	if signers.IsSignedByAddress(ipp.sender) {
+		return errors.Errorf("this signer has already signed nft; %q", ipp.sender)
 	}
 
-	signer := nft.NewSigner(ipp.sender, true)
+	signer := nft.NewSigner(signers.Signers()[idx].Account(), signers.Signers()[idx].Share(), true)
 	if err := signer.IsValid(nil); err != nil {
 		return err
 	}
-	signers[idx] = signer
+
+	sns := &signers
+	if err := sns.SetSigner(signer); err != nil {
+		return err
+	}
 
 	if ipp.item.Qualification() == CreatorQualification {
-		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), signers, n.Copyrighters())
+		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), *sns, n.Copyrighters())
 	} else {
-		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), n.Creators(), signers)
+		n = nft.NewNFT(n.ID(), n.Active(), n.Owner(), n.NftHash(), n.Uri(), n.Approved(), n.Creators(), *sns)
 	}
 
 	if err := n.IsValid(nil); err != nil {

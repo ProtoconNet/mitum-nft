@@ -99,21 +99,27 @@ func (ipp *MintItemProcessor) PreProcess(
 	}
 
 	form := ipp.item.Form()
-	for j := range form.Creators() {
-		creator := form.Creators()[j].Account()
-		if err := checkExistsState(currency.StateKeyAccount(creator), getState); err != nil {
-			return err
-		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
-			return errors.Errorf("contract account cannot be a creator; %q", creator)
+	if form.Creators().Total() != 0 {
+		creators := form.Creators().Signers()
+		for i := range creators {
+			creator := creators[i].Account()
+			if err := checkExistsState(currency.StateKeyAccount(creator), getState); err != nil {
+				return err
+			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
+				return errors.Errorf("contract account cannot be a creator; %q", creator)
+			}
 		}
 	}
 
-	for j := range form.Copyrighters() {
-		copyrighter := form.Copyrighters()[j].Account()
-		if err := checkExistsState(currency.StateKeyAccount(copyrighter), getState); err != nil {
-			return err
-		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
-			return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
+	if form.Copyrighters().Total() != 0 {
+		copyrighters := form.Copyrighters().Signers()
+		for i := range copyrighters {
+			copyrighter := copyrighters[i].Account()
+			if err := checkExistsState(currency.StateKeyAccount(copyrighter), getState); err != nil {
+				return err
+			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
+				return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
+			}
 		}
 	}
 

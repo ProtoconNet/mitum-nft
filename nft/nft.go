@@ -41,11 +41,11 @@ type NFT struct {
 	hash         NFTHash
 	uri          URI
 	approved     base.Address
-	creators     []Signer
-	copyrighters []Signer
+	creators     Signers
+	copyrighters Signers
 }
 
-func NewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
+func NewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators Signers, copyrighters Signers) NFT {
 	return NFT{
 		BaseHinter:   hint.NewBaseHinter(NFTHint),
 		id:           id,
@@ -59,7 +59,7 @@ func NewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, ap
 	}
 }
 
-func MustNewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators []Signer, copyrighters []Signer) NFT {
+func MustNewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI, approved base.Address, creators Signers, copyrighters Signers) NFT {
 	n := NewNFT(id, active, owner, hash, uri, approved, creators, copyrighters)
 
 	if err := n.IsValid(nil); err != nil {
@@ -71,21 +71,11 @@ func MustNewNFT(id NFTID, active bool, owner base.Address, hash NFTHash, uri URI
 
 func (n NFT) Bytes() []byte {
 	ba := make([]byte, 1)
-	bcrs := [][]byte{}
-	bcps := [][]byte{}
 
 	if n.active {
 		ba[0] = 1
 	} else {
 		ba[0] = 0
-	}
-
-	for i := range n.creators {
-		bcrs = append(bcrs, n.creators[i].Bytes())
-	}
-
-	for i := range n.copyrighters {
-		bcps = append(bcrs, n.copyrighters[i].Bytes())
 	}
 
 	return util.ConcatBytesSlice(
@@ -95,8 +85,8 @@ func (n NFT) Bytes() []byte {
 		n.hash.Bytes(),
 		[]byte(n.uri.String()),
 		n.approved.Bytes(),
-		util.ConcatBytesSlice(bcrs...),
-		util.ConcatBytesSlice(bcps...),
+		n.creators.Bytes(),
+		n.copyrighters.Bytes(),
 	)
 }
 
@@ -120,48 +110,14 @@ func (n NFT) IsValid([]byte) error {
 		n.hash,
 		n.uri,
 		n.approved,
+		n.creators,
+		n.copyrighters,
 	); err != nil {
 		return isvalid.InvalidError.Errorf("invalid nft; %w", err)
 	}
 
 	if len(n.uri.String()) < 1 {
 		return isvalid.InvalidError.Errorf("empty uri")
-	}
-
-	if l := len(n.creators); l > MaxCreators {
-		return isvalid.InvalidError.Errorf("creators over allowed; %d > %d", l, MaxCreators)
-	}
-
-	if l := len(n.copyrighters); l > MaxCopyrighters {
-		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, MaxCopyrighters)
-	}
-
-	founds := map[base.Address]struct{}{}
-	for i := range n.creators {
-		creator := n.creators[i].Account()
-		if err := creator.IsValid(nil); err != nil {
-			return err
-		}
-
-		if _, found := founds[creator]; found {
-			return isvalid.InvalidError.Errorf("duplicate creator found; %q", creator)
-		}
-
-		founds[creator] = struct{}{}
-	}
-
-	founds = map[base.Address]struct{}{}
-	for i := range n.copyrighters {
-		copyrighter := n.copyrighters[i].Account()
-		if err := copyrighter.IsValid(nil); err != nil {
-			return err
-		}
-
-		if _, found := founds[copyrighter]; found {
-			return isvalid.InvalidError.Errorf("duplicate copyrighter found; %q", copyrighter)
-		}
-
-		founds[copyrighter] = struct{}{}
 	}
 
 	return nil
@@ -191,11 +147,11 @@ func (n NFT) Approved() base.Address {
 	return n.approved
 }
 
-func (n NFT) Creators() []Signer {
+func (n NFT) Creators() Signers {
 	return n.creators
 }
 
-func (n NFT) Copyrighters() []Signer {
+func (n NFT) Copyrighters() Signers {
 	return n.copyrighters
 }
 

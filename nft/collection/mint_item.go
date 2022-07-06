@@ -21,11 +21,11 @@ type MintForm struct {
 	hint.BaseHinter
 	hash         nft.NFTHash
 	uri          nft.URI
-	creators     []nft.Signer
-	copyrighters []nft.Signer
+	creators     nft.Signers
+	copyrighters nft.Signers
 }
 
-func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyrighters []nft.Signer) MintForm {
+func NewMintForm(hash nft.NFTHash, uri nft.URI, creators nft.Signers, copyrighters nft.Signers) MintForm {
 	return MintForm{
 		BaseHinter:   hint.NewBaseHinter(MintFormHint),
 		hash:         hash,
@@ -35,7 +35,7 @@ func NewMintForm(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyright
 	}
 }
 
-func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyrighters []nft.Signer) MintForm {
+func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators nft.Signers, copyrighters nft.Signers) MintForm {
 	form := NewMintForm(hash, uri, creators, copyrighters)
 
 	if err := form.IsValid(nil); err != nil {
@@ -46,22 +46,11 @@ func MustNewMintform(hash nft.NFTHash, uri nft.URI, creators []nft.Signer, copyr
 }
 
 func (form MintForm) Bytes() []byte {
-	bcrs := [][]byte{}
-	bcps := [][]byte{}
-
-	for i := range form.creators {
-		bcrs = append(bcrs, form.creators[i].Bytes())
-	}
-
-	for i := range form.copyrighters {
-		bcps = append(bcps, form.copyrighters[i].Bytes())
-	}
-
 	return util.ConcatBytesSlice(
 		form.hash.Bytes(),
 		[]byte(form.uri.String()),
-		util.ConcatBytesSlice(bcrs...),
-		util.ConcatBytesSlice(bcps...),
+		form.creators.Bytes(),
+		form.copyrighters.Bytes(),
 	)
 }
 
@@ -73,27 +62,23 @@ func (form MintForm) Uri() nft.URI {
 	return form.uri
 }
 
-func (form MintForm) Creators() []nft.Signer {
+func (form MintForm) Creators() nft.Signers {
 	return form.creators
 }
 
-func (form MintForm) Copyrighters() []nft.Signer {
+func (form MintForm) Copyrighters() nft.Signers {
 	return form.copyrighters
 }
 
 func (form MintForm) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
-	if len(form.creators) > 1 {
-		for i := range form.creators {
-			as = append(as, form.creators[i].Account())
-		}
+	if ads, err := form.creators.Addresses(); err != nil {
+		as = append(as, ads...)
 	}
 
-	if len(form.copyrighters) > 1 {
-		for i := range form.copyrighters {
-			as = append(as, form.copyrighters[i].Account())
-		}
+	if ads, err := form.copyrighters.Addresses(); err != nil {
+		as = append(as, ads...)
 	}
 
 	return as, nil
@@ -104,48 +89,14 @@ func (form MintForm) IsValid([]byte) error {
 		nil, false,
 		form.BaseHinter,
 		form.hash,
-		form.uri); err != nil {
+		form.uri,
+		form.creators,
+		form.copyrighters); err != nil {
 		return err
 	}
 
 	if len(form.uri.String()) < 1 {
 		return isvalid.InvalidError.Errorf("empty uri")
-	}
-
-	if l := len(form.creators); l > nft.MaxCreators {
-		return isvalid.InvalidError.Errorf("creators over allowed; %d > %d", l, nft.MaxCreators)
-	}
-
-	if l := len(form.copyrighters); l > nft.MaxCopyrighters {
-		return isvalid.InvalidError.Errorf("copyrighters over allowed; %d > %d", l, nft.MaxCopyrighters)
-	}
-
-	founds := map[base.Address]struct{}{}
-	for i := range form.creators {
-		creator := form.creators[i].Account()
-		if err := creator.IsValid(nil); err != nil {
-			return err
-		}
-
-		if _, found := founds[creator]; found {
-			return isvalid.InvalidError.Errorf("duplicate creator found; %q", creator)
-		}
-
-		founds[creator] = struct{}{}
-	}
-
-	founds = map[base.Address]struct{}{}
-	for i := range form.copyrighters {
-		copyrighter := form.copyrighters[i].Account()
-		if err := copyrighter.IsValid(nil); err != nil {
-			return err
-		}
-
-		if _, found := founds[copyrighter]; found {
-			return isvalid.InvalidError.Errorf("duplicate copyrighter found; %q", copyrighter)
-		}
-
-		founds[copyrighter] = struct{}{}
 	}
 
 	return nil

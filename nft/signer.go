@@ -13,22 +13,26 @@ var (
 	SignerHinter = Signer{BaseHinter: hint.NewBaseHinter(SignerHint)}
 )
 
+var MaxSignerShare uint = 100
+
 type Signer struct {
 	hint.BaseHinter
 	account base.Address
+	share   uint
 	signed  bool
 }
 
-func NewSigner(account base.Address, signed bool) Signer {
+func NewSigner(account base.Address, share uint, signed bool) Signer {
 	return Signer{
 		BaseHinter: hint.NewBaseHinter(SignerHint),
 		account:    account,
+		share:      share,
 		signed:     signed,
 	}
 }
 
-func MustNewSigner(account base.Address, signed bool, clue string) Signer {
-	signer := NewSigner(account, signed)
+func MustNewSigner(account base.Address, share uint, signed bool, clue string) Signer {
+	signer := NewSigner(account, share, signed)
 
 	if err := signer.IsValid(nil); err != nil {
 		panic(err)
@@ -47,6 +51,7 @@ func (signer Signer) Bytes() []byte {
 
 	return util.ConcatBytesSlice(
 		signer.account.Bytes(),
+		util.UintToBytes(signer.share),
 		bs,
 	)
 }
@@ -56,11 +61,19 @@ func (signer Signer) IsValid([]byte) error {
 		return err
 	}
 
+	if signer.share > MaxSignerShare {
+		return isvalid.InvalidError.Errorf("share is over max; %d > %d", signer.share, MaxSignerShare)
+	}
+
 	return nil
 }
 
 func (signer Signer) Account() base.Address {
 	return signer.account
+}
+
+func (signer Signer) Share() uint {
+	return signer.share
 }
 
 func (signer Signer) Signed() bool {

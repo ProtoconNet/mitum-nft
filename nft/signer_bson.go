@@ -11,6 +11,7 @@ func (signer Signer) MarshalBSON() ([]byte, error) {
 		bsonenc.NewHintedDoc(signer.Hint()),
 		bson.M{
 			"account": signer.account,
+			"share":   signer.share,
 			"signed":  signer.signed,
 		}),
 	)
@@ -18,6 +19,7 @@ func (signer Signer) MarshalBSON() ([]byte, error) {
 
 type SignerBSONUnpacker struct {
 	AC base.AddressDecoder `bson:"account"`
+	SH uint                `bson:"share"`
 	SG bool                `bson:"signed"`
 }
 
@@ -27,5 +29,5 @@ func (signer *Signer) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return signer.unpack(enc, us.AC, us.SG)
+	return signer.unpack(enc, us.AC, us.SH, us.SG)
 }

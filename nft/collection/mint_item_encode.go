@@ -19,33 +19,21 @@ func (form *MintForm) unpack(
 	form.hash = nft.NFTHash(hash)
 	form.uri = nft.URI(uri)
 
-	hcrs, err := enc.DecodeSlice(bcrs)
-	if err != nil {
+	if hinter, err := enc.Decode(bcrs); err != nil {
 		return err
+	} else if sns, ok := hinter.(nft.Signers); !ok {
+		return util.WrongTypeError.Errorf("not Signers; %T", hinter)
+	} else {
+		form.creators = sns
 	}
-	crs := make([]nft.Signer, len(hcrs))
-	for i := range hcrs {
-		r, ok := hcrs[i].(nft.Signer)
-		if !ok {
-			return util.WrongTypeError.Errorf("not Signer; %T", hcrs[i])
-		}
-		crs[i] = r
-	}
-	form.creators = crs
 
-	hcps, err := enc.DecodeSlice(bcps)
-	if err != nil {
+	if hinter, err := enc.Decode(bcps); err != nil {
 		return err
+	} else if sns, ok := hinter.(nft.Signers); !ok {
+		return util.WrongTypeError.Errorf("not Signer; %T", hinter)
+	} else {
+		form.copyrighters = sns
 	}
-	cps := make([]nft.Signer, len(hcps))
-	for i := range hcps {
-		r, ok := hcps[i].(nft.Signer)
-		if !ok {
-			return util.WrongTypeError.Errorf("not Signer; %T", hcps[i])
-		}
-		cps[i] = r
-	}
-	form.copyrighters = cps
 
 	return nil
 }

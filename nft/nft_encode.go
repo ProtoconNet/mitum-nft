@@ -42,33 +42,21 @@ func (n *NFT) unpack(
 	n.uri = URI(uri)
 	n.hash = NFTHash(hash)
 
-	hcrs, err := enc.DecodeSlice(bcrs)
-	if err != nil {
+	if hinter, err := enc.Decode(bcrs); err != nil {
 		return err
+	} else if sns, ok := hinter.(Signers); !ok {
+		return util.WrongTypeError.Errorf("not Signers; %T", hinter)
+	} else {
+		n.creators = sns
 	}
-	crs := make([]Signer, len(hcrs))
-	for i := range hcrs {
-		r, ok := hcrs[i].(Signer)
-		if !ok {
-			return util.WrongTypeError.Errorf("not Signer; %T", hcrs[i])
-		}
-		crs[i] = r
-	}
-	n.creators = crs
 
-	hcps, err := enc.DecodeSlice(bcps)
-	if err != nil {
+	if hinter, err := enc.Decode(bcps); err != nil {
 		return err
+	} else if sns, ok := hinter.(Signers); !ok {
+		return util.WrongTypeError.Errorf("not Signer; %T", hinter)
+	} else {
+		n.copyrighters = sns
 	}
-	cps := make([]Signer, len(hcps))
-	for i := range hcps {
-		r, ok := hcps[i].(Signer)
-		if !ok {
-			return util.WrongTypeError.Errorf("not Signer; %T", hcps[i])
-		}
-		cps[i] = r
-	}
-	n.copyrighters = cps
 
 	return nil
 }

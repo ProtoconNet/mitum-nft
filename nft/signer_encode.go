@@ -8,6 +8,7 @@ import (
 func (signer *Signer) unpack(
 	enc encoder.Encoder,
 	ba base.AddressDecoder,
+	share uint,
 	signed bool,
 ) error {
 	a, err := ba.Encode(enc)
@@ -16,6 +17,7 @@ func (signer *Signer) unpack(
 	}
 	signer.account = a
 
+	signer.share = share
 	signer.signed = signed
 
 	return nil

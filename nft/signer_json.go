@@ -8,6 +8,7 @@ import (
 type SignerJSONPacker struct {
 	jsonenc.HintedHead
 	AC base.Address `json:"account"`
+	SH uint         `json:"share"`
 	SG bool         `json:"signed"`
 }
 
@@ -15,12 +16,14 @@ func (signer Signer) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(SignerJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(signer.Hint()),
 		AC:         signer.account,
+		SH:         signer.share,
 		SG:         signer.signed,
 	})
 }
 
 type SignerJSONUnpacker struct {
 	AC base.AddressDecoder `json:"account"`
+	SH uint                `json:"share"`
 	SG bool                `json:"signed"`
 }
 
@@ -30,5 +33,5 @@ func (signer *Signer) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return signer.unpack(enc, us.AC, us.SG)
+	return signer.unpack(enc, us.AC, us.SH, us.SG)
 }
