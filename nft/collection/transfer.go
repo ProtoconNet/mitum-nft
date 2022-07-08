@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	TransferFactType   = hint.Type("mitum-nft-tranfer-operation-fact")
+	TransferFactType   = hint.Type("mitum-nft-transfer-operation-fact")
 	TransferFactHint   = hint.NewHint(TransferFactType, "v0.0.1")
 	TransferFactHinter = TransferFact{BaseHinter: hint.NewBaseHinter(TransferFactHint)}
 	TransferType       = hint.Type("mitum-nft-transfer-operation")
