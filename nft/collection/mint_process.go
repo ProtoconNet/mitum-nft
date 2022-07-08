@@ -108,6 +108,9 @@ func (ipp *MintItemProcessor) PreProcess(
 			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(creator), getState); err != nil {
 				return errors.Errorf("contract account cannot be a creator; %q", creator)
 			}
+			if creators[i].Signed() {
+				return errors.Errorf("Cannot sign at the same time as minting; %q", creator)
+			}
 		}
 	}
 
@@ -119,6 +122,9 @@ func (ipp *MintItemProcessor) PreProcess(
 				return err
 			} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(copyrighter), getState); err != nil {
 				return errors.Errorf("contract account cannot be a copyrighter; %q", copyrighter)
+			}
+			if copyrighters[i].Signed() {
+				return errors.Errorf("Cannot sign at the same time as minting; %q", copyrighter)
 			}
 		}
 	}
