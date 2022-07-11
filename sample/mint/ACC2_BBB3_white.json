@@ -1,0 +1,51 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "D2wzoUCFbceo9nNvZy6kCYcP8T4geuZ3pMgLzAzW67kS",
+    "body_hash": "CBfy84DxJAnrG2ssbPWceK5YhL3P9aCw5gp2XLNBe84h",
+    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+    "signature": "381yXZSRURVXPHYSfwjZiVty83ZuVabrkGBsjtb27hdCVgpumK9PDFYaDmMsH7mPihB39sbWaQLNRzwMFBsx8guJxrh38rWC",
+    "signed_at": "2022-07-11T08:22:31.127757Z",
+    "operations": [
+        {
+            "_hint": "mitum-nft-mint-operation-v0.0.1",
+            "hash": "FaKJCq6ddLx9nra2fqFLopJsiWgzwqavAoLBG1Y8NLyK",
+            "fact": {
+                "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
+                "hash": "DtQXNw5qkXNxRNVcsbmYgZEgGa1KFNGzdGdc9w1X6zJt",
+                "token": "MjAyMi0wNy0xMVQwODoyMjozMS4xMjczODha",
+                "sender": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                "items": [
+                    {
+                        "_hint": "mitum-nft-mint-item-v0.0.1",
+                        "collection": "BBB",
+                        "form": {
+                            "_hint": "mitum-nft-mint-form-v0.0.1",
+                            "hash": "abcdefg",
+                            "uri": "https://localhost:5000/BBB/3",
+                            "creators": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            },
+                            "copyrighters": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            }
+                        },
+                        "currency": "MCC"
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+                    "signature": "381yXZDmRqtTir975nNNYQVogUNDJ42CtM6K4QLG3KHybRQ51iRjTPctUssGtyAqd5PkyUMBBMx5x3BzdZ7zJiNAGi8xU7dM",
+                    "signed_at": "2022-07-11T08:22:31.127728Z"
+                }
+            ],
+            "memo": ""
+        }
+    ]
+}

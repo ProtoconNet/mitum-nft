@@ -18,15 +18,17 @@ func (form CollectionRegisterForm) MarshalBSON() ([]byte, error) {
 				"name":    form.name,
 				"royalty": form.royalty,
 				"uri":     form.uri,
+				"whites":  form.whites,
 			}))
 }
 
 type CollectionRegisterFormBSONUnpacker struct {
-	TG base.AddressDecoder `bson:"target"`
-	SB string              `bson:"symbol"`
-	NM string              `bson:"name"`
-	RY uint                `bson:"royalty"`
-	UR string              `bson:"uri"`
+	TG base.AddressDecoder   `bson:"target"`
+	SB string                `bson:"symbol"`
+	NM string                `bson:"name"`
+	RY uint                  `bson:"royalty"`
+	UR string                `bson:"uri"`
+	WH []base.AddressDecoder `bson:"whites"`
 }
 
 func (form *CollectionRegisterForm) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -35,7 +37,7 @@ func (form *CollectionRegisterForm) UnpackBSON(b []byte, enc *bsonenc.Encoder) e
 		return err
 	}
 
-	return form.unpack(enc, uf.TG, uf.SB, uf.NM, uf.RY, uf.UR)
+	return form.unpack(enc, uf.TG, uf.SB, uf.NM, uf.RY, uf.UR, uf.WH)
 }
 
 func (fact CollectionRegisterFact) MarshalBSON() ([]byte, error) {

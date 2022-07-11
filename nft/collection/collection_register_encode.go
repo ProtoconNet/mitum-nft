@@ -17,6 +17,7 @@ func (form *CollectionRegisterForm) unpack(
 	name string,
 	royalty uint,
 	uri string,
+	bws []base.AddressDecoder,
 ) error {
 	target, err := bt.Encode(enc)
 	if err != nil {
@@ -28,6 +29,16 @@ func (form *CollectionRegisterForm) unpack(
 	form.name = CollectionName(name)
 	form.royalty = nft.PaymentParameter(royalty)
 	form.uri = nft.URI(uri)
+
+	whites := make([]base.Address, len(bws))
+	for i := range bws {
+		if white, err := bws[i].Encode(enc); err != nil {
+			return err
+		} else {
+			whites[i] = white
+		}
+	}
+	form.whites = whites
 
 	return nil
 }

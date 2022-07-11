@@ -59,8 +59,17 @@ func (ipp *MintItemProcessor) PreProcess(
 		return err
 	} else if !design.Active() {
 		return errors.Errorf("deactivated collection; %q", design.Symbol())
-	} else if !ipp.sender.Equal(design.Creator()) {
-		return errors.Errorf("sender must be collection creator; creator: %q", design.Creator().String())
+	} else if policy, ok := design.Policy().(CollectionPolicy); !ok {
+		return errors.Errorf("policy of design is not collection-policy; %q", design.Symbol())
+	} else if whites := policy.Whites(); !design.Creator().Equal(ipp.sender) {
+		for i := range whites {
+			if whites[i].Equal(ipp.sender) {
+				break
+			}
+			if i == len(whites)-1 {
+				return errors.Errorf("sender is not whitelisted, nor is collection creator; %q", ipp.sender)
+			}
+		}
 	}
 
 	if st, err := existsState(StateKeyCollectionLastIDX(ipp.item.Collection()), "collection idx", getState); err != nil {

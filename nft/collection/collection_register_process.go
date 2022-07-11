@@ -95,7 +95,20 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		opp.idxState = st
 	}
 
-	policy := NewCollectionPolicy(fact.Form().Name(), fact.Form().Royalty(), fact.Form().Uri())
+	whites := fact.Form().Whites()
+	for i := range whites {
+		if err := checkExistsState(currency.StateKeyAccount(whites[i]), getState); err != nil {
+			return nil, operation.NewBaseReasonError(err.Error())
+		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(whites[i]), getState); err != nil {
+			return nil, operation.NewBaseReasonError("contract account cannot be whitelisted; %q", whites[i])
+		}
+
+		if whites[i].Equal(fact.Sender()) {
+			return nil, operation.NewBaseReasonError("sender cannot be whitelisted; %q", fact.Sender())
+		}
+	}
+
+	policy := NewCollectionPolicy(fact.Form().Name(), fact.Form().Royalty(), fact.Form().Uri(), whites)
 	if err := policy.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
 	}

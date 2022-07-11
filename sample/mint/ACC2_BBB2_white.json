@@ -1,0 +1,58 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "DHWdxpHpoZTqkNMgYv2Vi3biMU8TKXP72rvFoyFG5Maw",
+    "body_hash": "6iqPMzEuKqH3oiyApK7v8qcRZiAQFVoHqJkirf23kSbT",
+    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+    "signature": "381yXYkHsmci6EDCt5bwrSJF1Ldwq93otbraoAZwFBZ7KWhkf5T7yq1fwVHVhRb6exmf2SGxmErV8YywJCVSxoxqBNEXAR5a",
+    "signed_at": "2022-07-11T08:21:55.467242Z",
+    "operations": [
+        {
+            "_hint": "mitum-nft-mint-operation-v0.0.1",
+            "hash": "7N1ehK5Rv3S4sLDxrFR8xhFbcmTdtbpukDdRSabj1Rh8",
+            "fact": {
+                "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
+                "hash": "F3CPUmtniwWGqGi2muT3HTtXQqdMATGLSKmvUPxNN5bB",
+                "token": "MjAyMi0wNy0xMVQwODoyMTo1NS40NjY4NDla",
+                "sender": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                "items": [
+                    {
+                        "_hint": "mitum-nft-mint-item-v0.0.1",
+                        "collection": "BBB",
+                        "form": {
+                            "_hint": "mitum-nft-mint-form-v0.0.1",
+                            "hash": "",
+                            "uri": "https://localhost:5000/BBB/2",
+                            "creators": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 100,
+                                "signers": [
+                                    {
+                                        "_hint": "mitum-nft-signer-v0.0.1",
+                                        "account": "CkiVJAwUhnhUWmPJcFCJrFSM7Y6jjLCdPMu2smEic2dTmca",
+                                        "share": 100,
+                                        "signed": false
+                                    }
+                                ]
+                            },
+                            "copyrighters": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            }
+                        },
+                        "currency": "MCC"
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "25h6wSwSRT6X6ZAsiACy8H2GsdAEchT2QeYCZV6NmJeN6mpu",
+                    "signature": "AN1rKvtkiB73P6DnPXBhmzWjEWD9k6FLGx5Zf3B4RSJmN1iEkzcVYw4Nxth5ikDx4TXDF9N5tdskcUwTQvd7tN9HUU3NPkpBG",
+                    "signed_at": "2022-07-11T08:21:55.467215Z"
+                }
+            ],
+            "memo": ""
+        }
+    ]
+}

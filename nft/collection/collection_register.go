@@ -24,10 +24,11 @@ type CollectionRegisterForm struct {
 	name    CollectionName
 	royalty nft.PaymentParameter
 	uri     nft.URI
+	whites  []base.Address
 }
 
 func NewCollectionRegisterForm(target base.Address, symbol extensioncurrency.ContractID, name CollectionName,
-	royalty nft.PaymentParameter, uri nft.URI) CollectionRegisterForm {
+	royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionRegisterForm {
 	return CollectionRegisterForm{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFormHint),
 		target:     target,
@@ -35,25 +36,34 @@ func NewCollectionRegisterForm(target base.Address, symbol extensioncurrency.Con
 		name:       name,
 		royalty:    royalty,
 		uri:        uri,
+		whites:     whites,
 	}
 }
 
 func MustNewCollectionRegisterForm(target base.Address, symbol extensioncurrency.ContractID, name CollectionName,
-	royalty nft.PaymentParameter, uri nft.URI, limit currency.Big) CollectionRegisterForm {
-	form := NewCollectionRegisterForm(target, symbol, name, royalty, uri)
+	royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionRegisterForm {
+	form := NewCollectionRegisterForm(target, symbol, name, royalty, uri, whites)
+
 	if err := form.IsValid(nil); err != nil {
 		panic(err)
 	}
+
 	return form
 }
 
 func (form CollectionRegisterForm) Bytes() []byte {
+	as := make([][]byte, len(form.whites))
+	for i := range form.whites {
+		as[i] = form.whites[i].Bytes()
+	}
+
 	return util.ConcatBytesSlice(
 		form.target.Bytes(),
 		form.symbol.Bytes(),
 		form.name.Bytes(),
 		form.royalty.Bytes(),
 		form.uri.Bytes(),
+		util.ConcatBytesSlice(as...),
 	)
 }
 
@@ -77,9 +87,20 @@ func (form CollectionRegisterForm) Uri() nft.URI {
 	return form.uri
 }
 
+func (form CollectionRegisterForm) Whites() []base.Address {
+	return form.whites
+}
+
 func (form CollectionRegisterForm) Addresses() ([]base.Address, error) {
-	as := make([]base.Address, 1)
-	as[0] = form.target
+	l := 1 + len(form.whites)
+
+	as := make([]base.Address, l)
+	for i := range form.whites {
+		as[i] = form.whites[i]
+	}
+
+	as[l-1] = form.target
+
 	return as, nil
 }
 
@@ -93,6 +114,22 @@ func (form CollectionRegisterForm) IsValid([]byte) error {
 		form.uri,
 	); err != nil {
 		return err
+	}
+
+	if l := len(form.whites); l > MaxWhiteAddress {
+		return isvalid.InvalidError.Errorf("address in white list over allowed; %d > %d", l, MaxWhiteAddress)
+	}
+
+	founds := map[base.Address]struct{}{}
+	for i := range form.whites {
+		acc := form.whites[i]
+		if err := acc.IsValid(nil); err != nil {
+			return err
+		}
+		if _, found := founds[acc]; found {
+			return isvalid.InvalidError.Errorf("duplicate white found; %q", acc)
+		}
+		founds[acc] = struct{}{}
 	}
 
 	return nil

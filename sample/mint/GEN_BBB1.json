@@ -1,0 +1,51 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "DokviC5he1pPqAEMZih7ntb7yPhtFkcCnsc64BRdSKpZ",
+    "body_hash": "F1oaXWX3QgGzBQ99D7S3Ls2MteJcZsX6967u1xqGXUCN",
+    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+    "signature": "381yXYjbhPKqWv4gEbbQbxMDM3F2JRDnPzFGT3kAw4EXf1N3crZ9PWCbx1KwdEgNngQ1Bzhynj6LthVA5nS9fLtqtA6Q1Sd3",
+    "signed_at": "2022-07-11T08:19:52.796091Z",
+    "operations": [
+        {
+            "hash": "CDkFFXAysi3jNERmfFDRY1G7w2NSxqVRTUzeFS37DG7C",
+            "fact": {
+                "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
+                "hash": "8mPHqm9TJzAikzhA8TovnaVdYiCdCsUrnZZJqB24jYgV",
+                "token": "MjAyMi0wNy0xMVQwODoxOTo1Mi43OTU2Njda",
+                "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
+                "items": [
+                    {
+                        "_hint": "mitum-nft-mint-item-v0.0.1",
+                        "collection": "BBB",
+                        "form": {
+                            "_hint": "mitum-nft-mint-form-v0.0.1",
+                            "hash": "",
+                            "uri": "https://localhost:5000/BBB/1",
+                            "creators": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            },
+                            "copyrighters": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            }
+                        },
+                        "currency": "MCC"
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+                    "signature": "381yXZWRJPDSXXtyPJM1eBN6WmCbEMwn7TbJ35RP3Zt8ZytdM6tP6HN9UKXqkh5wjNuY853QFJXKnDHZxFz4BX6rUQcaQ6Bh",
+                    "signed_at": "2022-07-11T08:19:52.79606Z"
+                }
+            ],
+            "memo": "",
+            "_hint": "mitum-nft-mint-operation-v0.0.1"
+        }
+    ]
+}

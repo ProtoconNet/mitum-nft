@@ -18,6 +18,7 @@ type CollectionRegisterFormJSONPacker struct {
 	NM CollectionName               `json:"name"`
 	RY nft.PaymentParameter         `json:"royalty"`
 	UR nft.URI                      `json:"uri"`
+	WH []base.Address               `json:"whites"`
 }
 
 func (form CollectionRegisterForm) MarshalJSON() ([]byte, error) {
@@ -28,15 +29,17 @@ func (form CollectionRegisterForm) MarshalJSON() ([]byte, error) {
 		NM:         form.name,
 		RY:         form.royalty,
 		UR:         form.uri,
+		WH:         form.whites,
 	})
 }
 
 type CollectionRegisterFormJSONUnpacker struct {
-	TG base.AddressDecoder `json:"target"`
-	SB string              `json:"symbol"`
-	NM string              `json:"name"`
-	RY uint                `json:"royalty"`
-	UR string              `json:"uri"`
+	TG base.AddressDecoder   `json:"target"`
+	SB string                `json:"symbol"`
+	NM string                `json:"name"`
+	RY uint                  `json:"royalty"`
+	UR string                `json:"uri"`
+	WH []base.AddressDecoder `json:"whites"`
 }
 
 func (form *CollectionRegisterForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -44,8 +47,7 @@ func (form *CollectionRegisterForm) UnpackJSON(b []byte, enc *jsonenc.Encoder) e
 	if err := enc.Unmarshal(b, &uf); err != nil {
 		return err
 	}
-
-	return form.unpack(enc, uf.TG, uf.SB, uf.NM, uf.RY, uf.UR)
+	return form.unpack(enc, uf.TG, uf.SB, uf.NM, uf.RY, uf.UR, uf.WH)
 }
 
 type CollectionRegisterFactJSONPacker struct {

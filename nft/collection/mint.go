@@ -93,7 +93,7 @@ func (fact MintFact) IsValid(b []byte) error {
 
 		c := fact.items[i].Collection()
 		if _, found := founds[c]; found {
-			return errors.Errorf("duplicated collection found; %q", c)
+			return errors.Errorf("duplicate collection found; %q", c)
 		}
 		founds[c] = struct{}{}
 	}

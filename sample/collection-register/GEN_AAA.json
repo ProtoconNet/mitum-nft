@@ -1,19 +1,17 @@
 {
     "_hint": "seal-v0.0.1",
-    "hash": "AzdpEhw78EGFQMP1BHxieczdTSpbuJf81hsYEqjZQu8D",
-    "body_hash": "4vCQV72Wzbjx9tM5K3UgAxAbm4LtkusmH5SAYPza7JSb",
+    "hash": "ognubwjRhXAAoNfXQAprNNESGXoKoYSqMb7u9ijogtr",
+    "body_hash": "3nELM5Gjv88By6vA5zS8zZ2en93JUiRGr98NSn8RJ2ng",
     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-    "signature": "AN1rKvt7PBe5uvkrzECpQGTxDnx9UfzVqTH1dvcLt6NqcCxgZJgbxCPJ9u6xMqVR9AyqiRVTWBm5kgRxVoWgugvU4YpsYcW4n",
-    "signed_at": "2022-06-08T05:29:53.120903Z",
+    "signature": "381yXZ2pg6EANACUFV1FYfzwFbZvckTDUjhTpAiDW6tVZ3x2tbZsMhfs5bJ7U8TjiNZ7oUhLBHg3sA7zRYESEPaRSpv5mUD2",
+    "signed_at": "2022-07-11T08:17:23.526657Z",
     "operations": [
         {
-            "memo": "",
-            "_hint": "mitum-nft-collection-register-operation-v0.0.1",
-            "hash": "GumF4KymqQuwR6jk5GkV39MryTkn3tVysoZ2A9qF6gzx",
+            "hash": "FviR2NqvPfDxJ15J6fMxkcungEdMkgazMUJGVAayFNbP",
             "fact": {
                 "_hint": "mitum-nft-collection-register-operation-fact-v0.0.1",
-                "hash": "G5ur8VywtsHiQ6yMVeDqmvGnj43v3C3HALPtRZ3CWhNV",
-                "token": "MjAyMi0wNi0wOFQwNToyOTo1My4xMjA1ODVa",
+                "hash": "FawDUQdhC9gvAXbqmJ55NRCGEmf2tjVBzWe9KEHi6qGk",
+                "token": "MjAyMi0wNy0xMVQwODoxNzoyMy41MjYyNzZa",
                 "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
                 "form": {
                     "_hint": "mitum-nft-collection-register-form-v0.0.1",
@@ -21,7 +19,8 @@
                     "symbol": "AAA",
                     "name": "First Collection",
                     "royalty": 1,
-                    "uri": ""
+                    "uri": "",
+                    "whites": []
                 },
                 "currency": "MCC"
             },
@@ -29,10 +28,12 @@
                 {
                     "_hint": "base-fact-sign-v0.0.1",
                     "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
-                    "signature": "AN1rKvtWeKioBFdb8dLqVuMu3GUS8fNkwnYedjiZB423M9Qck83eMqq9kpHJKKDnSMriH2oo8cJGmRrGfwLEtB9TjSqw7GB8L",
-                    "signed_at": "2022-06-08T05:29:53.120876Z"
+                    "signature": "AN1rKvtZtpnYRB2s1vbDktWdbJySjCvGcBkbusohSaYWktES3Rnra4QzQaagd5pJJmZaqBhcaS1zQW7K7VQXEufg4wHLeHSPo",
+                    "signed_at": "2022-07-11T08:17:23.526612Z"
                 }
-            ]
+            ],
+            "memo": "",
+            "_hint": "mitum-nft-collection-register-operation-v0.0.1"
         }
     ]
 }

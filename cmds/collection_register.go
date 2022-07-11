@@ -28,6 +28,7 @@ type CollectionRegisterCommand struct {
 	Name     string                      `arg:"" name:"name" help:"collection name" required:"true"`
 	Royalty  uint                        `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
 	Uri      string                      `name:"uri" help:"collection uri" optional:""`
+	White    AddressFlag                 `name:"white" help:"whitelisted address" optional:""`
 	sender   base.Address
 	target   base.Address
 	form     collection.CollectionRegisterForm
@@ -83,6 +84,15 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		cmd.target = a
 	}
 
+	var white base.Address = nil
+	if cmd.White.s != "" {
+		if a, err := cmd.White.Encode(jenc); err != nil {
+			return errors.Wrapf(err, "invalid white format; %q", cmd.White)
+		} else {
+			white = a
+		}
+	}
+
 	symbol := extensioncurrency.ContractID(cmd.CSymbol)
 	if err := symbol.IsValid(nil); err != nil {
 		return err
@@ -103,7 +113,12 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		return err
 	}
 
-	form := collection.NewCollectionRegisterForm(cmd.target, symbol, name, royalty, uri)
+	whites := []base.Address{}
+	if white != nil {
+		whites = append(whites, white)
+	}
+
+	form := collection.NewCollectionRegisterForm(cmd.target, symbol, name, royalty, uri, whites)
 	if err := form.IsValid(nil); err != nil {
 		return err
 	}

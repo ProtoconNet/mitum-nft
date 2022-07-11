@@ -10,6 +10,8 @@ import (
 	"github.com/spikeekips/mitum/util/isvalid"
 )
 
+var MaxWhiteAddress = 10
+
 var (
 	MinLengthCollectionName = 3
 	MaxLengthCollectionName = 30
@@ -48,19 +50,21 @@ type CollectionPolicy struct {
 	name    CollectionName
 	royalty nft.PaymentParameter
 	uri     nft.URI
+	whites  []base.Address
 }
 
-func NewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI) CollectionPolicy {
+func NewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionPolicy {
 	return CollectionPolicy{
 		BaseHinter: hint.NewBaseHinter(CollectionPolicyHint),
 		name:       name,
 		royalty:    royalty,
 		uri:        uri,
+		whites:     whites,
 	}
 }
 
-func MustNewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI) CollectionPolicy {
-	policy := NewCollectionPolicy(name, royalty, uri)
+func MustNewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionPolicy {
+	policy := NewCollectionPolicy(name, royalty, uri, whites)
 
 	if err := policy.IsValid(nil); err != nil {
 		panic(err)
@@ -70,10 +74,16 @@ func MustNewCollectionPolicy(name CollectionName, royalty nft.PaymentParameter, 
 }
 
 func (policy CollectionPolicy) Bytes() []byte {
+	as := make([][]byte, len(policy.whites))
+	for i := range policy.whites {
+		as[i] = policy.whites[i].Bytes()
+	}
+
 	return util.ConcatBytesSlice(
 		policy.name.Bytes(),
 		policy.royalty.Bytes(),
 		policy.uri.Bytes(),
+		util.ConcatBytesSlice(as...),
 	)
 }
 
@@ -82,6 +92,22 @@ func (policy CollectionPolicy) IsValid([]byte) error {
 		policy.name,
 		policy.royalty); err != nil {
 		return err
+	}
+
+	if l := len(policy.whites); l > MaxWhiteAddress {
+		return isvalid.InvalidError.Errorf("address in white list over allowed; %d > %d", l, MaxWhiteAddress)
+	}
+
+	founds := map[base.Address]struct{}{}
+	for i := range policy.whites {
+		acc := policy.whites[i]
+		if err := acc.IsValid(nil); err != nil {
+			return err
+		}
+		if _, found := founds[acc]; found {
+			return isvalid.InvalidError.Errorf("duplicate white found; %q", acc)
+		}
+		founds[acc] = struct{}{}
 	}
 
 	return nil
@@ -99,8 +125,15 @@ func (policy CollectionPolicy) Uri() nft.URI {
 	return policy.uri
 }
 
+func (policy CollectionPolicy) Whites() []base.Address {
+	return policy.whites
+}
+
 func (policy CollectionPolicy) Addresses() ([]base.Address, error) {
-	as := []base.Address{}
+	as := make([]base.Address, len(policy.whites))
+	for i := range policy.whites {
+		as[i] = policy.whites[i]
+	}
 	return as, nil
 }
 

@@ -3,6 +3,7 @@ package collection
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 
+	"github.com/spikeekips/mitum/base"
 	jsonenc "github.com/spikeekips/mitum/util/encoder/json"
 )
 
@@ -11,6 +12,7 @@ type CollectionPolicyJSONPacker struct {
 	NM CollectionName       `json:"name"`
 	RY nft.PaymentParameter `json:"royalty"`
 	UR nft.URI              `json:"uri"`
+	WH []base.Address       `json:"whites"`
 }
 
 func (p CollectionPolicy) MarshalJSON() ([]byte, error) {
@@ -23,9 +25,10 @@ func (p CollectionPolicy) MarshalJSON() ([]byte, error) {
 }
 
 type CollectionPolicyJSONUnpacker struct {
-	NM string `json:"name"`
-	RY uint   `json:"royalty"`
-	UR string `json:"uri"`
+	NM string                `json:"name"`
+	RY uint                  `json:"royalty"`
+	UR string                `json:"uri"`
+	WH []base.AddressDecoder `json:"whites"`
 }
 
 func (p *CollectionPolicy) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -34,5 +37,5 @@ func (p *CollectionPolicy) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return p.unpack(enc, up.NM, up.RY, up.UR)
+	return p.unpack(enc, up.NM, up.RY, up.UR, up.WH)
 }

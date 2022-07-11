@@ -71,7 +71,7 @@ type SignerFlag struct {
 func (v *SignerFlag) UnmarshalText(b []byte) error {
 	l := strings.SplitN(string(b), ",", 2)
 	if len(l) != 2 {
-		return fmt.Errorf("invalid nft id; %q", string(b))
+		return fmt.Errorf("invalid signer; %q", string(b))
 	}
 
 	v.address = l[0]
