@@ -77,6 +77,12 @@ func (fact MintFact) IsValid(b []byte) error {
 		return errors.Errorf("empty token for MintFact")
 	}
 
+	if l := len(fact.items); l < 1 {
+		return isvalid.InvalidError.Errorf("empty items for MintFact")
+	} else if l > int(MaxMintItems) {
+		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", l, MaxMintItems)
+	}
+
 	if err := isvalid.Check(
 		nil, false,
 		fact.h,

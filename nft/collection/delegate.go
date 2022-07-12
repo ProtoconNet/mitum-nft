@@ -19,7 +19,10 @@ var (
 	DelegateHinter     = Delegate{BaseOperation: operationHinter(DelegateHint)}
 )
 
-var MaxAgents = 10
+var (
+	MaxAgents        = 10
+	MaxDelegateItems = 10
+)
 
 type DelegateFact struct {
 	hint.BaseHinter
@@ -73,6 +76,12 @@ func (fact DelegateFact) IsValid(b []byte) error {
 
 	if len(fact.token) < 1 {
 		return errors.Errorf("empty token for DelegateFact")
+	}
+
+	if l := len(fact.items); l < 1 {
+		return isvalid.InvalidError.Errorf("empty items for DelegateFact")
+	} else if l > int(MaxDelegateItems) {
+		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", l, MaxDelegateItems)
 	}
 
 	if err := isvalid.Check(
