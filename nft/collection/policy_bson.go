@@ -26,7 +26,7 @@ type PolicyBSONUnpacker struct {
 	WH []base.AddressDecoder `bson:"whites"`
 }
 
-func (p CollectionPolicy) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
+func (p *CollectionPolicy) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 	var up PolicyBSONUnpacker
 	if err := enc.Unmarshal(b, &up); err != nil {
 		return err

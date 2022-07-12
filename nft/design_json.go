@@ -23,6 +23,7 @@ func (d Design) MarshalJSON() ([]byte, error) {
 		PR:         d.parent,
 		CR:         d.creator,
 		SB:         d.symbol,
+		AC:         d.active,
 		PO:         d.policy,
 	})
 }

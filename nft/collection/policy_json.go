@@ -21,6 +21,7 @@ func (p CollectionPolicy) MarshalJSON() ([]byte, error) {
 		NM:         p.name,
 		RY:         p.royalty,
 		UR:         p.uri,
+		WH:         p.whites,
 	})
 }
 
