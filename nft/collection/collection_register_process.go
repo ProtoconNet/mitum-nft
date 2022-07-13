@@ -102,10 +102,6 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		} else if err = checkNotExistsState(extensioncurrency.StateKeyContractAccount(whites[i]), getState); err != nil {
 			return nil, operation.NewBaseReasonError("contract account cannot be whitelisted; %q", whites[i])
 		}
-
-		if whites[i].Equal(fact.Sender()) {
-			return nil, operation.NewBaseReasonError("sender cannot be whitelisted; %q", fact.Sender())
-		}
 	}
 
 	policy := NewCollectionPolicy(fact.Form().Name(), fact.Form().Royalty(), fact.Form().Uri(), whites)

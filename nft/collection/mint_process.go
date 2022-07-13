@@ -61,13 +61,15 @@ func (ipp *MintItemProcessor) PreProcess(
 		return errors.Errorf("deactivated collection; %q", design.Symbol())
 	} else if policy, ok := design.Policy().(CollectionPolicy); !ok {
 		return errors.Errorf("policy of design is not collection-policy; %q", design.Symbol())
-	} else if whites := policy.Whites(); !design.Creator().Equal(ipp.sender) {
+	} else if whites := policy.Whites(); len(whites) == 0 {
+		return errors.Errorf("empty whitelist! nobody can mint to this collection; %q", ipp.item.Collection())
+	} else {
 		for i := range whites {
 			if whites[i].Equal(ipp.sender) {
 				break
 			}
 			if i == len(whites)-1 {
-				return errors.Errorf("sender is not whitelisted, nor is collection creator; %q", ipp.sender)
+				return errors.Errorf("sender is not whitelisted; %q", ipp.sender)
 			}
 		}
 	}

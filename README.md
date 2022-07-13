@@ -57,7 +57,7 @@ Just try sending operations in the order listed below.
 - [sign/ACC2_AAA2_copyrighter.json](sample/sign/ACC2_AAA2_copyrighter.json)
 - [burn/ACC4_AAA1.json](sample/burn/ACC4_AAA1.json)
 - [burn/ACC4_AAA2.json](sample/burn/ACC4_AAA2.json)
-- [mint/GEN_BBB1.json](sample/mint/GEN_BBB1.json)
+- [mint/ACC2_BBB1_white.json](sample/mint/ACC2_BBB1_white.json)
 - [mint/ACC2_BBB2_white.json](sample/mint/ACC2_BBB2_white.json)
 - [mint/ACC2_BBB3_white.json](sample/mint/ACC2_BBB3_white.json)
 
