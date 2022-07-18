@@ -33,16 +33,14 @@ func (Mint) Process(
 }
 
 type MintItemProcessor struct {
-	cp       *extensioncurrency.CurrencyPool
-	h        valuehash.Hash
-	idxState state.State
-	idx      uint64
-	boxState state.State
-	box      NFTBox
-	nft      nft.NFT
-	nst      state.State
-	sender   base.Address
-	item     MintItem
+	cp     *extensioncurrency.CurrencyPool
+	h      valuehash.Hash
+	idx    uint64
+	box    *NFTBox
+	nft    nft.NFT
+	nst    state.State
+	sender base.Address
+	item   MintItem
 }
 
 func (ipp *MintItemProcessor) PreProcess(
@@ -51,51 +49,6 @@ func (ipp *MintItemProcessor) PreProcess(
 ) error {
 	if err := ipp.item.IsValid(nil); err != nil {
 		return err
-	}
-
-	if st, err := existsState(StateKeyCollection(ipp.item.Collection()), "design", getState); err != nil {
-		return err
-	} else if design, err := StateCollectionValue(st); err != nil {
-		return err
-	} else if !design.Active() {
-		return errors.Errorf("deactivated collection; %q", design.Symbol())
-	} else if policy, ok := design.Policy().(CollectionPolicy); !ok {
-		return errors.Errorf("policy of design is not collection-policy; %q", design.Symbol())
-	} else if whites := policy.Whites(); len(whites) == 0 {
-		return errors.Errorf("empty whitelist! nobody can mint to this collection; %q", ipp.item.Collection())
-	} else {
-		for i := range whites {
-			if whites[i].Equal(ipp.sender) {
-				break
-			}
-			if i == len(whites)-1 {
-				return errors.Errorf("sender is not whitelisted; %q", ipp.sender)
-			}
-		}
-	}
-
-	if st, err := existsState(StateKeyCollectionLastIDX(ipp.item.Collection()), "collection idx", getState); err != nil {
-		return err
-	} else if idx, err := StateCollectionLastIDXValue(st); err != nil {
-		return err
-	} else {
-		ipp.idxState = st
-		ipp.idx = idx + 1
-	}
-
-	switch st, found, err := getState(StateKeyNFTs(ipp.item.Collection())); {
-	case err != nil:
-		return err
-	case !found:
-		ipp.box = NewNFTBox(nil)
-		ipp.boxState = st
-	default:
-		box, err := StateNFTsValue(st)
-		if err != nil {
-			return err
-		}
-		ipp.box = box
-		ipp.boxState = st
 	}
 
 	id := nft.NewNFTID(ipp.item.Collection(), ipp.idx)
@@ -156,23 +109,11 @@ func (ipp *MintItemProcessor) Process(
 
 	var states []state.State
 
-	if st, err := SetStateCollectionLastIDXValue(ipp.idxState, ipp.idx); err != nil {
-		return nil, err
-	} else {
-		states = append(states, st)
-	}
-
 	if err := ipp.box.Append(ipp.nft.ID()); err != nil {
 		return nil, err
 	}
 
 	if st, err := SetStateNFTValue(ipp.nst, ipp.nft); err != nil {
-		return nil, err
-	} else {
-		states = append(states, st)
-	}
-
-	if st, err := SetStateNFTsValue(ipp.boxState, ipp.box); err != nil {
 		return nil, err
 	} else {
 		states = append(states, st)
@@ -184,10 +125,8 @@ func (ipp *MintItemProcessor) Process(
 func (ipp *MintItemProcessor) Close() error {
 	ipp.cp = nil
 	ipp.h = nil
-	ipp.idxState = nil
 	ipp.idx = 0
-	ipp.boxState = nil
-	ipp.box = NFTBox{}
+	ipp.box = nil
 	ipp.nft = nft.NFT{}
 	ipp.nst = nil
 	ipp.sender = nil
@@ -201,6 +140,10 @@ type MintProcessor struct {
 	cp *extensioncurrency.CurrencyPool
 	Mint
 	ipps         []*MintItemProcessor
+	idxes        map[extensioncurrency.ContractID]uint64
+	idxStates    map[extensioncurrency.ContractID]state.State
+	boxes        map[extensioncurrency.ContractID]*NFTBox
+	boxStates    map[extensioncurrency.ContractID]state.State
 	amountStates map[currency.CurrencyID]currency.AmountState
 	required     map[currency.CurrencyID][2]currency.Big
 }
@@ -217,6 +160,10 @@ func NewMintProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcess
 		opp.cp = cp
 		opp.Mint = i
 		opp.ipps = nil
+		opp.idxes = nil
+		opp.idxStates = nil
+		opp.boxes = nil
+		opp.boxStates = nil
 		opp.amountStates = nil
 		opp.required = nil
 
@@ -246,16 +193,74 @@ func (opp *MintProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError("invalid signing; %w", err)
 	}
 
+	opp.idxes = map[extensioncurrency.ContractID]uint64{}
+	opp.idxStates = map[extensioncurrency.ContractID]state.State{}
+	opp.boxes = map[extensioncurrency.ContractID]*NFTBox{}
+	opp.boxStates = map[extensioncurrency.ContractID]state.State{}
+	for i := range fact.items {
+		collection := fact.items[i].Collection()
+
+		if _, found := opp.idxes[collection]; !found {
+			if st, err := existsState(StateKeyCollection(collection), "design", getState); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if design, err := StateCollectionValue(st); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if !design.Active() {
+				return nil, operation.NewBaseReasonError("deactivated collection; %q", design.Symbol())
+			} else if policy, ok := design.Policy().(CollectionPolicy); !ok {
+				return nil, operation.NewBaseReasonError("policy of design is not collection-policy; %q", design.Symbol())
+			} else if whites := policy.Whites(); !design.Creator().Equal(fact.Sender()) {
+				for i := range whites {
+					if whites[i].Equal(fact.Sender()) {
+						break
+					}
+					if i == len(whites)-1 {
+						return nil, operation.NewBaseReasonError("sender is not whitelisted, nor is collection creator; %q", fact.Sender())
+					}
+				}
+			}
+
+			if st, err := existsState(StateKeyCollectionLastIDX(collection), "collection idx", getState); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if idx, err := StateCollectionLastIDXValue(st); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else {
+				opp.idxes[collection] = idx
+				opp.idxStates[collection] = st
+			}
+		}
+
+		if _, found := opp.boxes[collection]; !found {
+			var box NFTBox
+			switch st, found, err := getState(StateKeyNFTs(collection)); {
+			case err != nil:
+				return nil, operation.NewBaseReasonError(err.Error())
+			case !found:
+				box = NewNFTBox(nil)
+				opp.boxStates[collection] = st
+			default:
+				b, err := StateNFTsValue(st)
+				if err != nil {
+					return nil, operation.NewBaseReasonError(err.Error())
+				}
+				box = b
+				opp.boxStates[collection] = st
+			}
+			opp.boxes[collection] = &box
+		}
+	}
+
 	ipps := make([]*MintItemProcessor, len(fact.items))
 	for i := range fact.items {
+		collection := fact.items[i].Collection()
+		idx := opp.idxes[collection] + 1
+		opp.idxes[collection] = idx
 
 		c := MintItemProcessorPool.Get().(*MintItemProcessor)
 		c.cp = opp.cp
 		c.h = opp.Hash()
-		c.idxState = nil
-		c.idx = 0
-		c.boxState = nil
-		c.box = NFTBox{}
+		c.idx = idx
+		c.box = opp.boxes[collection]
 		c.nft = nft.NFT{}
 		c.nst = nil
 		c.sender = fact.Sender()
@@ -302,6 +307,22 @@ func (opp *MintProcessor) Process(
 		}
 	}
 
+	for c, idx := range opp.idxes {
+		if st, err := SetStateCollectionLastIDXValue(opp.idxStates[c], idx); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else {
+			states = append(states, st)
+		}
+	}
+
+	for c, box := range opp.boxes {
+		if st, err := SetStateNFTsValue(opp.boxStates[c], *box); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else {
+			states = append(states, st)
+		}
+	}
+
 	for k := range opp.required {
 		rq := opp.required[k]
 		states = append(states, opp.amountStates[k].Sub(rq[0]).AddFee(rq[1]))
@@ -318,6 +339,10 @@ func (opp *MintProcessor) Close() error {
 	opp.cp = nil
 	opp.Mint = Mint{}
 	opp.ipps = nil
+	opp.idxes = nil
+	opp.idxStates = nil
+	opp.boxes = nil
+	opp.boxStates = nil
 	opp.amountStates = nil
 	opp.required = nil
 

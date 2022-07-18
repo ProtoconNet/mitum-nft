@@ -1,7 +1,6 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -88,20 +87,6 @@ func (fact MintFact) IsValid(b []byte) error {
 		fact.h,
 		fact.sender); err != nil {
 		return err
-	}
-
-	founds := map[extensioncurrency.ContractID]struct{}{}
-	for i := range fact.items {
-
-		if err := fact.items[i].IsValid(nil); err != nil {
-			return err
-		}
-
-		c := fact.items[i].Collection()
-		if _, found := founds[c]; found {
-			return errors.Errorf("duplicate collection found; %q", c)
-		}
-		founds[c] = struct{}{}
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {

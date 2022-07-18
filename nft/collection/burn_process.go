@@ -33,14 +33,13 @@ func (Burn) Process(
 }
 
 type BurnItemProcessor struct {
-	cp       *extensioncurrency.CurrencyPool
-	h        valuehash.Hash
-	box      NFTBox
-	boxState state.State
-	nft      nft.NFT
-	nst      state.State
-	sender   base.Address
-	item     BurnItem
+	cp     *extensioncurrency.CurrencyPool
+	h      valuehash.Hash
+	box    *NFTBox
+	nft    nft.NFT
+	nst    state.State
+	sender base.Address
+	item   BurnItem
 }
 
 func (ipp *BurnItemProcessor) PreProcess(
@@ -53,24 +52,6 @@ func (ipp *BurnItemProcessor) PreProcess(
 	}
 
 	nid := ipp.item.NFT()
-
-	// check collection
-	if st, err := existsState(StateKeyCollection(nid.Collection()), "design", getState); err != nil {
-		return err
-	} else if design, err := StateCollectionValue(st); err != nil {
-		return err
-	} else if !design.Active() {
-		return errors.Errorf("deactivated collection; %q", nid.Collection())
-	}
-
-	if st, err := existsState(StateKeyNFTs(nid.Collection()), "nfts", getState); err != nil {
-		return err
-	} else if box, err := StateNFTsValue(st); err != nil {
-		return err
-	} else {
-		ipp.box = box
-		ipp.boxState = st
-	}
 
 	var (
 		approved base.Address
@@ -119,17 +100,11 @@ func (ipp *BurnItemProcessor) Process(
 
 	var states []state.State
 
-	if st, err := SetStateNFTValue(ipp.nst, ipp.nft); err != nil {
-		return nil, err
-	} else {
-		states = append(states, st)
-	}
-
 	if err := ipp.box.Remove(ipp.nft.ID()); err != nil {
 		return nil, err
 	}
 
-	if st, err := SetStateNFTsValue(ipp.boxState, ipp.box); err != nil {
+	if st, err := SetStateNFTValue(ipp.nst, ipp.nft); err != nil {
 		return nil, err
 	} else {
 		states = append(states, st)
@@ -143,8 +118,7 @@ func (ipp *BurnItemProcessor) Close() error {
 	ipp.h = nil
 	ipp.nft = nft.NFT{}
 	ipp.nst = nil
-	ipp.box = NFTBox{}
-	ipp.boxState = nil
+	ipp.box = nil
 	ipp.sender = nil
 	ipp.item = BurnItem{}
 	BurnItemProcessorPool.Put(ipp)
@@ -155,6 +129,8 @@ func (ipp *BurnItemProcessor) Close() error {
 type BurnProcessor struct {
 	cp *extensioncurrency.CurrencyPool
 	Burn
+	boxes        map[extensioncurrency.ContractID]*NFTBox
+	boxStates    map[extensioncurrency.ContractID]state.State
 	ipps         []*BurnItemProcessor
 	amountStates map[currency.CurrencyID]currency.AmountState
 	required     map[currency.CurrencyID][2]currency.Big
@@ -171,6 +147,8 @@ func NewBurnProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcess
 
 		opp.cp = cp
 		opp.Burn = i
+		opp.boxes = nil
+		opp.boxStates = nil
 		opp.ipps = nil
 		opp.amountStates = nil
 		opp.required = nil
@@ -201,14 +179,41 @@ func (opp *BurnProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError("invalid signing; %w", err)
 	}
 
+	opp.boxes = map[extensioncurrency.ContractID]*NFTBox{}
+	opp.boxStates = map[extensioncurrency.ContractID]state.State{}
+	for i := range fact.items {
+		collection := fact.items[i].NFT().Collection()
+
+		if _, found := opp.boxes[collection]; !found {
+			var box NFTBox
+			if st, err := existsState(StateKeyCollection(collection), "design", getState); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if design, err := StateCollectionValue(st); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if !design.Active() {
+				return nil, operation.NewBaseReasonError("deactivated collection; %q", collection)
+			}
+
+			if st, err := existsState(StateKeyNFTs(collection), "nfts", getState); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if b, err := StateNFTsValue(st); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else {
+				box = b
+				opp.boxStates[collection] = st
+			}
+			opp.boxes[collection] = &box
+		}
+
+	}
+
 	ipps := make([]*BurnItemProcessor, len(fact.items))
 	for i := range fact.items {
 
 		c := BurnItemProcessorPool.Get().(*BurnItemProcessor)
 		c.cp = opp.cp
 		c.h = opp.Hash()
-		c.box = NFTBox{}
-		c.boxState = nil
+		c.box = opp.boxes[fact.items[i].NFT().Collection()]
 		c.nft = nft.NFT{}
 		c.nst = nil
 		c.sender = fact.Sender()
@@ -255,6 +260,14 @@ func (opp *BurnProcessor) Process(
 		}
 	}
 
+	for c, box := range opp.boxes {
+		if st, err := SetStateNFTsValue(opp.boxStates[c], *box); err != nil {
+			return operation.NewBaseReasonError(err.Error())
+		} else {
+			states = append(states, st)
+		}
+	}
+
 	for k := range opp.required {
 		rq := opp.required[k]
 		states = append(states, opp.amountStates[k].Sub(rq[0]).AddFee(rq[1]))
@@ -270,6 +283,8 @@ func (opp *BurnProcessor) Close() error {
 
 	opp.cp = nil
 	opp.Burn = Burn{}
+	opp.boxes = nil
+	opp.boxStates = nil
 	opp.ipps = nil
 	opp.amountStates = nil
 	opp.required = nil
