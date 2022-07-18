@@ -154,6 +154,7 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		*DelegateProcessor,
 		*ApproveProcessor,
 		*CollectionRegisterProcessor,
+		*CollectionPolicyUpdaterProcessor,
 		*MintProcessor,
 		*TransferProcessor,
 		*BurnProcessor,
@@ -170,6 +171,7 @@ func (opr *OperationProcessor) Process(op state.Processor) error {
 		Delegate,
 		Approve,
 		CollectionRegister,
+		CollectionPolicyUpdater,
 		Mint,
 		Transfer,
 		Burn,
@@ -203,6 +205,8 @@ func (opr *OperationProcessor) process(op state.Processor) error {
 	case *ApproveProcessor:
 		sp = t
 	case *CollectionRegisterProcessor:
+		sp = t
+	case *CollectionPolicyUpdaterProcessor:
 		sp = t
 	case *MintProcessor:
 		sp = t
@@ -263,6 +267,9 @@ func (opr *OperationProcessor) checkDuplication(op state.Processor) error { // n
 		didtype = DuplicationTypeSender
 	case CollectionRegister:
 		did = t.Fact().(CollectionRegisterFact).Sender().String()
+		didtype = DuplicationTypeSender
+	case CollectionPolicyUpdater:
+		did = t.Fact().(CollectionPolicyUpdaterFact).Sender().String()
 		didtype = DuplicationTypeSender
 	case Mint:
 		did = t.Fact().(MintFact).Sender().String()
@@ -366,6 +373,7 @@ func (opr *OperationProcessor) getNewProcessor(op state.Processor) (state.Proces
 		Delegate,
 		Approve,
 		CollectionRegister,
+		CollectionPolicyUpdater,
 		Mint,
 		Transfer,
 		Burn,

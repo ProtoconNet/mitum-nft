@@ -60,5 +60,7 @@ Just try sending operations in the order listed below.
 - [mint/ACC2_BBB1_white.json](sample/mint/ACC2_BBB1_white.json)
 - [mint/ACC2_BBB2_white.json](sample/mint/ACC2_BBB2_white.json)
 - [mint/ACC2_BBB3_white.json](sample/mint/ACC2_BBB3_white.json)
+- [collection-policy-updater/GEN_AAA_update.json](sample/collection-policy-updater/GEN_AAA_update.json)
+- [mint/ACC4_AAA4.json](sample/mint/ACC4_AAA4.json)
 
 All results of operations must be `true`.

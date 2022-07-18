@@ -169,6 +169,8 @@ func AttachProposalProcessor(
 		return nil, err
 	} else if _, err := opr.SetProcessor(collection.CollectionRegisterHinter, collection.NewCollectionRegisterProcessor(cp)); err != nil {
 		return nil, err
+	} else if _, err := opr.SetProcessor(collection.CollectionPolicyUpdaterHinter, collection.NewCollectionPolicyUpdaterProcessor(cp)); err != nil {
+		return nil, err
 	} else if _, err := opr.SetProcessor(collection.MintHinter, collection.NewMintProcessor(cp)); err != nil {
 		return nil, err
 	} else if _, err := opr.SetProcessor(collection.TransferHinter, collection.NewTransferProcessor(cp)); err != nil {
@@ -241,6 +243,7 @@ func InitializeProposalProcessor(ctx context.Context, opr *collection.OperationP
 		collection.DelegateHinter,
 		collection.ApproveHinter,
 		collection.CollectionRegisterHinter,
+		collection.CollectionPolicyUpdaterHinter,
 		collection.MintHinter,
 		collection.TransferHinter,
 		collection.BurnHinter,

@@ -1,0 +1,51 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "EWeY8fCttvy9mGvkRsQA1nMgxYpiN46a9iScfsBA2LoT",
+    "body_hash": "6CRRbcFShobZDy7xMnvM6zNdHcTjQ4p55TMw6SPkbxEz",
+    "signer": "kgMCJks41BJKkfVmbofv7cMyq1ZU17NDeb6RVwWuArESmpu",
+    "signature": "381yXYmAbhyjBSX2XpLvSGLF9wpqokBWMTmQggP1eaogH1yTdmQdYpsRctwJYdtGAsrFViwqsq3SXi91iBFAnyTfCU6YAivG",
+    "signed_at": "2022-07-18T01:44:07.740718Z",
+    "operations": [
+        {
+            "_hint": "mitum-nft-mint-operation-v0.0.1",
+            "hash": "D3pWHEZ7aBov36JNNzZ8gcTtrFsPU49LpFPdePB4ugp7",
+            "fact": {
+                "_hint": "mitum-nft-mint-operation-fact-v0.0.1",
+                "hash": "5WtzsEkxCFMjaC9EbUcsFELXGo7CHdb1XkTngy5qy2y7",
+                "token": "MjAyMi0wNy0xOFQwMTo0NDowNy43NDAzMjha",
+                "sender": "9MBW3xRBbkPSa5JVv2kMgnsXvGj9scSupZcSZ99cNPbwmca",
+                "items": [
+                    {
+                        "_hint": "mitum-nft-mint-item-v0.0.1",
+                        "collection": "AAA",
+                        "form": {
+                            "_hint": "mitum-nft-mint-form-v0.0.1",
+                            "hash": "",
+                            "uri": "https://localhost:5000/AAA/4",
+                            "creators": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            },
+                            "copyrighters": {
+                                "_hint": "mitum-nft-signers-v0.0.1",
+                                "total": 0,
+                                "signers": []
+                            }
+                        },
+                        "currency": "MCC"
+                    }
+                ]
+            },
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "kgMCJks41BJKkfVmbofv7cMyq1ZU17NDeb6RVwWuArESmpu",
+                    "signature": "AN1rKvt9vkjbqt5agSBbT8Hcv2PQKrr6kgYDKQVSGHJDizb9KaGHooFwR2eRoLVE5dK5TeoM8QhtMm9i4zVQW3hvQ91yw8BrW",
+                    "signed_at": "2022-07-18T01:44:07.740681Z"
+                }
+            ],
+            "memo": ""
+        }
+    ]
+}

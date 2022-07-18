@@ -1,0 +1,40 @@
+{
+    "_hint": "seal-v0.0.1",
+    "hash": "5ArJbyzJ9HPEZvcXiEvvV9uMcVn4n8XFDCUyPKZ5yBab",
+    "body_hash": "VQRT6R5S3qgH71J1T68a8UH2izXQDGn9X2XpR1FWuwk",
+    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+    "signature": "381yXZRTGwoSFJhMHanJJiUbZkV1VYbbGvLsXeV384MmwcHmCVqKJPHGhqdRfygaLpT8rUy3yY2haSCZAjJE4ufyPKe3ZfoC",
+    "signed_at": "2022-07-12T02:13:54.399939Z",
+    "operations": [
+        {
+            "fact_signs": [
+                {
+                    "_hint": "base-fact-sign-v0.0.1",
+                    "signer": "zzeo6WAS4uqwCss4eRibtLnYHqJM21zhzPbKWQVPttxWmpu",
+                    "signature": "AN1rKvt8Yb8fT8VtorgKSHNUhrkxcxYtUnP8gzHfudzyi8piuJ1WbWF1fLSX4JausUuahz6kiWdxrAT48Nip9Krafito1w39z",
+                    "signed_at": "2022-07-12T02:13:54.399898Z"
+                }
+            ],
+            "memo": "",
+            "_hint": "mitum-nft-collection-policy-updater-operation-v0.0.1",
+            "hash": "ACarF87oy7ehYQBP1w7cTzUGs4RkgBStEQciG8EV5YhJ",
+            "fact": {
+                "_hint": "mitum-nft-collection-policy-updater-fact-v0.0.1",
+                "hash": "6vPVeH4YsQC8pXSBjZHtXL9LAV7969nKXxkWSJThj1xZ",
+                "token": "MjAyMi0wNy0xMlQwMjoxMzo1NC4zOTk1Nzla",
+                "sender": "DBa8N5of7LZkx8ngH4mVbQmQ2NHDd6gL2mScGfhAEqddmca",
+                "collection": "AAA",
+                "policy": {
+                    "_hint": "mitum-nft-collection-policy-v0.0.1",
+                    "name": "Updated Collection",
+                    "royalty": 2,
+                    "uri": "https://localhost:5000/collection/AAA",
+                    "whites": [
+                        "9MBW3xRBbkPSa5JVv2kMgnsXvGj9scSupZcSZ99cNPbwmca"
+                    ]
+                },
+                "currency": "MCC"
+            }
+        }
+    ]
+}
