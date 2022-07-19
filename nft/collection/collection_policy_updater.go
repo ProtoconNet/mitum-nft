@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	CollectionPolicyUpdaterFactType   = hint.Type("mitum-nft-collection-policy-updater-fact")
+	CollectionPolicyUpdaterFactType   = hint.Type("mitum-nft-collection-policy-updater-operation-fact")
 	CollectionPolicyUpdaterFactHint   = hint.NewHint(CollectionPolicyUpdaterFactType, "v0.0.1")
 	CollectionPolicyUpdaterFactHinter = CollectionPolicyUpdaterFact{BaseHinter: hint.NewBaseHinter(CollectionPolicyUpdaterFactHint)}
 	CollectionPolicyUpdaterType       = hint.Type("mitum-nft-collection-policy-updater-operation")
