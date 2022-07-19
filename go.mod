@@ -3,7 +3,7 @@ module github.com/ProtoconNet/mitum-nft
 go 1.17
 
 require (
-	github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220602000749-0c4f8b32bd9c
+	github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220719014538-2a73e148beb7
 	github.com/alecthomas/kong v0.5.0
 	github.com/bluele/gcache v0.0.2
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce

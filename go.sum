@@ -15,6 +15,8 @@ github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220531131152-5401cd5d70
 github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220531131152-5401cd5d70eb/go.mod h1:XOncMhibX0KaJykiKa7XDeUBs2HzIxgiXt3ZB6f92po=
 github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220602000749-0c4f8b32bd9c h1:28ScgHvW7z36TG7nuq1DpVrd9eZZYELVTd1cMeFKGH8=
 github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220602000749-0c4f8b32bd9c/go.mod h1:XOncMhibX0KaJykiKa7XDeUBs2HzIxgiXt3ZB6f92po=
+github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220719014538-2a73e148beb7 h1:01DmX2ptzZfz9br/EVy8h+0AYQOB2lZeg/34xK1I7D0=
+github.com/ProtoconNet/mitum-currency-extension v0.0.0-20220719014538-2a73e148beb7/go.mod h1:XOncMhibX0KaJykiKa7XDeUBs2HzIxgiXt3ZB6f92po=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/alecthomas/kong v0.2.20/go.mod h1:ka3VZ8GZNPXv9Ov+j4YNLkI8mTuhXyr/0ktSlqIydQQ=
 github.com/alecthomas/kong v0.5.0 h1:u8Kdw+eeml93qtMZ04iei0CFYve/WPcA5IFh+9wSskE=
