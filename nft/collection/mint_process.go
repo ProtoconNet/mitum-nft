@@ -209,13 +209,15 @@ func (opp *MintProcessor) PreProcess(
 				return nil, operation.NewBaseReasonError("deactivated collection; %q", design.Symbol())
 			} else if policy, ok := design.Policy().(CollectionPolicy); !ok {
 				return nil, operation.NewBaseReasonError("policy of design is not collection-policy; %q", design.Symbol())
-			} else if whites := policy.Whites(); !design.Creator().Equal(fact.Sender()) {
+			} else if whites := policy.Whites(); len(whites) == 0 {
+				return nil, operation.NewBaseReasonError("empty whitelist! nobody can mint to this collection; %q", collection)
+			} else {
 				for i := range whites {
 					if whites[i].Equal(fact.Sender()) {
 						break
 					}
 					if i == len(whites)-1 {
-						return nil, operation.NewBaseReasonError("sender is not whitelisted, nor is collection creator; %q", fact.Sender())
+						return nil, operation.NewBaseReasonError("sender is not whitelisted; %q", fact.Sender())
 					}
 				}
 			}
