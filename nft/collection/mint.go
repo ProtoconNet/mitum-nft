@@ -64,7 +64,11 @@ func (fact MintFact) Bytes() []byte {
 }
 
 func (fact MintFact) IsValid(b []byte) error {
-	if err := fact.BaseHinter.IsValid(nil); err != nil {
+	if err := isvalid.Check(
+		nil, false,
+		fact.BaseHinter,
+		fact.h,
+		fact.sender); err != nil {
 		return err
 	}
 
@@ -82,11 +86,10 @@ func (fact MintFact) IsValid(b []byte) error {
 		return isvalid.InvalidError.Errorf("items over allowed; %d > %d", l, MaxMintItems)
 	}
 
-	if err := isvalid.Check(
-		nil, false,
-		fact.h,
-		fact.sender); err != nil {
-		return err
+	for i := range fact.items {
+		if err := fact.items[i].IsValid(nil); err != nil {
+			return err
+		}
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {
