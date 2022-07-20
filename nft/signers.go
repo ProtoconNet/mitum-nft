@@ -100,12 +100,12 @@ func (signers Signers) Signers() []Signer {
 	return signers.signers
 }
 
-func (signers Signers) Addresses() ([]base.Address, error) {
+func (signers Signers) Addresses() []base.Address {
 	as := make([]base.Address, len(signers.signers))
 	for i := range signers.signers {
 		as[i] = signers.signers[i].Account()
 	}
-	return as, nil
+	return as
 }
 
 func (signers Signers) Index(signer Signer) int {

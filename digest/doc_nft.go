@@ -3,6 +3,7 @@ package digest
 import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
+	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/base/state"
 	mongodbstorage "github.com/spikeekips/mitum/storage/mongodb"
 	"github.com/spikeekips/mitum/util/encoder"
@@ -46,24 +47,37 @@ func (doc NFTCollectionDoc) MarshalBSON() ([]byte, error) {
 
 type NFTDoc struct {
 	mongodbstorage.BaseDoc
-	st  state.State
-	nft nft.NFT
+	va        NFTValue
+	addresses []string
+	owner     string
+	height    base.Height
 }
 
-func NewNFTDoc(st state.State, enc encoder.Encoder) (NFTDoc, error) {
+func NewNFTDoc(st state.State, enc encoder.Encoder, height base.Height) (NFTDoc, error) {
 	n, err := collection.StateNFTValue(st)
 	if err != nil {
 		return NFTDoc{}, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	var addresses = make([]string, len(n.Creators().Addresses())+len(n.Copyrighters().Addresses())+1)
+	addresses[0] = n.Owner().String()
+	for i := range n.Creators().Addresses() {
+		addresses[i+1] = n.Creators().Addresses()[i].String()
+	}
+	for i := range n.Copyrighters().Addresses() {
+		addresses[i+1+len(n.Creators().Addresses())] = n.Copyrighters().Addresses()[i].String()
+	}
+	va := NewNFTValue(n, height)
+	b, err := mongodbstorage.NewBaseDoc(nil, va, enc)
 	if err != nil {
 		return NFTDoc{}, err
 	}
 
 	return NFTDoc{
-		BaseDoc: b,
-		st:      st,
-		nft:     n,
+		BaseDoc:   b,
+		va:        va,
+		addresses: addresses,
+		owner:     n.Owner().String(),
+		height:    height,
 	}, nil
 }
 
@@ -73,9 +87,10 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	m["nftid"] = doc.nft.ID().String()
-	m["owner"] = doc.nft.Owner()
-	m["height"] = doc.st.Height()
+	m["collection"] = doc.va.nft.ID().Collection()
+	m["nftid"] = doc.va.nft.ID().String()
+	m["owner"] = doc.va.nft.Owner()
+	m["height"] = doc.height
 
 	return bsonenc.Marshal(m)
 }

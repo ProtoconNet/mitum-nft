@@ -100,3 +100,18 @@ func LoadState(decoder func(interface{}) error, encs *encoder.Encoders) (state.S
 
 	return rs, nil
 }
+
+func LoadNFT(decoder func(interface{}) error, encs *encoder.Encoders) (NFTValue, error) {
+	var b bson.Raw
+	if err := decoder(&b); err != nil {
+		return NFTValue{}, err
+	}
+
+	if _, hinter, err := mongodbstorage.LoadDataFromDoc(b, encs); err != nil {
+		return NFTValue{}, err
+	} else if va, ok := hinter.(NFTValue); !ok {
+		return NFTValue{}, errors.Errorf("not NFTValue : %T", hinter)
+	} else {
+		return va, nil
+	}
+}

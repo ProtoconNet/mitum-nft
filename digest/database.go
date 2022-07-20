@@ -905,10 +905,6 @@ func parseOffsetByString(s string) (base.Height, string, error) {
 	return h, b, nil
 }
 
-func buildOffsetHeight(height base.Height) string {
-	return fmt.Sprintf("%d", height)
-}
-
 func buildOffsetByString(height base.Height, s string) string {
 	return fmt.Sprintf("%d,%s", height, s)
 }
@@ -958,16 +954,6 @@ func loadBriefAccountDoc(decoder func(interface{}) error) (briefAccountDoc, erro
 	}
 
 	return a, nil
-}
-
-func parseOffsetHeight(s string) (base.Height, error) {
-	if len(s) < 1 {
-		return base.NilHeight, errors.Errorf("invalid offset, %q", s)
-	} else if h, err := base.NewHeightFromString(s); err != nil {
-		return base.NilHeight, errors.Wrap(err, "invalid height of offset")
-	} else {
-		return h, nil
-	}
 }
 
 // ContractAccountStatus return contract account owner by address
@@ -1035,29 +1021,140 @@ func (st *Database) NFTCollection(symbol string) (nft.Design, base.Height, base.
 	return i, lastHeight, previousHeight, nil
 }
 
-func (st *Database) NFT(symbol string) (nft.NFT, base.Height, base.Height, error) {
+func (st *Database) NFT(symbol string) (NFTValue, base.Height, base.Height, error) {
 	lastHeight, previousHeight := base.NilHeight, base.NilHeight
-	var sta state.State
+	var va NFTValue
 	if err := st.database.Client().GetByFilter(
 		defaultColNameNFT,
 		util.NewBSONFilter("nftid", symbol).D(),
 		func(res *mongo.SingleResult) error {
-			i, err := LoadState(res.Decode, st.database.Encoders())
+			i, err := LoadNFT(res.Decode, st.database.Encoders())
 			if err != nil {
 				return err
 			}
-			sta = i
+			va = i
 
 			return nil
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nft.NFT{}, lastHeight, previousHeight, err
+		return NFTValue{}, lastHeight, previousHeight, err
 	}
 
-	i, err := collection.StateNFTValue(sta)
+	return va, lastHeight, previousHeight, nil
+}
+
+func (st *Database) NFTsByAddress(
+	address base.Address,
+	reverse bool,
+	offset string,
+	limit int64,
+	collectionid string,
+	callback func(string /* nft id */, NFTValue) (bool, error),
+) error {
+	filter, err := buildNFTsFilterByAddress(address, offset, reverse, collectionid)
 	if err != nil {
-		return nft.NFT{}, lastHeight, previousHeight, err
+		return err
 	}
-	return i, lastHeight, previousHeight, nil
+
+	sr := 1
+	if reverse {
+		sr = -1
+	}
+
+	opt := options.Find().SetSort(
+		util.NewBSONFilter("height", sr).D(),
+	)
+
+	switch {
+	case limit <= 0: // no limit
+	case limit > maxLimit:
+		opt = opt.SetLimit(maxLimit)
+	default:
+		opt = opt.SetLimit(limit)
+	}
+
+	return st.database.Client().Find(
+		context.Background(),
+		defaultColNameNFT,
+		filter,
+		func(cursor *mongo.Cursor) (bool, error) {
+			va, err := LoadNFT(cursor.Decode, st.database.Encoders())
+			if err != nil {
+				return false, err
+			}
+			return callback(va.NFT().ID().String(), va)
+		},
+		opt,
+	)
+}
+
+func (st *Database) cleanByHeightColNameNFTId(
+	ctx context.Context,
+	height base.Height,
+	colName string,
+	nftid string,
+) error {
+	if height <= base.PreGenesisHeight+1 {
+		return st.clean(ctx)
+	}
+
+	opts := options.BulkWrite().SetOrdered(true)
+	removeByHeight := mongo.NewDeleteManyModel().SetFilter(
+		bson.M{"nftid": nftid, "height": bson.M{"$lte": height}},
+	)
+
+	res, err := st.database.Client().Collection(colName).BulkWrite(
+		ctx,
+		[]mongo.WriteModel{removeByHeight},
+		opts,
+	)
+	if err != nil {
+		return storage.MergeStorageError(err)
+	}
+
+	st.Log().Debug().Str("collection", colName).Interface("result", res).Msg("clean collection by height")
+
+	return st.setLastBlock(height - 1)
+}
+
+func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool, collection string) (bson.D, error) {
+	filterA := bson.A{}
+
+	// filter fot matching address
+	filterAddress := bson.D{{"owner", bson.D{{"$in", []string{address.String()}}}}}
+	filterA = append(filterA, filterAddress)
+
+	// if collection query exist, find by collection first
+	if len(collection) > 0 {
+		filterCollection := bson.D{
+			{"collection", bson.D{{"$eq", collection}}},
+		}
+		filterA = append(filterA, filterCollection)
+	}
+
+	// if offset exist, apply offset
+	if len(offset) > 0 {
+		if !reverse {
+			filterOffset := bson.D{
+				{"nftid", bson.D{{"$gt", offset}}},
+			}
+			filterA = append(filterA, filterOffset)
+			// if reverse true, lesser then offset height
+		} else {
+			filterHeight := bson.D{
+				{"nftid", bson.D{{"$lt", offset}}},
+			}
+			filterA = append(filterA, filterHeight)
+		}
+	}
+
+	filter := bson.D{}
+	if len(filterA) > 0 {
+		filter = bson.D{
+			{"$and", filterA},
+		}
+	}
+
+	return filter, nil
 }

@@ -516,3 +516,161 @@ func (hd *Handlers) buildNFTAgentHal(va collection.AgentBox, address base.Addres
 
 	return hal, nil
 }
+
+func (hd *Handlers) handleAccountNFTs(w http.ResponseWriter, r *http.Request) {
+	var address base.Address
+	if a, err := base.DecodeAddressFromString(strings.TrimSpace(mux.Vars(r)["address"]), hd.enc); err != nil {
+		HTTP2ProblemWithError(w, err, http.StatusBadRequest)
+
+		return
+	} else if err := a.IsValid(nil); err != nil {
+		HTTP2ProblemWithError(w, err, http.StatusBadRequest)
+		return
+	} else {
+		address = a
+	}
+
+	limit := parseLimitQuery(r.URL.Query().Get("limit"))
+	offset := parseOffsetQuery(r.URL.Query().Get("offset"))
+	reverse := parseBoolQuery(r.URL.Query().Get("reverse"))
+	collectionid := parseStringQuery(r.URL.Query().Get("collection"))
+
+	cachekey := CacheKey(
+		r.URL.Path, stringOffsetQuery(offset),
+		stringBoolQuery("reverse", reverse),
+		stringCollectionQuery(collectionid),
+	)
+
+	if err := LoadFromCache(hd.cache, cachekey, w); err == nil {
+		return
+	}
+
+	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
+		i, filled, err := hd.handleAccountNFTsInGroup(address, offset, reverse, limit, collectionid)
+
+		return []interface{}{i, filled}, err
+	})
+
+	if err != nil {
+		hd.Log().Error().Err(err).Stringer("address", address).Msg("failed to get nfts")
+		HTTP2HandleError(w, err)
+
+		return
+	}
+
+	var b []byte
+	var filled bool
+	{
+		l := v.([]interface{})
+		b = l[0].([]byte)
+		filled = l[1].(bool)
+	}
+
+	HTTP2WriteHalBytes(hd.enc, w, b, http.StatusOK)
+
+	if !shared {
+		expire := hd.expireNotFilled
+		if len(offset) > 0 && filled {
+			expire = time.Minute
+		}
+
+		HTTP2WriteCache(w, cachekey, expire)
+	}
+}
+
+func (hd *Handlers) handleAccountNFTsInGroup(
+	address base.Address,
+	offset string,
+	reverse bool,
+	l int64,
+	collectionid string,
+) ([]byte, bool, error) {
+	var limit int64
+	if l < 0 {
+		limit = hd.itemsLimiter("account-nfts")
+	} else {
+		limit = l
+	}
+
+	var vas []Hal
+	if err := hd.database.NFTsByAddress(
+		address, reverse, offset, limit, collectionid,
+		func(_ string, va NFTValue) (bool, error) {
+			hal, err := hd.buildNFTHal(va)
+			if err != nil {
+				return false, err
+			}
+			vas = append(vas, hal)
+
+			return true, nil
+		},
+	); err != nil {
+		return nil, false, err
+	} else if len(vas) < 1 {
+		return nil, false, util.NotFoundError.Errorf("nfts not found")
+	}
+
+	i, err := hd.buildAccountNFTsHal(address, vas, offset, reverse, collectionid)
+	if err != nil {
+		return nil, false, err
+	}
+
+	b, err := hd.enc.Marshal(i)
+	return b, int64(len(vas)) == limit, err
+}
+
+func (hd *Handlers) buildAccountNFTsHal(
+	address base.Address,
+	vas []Hal,
+	offset string,
+	reverse bool,
+	collectionid string,
+) (Hal, error) {
+	baseSelf, err := hd.combineURL(HandlerPathAccountNFTs, "address", address.String())
+	if err != nil {
+		return nil, err
+	}
+
+	self := baseSelf
+	if len(offset) > 0 {
+		self = addQueryValue(baseSelf, stringOffsetQuery(offset))
+	}
+	if reverse {
+		self = addQueryValue(baseSelf, stringBoolQuery("reverse", reverse))
+	}
+
+	var hal Hal
+	hal = NewBaseHal(vas, NewHalLink(self, nil))
+
+	h, err := hd.combineURL(HandlerPathAccount, "address", address.String())
+	if err != nil {
+		return nil, err
+	}
+	hal = hal.AddLink("account", NewHalLink(h, nil))
+
+	var nextoffset string
+
+	if len(vas) > 0 {
+		va := vas[len(vas)-1].Interface().(NFTValue)
+		nextoffset = va.nft.ID().String()
+	}
+
+	if len(nextoffset) > 0 {
+		next := baseSelf
+		next = addQueryValue(next, stringOffsetQuery(nextoffset))
+
+		if len(collectionid) > 0 {
+			next = addQueryValue(next, stringCollectionQuery(collectionid))
+		}
+
+		if reverse {
+			next = addQueryValue(next, stringBoolQuery("reverse", reverse))
+		}
+
+		hal = hal.AddLink("next", NewHalLink(next, nil))
+	}
+
+	hal = hal.AddLink("reverse", NewHalLink(addQueryValue(baseSelf, stringBoolQuery("reverse", !reverse)), nil))
+
+	return hal, nil
+}

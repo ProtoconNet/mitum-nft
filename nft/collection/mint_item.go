@@ -72,14 +72,8 @@ func (form MintForm) Copyrighters() nft.Signers {
 
 func (form MintForm) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
-
-	if ads, err := form.creators.Addresses(); err != nil {
-		as = append(as, ads...)
-	}
-
-	if ads, err := form.copyrighters.Addresses(); err != nil {
-		as = append(as, ads...)
-	}
+	as = append(as, form.creators.Addresses()...)
+	as = append(as, form.copyrighters.Addresses()...)
 
 	return as, nil
 }

@@ -56,8 +56,8 @@ func (hd *Handlers) handleNFTInGroup(id string) (interface{}, error) {
 	}
 }
 
-func (hd *Handlers) buildNFTHal(va nft.NFT) (Hal, error) {
-	hinted := va.ID().String()
+func (hd *Handlers) buildNFTHal(va NFTValue) (Hal, error) {
+	hinted := va.nft.ID().String()
 	h, err := hd.combineURL(HandlerPathNFT, "id", hinted)
 	if err != nil {
 		return nil, err

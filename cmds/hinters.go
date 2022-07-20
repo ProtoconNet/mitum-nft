@@ -95,6 +95,7 @@ var types = []hint.Type{
 	digest.BaseHalType,
 	digest.AccountValueType,
 	digest.OperationValueType,
+	digest.NFTValueType,
 }
 
 var hinters = []hint.Hinter{
@@ -174,6 +175,7 @@ var hinters = []hint.Hinter{
 	digest.BaseHal{},
 	digest.NodeInfo{},
 	digest.OperationValue{},
+	digest.NFTValue{},
 	digest.Problem{},
 }
 

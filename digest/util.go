@@ -89,6 +89,10 @@ func stringOffsetQuery(offset string) string {
 	return fmt.Sprintf("offset=%s", offset)
 }
 
+func stringCollectionQuery(collection string) string {
+	return fmt.Sprintf("collection=%s", collection)
+}
+
 func parseBoolQuery(s string) bool {
 	return s == "1"
 }

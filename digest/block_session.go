@@ -36,6 +36,7 @@ type BlockSession struct {
 	nftModels             []mongo.WriteModel
 	nftAgentModels        []mongo.WriteModel
 	statesValue           *sync.Map
+	nftList               []string
 }
 
 func NewBlockSession(st *Database, blk block.Block) (*BlockSession, error) {
@@ -106,8 +107,22 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}
 
 	if len(bs.nftModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
-			return err
+		for i := range bs.nftList {
+			err := bs.st.cleanByHeightColNameNFTId(
+				ctx,
+				bs.block.Height(),
+				defaultColNameNFT,
+				bs.nftList[i],
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		if len(bs.nftModels) > 0 {
+			if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -297,11 +312,12 @@ func (bs *BlockSession) handleNFTCollectionState(st state.State) ([]mongo.WriteM
 }
 
 func (bs *BlockSession) handleNFTState(st state.State) ([]mongo.WriteModel, error) {
-	doc, err := NewNFTDoc(st, bs.st.database.Encoder())
+	doc, err := NewNFTDoc(st, bs.st.database.Encoder(), bs.block.Height())
 	if err != nil {
 		return nil, err
 	}
 
+	bs.nftList = append(bs.nftList, doc.va.nft.ID().String())
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
