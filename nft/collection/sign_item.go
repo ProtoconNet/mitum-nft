@@ -61,7 +61,7 @@ func (it SignItem) Bytes() []byte {
 }
 
 func (it SignItem) IsValid([]byte) error {
-	return isvalid.Check(nil, false, it.BaseHinter, it.qualification, it.nft)
+	return isvalid.Check(nil, false, it.BaseHinter, it.qualification, it.nft, it.cid)
 }
 
 func (it SignItem) Qualification() Qualification {
