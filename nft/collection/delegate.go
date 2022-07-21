@@ -1,6 +1,7 @@
 package collection
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum-currency/currency"
 	"github.com/spikeekips/mitum/base"
@@ -91,21 +92,19 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	founds := map[base.Address]struct{}{}
+	founds := map[extensioncurrency.ContractID]map[base.Address]struct{}{}
 	for i := range fact.items {
 		if err := isvalid.Check(nil, false, fact.items[i]); err != nil {
 			return err
 		}
 
 		agent := fact.items[i].Agent()
-		if err := agent.IsValid(nil); err != nil {
-			return err
-		}
+		collection := fact.items[i].Collection()
 
-		if _, found := founds[agent]; found {
-			return isvalid.InvalidError.Errorf("duplicated agent found; %q", agent)
+		if _, found := founds[collection][agent]; found {
+			return isvalid.InvalidError.Errorf("duplicated collection-agent pair found; %q-%q", collection, agent)
 		}
-		founds[agent] = struct{}{}
+		founds[collection][agent] = struct{}{}
 	}
 
 	return nil
