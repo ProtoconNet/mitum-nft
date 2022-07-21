@@ -37,7 +37,6 @@ type CollectionRegisterProcessor struct {
 
 func NewCollectionRegisterProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProcessor {
 	return func(op state.Processor) (state.Processor, error) {
-
 		i, ok := op.(CollectionRegister)
 		if !ok {
 			return nil, errors.Errorf("not CollectionRegister; %T", op)
@@ -61,7 +60,10 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(CollectionRegisterFact)
+	fact, ok := opp.Fact().(CollectionRegisterFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not CollectionRegisterFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -151,7 +153,10 @@ func (opp *CollectionRegisterProcessor) Process(
 	_ func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(CollectionRegisterFact)
+	fact, ok := opp.Fact().(CollectionRegisterFact)
+	if !ok {
+		return operation.NewBaseReasonError("not CollectionRegisterFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 

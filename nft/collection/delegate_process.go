@@ -43,7 +43,6 @@ func (ipp *DelegateItemProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) error {
-
 	if err := ipp.item.IsValid(nil); err != nil {
 		return err
 	}
@@ -63,7 +62,6 @@ func (ipp *DelegateItemProcessor) Process(
 	_ func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) ([]state.State, error) {
-
 	switch ipp.item.Mode() {
 	case DelegateAllow:
 		if err := ipp.box.Append(ipp.item.Agent()); err != nil {
@@ -108,7 +106,7 @@ func NewDelegateProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewPro
 	return func(op state.Processor) (state.Processor, error) {
 		i, ok := op.(Delegate)
 		if !ok {
-			return nil, operation.NewBaseReasonError("not Delegate; %T", op)
+			return nil, errors.Errorf("not Delegate; %T", op)
 		}
 
 		opp := DelegateProcessorPool.Get().(*DelegateProcessor)
@@ -129,7 +127,10 @@ func (opp *DelegateProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(DelegateFact)
+	fact, ok := opp.Fact().(DelegateFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not DelegateFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -212,7 +213,10 @@ func (opp *DelegateProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(DelegateFact)
+	fact, ok := opp.Fact().(DelegateFact)
+	if !ok {
+		return operation.NewBaseReasonError("not DelegateFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -259,7 +263,10 @@ func (opp *DelegateProcessor) Close() error {
 }
 
 func (opp *DelegateProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(DelegateFact)
+	fact, ok := opp.Fact().(DelegateFact)
+	if !ok {
+		return nil, errors.Errorf("not DelegateFact; %T", opp.Fact())
+	}
 
 	items := make([]DelegateItem, len(fact.items))
 	for i := range fact.items {

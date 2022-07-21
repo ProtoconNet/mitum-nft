@@ -45,7 +45,6 @@ func (ipp *SignItemProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) error {
-
 	if err := ipp.item.IsValid(nil); err != nil {
 		return err
 	}
@@ -176,7 +175,10 @@ func (opp *SignProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(SignFact)
+	fact, ok := opp.Fact().(SignFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not SignFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -234,7 +236,10 @@ func (opp *SignProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(SignFact)
+	fact, ok := opp.Fact().(SignFact)
+	if !ok {
+		return operation.NewBaseReasonError("not SignFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -271,7 +276,10 @@ func (opp *SignProcessor) Close() error {
 }
 
 func (opp *SignProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(SignFact)
+	fact, ok := opp.Fact().(SignFact)
+	if !ok {
+		return nil, errors.Errorf("not SignFact; %T", opp.Fact())
+	}
 
 	items := make([]SignItem, len(fact.items))
 	for i := range fact.items {

@@ -142,7 +142,7 @@ func NewApproveProcessor(cp *extensioncurrency.CurrencyPool) currency.GetNewProc
 	return func(op state.Processor) (state.Processor, error) {
 		i, ok := op.(Approve)
 		if !ok {
-			return nil, operation.NewBaseReasonError("not Approve; %T", op)
+			return nil, errors.Errorf("not Approve; %T", op)
 		}
 
 		opp := ApproveProcessorPool.Get().(*ApproveProcessor)
@@ -162,7 +162,10 @@ func (opp *ApproveProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(ApproveFact)
+	fact, ok := opp.Fact().(ApproveFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not ApproveFact; %T", opp.Fact())
+	}
 
 	if err := checkExistsState(currency.StateKeyAccount(fact.Sender()), getState); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -208,7 +211,10 @@ func (opp *ApproveProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(ApproveFact)
+	fact, ok := opp.Fact().(ApproveFact)
+	if !ok {
+		return operation.NewBaseReasonError("not ApproveFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -245,7 +251,10 @@ func (opp *ApproveProcessor) Close() error {
 }
 
 func (opp *ApproveProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(ApproveFact)
+	fact, ok := opp.Fact().(ApproveFact)
+	if !ok {
+		return nil, errors.Errorf("not ApproveFact; %T", opp.Fact())
+	}
 
 	items := make([]ApproveItem, len(fact.items))
 	for i := range fact.items {

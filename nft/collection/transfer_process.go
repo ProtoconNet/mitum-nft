@@ -45,7 +45,6 @@ func (ipp *TransferItemProcessor) PreProcess(
 	getState func(key string) (state.State, bool, error),
 	_ func(valuehash.Hash, ...state.State) error,
 ) error {
-
 	if err := ipp.item.IsValid(nil); err != nil {
 		return err
 	}
@@ -167,7 +166,10 @@ func (opp *TransferProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(TransferFact)
+	fact, ok := opp.Fact().(TransferFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not TransferFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -225,7 +227,10 @@ func (opp *TransferProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(TransferFact)
+	fact, ok := opp.Fact().(TransferFact)
+	if !ok {
+		return operation.NewBaseReasonError("not TransferFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -262,7 +267,10 @@ func (opp *TransferProcessor) Close() error {
 }
 
 func (opp *TransferProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(TransferFact)
+	fact, ok := opp.Fact().(TransferFact)
+	if !ok {
+		return nil, errors.Errorf("not TransferFact; %T", opp.Fact())
+	}
 
 	items := make([]TransferItem, len(fact.items))
 	for i := range fact.items {
