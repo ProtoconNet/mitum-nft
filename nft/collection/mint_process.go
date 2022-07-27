@@ -175,7 +175,10 @@ func (opp *MintProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(MintFact)
+	fact, ok := opp.Fact().(MintFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not MintFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -297,7 +300,10 @@ func (opp *MintProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(MintFact)
+	fact, ok := opp.Fact().(MintFact)
+	if !ok {
+		return operation.NewBaseReasonError("not MintFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -354,7 +360,10 @@ func (opp *MintProcessor) Close() error {
 }
 
 func (opp *MintProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(MintFact)
+	fact, ok := opp.Fact().(MintFact)
+	if !ok {
+		return nil, errors.Errorf("not MintFact; %T", opp.Fact())
+	}
 
 	items := make([]MintItem, len(fact.items))
 	for i := range fact.items {

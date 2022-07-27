@@ -161,7 +161,10 @@ func (opp *BurnProcessor) PreProcess(
 	getState func(string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) (state.Processor, error) {
-	fact := opp.Fact().(BurnFact)
+	fact, ok := opp.Fact().(BurnFact)
+	if !ok {
+		return nil, operation.NewBaseReasonError("not BurnFact; %T", opp.Fact())
+	}
 
 	if err := fact.IsValid(nil); err != nil {
 		return nil, operation.NewBaseReasonError(err.Error())
@@ -248,7 +251,10 @@ func (opp *BurnProcessor) Process(
 	getState func(key string) (state.State, bool, error),
 	setState func(valuehash.Hash, ...state.State) error,
 ) error {
-	fact := opp.Fact().(BurnFact)
+	fact, ok := opp.Fact().(BurnFact)
+	if !ok {
+		return operation.NewBaseReasonError("not BurnFact; %T", opp.Fact())
+	}
 
 	var states []state.State
 
@@ -295,7 +301,10 @@ func (opp *BurnProcessor) Close() error {
 }
 
 func (opp *BurnProcessor) calculateItemsFee() (map[currency.CurrencyID][2]currency.Big, error) {
-	fact := opp.Fact().(BurnFact)
+	fact, ok := opp.Fact().(BurnFact)
+	if !ok {
+		return nil, errors.Errorf("not BurnFact; %T", opp.Fact())
+	}
 
 	items := make([]BurnItem, len(fact.items))
 	for i := range fact.items {
