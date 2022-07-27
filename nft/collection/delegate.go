@@ -101,9 +101,12 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		agent := fact.items[i].Agent()
 		collection := fact.items[i].Collection()
 
-		if _, found := founds[collection][agent]; found {
+		if addressMap, collectionFound := founds[collection]; !collectionFound {
+			founds[collection] = make(map[base.Address]struct{})
+		} else if _, addressFound := addressMap[agent]; addressFound {
 			return isvalid.InvalidError.Errorf("duplicated collection-agent pair found; %q-%q", collection, agent)
 		}
+
 		founds[collection][agent] = struct{}{}
 	}
 
