@@ -89,6 +89,11 @@ func (nid NFTID) IsValid([]byte) error {
 	if nid.idx > uint64(MaxNFTIdx) {
 		return isvalid.InvalidError.Errorf("nid idx over max; %d > %d", nid.idx, MaxNFTIdx)
 	}
+
+	if nid.idx == 0 {
+		return isvalid.InvalidError.Errorf("nid idx must be over zero; %q", nid)
+	}
+
 	if err := nid.collection.IsValid(nil); err != nil {
 		return err
 	}
