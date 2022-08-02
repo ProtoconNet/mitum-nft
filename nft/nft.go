@@ -1,12 +1,16 @@
 package nft
 
 import (
+	"strings"
+
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
 	"github.com/spikeekips/mitum/util/hint"
 	"github.com/spikeekips/mitum/util/isvalid"
 	"github.com/spikeekips/mitum/util/valuehash"
 )
+
+var MaxNFTHashLength = 1024
 
 type NFTHash string
 
@@ -19,6 +23,14 @@ func (hs NFTHash) String() string {
 }
 
 func (hs NFTHash) IsValid([]byte) error {
+	if l := len(hs); l > MaxNFTHashLength {
+		return isvalid.InvalidError.Errorf("invalid length of nft hash; %d > %d", l, MaxNFTHashLength)
+	}
+
+	if hs != "" && strings.TrimSpace(string(hs)) == "" {
+		return isvalid.InvalidError.Errorf("nft hash with only spaces")
+	}
+
 	return nil
 }
 
