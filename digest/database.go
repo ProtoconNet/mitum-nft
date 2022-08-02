@@ -569,7 +569,7 @@ func (st *Database) NFTAgentByAddressAndSymbol(
 
 	opt := options.Find().SetSort(
 		util.NewBSONFilter("height", sr).D(),
-	)
+	).SetLimit(1)
 
 	var sta state.State
 	return st.database.Client().Find(
