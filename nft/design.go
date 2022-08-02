@@ -2,6 +2,7 @@ package nft
 
 import (
 	"net/url"
+	"strings"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/currency"
 	"github.com/spikeekips/mitum/base"
@@ -30,6 +31,8 @@ func (pp PaymentParameter) IsValid([]byte) error {
 	return nil
 }
 
+var MaxURILength = 1000
+
 type URI string
 
 func (uri URI) Bytes() []byte {
@@ -44,6 +47,15 @@ func (uri URI) IsValid([]byte) error {
 	if _, err := url.Parse(string(uri)); err != nil {
 		return err
 	}
+
+	if l := len(uri); l > 1000 {
+		return isvalid.InvalidError.Errorf("invalid length of uri; %d > %d", l, MaxURILength)
+	}
+
+	if uri != "" && strings.TrimSpace(string(uri)) == "" {
+		return isvalid.InvalidError.Errorf("uri with only spaces")
+	}
+
 	return nil
 }
 
