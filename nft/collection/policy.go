@@ -90,7 +90,8 @@ func (policy CollectionPolicy) Bytes() []byte {
 func (policy CollectionPolicy) IsValid([]byte) error {
 	if err := isvalid.Check(nil, false,
 		policy.name,
-		policy.royalty); err != nil {
+		policy.royalty,
+		policy.uri); err != nil {
 		return err
 	}
 
