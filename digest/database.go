@@ -1089,6 +1089,50 @@ func (st *Database) NFTsByAddress(
 	)
 }
 
+func (st *Database) NFTsByCollection(
+	symbol string,
+	reverse bool,
+	offset string,
+	limit int64,
+	callback func(string /* nft id */, NFTValue) (bool, error),
+) error {
+	filter, err := buildNFTsFilterByCollection(symbol, offset, reverse)
+	if err != nil {
+		return err
+	}
+
+	sr := 1
+	if reverse {
+		sr = -1
+	}
+
+	opt := options.Find().SetSort(
+		util.NewBSONFilter("height", sr).D(),
+	)
+
+	switch {
+	case limit <= 0: // no limit
+	case limit > maxLimit:
+		opt = opt.SetLimit(maxLimit)
+	default:
+		opt = opt.SetLimit(limit)
+	}
+
+	return st.database.Client().Find(
+		context.Background(),
+		defaultColNameNFT,
+		filter,
+		func(cursor *mongo.Cursor) (bool, error) {
+			va, err := LoadNFT(cursor.Decode, st.database.Encoders())
+			if err != nil {
+				return false, err
+			}
+			return callback(va.NFT().ID().String(), va)
+		},
+		opt,
+	)
+}
+
 func (st *Database) cleanByHeightColNameNFTId(
 	ctx context.Context,
 	height base.Height,
@@ -1132,6 +1176,39 @@ func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool,
 		}
 		filterA = append(filterA, filterCollection)
 	}
+
+	// if offset exist, apply offset
+	if len(offset) > 0 {
+		if !reverse {
+			filterOffset := bson.D{
+				{"nftid", bson.D{{"$gt", offset}}},
+			}
+			filterA = append(filterA, filterOffset)
+			// if reverse true, lesser then offset height
+		} else {
+			filterHeight := bson.D{
+				{"nftid", bson.D{{"$lt", offset}}},
+			}
+			filterA = append(filterA, filterHeight)
+		}
+	}
+
+	filter := bson.D{}
+	if len(filterA) > 0 {
+		filter = bson.D{
+			{"$and", filterA},
+		}
+	}
+
+	return filter, nil
+}
+
+func buildNFTsFilterByCollection(symbol string, offset string, reverse bool) (bson.D, error) {
+	filterA := bson.A{}
+
+	// filter fot matching collection
+	filterSymbol := bson.D{{"collection", bson.D{{"$in", []string{symbol}}}}}
+	filterA = append(filterA, filterSymbol)
 
 	// if offset exist, apply offset
 	if len(offset) > 0 {

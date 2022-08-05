@@ -44,8 +44,9 @@ var (
 	HandlerPathAccounts                   = `/accounts`
 	HandlerPathAccountNFTAgent            = `/account/{address:(?i)` + base.REStringAddressString + `}/nftagent/{symbol:.*}` // revive:disable-line:line-length-limit
 	HandlerPathAccountNFTs                = `/account/{address:(?i)` + base.REStringAddressString + `}/nfts`                 // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection              = `/nft/collection/{symbol:.*}`
+	HandlerPathNFTCollection              = `/nft/collection/{symbol:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}`
 	HandlerPathNFT                        = `/nft/{id:.*}`
+	HandlerPathNFTCollectionNFTs          = `/nft/collection/{symbol:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/nfts`
 	HandlerPathOperationBuildFactTemplate = `/builder/operation/fact/template/{fact:[\w][\w\-]*}`
 	HandlerPathOperationBuildFact         = `/builder/operation/fact`
 	HandlerPathOperationBuildSign         = `/builder/operation/sign`
@@ -72,6 +73,7 @@ var RateLimitHandlerMap = map[string]string{
 	"account-nfts":                    HandlerPathAccountNFTs,
 	"nft-collection":                  HandlerPathNFTCollection,
 	"nft":                             HandlerPathNFT,
+	"nft-collection-nfts":             HandlerPathNFTCollectionNFTs,
 	"builder-operation-fact-template": HandlerPathOperationBuildFactTemplate,
 	"builder-operation-fact":          HandlerPathOperationBuildFact,
 	"builder-operation-sign":          HandlerPathOperationBuildSign,
@@ -204,6 +206,8 @@ func (hd *Handlers) setHandlers() {
 	hd.setHandler(HandlerPathAccounts, hd.handleAccounts, true).
 		Methods(http.MethodOptions, "GET")
 	hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true).
+		Methods(http.MethodOptions, "GET")
+	hd.setHandler(HandlerPathNFTCollectionNFTs, hd.handleCollectionNFTs, true).
 		Methods(http.MethodOptions, "GET")
 	hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
 		Methods(http.MethodOptions, "GET")

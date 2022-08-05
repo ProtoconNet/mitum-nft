@@ -674,3 +674,54 @@ func (hd *Handlers) buildAccountNFTsHal(
 
 	return hal, nil
 }
+
+func (hd *Handlers) buildCollectionNFTsHal(
+	symbol string,
+	vas []Hal,
+	offset string,
+	reverse bool,
+) (Hal, error) {
+	baseSelf, err := hd.combineURL(HandlerPathNFTCollectionNFTs, "symbol", symbol)
+	if err != nil {
+		return nil, err
+	}
+
+	self := baseSelf
+	if len(offset) > 0 {
+		self = addQueryValue(baseSelf, stringOffsetQuery(offset))
+	}
+	if reverse {
+		self = addQueryValue(baseSelf, stringBoolQuery("reverse", reverse))
+	}
+
+	var hal Hal
+	hal = NewBaseHal(vas, NewHalLink(self, nil))
+
+	h, err := hd.combineURL(HandlerPathNFTCollection, "symbol", symbol)
+	if err != nil {
+		return nil, err
+	}
+	hal = hal.AddLink("collection", NewHalLink(h, nil))
+
+	var nextoffset string
+
+	if len(vas) > 0 {
+		va := vas[len(vas)-1].Interface().(NFTValue)
+		nextoffset = va.nft.ID().String()
+	}
+
+	if len(nextoffset) > 0 {
+		next := baseSelf
+		next = addQueryValue(next, stringOffsetQuery(nextoffset))
+
+		if reverse {
+			next = addQueryValue(next, stringBoolQuery("reverse", reverse))
+		}
+
+		hal = hal.AddLink("next", NewHalLink(next, nil))
+	}
+
+	hal = hal.AddLink("reverse", NewHalLink(addQueryValue(baseSelf, stringBoolQuery("reverse", !reverse)), nil))
+
+	return hal, nil
+}
