@@ -31,7 +31,7 @@ func NewSigner(account base.Address, share uint, signed bool) Signer {
 	}
 }
 
-func MustNewSigner(account base.Address, share uint, signed bool, clue string) Signer {
+func MustNewSigner(account base.Address, share uint, signed bool) Signer {
 	signer := NewSigner(account, share, signed)
 
 	if err := signer.IsValid(nil); err != nil {
@@ -78,4 +78,20 @@ func (signer Signer) Share() uint {
 
 func (signer Signer) Signed() bool {
 	return signer.signed
+}
+
+func (signer Signer) Equal(csigner Signer) bool {
+	if signer.Share() != csigner.Share() {
+		return false
+	}
+
+	if !signer.Account().Equal(csigner.Account()) {
+		return false
+	}
+
+	if signer.Signed() != csigner.Signed() {
+		return false
+	}
+
+	return true
 }

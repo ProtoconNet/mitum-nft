@@ -11,7 +11,7 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-var MaxNFTIdx = 10000
+var MaxNFTIdx uint64 = 10000
 
 var (
 	NFTIDType   = hint.Type("mitum-nft-nft-id")

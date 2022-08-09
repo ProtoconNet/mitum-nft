@@ -12,6 +12,8 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
+var MaxPaymentParameter uint = 99
+
 type PaymentParameter uint
 
 func (pp PaymentParameter) Bytes() []byte {
@@ -23,9 +25,9 @@ func (pp PaymentParameter) Uint() uint {
 }
 
 func (pp PaymentParameter) IsValid([]byte) error {
-	if uint(pp) >= 100 {
+	if uint(pp) > MaxPaymentParameter {
 		return isvalid.InvalidError.Errorf(
-			"invalid range of symbol; %d <= %d < %d", 0, pp, 100)
+			"invalid range of paymentparameter; %d <= %d <= %d", 0, pp, MaxPaymentParameter)
 	}
 
 	return nil
@@ -167,11 +169,40 @@ func (d Design) IsValid([]byte) error {
 		d.policy); err != nil {
 		return err
 	}
+
+	if d.parent.Equal(d.creator) {
+		return isvalid.InvalidError.Errorf("parent and creator are the same; %q == %q", d.parent, d.creator)
+	}
+
 	return nil
 }
 
 func (d Design) Equal(cd Design) bool {
-	return d.Symbol() == cd.Symbol()
+	if !d.parent.Equal(cd.parent) {
+		return false
+	}
+
+	if !d.creator.Equal(cd.creator) {
+		return false
+	}
+
+	if d.symbol != cd.symbol {
+		return false
+	}
+
+	if d.active != cd.active {
+		return false
+	}
+
+	if !d.policy.Equal(cd.policy) {
+		return false
+	}
+
+	if d.Hash() != cd.Hash() {
+		return false
+	}
+
+	return true
 }
 
 func (d Design) Rebuild() Design {
@@ -183,5 +214,6 @@ type BasePolicy interface {
 	isvalid.IsValider
 	Bytes() []byte
 	Addresses() ([]base.Address, error)
+	Equal(c BasePolicy) bool
 	Rebuild() BasePolicy
 }

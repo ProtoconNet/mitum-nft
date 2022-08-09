@@ -1,6 +1,9 @@
 package nft
 
 import (
+	"bytes"
+	"sort"
+
 	"github.com/pkg/errors"
 	"github.com/spikeekips/mitum/base"
 	"github.com/spikeekips/mitum/util"
@@ -126,6 +129,34 @@ func (signers Signers) Exists(signer Signer) bool {
 		return true
 	}
 	return false
+}
+
+func (signers Signers) Equal(csigners Signers) bool {
+	if signers.Total() != csigners.Total() {
+		return false
+	}
+
+	if len(signers.Signers()) != len(csigners.Signers()) {
+		return false
+	}
+
+	sgns := signers.Signers()
+	sort.Slice(sgns, func(i, j int) bool {
+		return bytes.Compare(sgns[j].Bytes(), sgns[i].Bytes()) < 0
+	})
+
+	csgns := csigners.Signers()
+	sort.Slice(csgns, func(i, j int) bool {
+		return bytes.Compare(csgns[j].Bytes(), csgns[i].Bytes()) < 0
+	})
+
+	for i := range sgns {
+		if !sgns[i].Equal(csgns[i]) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (signers Signers) IsSigned(signer Signer) bool {

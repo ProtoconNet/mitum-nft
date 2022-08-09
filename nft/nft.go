@@ -40,10 +40,8 @@ var (
 	NFTHinter = NFT{BaseHinter: hint.NewBaseHinter(NFTHint)}
 )
 
-var (
-	MaxCreators     = 10
-	MaxCopyrighters = 10
-)
+var MaxCreators = 10
+var MaxCopyrighters = 10
 
 type NFT struct {
 	hint.BaseHinter
@@ -168,6 +166,38 @@ func (n NFT) Copyrighters() Signers {
 }
 
 func (n NFT) Equal(cn NFT) bool {
+	if !n.ID().Equal(cn.ID()) {
+		return false
+	}
+
+	if n.Active() != cn.Active() {
+		return false
+	}
+
+	if !n.Owner().Equal(cn.Owner()) {
+		return false
+	}
+
+	if n.NftHash() != cn.NftHash() {
+		return false
+	}
+
+	if n.Uri() != cn.Uri() {
+		return false
+	}
+
+	if !n.Approved().Equal(cn.Approved()) {
+		return false
+	}
+
+	if !n.Creators().Equal(cn.Creators()) {
+		return false
+	}
+
+	if !n.Copyrighters().Equal(cn.Copyrighters()) {
+		return false
+	}
+
 	return n.ID().Equal(cn.ID())
 }
 
