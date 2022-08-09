@@ -1,7 +1,9 @@
 package collection
 
 import (
+	"bytes"
 	"regexp"
+	"sort"
 
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/spikeekips/mitum/base"
@@ -136,6 +138,46 @@ func (policy CollectionPolicy) Addresses() ([]base.Address, error) {
 		as[i] = policy.whites[i]
 	}
 	return as, nil
+}
+
+func (policy CollectionPolicy) Equal(c nft.BasePolicy) bool {
+	cpolicy, ok := c.(CollectionPolicy)
+	if !ok {
+		return false
+	}
+
+	if policy.name != cpolicy.name {
+		return false
+	}
+
+	if policy.royalty != cpolicy.royalty {
+		return false
+	}
+
+	if policy.uri != cpolicy.uri {
+		return false
+	}
+
+	if len(policy.whites) != len(cpolicy.whites) {
+		return false
+	}
+
+	whites := policy.Whites()
+	cwhites := cpolicy.Whites()
+	sort.Slice(whites, func(i, j int) bool {
+		return bytes.Compare(whites[j].Bytes(), whites[i].Bytes()) < 0
+	})
+	sort.Slice(cwhites, func(i, j int) bool {
+		return bytes.Compare(cwhites[j].Bytes(), cwhites[i].Bytes()) < 0
+	})
+
+	for i := range whites {
+		if !whites[i].Equal(cwhites[i]) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (policy CollectionPolicy) Rebuild() nft.BasePolicy {
