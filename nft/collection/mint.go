@@ -10,7 +10,7 @@ import (
 	"github.com/spikeekips/mitum/util/valuehash"
 )
 
-var MaxMintItems uint = 10
+var MaxMintItems = 10
 
 var (
 	MintFactType   = hint.Type("mitum-nft-mint-operation-fact")
@@ -121,6 +121,10 @@ func (fact MintFact) Addresses() ([]base.Address, error) {
 	as = append(as, fact.sender)
 
 	return as, nil
+}
+
+func (fact MintFact) Items() []MintItem {
+	return fact.items
 }
 
 func (fact MintFact) Currencies() []currency.CurrencyID {

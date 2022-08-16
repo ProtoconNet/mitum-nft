@@ -20,7 +20,7 @@ var (
 	SignHinter     = Sign{BaseOperation: operationHinter(SignHint)}
 )
 
-var MaxSignItems uint = 10
+var MaxSignItems = 10
 
 type SignFact struct {
 	hint.BaseHinter
@@ -94,7 +94,7 @@ func (fact SignFact) IsValid(b []byte) error {
 		}
 
 		if _, found := founds[n]; found {
-			return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
+			return isvalid.InvalidError.Errorf("duplicate nft found; %q", n)
 		}
 
 		founds[n] = struct{}{}

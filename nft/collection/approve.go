@@ -93,7 +93,7 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		}
 
 		if _, found := founds[n]; found {
-			return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
+			return isvalid.InvalidError.Errorf("duplicate nft found; %q", n)
 		}
 
 		founds[n] = struct{}{}

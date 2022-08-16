@@ -195,6 +195,12 @@ func (opp *BurnProcessor) PreProcess(
 				return nil, operation.NewBaseReasonError(err.Error())
 			} else if !design.Active() {
 				return nil, operation.NewBaseReasonError("deactivated collection; %q", collection)
+			} else if cst, err := existsState(extensioncurrency.StateKeyContractAccount(design.Parent()), "contract account", getState); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if ca, err := extensioncurrency.StateContractAccountValue(cst); err != nil {
+				return nil, operation.NewBaseReasonError(err.Error())
+			} else if !ca.IsActive() {
+				return nil, operation.NewBaseReasonError("deactivated contract account; %q", design.Parent())
 			}
 
 			if st, err := existsState(StateKeyNFTs(collection), "nfts", getState); err != nil {

@@ -83,6 +83,12 @@ func (opp *CollectionPolicyUpdaterProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError("deactivated collection; %q", fact.Collection())
 	} else if !design.Creator().Equal(fact.Sender()) {
 		return nil, operation.NewBaseReasonError("not creator of collection design; %q", fact.Collection())
+	} else if cst, err := existsState(extensioncurrency.StateKeyContractAccount(design.Parent()), "contract account", getState); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	} else if ca, err := extensioncurrency.StateContractAccountValue(cst); err != nil {
+		return nil, operation.NewBaseReasonError(err.Error())
+	} else if !ca.IsActive() {
+		return nil, operation.NewBaseReasonError("deactivated contract account; %q", design.Parent())
 	} else {
 		opp.designState = st
 		opp.design = nft.NewDesign(design.Parent(), design.Creator(), design.Symbol(), design.Active(), fact.Policy())

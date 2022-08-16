@@ -83,6 +83,8 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		return nil, operation.NewBaseReasonError(err.Error())
 	} else if !ca.Owner().Equal(fact.Sender()) {
 		return nil, operation.NewBaseReasonError("not owner of contract account; %q", fact.Form().Target())
+	} else if !ca.IsActive() {
+		return nil, operation.NewBaseReasonError("deactivated contract account; %q", fact.Form().Target())
 	}
 
 	if st, err := notExistsState(StateKeyCollection(fact.Form().Symbol()), "design", getState); err != nil {

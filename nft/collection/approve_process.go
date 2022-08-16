@@ -62,6 +62,12 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return err
 	} else if !design.Active() {
 		return errors.Errorf("deactivated collection; %q", nid.Collection())
+	} else if cst, err := existsState(extensioncurrency.StateKeyContractAccount(design.Parent()), "contract account", getState); err != nil {
+		return err
+	} else if ca, err := extensioncurrency.StateContractAccountValue(cst); err != nil {
+		return err
+	} else if !ca.IsActive() {
+		return errors.Errorf("deactivated contract account; %q", design.Parent())
 	}
 
 	if st, err := existsState(StateKeyNFT(nid), "nft", getState); err != nil {
@@ -78,11 +84,11 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		if err := checkExistsState(currency.StateKeyAccount(ipp.nft.Owner()), getState); err != nil {
 			return err
 		} else if st, err := existsState(StateKeyAgents(ipp.nft.Owner(), ipp.nft.ID().Collection()), "agents", getState); err != nil {
-			return errors.Errorf("unathorized sender; %q", ipp.sender)
+			return errors.Errorf("unauthorized sender; %q", ipp.sender)
 		} else if box, err := StateAgentsValue(st); err != nil {
 			return err
 		} else if !box.Exists(ipp.sender) {
-			return errors.Errorf("unathorized sender; %q", ipp.sender)
+			return errors.Errorf("unauthorized sender; %q", ipp.sender)
 		}
 	}
 

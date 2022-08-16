@@ -65,6 +65,12 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return err
 	} else if !design.Active() {
 		return errors.Errorf("deactivated collection; %q", design.Symbol())
+	} else if cst, err := existsState(extensioncurrency.StateKeyContractAccount(design.Parent()), "contract account", getState); err != nil {
+		return err
+	} else if ca, err := extensioncurrency.StateContractAccountValue(cst); err != nil {
+		return err
+	} else if !ca.IsActive() {
+		return errors.Errorf("deactivated contract account; %q", design.Parent())
 	}
 
 	var (

@@ -104,7 +104,7 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		if addressMap, collectionFound := founds[collection]; !collectionFound {
 			founds[collection] = make(map[base.Address]struct{})
 		} else if _, addressFound := addressMap[agent]; addressFound {
-			return isvalid.InvalidError.Errorf("duplicated collection-agent pair found; %q-%q", collection, agent)
+			return isvalid.InvalidError.Errorf("duplicate collection-agent pair found; %q-%q", collection, agent)
 		}
 
 		founds[collection][agent] = struct{}{}
@@ -131,6 +131,10 @@ func (fact DelegateFact) Addresses() ([]base.Address, error) {
 	as[len(fact.items)] = fact.sender
 
 	return as, nil
+}
+
+func (fact DelegateFact) Items() []DelegateItem {
+	return fact.items
 }
 
 func (fact DelegateFact) Currencies() []currency.CurrencyID {

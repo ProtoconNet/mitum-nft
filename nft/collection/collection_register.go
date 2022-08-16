@@ -27,8 +27,14 @@ type CollectionRegisterForm struct {
 	whites  []base.Address
 }
 
-func NewCollectionRegisterForm(target base.Address, symbol extensioncurrency.ContractID, name CollectionName,
-	royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionRegisterForm {
+func NewCollectionRegisterForm(
+	target base.Address,
+	symbol extensioncurrency.ContractID,
+	name CollectionName,
+	royalty nft.PaymentParameter,
+	uri nft.URI,
+	whites []base.Address,
+) CollectionRegisterForm {
 	return CollectionRegisterForm{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFormHint),
 		target:     target,
@@ -40,8 +46,13 @@ func NewCollectionRegisterForm(target base.Address, symbol extensioncurrency.Con
 	}
 }
 
-func MustNewCollectionRegisterForm(target base.Address, symbol extensioncurrency.ContractID, name CollectionName,
-	royalty nft.PaymentParameter, uri nft.URI, whites []base.Address) CollectionRegisterForm {
+func MustNewCollectionRegisterForm(target base.Address,
+	symbol extensioncurrency.ContractID,
+	name CollectionName,
+	royalty nft.PaymentParameter,
+	uri nft.URI,
+	whites []base.Address,
+) CollectionRegisterForm {
 	form := NewCollectionRegisterForm(target, symbol, name, royalty, uri, whites)
 
 	if err := form.IsValid(nil); err != nil {
@@ -207,6 +218,10 @@ func (fact CollectionRegisterFact) IsValid(b []byte) error {
 		fact.form,
 		fact.cid); err != nil {
 		return err
+	}
+
+	if fact.sender.Equal(fact.form.target) {
+		return isvalid.InvalidError.Errorf("sender and target are the same; %q == %q", fact.sender, fact.form.target)
 	}
 
 	if !fact.h.Equal(fact.GenerateHash()) {

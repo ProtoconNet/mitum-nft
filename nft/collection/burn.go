@@ -20,7 +20,7 @@ var (
 	BurnHinter     = Burn{BaseOperation: operationHinter(BurnHint)}
 )
 
-var MaxBurnItems uint = 10
+var MaxBurnItems = 10
 
 type BurnFact struct {
 	hint.BaseHinter
@@ -94,7 +94,7 @@ func (fact BurnFact) IsValid(b []byte) error {
 		}
 
 		if _, found := founds[n]; found {
-			return isvalid.InvalidError.Errorf("duplicated nft found; %s", n)
+			return isvalid.InvalidError.Errorf("duplicate nft found; %s", n)
 		}
 
 		founds[n] = struct{}{}

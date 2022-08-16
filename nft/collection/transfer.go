@@ -20,7 +20,7 @@ var (
 	TransferHinter     = Transfer{BaseOperation: operationHinter(TransferHint)}
 )
 
-var MaxTransferItems uint = 10
+var MaxTransferItems = 10
 
 type TransferFact struct {
 	hint.BaseHinter
@@ -94,7 +94,7 @@ func (fact TransferFact) IsValid(b []byte) error {
 		}
 
 		if _, found := founds[n]; found {
-			return isvalid.InvalidError.Errorf("duplicated nft found; %q", n)
+			return isvalid.InvalidError.Errorf("duplicate nft found; %q", n)
 		}
 
 		founds[n] = struct{}{}
