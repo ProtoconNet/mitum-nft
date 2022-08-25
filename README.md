@@ -7,7 +7,7 @@
 * user defined contract account state policy: collection.
 * collection: user defined nft collection.
 * *mongodb*: as mitum does, *mongodb* is the primary storage.
-* ERC-721: ERC-721
+* reference nft standard: ERC-721
 * multiple collection policy for one contract account.
 
 #### Installation
@@ -20,6 +20,18 @@ $ git clone https://github.com/protoconNet/mitum-nft
 $ cd mitum-nft
 
 $ go build -ldflags="-X 'main.Version=v0.0.1-tutorial'" -o ./mitum-nft ./main.go
+```
+
+#### Test
+
+```sh
+$ go test -tags 'test' ./... 
+```
+
+For more details,
+
+```sh
+$ go clean -testcache; time go test -race -tags 'test' -v -timeout 20m ./... -run .
 ```
 
 #### Run
