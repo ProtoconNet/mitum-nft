@@ -151,17 +151,20 @@ func (abx AgentBox) Agents() []base.Address {
 
 type AgentBoxJSONPacker struct {
 	jsonenc.HintedHead
-	AG []base.Address `json:"agents"`
+	CL extensioncurrency.ContractID `json:"collection"`
+	AG []base.Address               `json:"agents"`
 }
 
 func (abx AgentBox) MarshalJSON() ([]byte, error) {
 	return jsonenc.Marshal(AgentBoxJSONPacker{
 		HintedHead: jsonenc.NewHintedHead(abx.Hint()),
+		CL:         abx.collection,
 		AG:         abx.agents,
 	})
 }
 
 type AgentBoxJSONUnpacker struct {
+	CL string                `json:"collection"`
 	AG []base.AddressDecoder `json:"agents"`
 }
 
@@ -171,23 +174,26 @@ func (abx *AgentBox) UnpackJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	return abx.unpack(enc, ubox.AG)
+	return abx.unpack(enc, ubox.CL, ubox.AG)
 }
 
 type AgentBoxBSONPacker struct {
-	AG []base.Address `bson:"agents"`
+	CL extensioncurrency.ContractID `bson:"collection"`
+	AG []base.Address               `bson:"agents"`
 }
 
 func (abx AgentBox) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bsonenc.MergeBSONM(
 		bsonenc.NewHintedDoc(abx.Hint()),
 		bson.M{
-			"agents": abx.agents,
+			"collection": abx.collection,
+			"agents":     abx.agents,
 		}),
 	)
 }
 
 type AgentBoxBSONUnpacker struct {
+	CL string                `bson:"collection"`
 	AG []base.AddressDecoder `bson:"agents"`
 }
 
@@ -197,13 +203,16 @@ func (abx *AgentBox) UnpackBSON(b []byte, enc *bsonenc.Encoder) error {
 		return err
 	}
 
-	return abx.unpack(enc, ubox.AG)
+	return abx.unpack(enc, ubox.CL, ubox.AG)
 }
 
 func (abx *AgentBox) unpack(
 	enc encoder.Encoder,
+	cl string,
 	bags []base.AddressDecoder, // base.Addresss
 ) error {
+
+	abx.collection = extensioncurrency.ContractID(cl)
 
 	agents := make([]base.Address, len(bags))
 	for i := range agents {
