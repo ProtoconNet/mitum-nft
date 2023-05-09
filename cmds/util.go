@@ -14,18 +14,22 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"path/filepath"
 	"time"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	extensioncurrencycmds "github.com/ProtoconNet/mitum-currency-extension/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	mongodbstorage "github.com/ProtoconNet/mitum-currency-extension/v2/digest/mongodb"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
+	mitumcurrency "github.com/ProtoconNet/mitum-currency/v2/currency"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	isaacoperation "github.com/ProtoconNet/mitum-currency/v2/isaac"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	isaacblock "github.com/ProtoconNet/mitum2/isaac/block"
 	isaacdatabase "github.com/ProtoconNet/mitum2/isaac/database"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
-	isaacoperation "github.com/ProtoconNet/mitum2/isaac/operation"
 	isaacstates "github.com/ProtoconNet/mitum2/isaac/states"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/network/quicmemberlist"
@@ -38,6 +42,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/logging"
 	"github.com/ProtoconNet/mitum2/util/ps"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -161,15 +166,15 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 
 	set := hint.NewCompatibleSet()
 
-	opr := extensioncurrency.NewOperationProcessor()
-	opr.SetProcessor(currency.CreateAccountsHint, extensioncurrency.NewCreateAccountsProcessor())
-	opr.SetProcessor(currency.KeyUpdaterHint, extensioncurrency.NewKeyUpdaterProcessor())
-	opr.SetProcessor(currency.TransfersHint, extensioncurrency.NewTransfersProcessor())
-	opr.SetProcessor(currency.CurrencyRegisterHint, extensioncurrency.NewCurrencyRegisterProcessor(params.Threshold()))
-	opr.SetProcessor(currency.CurrencyPolicyUpdaterHint, extensioncurrency.NewCurrencyPolicyUpdaterProcessor(params.Threshold()))
-	opr.SetProcessor(currency.SuffrageInflationHint, extensioncurrency.NewSuffrageInflationProcessor(params.Threshold()))
-	opr.SetProcessor(extensioncurrency.CreateContractAccountsHint, extensioncurrency.NewCreateContractAccountsProcessor())
-	opr.SetProcessor(extensioncurrency.WithdrawsHint, extensioncurrency.NewWithdrawsProcessor())
+	opr := collection.NewOperationProcessor()
+	opr.SetProcessor(mitumcurrency.CreateAccountsHint, currency.NewCreateAccountsProcessor())
+	opr.SetProcessor(mitumcurrency.KeyUpdaterHint, currency.NewKeyUpdaterProcessor())
+	opr.SetProcessor(mitumcurrency.TransfersHint, currency.NewTransfersProcessor())
+	opr.SetProcessor(currency.CurrencyRegisterHint, currency.NewCurrencyRegisterProcessor(params.Threshold()))
+	opr.SetProcessor(currency.CurrencyPolicyUpdaterHint, currency.NewCurrencyPolicyUpdaterProcessor(params.Threshold()))
+	opr.SetProcessor(mitumcurrency.SuffrageInflationHint, currency.NewSuffrageInflationProcessor(params.Threshold()))
+	opr.SetProcessor(currency.CreateContractAccountsHint, currency.NewCreateContractAccountsProcessor())
+	opr.SetProcessor(currency.WithdrawsHint, currency.NewWithdrawsProcessor())
 	opr.SetProcessor(collection.CollectionRegisterHint, collection.NewCollectionRegisterProcessor())
 	opr.SetProcessor(collection.CollectionPolicyUpdaterHint, collection.NewCollectionPolicyUpdaterProcessor())
 	opr.SetProcessor(collection.MintHint, collection.NewMintProcessor())
@@ -178,7 +183,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	opr.SetProcessor(collection.ApproveHint, collection.NewApproveProcessor())
 	opr.SetProcessor(collection.NFTSignHint, collection.NewNFTSignProcessor())
 
-	_ = set.Add(currency.CreateAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(mitumcurrency.CreateAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -187,7 +192,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(currency.KeyUpdaterHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(mitumcurrency.KeyUpdaterHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -196,7 +201,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(currency.TransfersHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(mitumcurrency.TransfersHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -223,7 +228,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(currency.SuffrageInflationHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(mitumcurrency.SuffrageInflationHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -232,7 +237,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(extensioncurrency.CreateContractAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(currency.CreateContractAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -241,7 +246,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(extensioncurrency.WithdrawsHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(currency.WithdrawsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -394,7 +399,7 @@ func PGenerateGenesis(ctx context.Context) (context.Context, error) {
 		return ctx, e(err, "")
 	}
 
-	g := NewGenesisBlockGenerator(
+	g := extensioncurrencycmds.NewGenesisBlockGenerator(
 		local,
 		params.NetworkID(),
 		enc,
@@ -428,6 +433,51 @@ func PEncoder(ctx context.Context) (context.Context, error) {
 	ctx = context.WithValue(ctx, launch.EncodersContextKey, encs) //revive:disable-line:modifies-parameter
 	ctx = context.WithValue(ctx, launch.EncoderContextKey, jenc)  //revive:disable-line:modifies-parameter
 	ctx = context.WithValue(ctx, BEncoderContextKey, benc)        //revive:disable-line:modifies-parameter
+
+	return ctx, nil
+}
+
+func PLoadDigestDesign(ctx context.Context) (context.Context, error) {
+	e := util.StringErrorFunc("failed to load design")
+
+	var log *logging.Logging
+	var flag launch.DesignFlag
+	var enc *jsonenc.Encoder
+
+	if err := util.LoadFromContextOK(ctx,
+		launch.LoggingContextKey, &log,
+		launch.DesignFlagContextKey, &flag,
+		launch.EncoderContextKey, &enc,
+	); err != nil {
+		return ctx, e(err, "")
+	}
+
+	switch flag.Scheme() {
+	case "file":
+		b, err := os.ReadFile(filepath.Clean(flag.URL().Path))
+		if err != nil {
+			return ctx, e(err, "")
+		}
+		var m struct {
+			Digest *currencycmds.DigestDesign
+		}
+
+		if err := yaml.Unmarshal(b, &m); err != nil {
+			return ctx, err
+		} else if m.Digest == nil {
+			return ctx, nil
+		} else if i, err := m.Digest.Set(ctx); err != nil {
+			return ctx, err
+		} else {
+			ctx = i
+		}
+
+		ctx = context.WithValue(ctx, ContextValueDigestDesign, *m.Digest)
+
+		log.Log().Debug().Object("design", *m.Digest).Msg("digest design loaded")
+	default:
+		return ctx, e(nil, "unknown digest design uri, %q", flag.URL())
+	}
 
 	return ctx, nil
 }
@@ -696,8 +746,8 @@ func SendOperationFilterFunc(ctx context.Context) (
 
 func IsSupportedProposalOperationFactHintFunc() func(hint.Hint) bool {
 	return func(ht hint.Hint) bool {
-		for _, hinter := range SupportedProposalOperationFactHinters {
-			s := hinter.Hint
+		for i := range SupportedProposalOperationFactHinters {
+			s := SupportedProposalOperationFactHinters[i].Hint
 			if ht.Type() != s.Type() {
 				continue
 			}
@@ -707,4 +757,71 @@ func IsSupportedProposalOperationFactHintFunc() func(hint.Hint) bool {
 
 		return false
 	}
+}
+
+func ProcessDatabase(ctx context.Context) (context.Context, error) {
+	var l currencycmds.DigestDesign
+	if err := util.LoadFromContext(ctx, ContextValueDigestDesign, &l); err != nil {
+		return ctx, err
+	}
+
+	if (l == currencycmds.DigestDesign{}) {
+		return ctx, nil
+	}
+	conf := l.Database()
+
+	switch {
+	case conf.URI().Scheme == "mongodb", conf.URI().Scheme == "mongodb+srv":
+		return processMongodbDatabase(ctx, l)
+	default:
+		return ctx, errors.Errorf("unsupported database type, %q", conf.URI().Scheme)
+	}
+}
+
+func processMongodbDatabase(ctx context.Context, l currencycmds.DigestDesign) (context.Context, error) {
+	conf := l.Database()
+
+	/*
+		ca, err := cache.NewCacheFromURI(conf.Cache().String())
+		if err != nil {
+			return ctx, err
+		}
+	*/
+
+	var encs *encoder.Encoders
+	if err := util.LoadFromContext(ctx, launch.EncodersContextKey, &encs); err != nil {
+		return ctx, err
+	}
+
+	st, err := mongodbstorage.NewDatabaseFromURI(conf.URI().String(), encs)
+	if err != nil {
+		return ctx, err
+	}
+
+	if err := st.Initialize(); err != nil {
+		return ctx, err
+	}
+
+	var db isaac.Database
+	if err := util.LoadFromContextOK(ctx, launch.CenterDatabaseContextKey, &db); err != nil {
+		return ctx, err
+	}
+
+	mst, ok := db.(*isaacdatabase.Center)
+	if !ok {
+		return ctx, errors.Errorf("expected isaacdatabase.Center, not %T", db)
+	}
+
+	dst, err := loadDigestDatabase(mst, st, false)
+	if err != nil {
+		return ctx, err
+	}
+	var log *logging.Logging
+	if err := util.LoadFromContextOK(ctx, launch.LoggingContextKey, &log); err != nil {
+		return ctx, err
+	}
+
+	_ = dst.SetLogging(log)
+
+	return context.WithValue(ctx, ContextValueDigestDatabase, dst), nil
 }

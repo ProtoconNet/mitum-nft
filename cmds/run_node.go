@@ -7,12 +7,16 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
+	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
 	isaacstates "github.com/ProtoconNet/mitum2/isaac/states"
 	"github.com/ProtoconNet/mitum2/launch"
+	"github.com/ProtoconNet/mitum2/network/quicmemberlist"
 	"github.com/ProtoconNet/mitum2/network/quicstream"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/logging"
@@ -76,6 +80,10 @@ func (cmd *RunCommand) Run(pctx context.Context) error {
 		PreAddOK(ps.Name("when-new-block-confirmed-func"), cmd.pWhenNewBlockConfirmed)
 	_ = pps.POK(launch.PNameStates).
 		PreAddOK(PNameOperationProcessorsMap, POperationProcessorsMap)
+	_ = pps.POK(PNameDigest).
+		PostAddOK(PNameDigestAPIHandlers, cmd.pDigestAPIHandlers)
+	_ = pps.POK(PNameDigester).
+		PostAddOK(PNameDigesterFollowUp, PdigesterFollowUp)
 
 	_ = pps.SetLogging(log)
 
@@ -309,4 +317,109 @@ func (cmd *RunCommand) runHTTPState(bind string) error {
 	}()
 
 	return nil
+}
+
+func (cmd *RunCommand) pDigestAPIHandlers(ctx context.Context) (context.Context, error) {
+	var params base.LocalParams
+	var local base.LocalNode
+
+	util.LoadFromContextOK(ctx,
+		launch.LocalContextKey, &local,
+		launch.LocalParamsContextKey, &params,
+	)
+
+	var design currencycmds.DigestDesign
+	if err := util.LoadFromContext(ctx, ContextValueDigestDesign, &design); err != nil {
+		if errors.Is(err, util.ErrNotFound) {
+			return ctx, nil
+		}
+
+		return nil, err
+	}
+
+	if (design == currencycmds.DigestDesign{}) {
+		return ctx, nil
+	}
+
+	cache, err := cmd.loadCache(ctx, design)
+	if err != nil {
+		return ctx, err
+	}
+
+	handlers, err := cmd.setDigestHandlers(ctx, local, params, design, cache)
+	if err != nil {
+		return ctx, err
+	}
+
+	if err := handlers.Initialize(); err != nil {
+		return ctx, err
+	}
+
+	var dnt *digest.HTTP2Server
+	if err := util.LoadFromContext(ctx, ContextValueDigestNetwork, &dnt); err != nil {
+		return ctx, err
+	}
+	dnt.SetRouter(handlers.Router())
+
+	return ctx, nil
+}
+
+func (cmd *RunCommand) loadCache(_ context.Context, design currencycmds.DigestDesign) (digest.Cache, error) {
+	c, err := digest.NewCacheFromURI(design.Cache().String())
+	if err != nil {
+		cmd.log.Err(err).Str("cache", design.Cache().String()).Msg("failed to connect cache server")
+		cmd.log.Warn().Msg("instead of remote cache server, internal mem cache can be available, `memory://`")
+
+		return nil, err
+	}
+	return c, nil
+}
+
+func (cmd *RunCommand) setDigestHandlers(
+	ctx context.Context,
+	local base.LocalNode,
+	params base.LocalParams,
+	design currencycmds.DigestDesign,
+	cache digest.Cache,
+) (*digest.Handlers, error) {
+	var st *digest.Database
+	if err := util.LoadFromContext(ctx, ContextValueDigestDatabase, &st); err != nil {
+		return nil, err
+	}
+
+	handlers := digest.NewHandlers(ctx, params.NetworkID(), encs, enc, st, cache)
+	i, err := cmd.setDigestSendHandler(ctx, local, params, handlers)
+	if err != nil {
+		return nil, err
+	}
+	handlers = i
+
+	return handlers, nil
+}
+
+func (cmd *RunCommand) setDigestSendHandler(
+	ctx context.Context,
+	local base.LocalNode,
+	params base.LocalParams,
+	handlers *digest.Handlers,
+) (*digest.Handlers, error) {
+	var memberlist *quicmemberlist.Memberlist
+	if err := util.LoadFromContextOK(ctx, launch.MemberlistContextKey, &memberlist); err != nil {
+		return nil, err
+	}
+
+	client := launch.NewNetworkClient( //nolint:gomnd //...
+		encs, enc, time.Second*2,
+		base.NetworkID([]byte(params.NetworkID())),
+	)
+
+	handlers = handlers.SetSend(
+		NewSendHandler(local.Privatekey(), params.NetworkID(), func() (*isaacnetwork.QuicstreamClient, *quicmemberlist.Memberlist, error) { // nolint:contextcheck
+			return client, memberlist, nil
+		}),
+	)
+
+	cmd.log.Debug().Msg("send handler attached")
+
+	return handlers, nil
 }
