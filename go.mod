@@ -3,8 +3,8 @@ module github.com/ProtoconNet/mitum-nft
 go 1.19
 
 require (
-	github.com/ProtoconNet/mitum-currency-extension/v2 v2.0.0-alpha
-	github.com/ProtoconNet/mitum-currency/v2 v2.0.0-alpha
+	github.com/ProtoconNet/mitum-currency-extension/v2 v2.0.0-20230509022445-e3cefd28984e
+	github.com/ProtoconNet/mitum-currency/v2 v2.0.0-20230508143724-e411584507ab
 	github.com/ProtoconNet/mitum2 v0.0.0-20230327234451-801228e1e81f
 	github.com/alecthomas/kong v0.7.1
 	github.com/arl/statsviz v0.5.1
@@ -108,7 +108,7 @@ require (
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230206171751-46f607a40771 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
@@ -117,7 +117,6 @@ require (
 	google.golang.org/genproto v0.0.0-20230127162408-596548ed4efa // indirect
 	google.golang.org/grpc v1.52.3 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
