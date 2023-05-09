@@ -49,7 +49,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
 	}
 
-	design, err := StateCollectionDesignValue(st)
+	design, err := StateCollectionValue(st)
 	if err != nil {
 		return errors.Errorf("collection design value not found, %q: %w", nid.Collection(), err)
 	}
@@ -100,12 +100,12 @@ func (ipp *ApproveItemProcessor) PreProcess(
 			return errors.Errorf("unauthorized sender, %q: %w", ipp.sender, err)
 		}
 
-		box, err := StateAgentBoxValue(st)
+		operators, err := StateOperatorsBookValue(st)
 		if err != nil {
-			return errors.Errorf("agent box value not found, %q: %w", StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), err)
+			return errors.Errorf("operators book value not found, %q: %w", StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), err)
 		}
 
-		if !box.Exists(ipp.sender) {
+		if !operators.Exists(ipp.sender) {
 			return errors.Errorf("unauthorized sender, %q", ipp.sender)
 		}
 	}
@@ -133,7 +133,7 @@ func (ipp *ApproveItemProcessor) Process(
 		return nil, err
 	}
 
-	sts := []base.StateMergeValue{NewNFTStateMergeValue(st.Key(), NewNFTStateValue(n))}
+	sts := []base.StateMergeValue{NewStateMergeValue(st.Key(), NewNFTStateValue(n))}
 
 	return sts, nil
 }

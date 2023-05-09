@@ -102,7 +102,7 @@ func (ipp *MintItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %q: %w", id, err)
 	}
 
-	sts[0] = NewNFTStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.collection, id), NewNFTStateValue(n))
+	sts[0] = NewStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.collection, id), NewNFTStateValue(n))
 
 	if err := ipp.box.Append(n.ID()); err != nil {
 		return nil, errors.Errorf("failed to append nft id to nft box, %q: %w", n.ID(), err)
@@ -190,7 +190,7 @@ func (opp *MintProcessor) PreProcess(
 				return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q: %w", collection, err), nil
 			}
 
-			design, err := StateCollectionDesignValue(st)
+			design, err := StateCollectionValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("collection design value not found, %q: %w", collection, err), nil
 			}
@@ -237,7 +237,7 @@ func (opp *MintProcessor) PreProcess(
 				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q: %w", collection, err), nil
 			}
 
-			idx, err := StateCollectionLastNFTIndexValue(st)
+			idx, err := StateLastNFTIndexValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q: %w", collection, err), nil
 			}
@@ -294,7 +294,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q: %w", collection, err), nil
 			}
 
-			idx, err := StateCollectionLastNFTIndexValue(st)
+			idx, err := StateLastNFTIndexValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q: %w", collection, err), nil
 			}
@@ -353,12 +353,12 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	for key, idx := range idxes {
-		iv := NewCollectionLastNFTIndexStateMergeValue(key, NewCollectionLastNFTIndexStateValue(idx))
+		iv := NewStateMergeValue(key, NewLastNFTIndexStateValue(idx))
 		sts = append(sts, iv)
 	}
 
 	for key, box := range boxes {
-		bv := NewNFTBoxStateMergeValue(key, NewNFTBoxStateValue(*box))
+		bv := NewStateMergeValue(key, NewNFTBoxStateValue(*box))
 		sts = append(sts, bv)
 	}
 

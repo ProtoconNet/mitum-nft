@@ -80,7 +80,7 @@ func (it DelegateItem) Collection() extensioncurrency.ContractID {
 	return it.collection
 }
 
-func (it DelegateItem) Agent() base.Address {
+func (it DelegateItem) Operator() base.Address {
 	return it.operator
 }
 

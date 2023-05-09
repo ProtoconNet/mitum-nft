@@ -14,16 +14,16 @@ var CollectionRegisterFormHint = hint.MustNewHint("mitum-nft-collection-register
 
 type CollectionRegisterForm struct {
 	hint.BaseHinter
-	target  base.Address
-	symbol  extensioncurrency.ContractID
-	name    CollectionName
-	royalty nft.PaymentParameter
-	uri     nft.URI
-	whites  []base.Address
+	contract base.Address
+	symbol   extensioncurrency.ContractID
+	name     CollectionName
+	royalty  nft.PaymentParameter
+	uri      nft.URI
+	whites   []base.Address
 }
 
 func NewCollectionRegisterForm(
-	target base.Address,
+	contract base.Address,
 	symbol extensioncurrency.ContractID,
 	name CollectionName,
 	royalty nft.PaymentParameter,
@@ -32,7 +32,7 @@ func NewCollectionRegisterForm(
 ) CollectionRegisterForm {
 	return CollectionRegisterForm{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFormHint),
-		target:     target,
+		contract:   contract,
 		symbol:     symbol,
 		name:       name,
 		royalty:    royalty,
@@ -44,7 +44,7 @@ func NewCollectionRegisterForm(
 func (form CollectionRegisterForm) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		form.BaseHinter,
-		form.target,
+		form.contract,
 		form.symbol,
 		form.name,
 		form.royalty,
@@ -78,7 +78,7 @@ func (form CollectionRegisterForm) Bytes() []byte {
 	}
 
 	return util.ConcatBytesSlice(
-		form.target.Bytes(),
+		form.contract.Bytes(),
 		form.symbol.Bytes(),
 		form.name.Bytes(),
 		form.royalty.Bytes(),
@@ -87,8 +87,8 @@ func (form CollectionRegisterForm) Bytes() []byte {
 	)
 }
 
-func (form CollectionRegisterForm) Target() base.Address {
-	return form.target
+func (form CollectionRegisterForm) Contract() base.Address {
+	return form.contract
 }
 
 func (form CollectionRegisterForm) Symbol() extensioncurrency.ContractID {
@@ -117,7 +117,7 @@ func (form CollectionRegisterForm) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, l)
 	copy(as, form.whites)
 
-	as[l-1] = form.target
+	as[l-1] = form.contract
 
 	return as, nil
 }
@@ -164,8 +164,8 @@ func (fact CollectionRegisterFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if fact.sender.Equal(fact.form.target) {
-		return util.ErrInvalid.Errorf("sender and target are the same, %q == %q", fact.sender, fact.form.target)
+	if fact.sender.Equal(fact.form.contract) {
+		return util.ErrInvalid.Errorf("sender and contract are the same, %q == %q", fact.sender, fact.form.contract)
 	}
 
 	return nil

@@ -13,7 +13,7 @@ func (it DelegateItem) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"_hint":      it.Hint().String(),
 			"collection": it.collection,
-			"agent":      it.operator,
+			"operator":   it.operator,
 			"mode":       it.mode,
 			"currency":   it.currency,
 		},
@@ -23,7 +23,7 @@ func (it DelegateItem) MarshalBSON() ([]byte, error) {
 type DelegateItemBSONUnmarshaler struct {
 	Hint       string `bson:"_hint"`
 	Collection string `bson:"collection"`
-	Agent      string `bson:"agent"`
+	Operator   string `bson:"operator"`
 	Mode       string `bson:"mode"`
 	Currency   string `bson:"currency"`
 }
@@ -41,5 +41,5 @@ func (it *DelegateItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, ht, u.Collection, u.Agent, u.Mode, u.Currency)
+	return it.unmarshal(enc, ht, u.Collection, u.Operator, u.Mode, u.Currency)
 }

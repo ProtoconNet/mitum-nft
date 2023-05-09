@@ -25,11 +25,11 @@ func (it *DelegateItem) unmarshal(
 	it.mode = DelegateMode(md)
 	it.currency = currency.CurrencyID(cid)
 
-	agent, err := base.DecodeAddress(ag, enc)
+	operator, err := base.DecodeAddress(ag, enc)
 	if err != nil {
 		return e(err, "")
 	}
-	it.operator = agent
+	it.operator = operator
 
 	return nil
 }

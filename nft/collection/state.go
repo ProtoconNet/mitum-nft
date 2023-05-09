@@ -10,108 +10,104 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	CollectionDesignStateValueHint = hint.MustNewHint("collection-design-state-value-v0.0.1")
-	StateKeyCollectionDesignPrefix = "collection:"
-)
-
-type CollectionDesignStateValue struct {
-	hint.BaseHinter
-	CollectionDesign CollectionDesign
-}
-
-func NewCollectionDesignStateValue(design CollectionDesign) CollectionDesignStateValue {
-	return CollectionDesignStateValue{
-		BaseHinter:       hint.NewBaseHinter(CollectionDesignStateValueHint),
-		CollectionDesign: design,
-	}
-}
-
-func (cs CollectionDesignStateValue) Hint() hint.Hint {
-	return cs.BaseHinter.Hint()
-}
-
-func (cs CollectionDesignStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid CollectionDesignStateValue")
-
-	if err := cs.BaseHinter.IsValid(CollectionDesignStateValueHint.Type().Bytes()); err != nil {
-		return e.Wrap(err)
-	}
-
-	if err := cs.CollectionDesign.IsValid(nil); err != nil {
-		return e.Wrap(err)
-	}
-
-	return nil
-}
-
-func (cs CollectionDesignStateValue) HashBytes() []byte {
-	return cs.CollectionDesign.Bytes()
-}
-
-func StateCollectionDesignValue(st base.State) (CollectionDesign, error) {
-	v := st.Value()
-	if v == nil {
-		return CollectionDesign{}, util.ErrNotFound.Errorf("collection design not found in State")
-	}
-
-	d, ok := v.(CollectionDesignStateValue)
-	if !ok {
-		return CollectionDesign{}, errors.Errorf("invalid collection design value found, %T", v)
-	}
-
-	return d.CollectionDesign, nil
-}
-
-type CollectionDesignStateValueMerger struct {
+type StateValueMerger struct {
 	*base.BaseStateValueMerger
 }
 
-func NewCollectionDesignStateValueMerger(height base.Height, key string, st base.State) *CollectionDesignStateValueMerger {
-	s := &CollectionDesignStateValueMerger{
+func NewStateValueMerger(height base.Height, key string, st base.State) *StateValueMerger {
+	s := &StateValueMerger{
 		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
 	}
 
 	return s
 }
 
-func NewCollectionDesignStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
+func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
+	StateValueMergerFunc := func(height base.Height, st base.State) base.StateValueMerger {
+		return NewStateValueMerger(height, key, st)
+	}
+
 	return base.NewBaseStateMergeValue(
 		key,
 		stv,
-		func(height base.Height, st base.State) base.StateValueMerger {
-			return NewCollectionDesignStateValueMerger(height, key, st)
-		},
+		StateValueMergerFunc,
 	)
 }
 
-var (
-	CollectionLastNFTIndexStateValueHint = hint.MustNewHint("collection-last-nft-index-state-value-v0.0.1")
-	StateKeyCollectionLastNFTIndexSuffix = ":collectionidx"
-)
+var CollectionStateValueHint = hint.MustNewHint("collection-state-value-v0.0.1")
 
-type CollectionLastNFTIndexStateValue struct {
+type CollectionStateValue struct {
+	hint.BaseHinter
+	Design CollectionDesign
+}
+
+func NewCollectionStateValue(design CollectionDesign) CollectionStateValue {
+	return CollectionStateValue{
+		BaseHinter: hint.NewBaseHinter(CollectionStateValueHint),
+		Design:     design,
+	}
+}
+
+func (cs CollectionStateValue) Hint() hint.Hint {
+	return cs.BaseHinter.Hint()
+}
+
+func (cs CollectionStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid CollectionStateValue")
+
+	if err := cs.BaseHinter.IsValid(CollectionStateValueHint.Type().Bytes()); err != nil {
+		return e.Wrap(err)
+	}
+
+	if err := cs.Design.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (cs CollectionStateValue) HashBytes() []byte {
+	return cs.Design.Bytes()
+}
+
+func StateCollectionValue(st base.State) (CollectionDesign, error) {
+	v := st.Value()
+	if v == nil {
+		return CollectionDesign{}, util.ErrNotFound.Errorf("collection design not found in State")
+	}
+
+	d, ok := v.(CollectionStateValue)
+	if !ok {
+		return CollectionDesign{}, errors.Errorf("invalid collection value found, %T", v)
+	}
+
+	return d.Design, nil
+}
+
+var LastNFTIndexStateValueHint = hint.MustNewHint("collection-last-nft-index-state-value-v0.0.1")
+
+type LastNFTIndexStateValue struct {
 	hint.BaseHinter
 	// Collection extensioncurrency.ContractID
 	Index uint64
 }
 
-func NewCollectionLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ index uint64) CollectionLastNFTIndexStateValue {
-	return CollectionLastNFTIndexStateValue{
-		BaseHinter: hint.NewBaseHinter(CollectionLastNFTIndexStateValueHint),
+func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ index uint64) LastNFTIndexStateValue {
+	return LastNFTIndexStateValue{
+		BaseHinter: hint.NewBaseHinter(LastNFTIndexStateValueHint),
 		// Collection: collection,
 		Index: index,
 	}
 }
 
-func (is CollectionLastNFTIndexStateValue) Hint() hint.Hint {
+func (is LastNFTIndexStateValue) Hint() hint.Hint {
 	return is.BaseHinter.Hint()
 }
 
-func (is CollectionLastNFTIndexStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid CollectionLastNFTIndexStateValue")
+func (is LastNFTIndexStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid LastNFTIndexStateValue")
 
-	if err := is.BaseHinter.IsValid(CollectionLastNFTIndexStateValueHint.Type().Bytes()); err != nil {
+	if err := is.BaseHinter.IsValid(LastNFTIndexStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
@@ -122,44 +118,22 @@ func (is CollectionLastNFTIndexStateValue) IsValid([]byte) error {
 	return nil
 }
 
-func (is CollectionLastNFTIndexStateValue) HashBytes() []byte {
+func (is LastNFTIndexStateValue) HashBytes() []byte {
 	return util.ConcatBytesSlice( /*is.Collection.Bytes(), */ util.Uint64ToBytes(is.Index))
 }
 
-func StateCollectionLastNFTIndexValue(st base.State) (uint64, error) {
+func StateLastNFTIndexValue(st base.State) (uint64, error) {
 	v := st.Value()
 	if v == nil {
 		return 0, util.ErrNotFound.Errorf("collection last nft index not found in State")
 	}
 
-	isv, ok := v.(CollectionLastNFTIndexStateValue)
+	isv, ok := v.(LastNFTIndexStateValue)
 	if !ok {
 		return 0, errors.Errorf("invalid collection last nft index value found, %T", v)
 	}
 
 	return isv.Index, nil
-}
-
-type CollectionLastNFTIndexStateValueMerger struct {
-	*base.BaseStateValueMerger
-}
-
-func NewCollectionLastNFTIndexStateValueMerger(height base.Height, key string, st base.State) *CollectionLastNFTIndexStateValueMerger {
-	s := &CollectionLastNFTIndexStateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewCollectionLastNFTIndexStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
-	return base.NewBaseStateMergeValue(
-		key,
-		stv,
-		func(height base.Height, st base.State) base.StateValueMerger {
-			return NewCollectionLastNFTIndexStateValueMerger(height, key, st)
-		},
-	)
 }
 
 var (
@@ -214,32 +188,7 @@ func StateNFTValue(st base.State) (nft.NFT, error) {
 	return ns.NFT, nil
 }
 
-type NFTStateValueMerger struct {
-	*base.BaseStateValueMerger
-}
-
-func NewNFTStateValueMerger(height base.Height, key string, st base.State) *NFTStateValueMerger {
-	s := &NFTStateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewNFTStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
-	return base.NewBaseStateMergeValue(
-		key,
-		stv,
-		func(height base.Height, st base.State) base.StateValueMerger {
-			return NewNFTStateValueMerger(height, key, st)
-		},
-	)
-}
-
-var (
-	NFTBoxStateValueHint = hint.MustNewHint("nft-box-state-value-v0.0.1")
-	StateKeyNFTBoxSuffix = ":nftbox"
-)
+var NFTBoxStateValueHint = hint.MustNewHint("nft-box-state-value-v0.0.1")
 
 type NFTBoxStateValue struct {
 	hint.BaseHinter
@@ -289,101 +238,54 @@ func StateNFTBoxValue(st base.State) (NFTBox, error) {
 	return nb.Box, nil
 }
 
-type NFTBoxStateValueMerger struct {
-	*base.BaseStateValueMerger
-}
+var OperatorsBookStateValueHint = hint.MustNewHint("operators-book-state-value-v0.0.1")
 
-func NewNFTBoxStateValueMerger(height base.Height, key string, st base.State) *NFTBoxStateValueMerger {
-	s := &NFTBoxStateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewNFTBoxStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
-	return base.NewBaseStateMergeValue(
-		key,
-		stv,
-		func(height base.Height, st base.State) base.StateValueMerger {
-			return NewNFTBoxStateValueMerger(height, key, st)
-		},
-	)
-}
-
-var (
-	AgentBoxStateValueHint = hint.MustNewHint("agent-box-state-value-v0.0.1")
-	StateKeyAgentBoxSuffix = ":agentbox"
-)
-
-type AgentBoxStateValue struct {
+type OperatorsBookStateValue struct {
 	hint.BaseHinter
-	Box AgentBox
+	Operators OperatorsBook
 }
 
-func NewAgentBoxStateValue(box AgentBox) AgentBoxStateValue {
-	return AgentBoxStateValue{
-		BaseHinter: hint.NewBaseHinter(AgentBoxStateValueHint),
-		Box:        box,
+func NewOperatorsBookStateValue(operators OperatorsBook) OperatorsBookStateValue {
+	return OperatorsBookStateValue{
+		BaseHinter: hint.NewBaseHinter(OperatorsBookStateValueHint),
+		Operators:  operators,
 	}
 }
 
-func (ab AgentBoxStateValue) Hint() hint.Hint {
-	return ab.BaseHinter.Hint()
+func (ob OperatorsBookStateValue) Hint() hint.Hint {
+	return ob.BaseHinter.Hint()
 }
 
-func (ab AgentBoxStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid AgentBoxStateValue")
+func (ob OperatorsBookStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid OperatorsBookStateValue")
 
-	if err := ab.BaseHinter.IsValid(AgentBoxStateValueHint.Type().Bytes()); err != nil {
+	if err := ob.BaseHinter.IsValid(OperatorsBookStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := ab.Box.IsValid(nil); err != nil {
+	if err := ob.Operators.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
 	return nil
 }
 
-func (ab AgentBoxStateValue) HashBytes() []byte {
-	return ab.Box.Bytes()
+func (ob OperatorsBookStateValue) HashBytes() []byte {
+	return ob.Operators.Bytes()
 }
 
-func StateAgentBoxValue(st base.State) (AgentBox, error) {
+func StateOperatorsBookValue(st base.State) (OperatorsBook, error) {
 	v := st.Value()
 	if v == nil {
-		return AgentBox{}, util.ErrNotFound.Errorf("agent box not found in State")
+		return OperatorsBook{}, util.ErrNotFound.Errorf("operators book not found in State")
 	}
 
-	ab, ok := v.(AgentBoxStateValue)
+	ob, ok := v.(OperatorsBookStateValue)
 	if !ok {
-		return AgentBox{}, errors.Errorf("invalid agent box value found, %T", v)
+		return OperatorsBook{}, errors.Errorf("invalid operators book value found, %T", v)
 	}
 
-	return ab.Box, nil
-}
-
-type AgentBoxStateValueMerger struct {
-	*base.BaseStateValueMerger
-}
-
-func NewAgentBoxStateValueMerger(height base.Height, key string, st base.State) *AgentBoxStateValueMerger {
-	s := &AgentBoxStateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewAgentBoxStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
-	return base.NewBaseStateMergeValue(
-		key,
-		stv,
-		func(height base.Height, st base.State) base.StateValueMerger {
-			return NewNFTBoxStateValueMerger(height, key, st)
-		},
-	)
+	return ob.Operators, nil
 }
 
 func checkExistsState(
@@ -510,11 +412,11 @@ func existsCollectionPolicy(contract base.Address, id extensioncurrency.Contract
 	case !found:
 		return CollectionPolicy{}, errors.Errorf("collection not found, %v", id)
 	default:
-		design, ok := st.Value().(CollectionDesignStateValue)
+		design, ok := st.Value().(CollectionStateValue)
 		if !ok {
 			return CollectionPolicy{}, errors.Errorf("expected CollectionDesignStateValue, not %T", st.Value())
 		}
-		p := design.CollectionDesign.Policy()
+		p := design.Design.Policy()
 		policy, ok = p.(CollectionPolicy)
 		if !ok {
 			return CollectionPolicy{}, errors.Errorf("expected CollectionPolicy, not %T", p)

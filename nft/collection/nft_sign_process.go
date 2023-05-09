@@ -46,7 +46,7 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
 	}
 
-	design, err := StateCollectionDesignValue(st)
+	design, err := StateCollectionValue(st)
 	if err != nil {
 		return errors.Errorf("collection design value not found, %q: %w", ipp.item.symbol, err)
 	}
@@ -152,7 +152,7 @@ func (ipp *NFTSignItemProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 1)
 
-	sts[0] = NewNFTStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.symbol, n.ID()), NewNFTStateValue(n))
+	sts[0] = NewStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.symbol, n.ID()), NewNFTStateValue(n))
 
 	return sts, nil
 }

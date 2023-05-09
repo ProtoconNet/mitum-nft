@@ -25,7 +25,7 @@ var (
 	NFTPrefix                = "nft:"
 	StateKeyCollectionSuffix = ":collection"
 	StateKeyOperatorsSuffix  = ":operators"
-	StateKeyLastIDXSuffix    = ":lastidx"
+	StateKeyLastNFTIDXSuffix = ":lastnftidx"
 	StateKeyNFTsSuffix       = ":nfts"
 	StateKeyNFTSuffix        = ":nft"
 )
@@ -47,7 +47,7 @@ func NFTStateKey(
 	case OperatorsKey:
 		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyOperatorsSuffix)
 	case LastIDXKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyLastIDXSuffix)
+		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyLastNFTIDXSuffix)
 	case NFTsKey:
 		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyNFTsSuffix)
 	}
@@ -71,7 +71,7 @@ func parseNFTStateKey(key string) (StateKey, error) {
 		return NFTsKey, nil
 	case strings.HasSuffix(key, StateKeyNFTSuffix):
 		return NFTKey, nil
-	case strings.HasSuffix(key, StateKeyLastIDXSuffix):
+	case strings.HasSuffix(key, StateKeyLastNFTIDXSuffix):
 		return LastIDXKey, nil
 	case strings.HasSuffix(key, StateKeyOperatorsSuffix):
 		return OperatorsKey, nil

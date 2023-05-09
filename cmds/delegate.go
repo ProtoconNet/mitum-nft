@@ -19,13 +19,13 @@ type DelegateCommand struct {
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
 	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
-	Agent      cmds.AddressFlag    `arg:"" name:"agent" help:"agent account address"`
+	Operator   cmds.AddressFlag    `arg:"" name:"operator" help:"operator account address"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Mode       string              `name:"mode" help:"delegate mode" optional:""`
 	sender     base.Address
 	contract   base.Address
 	collection extensioncurrency.ContractID
-	agent      base.Address
+	operator   base.Address
 	mode       nftcollection.DelegateMode
 }
 
@@ -79,10 +79,10 @@ func (cmd *DelegateCommand) parseFlags() error {
 	}
 	cmd.collection = symbol
 
-	if a, err := cmd.Agent.Encode(enc); err != nil {
-		return errors.Wrapf(err, "invalid agent format; %q", cmd.Agent)
+	if a, err := cmd.Operator.Encode(enc); err != nil {
+		return errors.Wrapf(err, "invalid operator address format; %q", cmd.Operator)
 	} else {
-		cmd.agent = a
+		cmd.operator = a
 	}
 
 	if len(cmd.Mode) < 1 {
@@ -102,7 +102,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 func (cmd *DelegateCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create delegate operation")
 
-	items := []nftcollection.DelegateItem{nftcollection.NewDelegateItem(cmd.contract, cmd.collection, cmd.agent, cmd.mode, cmd.Currency.CID)}
+	items := []nftcollection.DelegateItem{nftcollection.NewDelegateItem(cmd.contract, cmd.collection, cmd.operator, cmd.mode, cmd.Currency.CID)}
 
 	fact := nftcollection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 

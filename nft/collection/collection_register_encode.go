@@ -13,7 +13,7 @@ import (
 func (form *CollectionRegisterForm) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	tg string,
+	ca string,
 	sb string,
 	nm string,
 	ry uint,
@@ -28,11 +28,11 @@ func (form *CollectionRegisterForm) unmarshal(
 	form.royalty = nft.PaymentParameter(ry)
 	form.uri = nft.URI(uri)
 
-	target, err := base.DecodeAddress(tg, enc)
+	contract, err := base.DecodeAddress(ca, enc)
 	if err != nil {
 		return e(err, "")
 	}
-	form.target = target
+	form.contract = contract
 
 	whites := make([]base.Address, len(bws))
 	for i, bw := range bws {

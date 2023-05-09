@@ -13,24 +13,24 @@ import (
 func (form CollectionRegisterForm) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":   form.Hint().String(),
-			"target":  form.target,
-			"symbol":  form.symbol,
-			"name":    form.name,
-			"royalty": form.royalty,
-			"uri":     form.uri,
-			"whites":  form.whites,
+			"_hint":    form.Hint().String(),
+			"contract": form.contract,
+			"symbol":   form.symbol,
+			"name":     form.name,
+			"royalty":  form.royalty,
+			"uri":      form.uri,
+			"whites":   form.whites,
 		})
 }
 
 type CollectionRegisterFormBSONUnmarshaler struct {
-	Hint    string   `bson:"_hint"`
-	Target  string   `bson:"target"`
-	Symbol  string   `bson:"symbol"`
-	Name    string   `bson:"name"`
-	Royalty uint     `bson:"royalty"`
-	URI     string   `bson:"uri"`
-	Whites  []string `bson:"whites"`
+	Hint     string   `bson:"_hint"`
+	Contract string   `bson:"contract"`
+	Symbol   string   `bson:"symbol"`
+	Name     string   `bson:"name"`
+	Royalty  uint     `bson:"royalty"`
+	URI      string   `bson:"uri"`
+	Whites   []string `bson:"whites"`
 }
 
 func (form *CollectionRegisterForm) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -46,7 +46,7 @@ func (form *CollectionRegisterForm) DecodeBSON(b []byte, enc *bsonenc.Encoder) e
 		return e(err, "")
 	}
 
-	return form.unmarshal(enc, ht, u.Target, u.Symbol, u.Name, u.Royalty, u.URI, u.Whites)
+	return form.unmarshal(enc, ht, u.Contract, u.Symbol, u.Name, u.Royalty, u.URI, u.Whites)
 }
 
 func (fact CollectionRegisterFact) MarshalBSON() ([]byte, error) {

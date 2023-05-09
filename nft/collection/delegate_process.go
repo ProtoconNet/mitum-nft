@@ -32,7 +32,7 @@ func (Delegate) Process(
 type DelegateItemProcessor struct {
 	h      util.Hash
 	sender base.Address
-	box    *AgentBox
+	box    *OperatorsBook
 	item   DelegateItem
 }
 
@@ -43,12 +43,12 @@ func (ipp *DelegateItemProcessor) PreProcess(
 		return err
 	}
 
-	if err := checkExistsState(currency.StateKeyAccount(ipp.item.Agent()), getStateFunc); err != nil {
+	if err := checkExistsState(currency.StateKeyAccount(ipp.item.Operator()), getStateFunc); err != nil {
 		return err
 	}
 
-	if ipp.sender.Equal(ipp.item.Agent()) {
-		return errors.Errorf("sender cannot be agent itself, %q", ipp.item.Agent())
+	if ipp.sender.Equal(ipp.item.Operator()) {
+		return errors.Errorf("sender cannot be operator itself, %q", ipp.item.Operator())
 	}
 
 	return nil
@@ -63,11 +63,11 @@ func (ipp *DelegateItemProcessor) Process(
 
 	switch ipp.item.Mode() {
 	case DelegateAllow:
-		if err := ipp.box.Append(ipp.item.Agent()); err != nil {
+		if err := ipp.box.Append(ipp.item.Operator()); err != nil {
 			return nil, err
 		}
 	case DelegateCancel:
-		if err := ipp.box.Remove(ipp.item.Agent()); err != nil {
+		if err := ipp.box.Remove(ipp.item.Operator()); err != nil {
 			return nil, err
 		}
 	default:
@@ -140,7 +140,7 @@ func (opp *DelegateProcessor) PreProcess(
 	}
 
 	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot have agents, %q", fact.Sender()), nil
+		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot have operators, %q", fact.Sender()), nil
 	}
 
 	if err := checkFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
@@ -153,7 +153,7 @@ func (opp *DelegateProcessor) PreProcess(
 			return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q: %w", item.Collection(), err), nil
 		}
 
-		design, err := StateCollectionDesignValue(st)
+		design, err := StateCollectionValue(st)
 		if err != nil {
 			return nil, base.NewBaseOperationProcessReasonError("collection design value not found, %q: %w", item.Collection(), err), nil
 		}
@@ -210,20 +210,20 @@ func (opp *DelegateProcessor) Process(
 		return nil, nil, e(nil, "expected DelgateFact, not %T", op.Fact())
 	}
 
-	boxes := map[string]*AgentBox{}
+	boxes := map[string]*OperatorsBook{}
 	for _, item := range fact.Items() {
 		ak := StateKeyOperators(item.contract, item.Collection(), fact.Sender())
 
-		var box AgentBox
+		var box OperatorsBook
 		switch st, found, err := getStateFunc(ak); {
 		case err != nil:
-			return nil, base.NewBaseOperationProcessReasonError("failed to get state of agent box, %q: %w", ak, err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to get state of operators book, %q: %w", ak, err), nil
 		case !found:
-			box = NewAgentBox(item.Collection(), nil)
+			box = NewOperatorsBook(item.Collection(), nil)
 		default:
-			box, err = StateAgentBoxValue(st)
+			box, err = StateOperatorsBookValue(st)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("agent box value not found, %q: %w", ak, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("operators book value not found, %q: %w", ak, err), nil
 			}
 		}
 		boxes[ak] = &box
@@ -254,7 +254,7 @@ func (opp *DelegateProcessor) Process(
 	}
 
 	for ak, box := range boxes {
-		bv := NewAgentBoxStateMergeValue(ak, NewAgentBoxStateValue(*box))
+		bv := NewStateMergeValue(ak, NewOperatorsBookStateValue(*box))
 		sts = append(sts, bv)
 	}
 

@@ -8,26 +8,26 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (ab *AgentBox) unmarshal(
+func (ob *OperatorsBook) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	col string,
 	bags []string,
 ) error {
-	e := util.StringErrorFunc("failed to unmarshal AgentBox")
+	e := util.StringErrorFunc("failed to unmarshal operators book")
 
-	ab.BaseHinter = hint.NewBaseHinter(ht)
-	ab.collection = extensioncurrency.ContractID(col)
+	ob.BaseHinter = hint.NewBaseHinter(ht)
+	ob.collection = extensioncurrency.ContractID(col)
 
-	agents := make([]base.Address, len(bags))
+	operators := make([]base.Address, len(bags))
 	for i, bag := range bags {
-		agent, err := base.DecodeAddress(bag, enc)
+		operator, err := base.DecodeAddress(bag, enc)
 		if err != nil {
 			return e(err, "")
 		}
-		agents[i] = agent
+		operators[i] = operator
 	}
-	ab.agents = agents
+	ob.operators = operators
 
 	return nil
 }

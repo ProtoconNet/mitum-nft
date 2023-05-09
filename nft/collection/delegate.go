@@ -14,7 +14,7 @@ var (
 )
 
 var (
-	MaxAgents        = 10
+	MaxOperators     = 10
 	MaxDelegateItems = 10
 )
 
@@ -61,16 +61,16 @@ func (fact DelegateFact) IsValid(b []byte) error {
 			return err
 		}
 
-		agent := item.Agent()
+		operator := item.Operator()
 		collection := item.Collection()
 
 		if addressMap, collectionFound := founds[collection.String()]; !collectionFound {
 			founds[collection.String()] = make(map[string]struct{})
-		} else if _, addressFound := addressMap[agent.String()]; addressFound {
-			return util.ErrInvalid.Errorf("duplicate collection-agent found, %q-%q", collection, agent)
+		} else if _, addressFound := addressMap[operator.String()]; addressFound {
+			return util.ErrInvalid.Errorf("duplicate collection-operator found, %q-%q", collection, operator)
 		}
 
-		founds[collection.String()][agent.String()] = struct{}{}
+		founds[collection.String()][operator.String()] = struct{}{}
 	}
 
 	return nil
@@ -111,7 +111,7 @@ func (fact DelegateFact) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, l+1)
 
 	for i, item := range fact.items {
-		as[i] = item.Agent()
+		as[i] = item.Operator()
 	}
 
 	as[l] = fact.sender

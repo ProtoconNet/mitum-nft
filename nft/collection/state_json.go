@@ -11,21 +11,22 @@ import (
 
 type CollectionDesignStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	CollectionDesign CollectionDesign `json:"collectiondesign"`
+	Design CollectionDesign `json:"collectiondesign"`
 }
 
-func (s CollectionDesignStateValue) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(
-		CollectionDesignStateValueJSONMarshaler(s),
-	)
+func (s CollectionStateValue) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(CollectionDesignStateValueJSONMarshaler{
+		BaseHinter: s.BaseHinter,
+		Design:     s.Design,
+	})
 }
 
 type CollectionDesignStateValueJSONUnmarshaler struct {
-	Hint             hint.Hint       `json:"_hint"`
-	CollectionDesign json.RawMessage `json:"collectiondesign"`
+	Hint   hint.Hint       `json:"_hint"`
+	Design json.RawMessage `json:"collectiondesign"`
 }
 
-func (s *CollectionDesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *CollectionStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode json of CollectionDesignStateValue")
 
 	var u CollectionDesignStateValueJSONUnmarshaler
@@ -36,36 +37,36 @@ func (s *CollectionDesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
 
 	var cd CollectionDesign
-	if err := cd.DecodeJSON(u.CollectionDesign, enc); err != nil {
+	if err := cd.DecodeJSON(u.Design, enc); err != nil {
 		return e(err, "")
 	}
-	s.CollectionDesign = cd
+	s.Design = cd
 
 	return nil
 }
 
-type CollectionLastNFTIndexStateValueJSONMarshaler struct {
+type LastNFTIndexStateValueJSONMarshaler struct {
 	hint.BaseHinter
 	// Collection extensioncurrency.ContractID `json:"collection"`
 	Index uint64 `json:"index"`
 }
 
-func (s CollectionLastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
+func (s LastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(
-		CollectionLastNFTIndexStateValueJSONMarshaler(s),
+		LastNFTIndexStateValueJSONMarshaler(s),
 	)
 }
 
-type CollectionLastNFTIndexStateValueJSONUnmarshaler struct {
+type LastNFTIndexStateValueJSONUnmarshaler struct {
 	Hint hint.Hint `json:"_hint"`
 	// Collection string    `json:"collection"`
 	Index uint64 `json:"index"`
 }
 
-func (s *CollectionLastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode json of CollectionLastNFTIndexStateValue")
 
-	var u CollectionLastNFTIndexStateValueJSONUnmarshaler
+	var u LastNFTIndexStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return e(err, "")
 	}
@@ -147,37 +148,37 @@ func (s *NFTBoxStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	return nil
 }
 
-type AgentBoxStateValueJSONMarshaler struct {
+type OperatorsBookStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	Box AgentBox `json:"agentbox"`
+	Operators OperatorsBook `json:"operatorsbook"`
 }
 
-func (s AgentBoxStateValue) MarshalJSON() ([]byte, error) {
+func (s OperatorsBookStateValue) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(
-		AgentBoxStateValueJSONMarshaler(s),
+		OperatorsBookStateValueJSONMarshaler(s),
 	)
 }
 
-type AgentBoxStateValueJSONUnmarshaler struct {
-	Hint hint.Hint       `json:"_hint"`
-	Box  json.RawMessage `json:"agentbox"`
+type OperatorsBookStateValueJSONUnmarshaler struct {
+	Hint      hint.Hint       `json:"_hint"`
+	Operators json.RawMessage `json:"operatorsbook"`
 }
 
-func (s *AgentBoxStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
-	e := util.StringErrorFunc("failed to decode json of AgentBoxStateValue")
+func (s *OperatorsBookStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+	e := util.StringErrorFunc("failed to decode json of OperatorsBookStateValue")
 
-	var u AgentBoxStateValueJSONUnmarshaler
+	var u OperatorsBookStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return e(err, "")
 	}
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
 
-	var box AgentBox
-	if err := box.DecodeJSON(u.Box, enc); err != nil {
+	var operators OperatorsBook
+	if err := operators.DecodeJSON(u.Operators, enc); err != nil {
 		return e(err, "")
 	}
-	s.Box = box
+	s.Operators = operators
 
 	return nil
 }

@@ -1,0 +1,40 @@
+package collection
+
+import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/util"
+	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/hint"
+)
+
+type OperatorsBookJSONMarshaler struct {
+	hint.BaseHinter
+	Collection extensioncurrency.ContractID `json:"collection"`
+	Operators  []base.Address               `json:"operators"`
+}
+
+func (ob OperatorsBook) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(OperatorsBookJSONMarshaler{
+		BaseHinter: ob.BaseHinter,
+		Collection: ob.collection,
+		Operators:  ob.operators,
+	})
+}
+
+type OperatorsBookJSONUnmarshaler struct {
+	Hint       hint.Hint `json:"_hint"`
+	Collection string    `json:"collection"`
+	Operators  []string  `json:"operators"`
+}
+
+func (ob *OperatorsBook) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+	e := util.StringErrorFunc("failed to decode json of operators book")
+
+	var u OperatorsBookJSONUnmarshaler
+	if err := enc.Unmarshal(b, &u); err != nil {
+		return e(err, "")
+	}
+
+	return ob.unmarshal(enc, u.Hint, u.Collection, u.Operators)
+}
