@@ -29,7 +29,7 @@ func (it *DelegateItem) unmarshal(
 	if err != nil {
 		return e(err, "")
 	}
-	it.agent = agent
+	it.operator = agent
 
 	return nil
 }

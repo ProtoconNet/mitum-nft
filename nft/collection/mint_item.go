@@ -91,14 +91,16 @@ var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
 
 type MintItem struct {
 	hint.BaseHinter
+	contract   base.Address
 	collection extensioncurrency.ContractID
 	form       MintForm
 	currency   currency.CurrencyID
 }
 
-func NewMintItem(collection extensioncurrency.ContractID, form MintForm, currency currency.CurrencyID) MintItem {
+func NewMintItem(contract base.Address, collection extensioncurrency.ContractID, form MintForm, currency currency.CurrencyID) MintItem {
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
+		contract:   contract,
 		collection: collection,
 		form:       form,
 		currency:   currency,
@@ -107,6 +109,7 @@ func NewMintItem(collection extensioncurrency.ContractID, form MintForm, currenc
 
 func (it MintItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
+		it.contract.Bytes(),
 		it.collection.Bytes(),
 		it.form.Bytes(),
 		it.currency.Bytes(),
@@ -115,6 +118,10 @@ func (it MintItem) Bytes() []byte {
 
 func (it MintItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false, it.BaseHinter, it.collection, it.form, it.currency)
+}
+
+func (it MintItem) Contract() base.Address {
+	return it.contract
 }
 
 func (it MintItem) Collection() extensioncurrency.ContractID {

@@ -13,7 +13,7 @@ func (it DelegateItem) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"_hint":      it.Hint().String(),
 			"collection": it.collection,
-			"agent":      it.agent,
+			"agent":      it.operator,
 			"mode":       it.mode,
 			"currency":   it.currency,
 		},

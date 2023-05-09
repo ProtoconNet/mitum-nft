@@ -1,9 +1,6 @@
 package collection
 
 import (
-	"fmt"
-	"strings"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
@@ -66,14 +63,6 @@ func StateCollectionDesignValue(st base.State) (CollectionDesign, error) {
 	return d.CollectionDesign, nil
 }
 
-func IsStateCollectionDesignKey(key string) bool {
-	return strings.HasPrefix(key, StateKeyCollectionDesignPrefix)
-}
-
-func StateKeyCollectionDesign(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", StateKeyCollectionDesignPrefix, id)
-}
-
 type CollectionDesignStateValueMerger struct {
 	*base.BaseStateValueMerger
 }
@@ -103,15 +92,15 @@ var (
 
 type CollectionLastNFTIndexStateValue struct {
 	hint.BaseHinter
-	Collection extensioncurrency.ContractID
-	Index      uint64
+	// Collection extensioncurrency.ContractID
+	Index uint64
 }
 
-func NewCollectionLastNFTIndexStateValue(collection extensioncurrency.ContractID, index uint64) CollectionLastNFTIndexStateValue {
+func NewCollectionLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ index uint64) CollectionLastNFTIndexStateValue {
 	return CollectionLastNFTIndexStateValue{
 		BaseHinter: hint.NewBaseHinter(CollectionLastNFTIndexStateValueHint),
-		Collection: collection,
-		Index:      index,
+		// Collection: collection,
+		Index: index,
 	}
 }
 
@@ -126,15 +115,15 @@ func (is CollectionLastNFTIndexStateValue) IsValid([]byte) error {
 		return e.Wrap(err)
 	}
 
-	if err := is.Collection.IsValid(nil); err != nil {
-		return e.Wrap(err)
-	}
+	// if err := is.Collection.IsValid(nil); err != nil {
+	// 	return e.Wrap(err)
+	// }
 
 	return nil
 }
 
 func (is CollectionLastNFTIndexStateValue) HashBytes() []byte {
-	return util.ConcatBytesSlice(is.Collection.Bytes(), util.Uint64ToBytes(is.Index))
+	return util.ConcatBytesSlice( /*is.Collection.Bytes(), */ util.Uint64ToBytes(is.Index))
 }
 
 func StateCollectionLastNFTIndexValue(st base.State) (uint64, error) {
@@ -149,14 +138,6 @@ func StateCollectionLastNFTIndexValue(st base.State) (uint64, error) {
 	}
 
 	return isv.Index, nil
-}
-
-func IsStateCollectionLastNFTIndexKey(key string) bool {
-	return strings.HasSuffix(key, StateKeyCollectionLastNFTIndexSuffix)
-}
-
-func StateKeyCollectionLastNFTIndex(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", id, StateKeyCollectionLastNFTIndexSuffix)
 }
 
 type CollectionLastNFTIndexStateValueMerger struct {
@@ -183,7 +164,6 @@ func NewCollectionLastNFTIndexStateMergeValue(key string, stv base.StateValue) b
 
 var (
 	NFTStateValueHint = hint.MustNewHint("nft-state-value-v0.0.1")
-	StateKeyNFTSuffix = ":nft"
 )
 
 type NFTStateValue struct {
@@ -232,14 +212,6 @@ func StateNFTValue(st base.State) (nft.NFT, error) {
 	}
 
 	return ns.NFT, nil
-}
-
-func IsStateNFTKey(key string) bool {
-	return strings.HasSuffix(key, StateKeyNFTSuffix)
-}
-
-func StateKeyNFT(id nft.NFTID) string {
-	return fmt.Sprintf("%s%s", id, StateKeyNFTSuffix)
 }
 
 type NFTStateValueMerger struct {
@@ -317,14 +289,6 @@ func StateNFTBoxValue(st base.State) (NFTBox, error) {
 	return nb.Box, nil
 }
 
-func IsStateNFTBoxKey(key string) bool {
-	return strings.HasSuffix(key, StateKeyNFTBoxSuffix)
-}
-
-func StateKeyNFTBox(id extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", id, StateKeyNFTBoxSuffix)
-}
-
 type NFTBoxStateValueMerger struct {
 	*base.BaseStateValueMerger
 }
@@ -400,14 +364,6 @@ func StateAgentBoxValue(st base.State) (AgentBox, error) {
 	return ab.Box, nil
 }
 
-func IsStateAgentBoxKey(key string) bool {
-	return strings.HasSuffix(key, StateKeyAgentBoxSuffix)
-}
-
-func StateKeyAgentBox(addr base.Address, collection extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s-%s%s", addr, collection, StateKeyAgentBoxSuffix)
-}
-
 type AgentBoxStateValueMerger struct {
 	*base.BaseStateValueMerger
 }
@@ -444,6 +400,21 @@ func checkExistsState(
 	}
 }
 
+func checkExistsStates(
+	keys []string,
+	getState base.GetStateFunc,
+) error {
+	for i := range keys {
+		switch _, found, err := getState(keys[i]); {
+		case err != nil:
+			return err
+		case !found:
+			return base.NewBaseOperationProcessReasonError("state, %q does not exist", keys[i])
+		}
+	}
+	return nil
+}
+
 func checkNotExistsState(
 	key string,
 	getState base.GetStateFunc,
@@ -471,6 +442,27 @@ func existsState(
 	default:
 		return st, nil
 	}
+}
+
+func existsStates(
+	getState base.GetStateFunc,
+	keys ...string,
+) ([]base.State, error) {
+	var states []base.State
+	for i := range keys {
+		switch st, found, err := getState(keys[i]); {
+		case err != nil:
+			return nil, err
+		case !found:
+			return nil, base.NewBaseOperationProcessReasonError("value of key does not exist, %s", keys[i])
+		default:
+			states = append(states, st)
+		}
+	}
+	if len(keys) != len(states) {
+		return nil, base.NewBaseOperationProcessReasonError("get multiple states failed")
+	}
+	return states, nil
 }
 
 func notExistsState(
@@ -509,10 +501,10 @@ func existsCurrencyPolicy(cid currency.CurrencyID, getStateFunc base.GetStateFun
 	return policy, nil
 }
 
-func existsCollectionPolicy(id extensioncurrency.ContractID, getStateFunc base.GetStateFunc) (CollectionPolicy, error) {
+func existsCollectionPolicy(contract base.Address, id extensioncurrency.ContractID, getStateFunc base.GetStateFunc) (CollectionPolicy, error) {
 	var policy CollectionPolicy
 
-	switch st, found, err := getStateFunc(StateKeyCollectionDesign(id)); {
+	switch st, found, err := getStateFunc(NFTStateKey(contract, id, CollectionKey)); {
 	case err != nil:
 		return CollectionPolicy{}, err
 	case !found:

@@ -21,7 +21,7 @@ func (it DelegateItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DelegateItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
 		Collection: it.collection,
-		Agent:      it.agent,
+		Agent:      it.operator,
 		Mode:       it.mode,
 		Currency:   it.currency,
 	})

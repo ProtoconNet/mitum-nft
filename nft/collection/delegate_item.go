@@ -39,17 +39,19 @@ var DelegateItemHint = hint.MustNewHint("mitum-nft-delegate-item-v0.0.1")
 
 type DelegateItem struct {
 	hint.BaseHinter
+	contract   base.Address
 	collection extensioncurrency.ContractID
-	agent      base.Address
+	operator   base.Address
 	mode       DelegateMode
 	currency   currency.CurrencyID
 }
 
-func NewDelegateItem(symbol extensioncurrency.ContractID, agent base.Address, mode DelegateMode, currency currency.CurrencyID) DelegateItem {
+func NewDelegateItem(contract base.Address, symbol extensioncurrency.ContractID, operator base.Address, mode DelegateMode, currency currency.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
+		contract:   contract,
 		collection: symbol,
-		agent:      agent,
+		operator:   operator,
 		mode:       mode,
 		currency:   currency,
 	}
@@ -59,7 +61,7 @@ func (it DelegateItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.collection,
-		it.agent,
+		it.operator,
 		it.mode,
 		it.currency,
 	)
@@ -68,7 +70,7 @@ func (it DelegateItem) IsValid([]byte) error {
 func (it DelegateItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.collection.Bytes(),
-		it.agent.Bytes(),
+		it.operator.Bytes(),
 		it.mode.Bytes(),
 		it.currency.Bytes(),
 	)
@@ -79,7 +81,7 @@ func (it DelegateItem) Collection() extensioncurrency.ContractID {
 }
 
 func (it DelegateItem) Agent() base.Address {
-	return it.agent
+	return it.operator
 }
 
 func (it DelegateItem) Mode() DelegateMode {
@@ -88,7 +90,7 @@ func (it DelegateItem) Mode() DelegateMode {
 
 func (it DelegateItem) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 1)
-	as[0] = it.agent
+	as[0] = it.operator
 	return as, nil
 }
 

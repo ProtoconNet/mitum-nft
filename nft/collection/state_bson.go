@@ -1,7 +1,6 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/util"
@@ -49,17 +48,17 @@ func (s *CollectionDesignStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) 
 func (s CollectionLastNFTIndexStateValue) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      s.Hint().String(),
-			"collection": s.Collection,
-			"index":      s.Index,
+			"_hint": s.Hint().String(),
+			// "collection": s.Collection,
+			"index": s.Index,
 		},
 	)
 }
 
 type CollectionLastNFTIndexStateValueBSONUnmarshaler struct {
-	Hint       string `bson:"_hint"`
-	Collection string `bson:"collection"`
-	Index      uint64 `bson:"index"`
+	Hint string `bson:"_hint"`
+	// Collection string `bson:"collection"`
+	Index uint64 `bson:"index"`
 }
 
 func (s *CollectionLastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -76,7 +75,7 @@ func (s *CollectionLastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Enc
 	}
 	s.BaseHinter = hint.NewBaseHinter(ht)
 
-	s.Collection = extensioncurrency.ContractID(u.Collection)
+	// s.Collection = extensioncurrency.ContractID(u.Collection)
 	s.Index = u.Index
 
 	return nil

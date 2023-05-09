@@ -3,7 +3,6 @@ package collection
 import (
 	"encoding/json"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -47,8 +46,8 @@ func (s *CollectionDesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) 
 
 type CollectionLastNFTIndexStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	Collection extensioncurrency.ContractID `json:"collection"`
-	Index      uint64                       `json:"index"`
+	// Collection extensioncurrency.ContractID `json:"collection"`
+	Index uint64 `json:"index"`
 }
 
 func (s CollectionLastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
@@ -58,9 +57,9 @@ func (s CollectionLastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type CollectionLastNFTIndexStateValueJSONUnmarshaler struct {
-	Hint       hint.Hint `json:"_hint"`
-	Collection string    `json:"collection"`
-	Index      uint64    `json:"index"`
+	Hint hint.Hint `json:"_hint"`
+	// Collection string    `json:"collection"`
+	Index uint64 `json:"index"`
 }
 
 func (s *CollectionLastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -72,7 +71,7 @@ func (s *CollectionLastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Enc
 	}
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
-	s.Collection = extensioncurrency.ContractID(u.Collection)
+	// s.Collection = extensioncurrency.ContractID(u.Collection)
 	s.Index = u.Index
 
 	return nil

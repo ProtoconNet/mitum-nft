@@ -98,11 +98,11 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("deactivated contract account, %q", fact.Form().Target()), nil
 	}
 
-	if err := checkNotExistsState(StateKeyCollectionDesign(fact.Form().Symbol()), getStateFunc); err != nil {
+	if err := checkNotExistsState(NFTStateKey(fact.Form().target, fact.Form().Symbol(), CollectionKey), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError("collection design already exists, %q: %w", fact.Form().Symbol(), err), nil
 	}
 
-	if err := checkNotExistsState(StateKeyCollectionLastNFTIndex(fact.Form().Symbol()), getStateFunc); err != nil {
+	if err := checkNotExistsState(NFTStateKey(fact.Form().target, fact.Form().Symbol(), LastIDXKey), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError("last index of collection design already exists, %q: %w", fact.Form().Symbol(), err), nil
 	}
 
@@ -138,12 +138,12 @@ func (opp *CollectionRegisterProcessor) Process(
 	}
 
 	sts[0] = NewCollectionDesignStateMergeValue(
-		StateKeyCollectionDesign(design.Symbol()),
+		NFTStateKey(design.Parent(), design.Symbol(), CollectionKey),
 		NewCollectionDesignStateValue(design),
 	)
 	sts[1] = NewCollectionLastNFTIndexStateMergeValue(
-		StateKeyCollectionLastNFTIndex(design.Symbol()),
-		NewCollectionLastNFTIndexStateValue(design.Symbol(), 0),
+		NFTStateKey(design.Parent(), design.Symbol(), LastIDXKey),
+		NewCollectionLastNFTIndexStateValue(0),
 	)
 
 	currencyPolicy, err := existsCurrencyPolicy(fact.Currency(), getStateFunc)

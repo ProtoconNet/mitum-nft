@@ -17,13 +17,15 @@ var (
 type CollectionPolicyUpdaterFact struct {
 	base.BaseFact
 	sender     base.Address
+	contract   base.Address
 	collection extensioncurrency.ContractID
 	policy     CollectionPolicy
 	currency   currency.CurrencyID
 }
 
 func NewCollectionPolicyUpdaterFact(
-	token []byte, sender base.Address,
+	token []byte,
+	sender, contract base.Address,
 	collection extensioncurrency.ContractID,
 	policy CollectionPolicy,
 	currency currency.CurrencyID,
@@ -33,6 +35,7 @@ func NewCollectionPolicyUpdaterFact(
 	fact := CollectionPolicyUpdaterFact{
 		BaseFact:   bf,
 		sender:     sender,
+		contract:   contract,
 		collection: collection,
 		policy:     policy,
 		currency:   currency,
@@ -54,6 +57,7 @@ func (fact CollectionPolicyUpdaterFact) IsValid(b []byte) error {
 	if err := util.CheckIsValiders(
 		nil, false,
 		fact.sender,
+		fact.contract,
 		fact.collection,
 		fact.policy,
 		fact.currency,
@@ -76,6 +80,7 @@ func (fact CollectionPolicyUpdaterFact) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		fact.Token(),
 		fact.sender.Bytes(),
+		fact.contract.Bytes(),
 		fact.collection.Bytes(),
 		fact.policy.Bytes(),
 		fact.currency.Bytes(),
@@ -88,6 +93,10 @@ func (fact CollectionPolicyUpdaterFact) Token() base.Token {
 
 func (fact CollectionPolicyUpdaterFact) Sender() base.Address {
 	return fact.sender
+}
+
+func (fact CollectionPolicyUpdaterFact) Contract() base.Address {
+	return fact.contract
 }
 
 func (fact CollectionPolicyUpdaterFact) Collection() extensioncurrency.ContractID {

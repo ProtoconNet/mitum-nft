@@ -52,7 +52,7 @@ func (ipp *NFTTransferItemProcessor) PreProcess(
 
 	nid := ipp.item.NFT()
 
-	st, err := existsState(StateKeyCollectionDesign(nid.Collection()), "design", getStateFunc)
+	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.symbol, CollectionKey), "design", getStateFunc)
 	if err != nil {
 		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
 	}
@@ -79,7 +79,7 @@ func (ipp *NFTTransferItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", design.Parent())
 	}
 
-	st, err = existsState(StateKeyNFT(nid), "key of nft", getStateFunc)
+	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.symbol, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q: %w", nid, err)
 	}
@@ -94,7 +94,7 @@ func (ipp *NFTTransferItemProcessor) PreProcess(
 	}
 
 	if !(nv.Owner().Equal(ipp.sender) || nv.Approved().Equal(ipp.sender)) {
-		if st, err := existsState(StateKeyAgentBox(nv.Owner(), nv.ID().Collection()), "agents", getStateFunc); err != nil {
+		if st, err := existsState(StateKeyOperators(ipp.item.contract, ipp.item.symbol, nv.Owner()), "agents", getStateFunc); err != nil {
 			return errors.Errorf("unauthorized sender, %q: %w", ipp.sender, err)
 		} else if box, err := StateAgentBoxValue(st); err != nil {
 			return errors.Errorf("agent box value not found, %q: %w", ipp.sender, err)
@@ -112,7 +112,7 @@ func (ipp *NFTTransferItemProcessor) Process(
 	receiver := ipp.item.Receiver()
 	nid := ipp.item.NFT()
 
-	st, err := existsState(StateKeyNFT(nid), "key of nft", getStateFunc)
+	st, err := existsState(StateKeyNFT(ipp.item.contract, ipp.item.symbol, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q: %w", nid, err)
 	}
@@ -129,7 +129,7 @@ func (ipp *NFTTransferItemProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 1)
 
-	sts[0] = NewNFTStateMergeValue(StateKeyNFT(ipp.item.NFT()), NewNFTStateValue(n))
+	sts[0] = NewNFTStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.symbol, ipp.item.NFT()), NewNFTStateValue(n))
 
 	return sts, nil
 }

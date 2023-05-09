@@ -80,7 +80,7 @@ func (opp *CollectionPolicyUpdaterProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("invalid signing: %w", err), nil
 	}
 
-	st, err := existsState(StateKeyCollectionDesign(fact.Collection()), "key of design", getStateFunc)
+	st, err := existsState(NFTStateKey(fact.contract, fact.collection, CollectionKey), "key of collection design", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q: %w", fact.Collection(), err), nil
 	}
@@ -126,7 +126,7 @@ func (opp *CollectionPolicyUpdaterProcessor) Process(
 		return nil, nil, e(nil, "expected CollectionPolicyUpdaterFact, not %T", op.Fact())
 	}
 
-	st, err := existsState(StateKeyCollectionDesign(fact.Collection()), "key of design", getStateFunc)
+	st, err := existsState(NFTStateKey(fact.contract, fact.collection, CollectionKey), "key of design", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q: %w", fact.Collection(), err), nil
 	}
@@ -139,7 +139,7 @@ func (opp *CollectionPolicyUpdaterProcessor) Process(
 	sts := make([]base.StateMergeValue, 2)
 
 	de := NewCollectionDesign(design.Parent(), design.Creator(), design.Symbol(), design.Active(), fact.Policy())
-	sts[0] = NewCollectionDesignStateMergeValue(StateKeyCollectionDesign(design.Symbol()), NewCollectionDesignStateValue(de))
+	sts[0] = NewCollectionDesignStateMergeValue(NFTStateKey(fact.contract, design.Symbol(), CollectionKey), NewCollectionDesignStateValue(de))
 
 	currencyPolicy, err := existsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {

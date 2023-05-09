@@ -44,8 +44,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	}
 
 	nid := ipp.item.NFT()
-
-	st, err := existsState(StateKeyCollectionDesign(nid.Collection()), "key of design", getStateFunc)
+	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.collection, CollectionKey), "key of design", getStateFunc)
 	if err != nil {
 		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
 	}
@@ -73,7 +72,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", design.Parent())
 	}
 
-	st, err = existsState(StateKeyNFT(nid), "key of nft", getStateFunc)
+	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q: %w", nid, err)
 	}
@@ -96,14 +95,14 @@ func (ipp *ApproveItemProcessor) PreProcess(
 			return errors.Errorf("nft owner not found, %q: %w", nv.Owner(), err)
 		}
 
-		st, err = existsState(StateKeyAgentBox(nv.Owner(), nv.ID().Collection()), "key of agents", getStateFunc)
+		st, err = existsState(StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), "key of operators", getStateFunc)
 		if err != nil {
 			return errors.Errorf("unauthorized sender, %q: %w", ipp.sender, err)
 		}
 
 		box, err := StateAgentBoxValue(st)
 		if err != nil {
-			return errors.Errorf("agent box value not found, %q: %w", StateKeyAgentBox(nv.Owner(), nv.ID().Collection()), err)
+			return errors.Errorf("agent box value not found, %q: %w", StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), err)
 		}
 
 		if !box.Exists(ipp.sender) {
@@ -119,7 +118,7 @@ func (ipp *ApproveItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := existsState(StateKeyNFT(nid), "key of nft", getStateFunc)
+	st, err := existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q: %w", nid, err)
 	}

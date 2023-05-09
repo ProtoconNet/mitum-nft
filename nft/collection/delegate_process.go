@@ -58,7 +58,7 @@ func (ipp *DelegateItemProcessor) Process(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	if ipp.box == nil {
-		return nil, errors.Errorf("nft box not found, %q", StateKeyAgentBox(ipp.item.Agent(), ipp.item.Collection()))
+		return nil, errors.Errorf("nft box not found, %q", StateKeyOperators(ipp.item.contract, ipp.item.Collection(), ipp.sender))
 	}
 
 	switch ipp.item.Mode() {
@@ -148,7 +148,7 @@ func (opp *DelegateProcessor) PreProcess(
 	}
 
 	for _, item := range fact.Items() {
-		st, err := existsState(StateKeyCollectionDesign(item.Collection()), "key of design", getStateFunc)
+		st, err := existsState(NFTStateKey(item.contract, item.Collection(), CollectionKey), "key of design", getStateFunc)
 		if err != nil {
 			return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q: %w", item.Collection(), err), nil
 		}
@@ -212,7 +212,7 @@ func (opp *DelegateProcessor) Process(
 
 	boxes := map[string]*AgentBox{}
 	for _, item := range fact.Items() {
-		ak := StateKeyAgentBox(fact.Sender(), item.Collection())
+		ak := StateKeyOperators(item.contract, item.Collection(), fact.Sender())
 
 		var box AgentBox
 		switch st, found, err := getStateFunc(ak); {
@@ -242,7 +242,7 @@ func (opp *DelegateProcessor) Process(
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
 		ipc.item = item
-		ipc.box = boxes[StateKeyAgentBox(fact.Sender(), item.Collection())]
+		ipc.box = boxes[StateKeyOperators(item.contract, item.Collection(), fact.Sender())]
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {

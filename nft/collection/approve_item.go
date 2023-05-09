@@ -1,6 +1,7 @@
 package collection
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
@@ -13,14 +14,18 @@ var ApproveItemHint = hint.MustNewHint("mitum-nft-approve-item-v0.0.1")
 
 type ApproveItem struct {
 	hint.BaseHinter
-	approved base.Address
-	nft      nft.NFTID
-	currency currency.CurrencyID
+	contract   base.Address
+	collection extensioncurrency.ContractID
+	approved   base.Address
+	nft        nft.NFTID
+	currency   currency.CurrencyID
 }
 
-func NewApproveItem(approved base.Address, n nft.NFTID, currency currency.CurrencyID) ApproveItem {
+func NewApproveItem(contract base.Address, collection extensioncurrency.ContractID, approved base.Address, n nft.NFTID, currency currency.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
+		contract:   contract,
+		collection: collection,
 		approved:   approved,
 		nft:        n,
 		currency:   currency,
@@ -30,6 +35,8 @@ func NewApproveItem(approved base.Address, n nft.NFTID, currency currency.Curren
 func (it ApproveItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
+		it.contract,
+		it.collection,
 		it.approved,
 		it.nft,
 		it.currency,
@@ -38,6 +45,8 @@ func (it ApproveItem) IsValid([]byte) error {
 
 func (it ApproveItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
+		it.contract.Bytes(),
+		it.collection.Bytes(),
 		it.approved.Bytes(),
 		it.nft.Bytes(),
 		it.currency.Bytes(),
