@@ -17,12 +17,14 @@ type DelegateCommand struct {
 	baseCommand
 	cmds.OperationFlags
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection symbol" required:"true"`
+	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
 	Agent      cmds.AddressFlag    `arg:"" name:"agent" help:"agent account address"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Mode       string              `name:"mode" help:"delegate mode" optional:""`
 	sender     base.Address
-	symbol     extensioncurrency.ContractID
+	contract   base.Address
+	collection extensioncurrency.ContractID
 	agent      base.Address
 	mode       nftcollection.DelegateMode
 }
@@ -60,7 +62,13 @@ func (cmd *DelegateCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(enc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender address format; %q", cmd.Sender)
+	} else {
+		cmd.sender = a
+	}
+
+	if a, err := cmd.Contract.Encode(enc); err != nil {
+		return errors.Wrapf(err, "invalid contract address format; %q", cmd.Contract)
 	} else {
 		cmd.sender = a
 	}
@@ -69,7 +77,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 	if err := symbol.IsValid(nil); err != nil {
 		return err
 	}
-	cmd.symbol = symbol
+	cmd.collection = symbol
 
 	if a, err := cmd.Agent.Encode(enc); err != nil {
 		return errors.Wrapf(err, "invalid agent format; %q", cmd.Agent)
@@ -94,7 +102,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 func (cmd *DelegateCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create delegate operation")
 
-	items := []nftcollection.DelegateItem{nftcollection.NewDelegateItem(cmd.symbol, cmd.agent, cmd.mode, cmd.Currency.CID)}
+	items := []nftcollection.DelegateItem{nftcollection.NewDelegateItem(cmd.contract, cmd.collection, cmd.agent, cmd.mode, cmd.Currency.CID)}
 
 	fact := nftcollection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 

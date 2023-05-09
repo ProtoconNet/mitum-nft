@@ -18,15 +18,15 @@ type CollectionRegisterCommand struct {
 	baseCommand
 	cmds.OperationFlags
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Target     cmds.AddressFlag    `arg:"" name:"target" help:"target account to register policy" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection symbol" required:"true"`
+	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract account to register policy" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
 	Name       string              `arg:"" name:"name" help:"collection name" required:"true"`
 	Royalty    uint                `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	URI        string              `name:"uri" help:"collection uri" optional:""`
 	White      cmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
 	sender     base.Address
-	target     base.Address
+	contract   base.Address
 	form       nftcollection.CollectionRegisterForm
 }
 
@@ -63,21 +63,21 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(enc); err != nil {
-		return errors.Wrapf(err, "invalid sender format; %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender address format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	if a, err := cmd.Target.Encode(enc); err != nil {
-		return errors.Wrapf(err, "invalid target format; %q", cmd.Target)
+	if a, err := cmd.Contract.Encode(enc); err != nil {
+		return errors.Wrapf(err, "invalid contract address format; %q", cmd.Contract)
 	} else {
-		cmd.target = a
+		cmd.contract = a
 	}
 
 	var white base.Address = nil
 	if cmd.White.String() != "" {
 		if a, err := cmd.White.Encode(enc); err != nil {
-			return errors.Wrapf(err, "invalid white format, %q", cmd.White)
+			return errors.Wrapf(err, "invalid whitelist address format, %q", cmd.White)
 		} else {
 			white = a
 		}
@@ -108,7 +108,7 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		whites = append(whites, white)
 	}
 
-	form := nftcollection.NewCollectionRegisterForm(cmd.target, collection, name, royalty, uri, whites)
+	form := nftcollection.NewCollectionRegisterForm(cmd.contract, collection, name, royalty, uri, whites)
 	if err := form.IsValid(nil); err != nil {
 		return err
 	}

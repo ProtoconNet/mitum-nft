@@ -18,6 +18,7 @@ type MintCommand struct {
 	baseCommand
 	cmds.OperationFlags
 	Sender           cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract         cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
 	Collection       string              `arg:"" name:"collection" help:"collection symbol" required:"true"`
 	Hash             string              `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri              string              `arg:"" name:"uri" help:"nft uri" required:"true"`
@@ -27,6 +28,8 @@ type MintCommand struct {
 	CreatorTotal     uint                `name:"creator-total" help:"creators total share" optional:""`
 	CopyrighterTotal uint                `name:"copyrighter-total" help:"copyrighters total share" optional:""`
 	sender           base.Address
+	contract         base.Address
+	collection       extensioncurrency.ContractID
 	form             collection.MintForm
 }
 
@@ -64,9 +67,23 @@ func (cmd *MintCommand) parseFlags() error {
 
 	a, err := cmd.Sender.Encode(enc)
 	if err != nil {
-		return errors.Wrapf(err, "invalid sender format, %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender)
 	} else {
 		cmd.sender = a
+	}
+
+	a, err = cmd.Contract.Encode(enc)
+	if err != nil {
+		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract)
+	} else {
+		cmd.contract = a
+	}
+
+	col := extensioncurrency.ContractID(cmd.Collection)
+	if err = col.IsValid(nil); err != nil {
+		return err
+	} else {
+		cmd.collection = col
 	}
 
 	hash := nft.NFTHash(cmd.Hash)
@@ -83,7 +100,7 @@ func (cmd *MintCommand) parseFlags() error {
 	if len(cmd.Creator.address) > 0 {
 		a, err := cmd.Creator.Encode(enc)
 		if err != nil {
-			return errors.Wrapf(err, "invalid creator format, %q", cmd.Creator)
+			return errors.Wrapf(err, "invalid creator address format, %q", cmd.Creator)
 		}
 
 		signer := nft.NewSigner(a, cmd.Creator.share, false)
@@ -98,7 +115,7 @@ func (cmd *MintCommand) parseFlags() error {
 	if len(cmd.Copyrighter.address) > 0 {
 		a, err := cmd.Copyrighter.Encode(enc)
 		if err != nil {
-			return errors.Wrapf(err, "invalid copyrighter format, %q", cmd.Copyrighter)
+			return errors.Wrapf(err, "invalid copyrighter address format, %q", cmd.Copyrighter)
 		}
 
 		signer := nft.NewSigner(a, cmd.Copyrighter.share, false)
@@ -132,7 +149,7 @@ func (cmd *MintCommand) parseFlags() error {
 func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:dupl
 	e := util.StringErrorFunc("failed to create mint operation")
 
-	item := collection.NewMintItem(extensioncurrency.ContractID(cmd.Collection), cmd.form, cmd.Currency.CID)
+	item := collection.NewMintItem(cmd.contract, cmd.collection, cmd.form, cmd.Currency.CID)
 	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
 
 	op, err := collection.NewMint(fact)
