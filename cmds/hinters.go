@@ -2,8 +2,10 @@ package cmds
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	isaacoperation "github.com/ProtoconNet/mitum-currency-extension/v2/isaac"
+	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	digestisaac "github.com/ProtoconNet/mitum-currency/v2/digest/isaac"
+	isaacoperation "github.com/ProtoconNet/mitum-currency/v2/isaac"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/ProtoconNet/mitum2/launch"
@@ -32,6 +34,8 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: currency.TransfersItemMultiAmountsHint, Instance: currency.TransfersItemMultiAmounts{}},
 	{Hint: currency.TransfersItemSingleAmountHint, Instance: currency.TransfersItemSingleAmount{}},
 	{Hint: currency.TransfersHint, Instance: currency.Transfers{}},
+	{Hint: currency.SuffrageInflationHint, Instance: currency.SuffrageInflation{}},
+
 	{Hint: extensioncurrency.NilFeeerHint, Instance: extensioncurrency.NilFeeer{}},
 	{Hint: extensioncurrency.FixedFeeerHint, Instance: extensioncurrency.FixedFeeer{}},
 	{Hint: extensioncurrency.RatioFeeerHint, Instance: extensioncurrency.RatioFeeer{}},
@@ -40,7 +44,6 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: extensioncurrency.CurrencyDesignStateValueHint, Instance: extensioncurrency.CurrencyDesignStateValue{}},
 	{Hint: extensioncurrency.CurrencyRegisterHint, Instance: extensioncurrency.CurrencyRegister{}},
 	{Hint: extensioncurrency.CurrencyPolicyUpdaterHint, Instance: extensioncurrency.CurrencyPolicyUpdater{}},
-	{Hint: currency.SuffrageInflationHint, Instance: currency.SuffrageInflation{}},
 	{Hint: extensioncurrency.ContractAccountKeysHint, Instance: extensioncurrency.ContractAccountKeys{}},
 	{Hint: extensioncurrency.ContractAccountStateValueHint, Instance: extensioncurrency.ContractAccountStateValue{}},
 	{Hint: extensioncurrency.CreateContractAccountsItemMultiAmountsHint, Instance: extensioncurrency.CreateContractAccountsItemMultiAmounts{}},
@@ -50,6 +53,12 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: extensioncurrency.WithdrawsItemSingleAmountHint, Instance: extensioncurrency.WithdrawsItemSingleAmount{}},
 	{Hint: extensioncurrency.WithdrawsHint, Instance: extensioncurrency.Withdraws{}},
 	{Hint: extensioncurrency.GenesisCurrenciesHint, Instance: extensioncurrency.GenesisCurrencies{}},
+	{Hint: extensioncurrency.GenesisCurrenciesFactHint, Instance: extensioncurrency.GenesisCurrenciesFact{}},
+
+	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
+	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
+	{Hint: digest.OperationValueHint, Instance: digest.OperationValue{}},
+
 	{Hint: isaacoperation.NetworkPolicyHint, Instance: isaacoperation.NetworkPolicy{}},
 	{Hint: isaacoperation.NetworkPolicyStateValueHint, Instance: isaacoperation.NetworkPolicyStateValue{}},
 	{Hint: isaacoperation.GenesisNetworkPolicyHint, Instance: isaacoperation.GenesisNetworkPolicy{}},
@@ -59,11 +68,13 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: isaacoperation.SuffrageDisjoinHint, Instance: isaacoperation.SuffrageDisjoin{}},
 	{Hint: isaacoperation.FixedSuffrageCandidateLimiterRuleHint, Instance: isaacoperation.FixedSuffrageCandidateLimiterRule{}},
 	{Hint: isaacoperation.MajoritySuffrageCandidateLimiterRuleHint, Instance: isaacoperation.MajoritySuffrageCandidateLimiterRule{}},
+
 	{Hint: nft.SignerHint, Instance: nft.Signer{}},
 	{Hint: nft.SignersHint, Instance: nft.Signers{}},
 	{Hint: nft.NFTIDHint, Instance: nft.NFTID{}},
 	{Hint: nft.NFTHint, Instance: nft.NFT{}},
 	{Hint: nft.DesignHint, Instance: nft.Design{}},
+
 	{Hint: collection.CollectionLastNFTIndexStateValueHint, Instance: collection.CollectionLastNFTIndexStateValue{}},
 	{Hint: collection.NFTStateValueHint, Instance: collection.NFTStateValue{}},
 	{Hint: collection.NFTBoxStateValueHint, Instance: collection.NFTBoxStateValue{}},
@@ -90,20 +101,22 @@ var hinters = []encoder.DecodeDetail{
 }
 
 var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
+	{Hint: currency.CreateAccountsFactHint, Instance: currency.CreateAccountsFact{}},
+	{Hint: currency.KeyUpdaterFactHint, Instance: currency.KeyUpdaterFact{}},
+	{Hint: currency.TransfersFactHint, Instance: currency.TransfersFact{}},
+	{Hint: currency.SuffrageInflationFactHint, Instance: currency.SuffrageInflationFact{}},
+
+	{Hint: extensioncurrency.CurrencyRegisterFactHint, Instance: extensioncurrency.CurrencyRegisterFact{}},
+	{Hint: extensioncurrency.CurrencyPolicyUpdaterFactHint, Instance: extensioncurrency.CurrencyPolicyUpdaterFact{}},
+	{Hint: extensioncurrency.CreateContractAccountsFactHint, Instance: extensioncurrency.CreateContractAccountsFact{}},
+	{Hint: extensioncurrency.WithdrawsFactHint, Instance: extensioncurrency.WithdrawsFact{}},
+
 	{Hint: isaacoperation.GenesisNetworkPolicyFactHint, Instance: isaacoperation.GenesisNetworkPolicyFact{}},
-	{Hint: extensioncurrency.GenesisCurrenciesFactHint, Instance: extensioncurrency.GenesisCurrenciesFact{}},
 	{Hint: isaacoperation.SuffrageGenesisJoinFactHint, Instance: isaacoperation.SuffrageGenesisJoinFact{}},
 	{Hint: isaacoperation.SuffrageCandidateFactHint, Instance: isaacoperation.SuffrageCandidateFact{}},
 	{Hint: isaacoperation.SuffrageJoinFactHint, Instance: isaacoperation.SuffrageJoinFact{}},
 	{Hint: isaacoperation.SuffrageDisjoinFactHint, Instance: isaacoperation.SuffrageDisjoinFact{}},
-	{Hint: currency.CreateAccountsFactHint, Instance: currency.CreateAccountsFact{}},
-	{Hint: currency.KeyUpdaterFactHint, Instance: currency.KeyUpdaterFact{}},
-	{Hint: currency.TransfersFactHint, Instance: currency.TransfersFact{}},
-	{Hint: extensioncurrency.CurrencyRegisterFactHint, Instance: extensioncurrency.CurrencyRegisterFact{}},
-	{Hint: extensioncurrency.CurrencyPolicyUpdaterFactHint, Instance: extensioncurrency.CurrencyPolicyUpdaterFact{}},
-	{Hint: currency.SuffrageInflationFactHint, Instance: currency.SuffrageInflationFact{}},
-	{Hint: extensioncurrency.CreateContractAccountsFactHint, Instance: extensioncurrency.CreateContractAccountsFact{}},
-	{Hint: extensioncurrency.WithdrawsFactHint, Instance: extensioncurrency.WithdrawsFact{}},
+
 	{Hint: collection.CollectionRegisterFactHint, Instance: collection.CollectionRegisterFact{}},
 	{Hint: collection.CollectionPolicyUpdaterFactHint, Instance: collection.CollectionPolicyUpdaterFact{}},
 	{Hint: collection.MintFactHint, Instance: collection.MintFact{}},
