@@ -1,5 +1,5 @@
 address: no0sas
-privatekey: EYc4WdFjP9qkgfwJZfnsVXeh827rsNppm5HUSjSDeMFFmpr
+privatekey: 5VYUTw5LWwTiSegXU4LQCadNG1eW8uVxkDdESkPN1dR7mpr
 network_id: mitum
 network:
   bind: 0.0.0.0:4320
@@ -7,6 +7,12 @@ network:
 storage:
   base: ./mitum-data
   database: leveldb://
+# digest:
+#   network:
+#     bind: http://localhost:54320
+#     url: http://localhost:54320
+#   database: 
+#     uri: mongodb://127.0.0.1:27017/mc-sto
 parameters:
   threshold: 100
   interval_broadcast_ballot: 3s
