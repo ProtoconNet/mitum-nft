@@ -5,6 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -46,7 +47,7 @@ func (form *MintForm) unmarshal(
 func (it *MintItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	col string,
+	ca, col string,
 	bf []byte,
 	cid string,
 ) error {
@@ -54,6 +55,12 @@ func (it *MintItem) unmarshal(
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.collection = extensioncurrency.ContractID(col)
+	switch a, err := base.DecodeAddress(ca, enc); {
+	case err != nil:
+		return e(err, "")
+	default:
+		it.contract = a
+	}
 
 	if hinter, err := enc.Decode(bf); err != nil {
 		return e(err, "")

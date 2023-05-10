@@ -23,7 +23,7 @@ func (form *CollectionRegisterForm) unmarshal(
 	e := util.StringErrorFunc("failed to unmarshal CollectionRegisterForm")
 
 	form.BaseHinter = hint.NewBaseHinter(ht)
-	form.symbol = extensioncurrency.ContractID(sb)
+	form.collection = extensioncurrency.ContractID(sb)
 	form.name = CollectionName(nm)
 	form.royalty = nft.PaymentParameter(ry)
 	form.uri = nft.URI(uri)

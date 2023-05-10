@@ -36,17 +36,17 @@ var NFTSignItemHint = hint.MustNewHint("mitum-nft-sign-item-v0.0.1")
 type NFTSignItem struct {
 	hint.BaseHinter
 	contract      base.Address
-	symbol        extensioncurrency.ContractID
+	collection    extensioncurrency.ContractID
 	qualification Qualification
 	nft           nft.NFTID
 	currency      currency.CurrencyID
 }
 
-func NewNFTSignItem(contract base.Address, symbol extensioncurrency.ContractID, q Qualification, n nft.NFTID, currency currency.CurrencyID) NFTSignItem {
+func NewNFTSignItem(contract base.Address, collection extensioncurrency.ContractID, q Qualification, n nft.NFTID, currency currency.CurrencyID) NFTSignItem {
 	return NFTSignItem{
 		BaseHinter:    hint.NewBaseHinter(NFTSignItemHint),
 		contract:      contract,
-		symbol:        symbol,
+		collection:    collection,
 		qualification: q,
 		nft:           n,
 		currency:      currency,
@@ -56,7 +56,7 @@ func NewNFTSignItem(contract base.Address, symbol extensioncurrency.ContractID, 
 func (it NFTSignItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.symbol.Bytes(),
+		it.collection.Bytes(),
 		it.qualification.Bytes(),
 		it.nft.Bytes(),
 		it.currency.Bytes(),
@@ -64,7 +64,7 @@ func (it NFTSignItem) Bytes() []byte {
 }
 
 func (it NFTSignItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.symbol, it.qualification, it.nft, it.currency)
+	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.collection, it.qualification, it.nft, it.currency)
 }
 
 func (it NFTSignItem) Qualification() Qualification {
@@ -83,6 +83,6 @@ func (it NFTSignItem) Currency() currency.CurrencyID {
 	return it.currency
 }
 
-func (it NFTSignItem) Symbol() extensioncurrency.ContractID {
-	return it.symbol
+func (it NFTSignItem) Collection() extensioncurrency.ContractID {
+	return it.collection
 }

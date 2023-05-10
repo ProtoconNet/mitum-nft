@@ -13,18 +13,18 @@ var NFTTransferItemHint = hint.MustNewHint("mitum-nft-transfer-item-v0.0.1")
 
 type NFTTransferItem struct {
 	hint.BaseHinter
-	contract base.Address
-	symbol   extensioncurrency.ContractID
-	receiver base.Address
-	nft      nft.NFTID
-	currency currency.CurrencyID
+	contract   base.Address
+	collection extensioncurrency.ContractID
+	receiver   base.Address
+	nft        nft.NFTID
+	currency   currency.CurrencyID
 }
 
-func NewNFTTransferItem(contract base.Address, symbol extensioncurrency.ContractID, receiver base.Address, n nft.NFTID, currency currency.CurrencyID) NFTTransferItem {
+func NewNFTTransferItem(contract base.Address, collection extensioncurrency.ContractID, receiver base.Address, n nft.NFTID, currency currency.CurrencyID) NFTTransferItem {
 	return NFTTransferItem{
 		BaseHinter: hint.NewBaseHinter(NFTTransferItemHint),
 		contract:   contract,
-		symbol:     symbol,
+		collection: collection,
 		receiver:   receiver,
 		nft:        n,
 		currency:   currency,
@@ -38,7 +38,7 @@ func (it NFTTransferItem) IsValid([]byte) error {
 func (it NFTTransferItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.symbol.Bytes(),
+		it.collection.Bytes(),
 		it.receiver.Bytes(),
 		it.nft.Bytes(),
 		it.currency.Bytes(),
@@ -49,8 +49,8 @@ func (it NFTTransferItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it NFTTransferItem) Symbol() extensioncurrency.ContractID {
-	return it.symbol
+func (it NFTTransferItem) Collection() extensioncurrency.ContractID {
+	return it.collection
 }
 
 func (it NFTTransferItem) Receiver() base.Address {

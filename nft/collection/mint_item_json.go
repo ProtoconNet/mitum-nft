@@ -7,6 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -51,6 +52,7 @@ func (form *MintForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 
 type MintItemJSONMarshaler struct {
 	hint.BaseHinter
+	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Form       MintForm                     `json:"form"`
 	Currency   currency.CurrencyID          `json:"currency"`
@@ -59,6 +61,7 @@ type MintItemJSONMarshaler struct {
 func (it MintItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(MintItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
+		Contract:   it.contract,
 		Collection: it.collection,
 		Form:       it.form,
 		Currency:   it.currency,
@@ -67,6 +70,7 @@ func (it MintItem) MarshalJSON() ([]byte, error) {
 
 type MintItemJSONUnmarshaler struct {
 	Hint       hint.Hint       `json:"_hint"`
+	Contract   string          `json:"contract"`
 	Collection string          `json:"collection"`
 	Form       json.RawMessage `json:"form"`
 	Currency   string          `json:"currency"`
@@ -80,5 +84,5 @@ func (it *MintItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Collection, u.Form, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Form, u.Currency)
 }

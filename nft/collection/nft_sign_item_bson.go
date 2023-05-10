@@ -12,6 +12,8 @@ func (it NFTSignItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":         it.Hint().String(),
+			"contract":      it.contract,
+			"collection":    it.collection,
 			"qualification": it.qualification,
 			"nft":           it.nft,
 			"currency":      it.currency,
@@ -21,6 +23,8 @@ func (it NFTSignItem) MarshalBSON() ([]byte, error) {
 
 type NFTSignItemBSONUnmarshaler struct {
 	Hint          string   `bson:"_hint"`
+	Contract      string   `bson:"contract"`
+	Collection    string   `bson:"collection"`
 	Qualification string   `bson:"qualification"`
 	NFT           bson.Raw `bson:"nft"`
 	Currency      string   `bson:"currency"`
@@ -39,5 +43,5 @@ func (it *NFTSignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, ht, u.Qualification, u.NFT, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.Qualification, u.NFT, u.Currency)
 }

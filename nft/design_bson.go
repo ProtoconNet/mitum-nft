@@ -11,22 +11,22 @@ import (
 func (de Design) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":   de.Hint().String(),
-			"parent":  de.parent,
-			"creator": de.creator,
-			"symbol":  de.symbol,
-			"active":  de.active,
-			"policy":  de.policy,
+			"_hint":      de.Hint().String(),
+			"parent":     de.parent,
+			"creator":    de.creator,
+			"collection": de.collection,
+			"active":     de.active,
+			"policy":     de.policy,
 		})
 }
 
 type DesignBSONUnmarshaler struct {
-	Hint    string   `bson:"_hint"`
-	Parent  string   `bson:"parent"`
-	Creator string   `bson:"creator"`
-	Symbol  string   `bson:"symbol"`
-	Active  bool     `bson:"active"`
-	Policy  bson.Raw `bson:"policy"`
+	Hint       string   `bson:"_hint"`
+	Parent     string   `bson:"parent"`
+	Creator    string   `bson:"creator"`
+	Collection string   `bson:"collection"`
+	Active     bool     `bson:"active"`
+	Policy     bson.Raw `bson:"policy"`
 }
 
 func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -42,5 +42,5 @@ func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return de.unmarshal(enc, ht, u.Parent, u.Creator, u.Symbol, u.Active, u.Policy)
+	return de.unmarshal(enc, ht, u.Parent, u.Creator, u.Collection, u.Active, u.Policy)
 }

@@ -41,14 +41,14 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 ) error {
 	nid := ipp.item.NFT()
 
-	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.symbol, CollectionKey), "key of design", getStateFunc)
+	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.collection, CollectionKey), "key of design", getStateFunc)
 	if err != nil {
 		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
 	}
 
 	design, err := StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design value not found, %q: %w", ipp.item.symbol, err)
+		return errors.Errorf("collection design value not found, %q: %w", ipp.item.collection, err)
 	}
 
 	if !design.Active() {
@@ -68,7 +68,7 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", ipp.item.contract)
 	}
 
-	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.symbol, nid), "key of nft", getStateFunc)
+	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q: %w", nid, err)
 	}
@@ -103,7 +103,7 @@ func (ipp *NFTSignItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := existsState(StateKeyNFT(ipp.item.contract, ipp.item.symbol, nid), "key of nft", getStateFunc)
+	st, err := existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q: %w", nid, err)
 	}
@@ -152,7 +152,7 @@ func (ipp *NFTSignItemProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 1)
 
-	sts[0] = NewStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.symbol, n.ID()), NewNFTStateValue(n))
+	sts[0] = NewStateMergeValue(StateKeyNFT(ipp.item.contract, ipp.item.collection, n.ID()), NewNFTStateValue(n))
 
 	return sts, nil
 }

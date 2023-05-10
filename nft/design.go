@@ -63,19 +63,19 @@ var DesignHint = hint.MustNewHint("mitum-nft-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	parent  base.Address
-	creator base.Address
-	symbol  extensioncurrency.ContractID
-	active  bool
-	policy  BasePolicy
+	parent     base.Address
+	creator    base.Address
+	collection extensioncurrency.ContractID
+	active     bool
+	policy     BasePolicy
 }
 
-func NewDesign(parent base.Address, creator base.Address, symbol extensioncurrency.ContractID, active bool, policy BasePolicy) Design {
+func NewDesign(parent base.Address, creator base.Address, collection extensioncurrency.ContractID, active bool, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		parent:     parent,
 		creator:    creator,
-		symbol:     symbol,
+		collection: collection,
 		active:     active,
 		policy:     policy,
 	}
@@ -86,7 +86,7 @@ func (de Design) IsValid([]byte) error {
 		de.BaseHinter,
 		de.parent,
 		de.creator,
-		de.symbol,
+		de.collection,
 		de.policy,
 	); err != nil {
 		return err
@@ -110,7 +110,7 @@ func (de Design) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		de.parent.Bytes(),
 		de.creator.Bytes(),
-		de.symbol.Bytes(),
+		de.collection.Bytes(),
 		ab,
 		de.policy.Bytes(),
 	)
@@ -132,8 +132,8 @@ func (de Design) Creator() base.Address {
 	return de.creator
 }
 
-func (de Design) Symbol() extensioncurrency.ContractID {
-	return de.symbol
+func (de Design) Collection() extensioncurrency.ContractID {
+	return de.collection
 }
 
 func (de Design) Active() bool {
@@ -168,7 +168,7 @@ func (de Design) Equal(cd Design) bool {
 		return false
 	}
 
-	if de.symbol != cd.symbol {
+	if de.collection != cd.collection {
 		return false
 	}
 

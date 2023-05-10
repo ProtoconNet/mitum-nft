@@ -20,7 +20,7 @@ type NFTTransferCommand struct {
 	Receiver   cmds.AddressFlag    `arg:"" name:"receiver" help:"nft owner" required:"true"`
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
 	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
-	NFT        NFTIDFlag           `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
+	NFT        NFTIDFlag           `arg:"" name:"nft" help:"target nft; \"<colelction>,<idx>\""`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	sender     base.Address
 	receiver   base.Address

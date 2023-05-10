@@ -138,8 +138,8 @@ func (opp *CollectionPolicyUpdaterProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 2)
 
-	de := NewCollectionDesign(design.Parent(), design.Creator(), design.Symbol(), design.Active(), fact.Policy())
-	sts[0] = NewStateMergeValue(NFTStateKey(fact.contract, design.Symbol(), CollectionKey), NewCollectionStateValue(de))
+	de := NewCollectionDesign(design.Parent(), design.Creator(), design.Collection(), design.Active(), fact.Policy())
+	sts[0] = NewStateMergeValue(NFTStateKey(fact.contract, design.Collection(), CollectionKey), NewCollectionStateValue(de))
 
 	currencyPolicy, err := existsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {

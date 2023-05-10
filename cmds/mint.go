@@ -19,7 +19,7 @@ type MintCommand struct {
 	cmds.OperationFlags
 	Sender           cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract         cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection       string              `arg:"" name:"collection" help:"collection symbol" required:"true"`
+	Collection       string              `arg:"" name:"collection" help:"collection name" required:"true"`
 	Hash             string              `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri              string              `arg:"" name:"uri" help:"nft uri" required:"true"`
 	Currency         cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`

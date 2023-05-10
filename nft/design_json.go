@@ -12,11 +12,11 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Parent  base.Address                 `json:"parent"`
-	Creator base.Address                 `json:"creator"`
-	Symbol  extensioncurrency.ContractID `json:"symbol"`
-	Active  bool                         `json:"active"`
-	Policy  BasePolicy                   `json:"policy"`
+	Parent     base.Address                 `json:"parent"`
+	Creator    base.Address                 `json:"creator"`
+	Collection extensioncurrency.ContractID `json:"collection"`
+	Active     bool                         `json:"active"`
+	Policy     BasePolicy                   `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {
@@ -24,19 +24,19 @@ func (de Design) MarshalJSON() ([]byte, error) {
 		BaseHinter: de.BaseHinter,
 		Parent:     de.parent,
 		Creator:    de.creator,
-		Symbol:     de.symbol,
+		Collection: de.collection,
 		Active:     de.active,
 		Policy:     de.policy,
 	})
 }
 
 type DesignJSONUnmarshaler struct {
-	Hint    hint.Hint       `json:"_hint"`
-	Parent  string          `json:"parent"`
-	Creator string          `json:"creator"`
-	Symbol  string          `json:"symbol"`
-	Active  bool            `json:"active"`
-	Policy  json.RawMessage `json:"policy"`
+	Hint       hint.Hint       `json:"_hint"`
+	Parent     string          `json:"parent"`
+	Creator    string          `json:"creator"`
+	Collection string          `json:"collection"`
+	Active     bool            `json:"active"`
+	Policy     json.RawMessage `json:"policy"`
 }
 
 func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -47,5 +47,5 @@ func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return de.unmarshal(enc, u.Hint, u.Parent, u.Creator, u.Symbol, u.Active, u.Policy)
+	return de.unmarshal(enc, u.Hint, u.Parent, u.Creator, u.Collection, u.Active, u.Policy)
 }

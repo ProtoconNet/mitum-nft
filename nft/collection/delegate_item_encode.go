@@ -12,7 +12,7 @@ import (
 func (it *DelegateItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	col string,
+	ca, col string,
 	ag string,
 	md string,
 	cid string,
@@ -24,6 +24,13 @@ func (it *DelegateItem) unmarshal(
 	it.collection = extensioncurrency.ContractID(col)
 	it.mode = DelegateMode(md)
 	it.currency = currency.CurrencyID(cid)
+
+	switch a, err := base.DecodeAddress(ca, enc); {
+	case err != nil:
+		return e(err, "")
+	default:
+		it.contract = a
+	}
 
 	operator, err := base.DecodeAddress(ag, enc)
 	if err != nil {

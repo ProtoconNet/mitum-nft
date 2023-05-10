@@ -20,7 +20,7 @@ func (de *Design) unmarshal(
 	e := util.StringErrorFunc("failed to unmarshal Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.symbol = extensioncurrency.ContractID(sb)
+	de.collection = extensioncurrency.ContractID(sb)
 	de.active = ac
 
 	parent, err := base.DecodeAddress(pr, enc)

@@ -11,6 +11,7 @@ import (
 
 type DelegateItemJSONMarshaler struct {
 	hint.BaseHinter
+	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Operator   base.Address                 `json:"operator"`
 	Mode       DelegateMode                 `json:"mode"`
@@ -20,6 +21,7 @@ type DelegateItemJSONMarshaler struct {
 func (it DelegateItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DelegateItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
+		Contract:   it.contract,
 		Collection: it.collection,
 		Operator:   it.operator,
 		Mode:       it.mode,
@@ -29,6 +31,7 @@ func (it DelegateItem) MarshalJSON() ([]byte, error) {
 
 type DelegateItemJSONUnmarshaler struct {
 	Hint       hint.Hint `json:"_hint"`
+	Contract   string    `json:"contract"`
 	Collection string    `json:"collection"`
 	Operator   string    `json:"operator"`
 	Mode       string    `json:"mode"`
@@ -43,5 +46,5 @@ func (it *DelegateItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Collection, u.Operator, u.Mode, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Operator, u.Mode, u.Currency)
 }

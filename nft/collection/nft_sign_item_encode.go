@@ -1,9 +1,11 @@
 package collection
 
 import (
+	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,6 +14,7 @@ import (
 func (it *NFTSignItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
+	ca, col,
 	qual string,
 	bn []byte,
 	cid string,
@@ -21,6 +24,13 @@ func (it *NFTSignItem) unmarshal(
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.qualification = Qualification(qual)
 	it.currency = currency.CurrencyID(cid)
+	it.collection = extensioncurrency.ContractID(col)
+	switch a, err := base.DecodeAddress(ca, enc); {
+	case err != nil:
+		return e(err, "")
+	default:
+		it.contract = a
+	}
 
 	if hinter, err := enc.Decode(bn); err != nil {
 		return e(err, "")

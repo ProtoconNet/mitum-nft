@@ -14,19 +14,19 @@ import (
 
 type CollectionRegisterFormJSONMarshaler struct {
 	hint.BaseHinter
-	Contract base.Address                 `json:"contract"`
-	Symbol   extensioncurrency.ContractID `json:"symbol"`
-	Name     CollectionName               `json:"name"`
-	Royalty  nft.PaymentParameter         `json:"royalty"`
-	URI      nft.URI                      `json:"uri"`
-	Whites   []base.Address               `json:"whites"`
+	Contract   base.Address                 `json:"contract"`
+	Collection extensioncurrency.ContractID `json:"collection"`
+	Name       CollectionName               `json:"name"`
+	Royalty    nft.PaymentParameter         `json:"royalty"`
+	URI        nft.URI                      `json:"uri"`
+	Whites     []base.Address               `json:"whites"`
 }
 
 func (form CollectionRegisterForm) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CollectionRegisterFormJSONMarshaler{
 		BaseHinter: form.BaseHinter,
 		Contract:   form.contract,
-		Symbol:     form.symbol,
+		Collection: form.collection,
 		Name:       form.name,
 		Royalty:    form.royalty,
 		URI:        form.uri,
@@ -35,13 +35,13 @@ func (form CollectionRegisterForm) MarshalJSON() ([]byte, error) {
 }
 
 type CollectionRegisterFormJSONUnmarshaler struct {
-	Hint     hint.Hint `json:"_hint"`
-	Contract string    `json:"contract"`
-	Symbol   string    `json:"symbol"`
-	Name     string    `json:"name"`
-	Royalty  uint      `json:"royalty"`
-	URI      string    `json:"uri"`
-	Whites   []string  `json:"whites"`
+	Hint       hint.Hint `json:"_hint"`
+	Contract   string    `json:"contract"`
+	Collection string    `json:"collection"`
+	Name       string    `json:"name"`
+	Royalty    uint      `json:"royalty"`
+	URI        string    `json:"uri"`
+	Whites     []string  `json:"whites"`
 }
 
 func (form *CollectionRegisterForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -52,7 +52,7 @@ func (form *CollectionRegisterForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) e
 		return e(err, "")
 	}
 
-	return form.unmarshal(enc, u.Hint, u.Contract, u.Symbol, u.Name, u.Royalty, u.URI, u.Whites)
+	return form.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Name, u.Royalty, u.URI, u.Whites)
 }
 
 type CollectionRegisterFactJSONMarshaler struct {

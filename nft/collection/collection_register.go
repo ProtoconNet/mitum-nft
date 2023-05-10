@@ -14,17 +14,17 @@ var CollectionRegisterFormHint = hint.MustNewHint("mitum-nft-collection-register
 
 type CollectionRegisterForm struct {
 	hint.BaseHinter
-	contract base.Address
-	symbol   extensioncurrency.ContractID
-	name     CollectionName
-	royalty  nft.PaymentParameter
-	uri      nft.URI
-	whites   []base.Address
+	contract   base.Address
+	collection extensioncurrency.ContractID
+	name       CollectionName
+	royalty    nft.PaymentParameter
+	uri        nft.URI
+	whites     []base.Address
 }
 
 func NewCollectionRegisterForm(
 	contract base.Address,
-	symbol extensioncurrency.ContractID,
+	collection extensioncurrency.ContractID,
 	name CollectionName,
 	royalty nft.PaymentParameter,
 	uri nft.URI,
@@ -33,7 +33,7 @@ func NewCollectionRegisterForm(
 	return CollectionRegisterForm{
 		BaseHinter: hint.NewBaseHinter(CollectionRegisterFormHint),
 		contract:   contract,
-		symbol:     symbol,
+		collection: collection,
 		name:       name,
 		royalty:    royalty,
 		uri:        uri,
@@ -45,7 +45,7 @@ func (form CollectionRegisterForm) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		form.BaseHinter,
 		form.contract,
-		form.symbol,
+		form.collection,
 		form.name,
 		form.royalty,
 		form.uri,
@@ -79,7 +79,7 @@ func (form CollectionRegisterForm) Bytes() []byte {
 
 	return util.ConcatBytesSlice(
 		form.contract.Bytes(),
-		form.symbol.Bytes(),
+		form.collection.Bytes(),
 		form.name.Bytes(),
 		form.royalty.Bytes(),
 		form.uri.Bytes(),
@@ -91,8 +91,8 @@ func (form CollectionRegisterForm) Contract() base.Address {
 	return form.contract
 }
 
-func (form CollectionRegisterForm) Symbol() extensioncurrency.ContractID {
-	return form.symbol
+func (form CollectionRegisterForm) Collection() extensioncurrency.ContractID {
+	return form.collection
 }
 
 func (form CollectionRegisterForm) Name() CollectionName {

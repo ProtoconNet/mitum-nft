@@ -19,7 +19,7 @@ type NFTSignCommand struct {
 	Sender        cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract      cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
 	Collection    string              `arg:"" name:"collection" help:"collection name" required:"true"`
-	NFT           NFTIDFlag           `arg:"" name:"nft" help:"target nft; \"<symbol>,<idx>\""`
+	NFT           NFTIDFlag           `arg:"" name:"nft" help:"target nft; \"<collection>,<idx>\""`
 	Currency      cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Qualification string              `name:"qualification" help:"target qualification; creator | copyrighter" optional:""`
 	sender        base.Address
