@@ -19,7 +19,7 @@ type CollectionPolicyUpdaterCommand struct {
 	cmds.OperationFlags
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
 	Name       string              `arg:"" name:"name" help:"collection name" required:"true"`
 	Royalty    uint                `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`

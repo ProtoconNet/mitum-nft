@@ -18,7 +18,7 @@ type DelegateCommand struct {
 	cmds.OperationFlags
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
 	Operator   cmds.AddressFlag    `arg:"" name:"operator" help:"operator account address"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	Mode       string              `name:"mode" help:"delegate mode" optional:""`

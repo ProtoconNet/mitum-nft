@@ -18,7 +18,7 @@ type ApproveCommand struct {
 	cmds.OperationFlags
 	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection name" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
 	Approved   cmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
 	NFT        NFTIDFlag           `arg:"" name:"nft" help:"target nft to approve; \"<collection>,<idx>\""`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
