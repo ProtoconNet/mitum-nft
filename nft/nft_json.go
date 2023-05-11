@@ -11,40 +11,37 @@ import (
 
 type NFTJSONMarshaler struct {
 	hint.BaseHinter
-	ID           NFTID        `json:"id"`
-	Active       bool         `json:"active"`
-	Owner        base.Address `json:"owner"`
-	Hash         NFTHash      `json:"hash"`
-	URI          URI          `json:"uri"`
-	Approved     base.Address `json:"approved"`
-	Creators     Signers      `json:"creators"`
-	Copyrighters Signers      `json:"copyrighters"`
+	ID       NFTID        `json:"id"`
+	Active   bool         `json:"active"`
+	Owner    base.Address `json:"owner"`
+	Hash     NFTHash      `json:"hash"`
+	URI      URI          `json:"uri"`
+	Approved base.Address `json:"approved"`
+	Creators Signers      `json:"creators"`
 }
 
 func (n NFT) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(NFTJSONMarshaler{
-		BaseHinter:   n.BaseHinter,
-		ID:           n.id,
-		Active:       n.active,
-		Owner:        n.owner,
-		Hash:         n.hash,
-		URI:          n.uri,
-		Approved:     n.approved,
-		Creators:     n.creators,
-		Copyrighters: n.copyrighters,
+		BaseHinter: n.BaseHinter,
+		ID:         n.id,
+		Active:     n.active,
+		Owner:      n.owner,
+		Hash:       n.hash,
+		URI:        n.uri,
+		Approved:   n.approved,
+		Creators:   n.creators,
 	})
 }
 
 type NFTJSONUnmarshaler struct {
-	Hint         hint.Hint       `json:"_hint"`
-	ID           json.RawMessage `json:"id"`
-	Active       bool            `json:"active"`
-	Owner        string          `json:"owner"`
-	Hash         string          `json:"hash"`
-	URI          string          `json:"uri"`
-	Approved     string          `json:"approved"`
-	Creators     json.RawMessage `json:"creators"`
-	Copyrighters json.RawMessage `json:"copyrighters"`
+	Hint     hint.Hint       `json:"_hint"`
+	ID       json.RawMessage `json:"id"`
+	Active   bool            `json:"active"`
+	Owner    string          `json:"owner"`
+	Hash     string          `json:"hash"`
+	URI      string          `json:"uri"`
+	Approved string          `json:"approved"`
+	Creators json.RawMessage `json:"creators"`
 }
 
 func (n *NFT) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -55,5 +52,5 @@ func (n *NFT) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return n.unmarshal(enc, u.Hint, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators, u.Copyrighters)
+	return n.unmarshal(enc, u.Hint, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators)
 }

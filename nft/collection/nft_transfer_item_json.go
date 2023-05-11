@@ -1,10 +1,7 @@
 package collection
 
 import (
-	"encoding/json"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
@@ -18,7 +15,7 @@ type NFTTransferItemJSONMarshaler struct {
 	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Receiver   base.Address                 `json:"receiver"`
-	NFT        nft.NFTID                    `json:"nft"`
+	NFTidx     uint64                       `json:"nftidx"`
 	Currency   currency.CurrencyID          `json:"currency"`
 }
 
@@ -28,18 +25,18 @@ func (it NFTTransferItem) MarshalJSON() ([]byte, error) {
 		Contract:   it.contract,
 		Collection: it.collection,
 		Receiver:   it.receiver,
-		NFT:        it.nft,
+		NFTidx:     it.nft,
 		Currency:   it.currency,
 	})
 }
 
 type NFTTransferItemJSONUnmarshaler struct {
-	Hint       hint.Hint       `json:"_hint"`
-	Contract   string          `json:"contract"`
-	Collection string          `json:"collection"`
-	Receiver   string          `json:"receiver"`
-	NFT        json.RawMessage `json:"nft"`
-	Currency   string          `json:"currency"`
+	Hint       hint.Hint `json:"_hint"`
+	Contract   string    `json:"contract"`
+	Collection string    `json:"collection"`
+	Receiver   string    `json:"receiver"`
+	NFTidx     uint64    `json:"nftidx"`
+	Currency   string    `json:"currency"`
 }
 
 func (it *NFTTransferItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -50,5 +47,5 @@ func (it *NFTTransferItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Receiver, u.NFT, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Receiver, u.NFTidx, u.Currency)
 }

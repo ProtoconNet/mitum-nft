@@ -13,48 +13,50 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-type MintFormJSONMarshaler struct {
-	hint.BaseHinter
-	Hash         nft.NFTHash `json:"hash"`
-	URI          nft.URI     `json:"uri"`
-	Creators     nft.Signers `json:"creators"`
-	Copyrighters nft.Signers `json:"copyrighters"`
-}
+// type MintFormJSONMarshaler struct {
+// 	hint.BaseHinter
+// 	Hash         nft.NFTHash `json:"hash"`
+// 	URI          nft.URI     `json:"uri"`
+// 	Creators     nft.Signers `json:"creators"`
+// 	Copyrighters nft.Signers `json:"copyrighters"`
+// }
 
-func (form MintForm) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(MintFormJSONMarshaler{
-		BaseHinter:   form.BaseHinter,
-		Hash:         form.hash,
-		URI:          form.uri,
-		Creators:     form.creators,
-		Copyrighters: form.copyrighters,
-	})
-}
+// func (form MintForm) MarshalJSON() ([]byte, error) {
+// 	return util.MarshalJSON(MintFormJSONMarshaler{
+// 		BaseHinter:   form.BaseHinter,
+// 		Hash:         form.hash,
+// 		URI:          form.uri,
+// 		Creators:     form.creators,
+// 		Copyrighters: form.copyrighters,
+// 	})
+// }
 
-type MintFormJSONUnmarshaler struct {
-	Hint         hint.Hint       `json:"_hint"`
-	Hash         string          `json:"hash"`
-	URI          string          `json:"uri"`
-	Creators     json.RawMessage `json:"creators"`
-	Copyrighters json.RawMessage `json:"copyrighters"`
-}
+// type MintFormJSONUnmarshaler struct {
+// 	Hint         hint.Hint       `json:"_hint"`
+// 	Hash         string          `json:"hash"`
+// 	URI          string          `json:"uri"`
+// 	Creators     json.RawMessage `json:"creators"`
+// 	Copyrighters json.RawMessage `json:"copyrighters"`
+// }
 
-func (form *MintForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
-	e := util.StringErrorFunc("failed to decode json of MintForm")
+// func (form *MintForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+// 	e := util.StringErrorFunc("failed to decode json of MintForm")
 
-	var u MintFormJSONUnmarshaler
-	if err := enc.Unmarshal(b, &u); err != nil {
-		return e(err, "")
-	}
+// 	var u MintFormJSONUnmarshaler
+// 	if err := enc.Unmarshal(b, &u); err != nil {
+// 		return e(err, "")
+// 	}
 
-	return form.unmarshal(enc, u.Hint, u.Hash, u.URI, u.Creators, u.Copyrighters)
-}
+// 	return form.unmarshal(enc, u.Hint, u.Hash, u.URI, u.Creators, u.Copyrighters)
+// }
 
 type MintItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
-	Form       MintForm                     `json:"form"`
+	Hash       nft.NFTHash                  `json:"hash"`
+	Uri        nft.URI                      `json:"uri"`
+	Creators   nft.Signers                  `json:"creators"`
 	Currency   currency.CurrencyID          `json:"currency"`
 }
 
@@ -63,7 +65,9 @@ func (it MintItem) MarshalJSON() ([]byte, error) {
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
 		Collection: it.collection,
-		Form:       it.form,
+		Hash:       it.hash,
+		Uri:        it.uri,
+		Creators:   it.creators,
 		Currency:   it.currency,
 	})
 }
@@ -72,7 +76,9 @@ type MintItemJSONUnmarshaler struct {
 	Hint       hint.Hint       `json:"_hint"`
 	Contract   string          `json:"contract"`
 	Collection string          `json:"collection"`
-	Form       json.RawMessage `json:"form"`
+	Hash       string          `json:"hash"`
+	Uri        string          `json:"uri"`
+	Creators   json.RawMessage `json:"creators"`
 	Currency   string          `json:"currency"`
 }
 
@@ -84,5 +90,5 @@ func (it *MintItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Form, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Hash, u.Uri, u.Creators, u.Currency)
 }

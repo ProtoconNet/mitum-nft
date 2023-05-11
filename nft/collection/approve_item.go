@@ -17,17 +17,17 @@ type ApproveItem struct {
 	contract   base.Address
 	collection extensioncurrency.ContractID
 	approved   base.Address
-	nft        nft.NFTID
+	idx        uint64
 	currency   currency.CurrencyID
 }
 
-func NewApproveItem(contract base.Address, collection extensioncurrency.ContractID, approved base.Address, n nft.NFTID, currency currency.CurrencyID) ApproveItem {
+func NewApproveItem(contract base.Address, collection extensioncurrency.ContractID, approved base.Address, idx uint64, currency currency.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		contract:   contract,
 		collection: collection,
 		approved:   approved,
-		nft:        n,
+		idx:        idx,
 		currency:   currency,
 	}
 }
@@ -38,7 +38,6 @@ func (it ApproveItem) IsValid([]byte) error {
 		it.contract,
 		it.collection,
 		it.approved,
-		it.nft,
 		it.currency,
 	)
 }
@@ -48,7 +47,7 @@ func (it ApproveItem) Bytes() []byte {
 		it.contract.Bytes(),
 		it.collection.Bytes(),
 		it.approved.Bytes(),
-		it.nft.Bytes(),
+		util.Uint64ToBytes(it.idx),
 		it.currency.Bytes(),
 	)
 }
@@ -64,7 +63,8 @@ func (it ApproveItem) Addresses() ([]base.Address, error) {
 }
 
 func (it ApproveItem) NFT() nft.NFTID {
-	return it.nft
+	nftID := nft.NewNFTID(it.collection, it.idx)
+	return nftID
 }
 
 func (it ApproveItem) Currency() currency.CurrencyID {

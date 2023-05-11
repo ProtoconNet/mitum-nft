@@ -39,14 +39,13 @@ var MaxCopyrighters = 10
 
 type NFT struct {
 	hint.BaseHinter
-	id           NFTID
-	active       bool
-	owner        base.Address
-	hash         NFTHash
-	uri          URI
-	approved     base.Address
-	creators     Signers
-	copyrighters Signers
+	id       NFTID
+	active   bool
+	owner    base.Address
+	hash     NFTHash
+	uri      URI
+	approved base.Address
+	creators Signers
 }
 
 func NewNFT(
@@ -57,18 +56,16 @@ func NewNFT(
 	uri URI,
 	approved base.Address,
 	creators Signers,
-	copyrighters Signers,
 ) NFT {
 	return NFT{
-		BaseHinter:   hint.NewBaseHinter(NFTHint),
-		id:           id,
-		active:       active,
-		owner:        owner,
-		hash:         hash,
-		uri:          uri,
-		approved:     approved,
-		creators:     creators,
-		copyrighters: copyrighters,
+		BaseHinter: hint.NewBaseHinter(NFTHint),
+		id:         id,
+		active:     active,
+		owner:      owner,
+		hash:       hash,
+		uri:        uri,
+		approved:   approved,
+		creators:   creators,
 	}
 }
 
@@ -80,7 +77,6 @@ func (n NFT) IsValid([]byte) error {
 		n.uri,
 		n.approved,
 		n.creators,
-		n.copyrighters,
 	); err != nil {
 		return err
 	}
@@ -109,7 +105,6 @@ func (n NFT) Bytes() []byte {
 		[]byte(n.uri.String()),
 		n.approved.Bytes(),
 		n.creators.Bytes(),
-		n.copyrighters.Bytes(),
 	)
 }
 
@@ -141,10 +136,6 @@ func (n NFT) Creators() Signers {
 	return n.creators
 }
 
-func (n NFT) Copyrighters() Signers {
-	return n.copyrighters
-}
-
 func (n NFT) Equal(cn NFT) bool {
 	if !n.ID().Equal(cn.ID()) {
 		return false
@@ -171,10 +162,6 @@ func (n NFT) Equal(cn NFT) bool {
 	}
 
 	if !n.Creators().Equal(cn.Creators()) {
-		return false
-	}
-
-	if !n.Copyrighters().Equal(cn.Copyrighters()) {
 		return false
 	}
 

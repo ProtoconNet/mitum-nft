@@ -1,10 +1,7 @@
 package collection
 
 import (
-	"encoding/json"
-
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
@@ -18,7 +15,7 @@ type ApproveItemJSONMarshaler struct {
 	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Approved   base.Address                 `json:"approved"`
-	NFT        nft.NFTID                    `json:"nft"`
+	NFTidx     uint64                       `json:"nftidx"`
 	Currency   currency.CurrencyID          `json:"currency"`
 }
 
@@ -28,18 +25,18 @@ func (it ApproveItem) MarshalJSON() ([]byte, error) {
 		Contract:   it.contract,
 		Collection: it.collection,
 		Approved:   it.approved,
-		NFT:        it.nft,
+		NFTidx:     it.idx,
 		Currency:   it.currency,
 	})
 }
 
 type ApproveItemJSONUnmarshaler struct {
-	Hint       hint.Hint       `json:"_hint"`
-	Contract   string          `json:"contract"`
-	Collection string          `json:"collection"`
-	Approved   string          `json:"approved"`
-	NFT        json.RawMessage `json:"nft"`
-	Currency   string          `json:"currency"`
+	Hint       hint.Hint `json:"_hint"`
+	Contract   string    `json:"contract"`
+	Collection string    `json:"collection"`
+	Approved   string    `json:"approved"`
+	NFTidx     uint64    `json:"nftidx"`
+	Currency   string    `json:"currency"`
 }
 
 func (it *ApproveItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -50,5 +47,5 @@ func (it *ApproveItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Approved, u.NFT, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Approved, u.NFTidx, u.Currency)
 }

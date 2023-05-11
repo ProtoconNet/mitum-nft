@@ -17,7 +17,10 @@ func (fact CollectionPolicyUpdaterFact) MarshalBSON() ([]byte, error) {
 			"token":      fact.BaseFact.Token(),
 			"sender":     fact.sender,
 			"collection": fact.collection,
-			"policy":     fact.policy,
+			"name":       fact.name,
+			"royalty":    fact.royalty,
+			"uri":        fact.uri,
+			"whitelist":  fact.whitelist,
 			"currency":   fact.currency,
 		})
 }
@@ -26,7 +29,10 @@ type CollectionPolicyUpdaterFactBSONUnmarshaler struct {
 	Hint       string   `bson:"_hint"`
 	Sender     string   `bson:"sender"`
 	Collection string   `bson:"collection"`
-	Policy     bson.Raw `bson:"policy"`
+	Name       string   `bson:"name"`
+	Royalty    uint     `bson:"royalty"`
+	URI        string   `bson:"uri"`
+	Whitelist  []string `bson:"whitelist"`
 	Currency   string   `bson:"currency"`
 }
 
@@ -54,7 +60,7 @@ func (fact *CollectionPolicyUpdaterFact) DecodeBSON(b []byte, enc *bsonenc.Encod
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unmarshal(enc, uf.Sender, uf.Collection, uf.Policy, uf.Currency)
+	return fact.unmarshal(enc, uf.Sender, uf.Collection, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency)
 }
 
 func (op CollectionPolicyUpdater) MarshalBSON() ([]byte, error) {

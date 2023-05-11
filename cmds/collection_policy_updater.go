@@ -28,7 +28,10 @@ type CollectionPolicyUpdaterCommand struct {
 	sender     base.Address
 	contract   base.Address
 	collection extensioncurrency.ContractID
-	policy     nftcollection.CollectionPolicy
+	name       nftcollection.CollectionName
+	royalty    nft.PaymentParameter
+	uri        nft.URI
+	white      []base.Address
 }
 
 func NewCollectionPolicyUpdaterCommand() CollectionPolicyUpdaterCommand {
@@ -69,12 +72,11 @@ func (cmd *CollectionPolicyUpdaterCommand) parseFlags() error {
 		cmd.sender = a
 	}
 
-	var white base.Address = nil
 	if cmd.White.String() != "" {
 		if a, err := cmd.White.Encode(enc); err != nil {
 			return errors.Wrapf(err, "invalid whitelist address format, %q", cmd.White)
 		} else {
-			white = a
+			cmd.white = []base.Address{a}
 		}
 	}
 
@@ -94,28 +96,23 @@ func (cmd *CollectionPolicyUpdaterCommand) parseFlags() error {
 	name := nftcollection.CollectionName(cmd.Name)
 	if err := name.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.name = name
 	}
 
 	royalty := nft.PaymentParameter(cmd.Royalty)
 	if err := royalty.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.royalty = royalty
 	}
 
 	uri := nft.URI(cmd.URI)
 	if err := uri.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.uri = uri
 	}
-
-	whites := []base.Address{}
-	if white != nil {
-		whites = append(whites, white)
-	}
-
-	policy := nftcollection.NewCollectionPolicy(name, royalty, uri, whites)
-	if err := policy.IsValid(nil); err != nil {
-		return err
-	}
-	cmd.policy = policy
 
 	return nil
 }
@@ -128,7 +125,10 @@ func (cmd *CollectionPolicyUpdaterCommand) createOperation() (base.Operation, er
 		cmd.sender,
 		cmd.contract,
 		cmd.collection,
-		cmd.policy,
+		cmd.name,
+		cmd.royalty,
+		cmd.uri,
+		cmd.white,
 		cmd.Currency.CID,
 	)
 

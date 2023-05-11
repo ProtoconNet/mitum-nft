@@ -122,7 +122,7 @@ func (ipp *NFTTransferItemProcessor) Process(
 		return nil, errors.Errorf("nft value not found, %q: %w", nid, err)
 	}
 
-	n := nft.NewNFT(nid, nv.Active(), receiver, nv.NFTHash(), nv.URI(), receiver, nv.Creators(), nv.Copyrighters())
+	n := nft.NewNFT(nid, nv.Active(), receiver, nv.NFTHash(), nv.URI(), receiver, nv.Creators())
 	if err := n.IsValid(nil); err != nil {
 		return nil, errors.Errorf("invalid nft, %q: %w", nid, err)
 	}

@@ -17,7 +17,6 @@ func (n *NFT) unmarshal(
 	uri string,
 	ap string,
 	bcrs []byte,
-	bcps []byte,
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal NFT")
 
@@ -52,14 +51,6 @@ func (n *NFT) unmarshal(
 		return e(util.ErrWrongType.Errorf("expected Signers, not %T", hinter), "")
 	} else {
 		n.creators = sns
-	}
-
-	if hinter, err := enc.Decode(bcps); err != nil {
-		return e(err, "")
-	} else if sns, ok := hinter.(Signers); !ok {
-		return e(util.ErrWrongType.Errorf("expected Signer, not %T", hinter), "")
-	} else {
-		n.copyrighters = sns
 	}
 
 	return nil

@@ -87,7 +87,6 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: collection.CollectionRegisterFormHint, Instance: collection.CollectionRegisterForm{}},
 	{Hint: collection.CollectionRegisterHint, Instance: collection.CollectionRegister{}},
 	{Hint: collection.CollectionPolicyUpdaterHint, Instance: collection.CollectionPolicyUpdater{}},
-	{Hint: collection.MintFormHint, Instance: collection.MintForm{}},
 	{Hint: collection.MintItemHint, Instance: collection.MintItem{}},
 	{Hint: collection.MintHint, Instance: collection.Mint{}},
 	{Hint: collection.NFTTransferItemHint, Instance: collection.NFTTransferItem{}},

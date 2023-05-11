@@ -17,20 +17,20 @@ import (
 type MintCommand struct {
 	baseCommand
 	cmds.OperationFlags
-	Sender           cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract         cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection       string              `arg:"" name:"collection" help:"collection id" required:"true"`
-	Hash             string              `arg:"" name:"hash" help:"nft hash" required:"true"`
-	Uri              string              `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Currency         cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Creator          SignerFlag          `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
-	Copyrighter      SignerFlag          `name:"copyrighter" help:"nft contents copyrighter \"<address>,<share>\"" optional:""`
-	CreatorTotal     uint                `name:"creator-total" help:"creators total share" optional:""`
-	CopyrighterTotal uint                `name:"copyrighter-total" help:"copyrighters total share" optional:""`
-	sender           base.Address
-	contract         base.Address
-	collection       extensioncurrency.ContractID
-	form             collection.MintForm
+	Sender       cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract     cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Collection   string              `arg:"" name:"collection" help:"collection id" required:"true"`
+	Hash         string              `arg:"" name:"hash" help:"nft hash" required:"true"`
+	Uri          string              `arg:"" name:"uri" help:"nft uri" required:"true"`
+	Currency     cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Creator      SignerFlag          `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
+	CreatorTotal uint                `name:"creator-total" help:"creators total share" optional:""`
+	sender       base.Address
+	contract     base.Address
+	collection   extensioncurrency.ContractID
+	hash         nft.NFTHash
+	uri          nft.URI
+	creators     nft.Signers
 }
 
 func NewMintCommand() MintCommand {
@@ -89,11 +89,15 @@ func (cmd *MintCommand) parseFlags() error {
 	hash := nft.NFTHash(cmd.Hash)
 	if err := hash.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.hash = hash
 	}
 
 	uri := nft.URI(cmd.Uri)
 	if err := uri.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.uri = uri
 	}
 
 	var crts = []nft.Signer{}
@@ -111,36 +115,12 @@ func (cmd *MintCommand) parseFlags() error {
 		crts = append(crts, signer)
 	}
 
-	var cprs = []nft.Signer{}
-	if len(cmd.Copyrighter.address) > 0 {
-		a, err := cmd.Copyrighter.Encode(enc)
-		if err != nil {
-			return errors.Wrapf(err, "invalid copyrighter address format, %q", cmd.Copyrighter)
-		}
-
-		signer := nft.NewSigner(a, cmd.Copyrighter.share, false)
-		if err = signer.IsValid(nil); err != nil {
-			return err
-		}
-
-		cprs = append(cprs, signer)
-	}
-
 	creators := nft.NewSigners(cmd.CreatorTotal, crts)
 	if err := creators.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.creators = creators
 	}
-
-	copyrighters := nft.NewSigners(cmd.CopyrighterTotal, cprs)
-	if err := copyrighters.IsValid(nil); err != nil {
-		return err
-	}
-
-	form := collection.NewMintForm(hash, uri, creators, copyrighters)
-	if err := form.IsValid(nil); err != nil {
-		return err
-	}
-	cmd.form = form
 
 	return nil
 
@@ -149,7 +129,7 @@ func (cmd *MintCommand) parseFlags() error {
 func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:dupl
 	e := util.StringErrorFunc("failed to create mint operation")
 
-	item := collection.NewMintItem(cmd.contract, cmd.collection, cmd.form, cmd.Currency.CID)
+	item := collection.NewMintItem(cmd.contract, cmd.collection, cmd.hash, cmd.uri, cmd.creators, cmd.Currency.CID)
 	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
 
 	op, err := collection.NewMint(fact)

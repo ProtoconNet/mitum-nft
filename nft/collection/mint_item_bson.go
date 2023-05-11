@@ -8,41 +8,41 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (form MintForm) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(
-		bson.M{
-			"_hint":        form.Hint().String(),
-			"hash":         form.hash,
-			"uri":          form.uri,
-			"creators":     form.creators,
-			"copyrighters": form.copyrighters,
-		},
-	)
-}
+// func (form MintForm) MarshalBSON() ([]byte, error) {
+// 	return bsonenc.Marshal(
+// 		bson.M{
+// 			"_hint":        form.Hint().String(),
+// 			"hash":         form.hash,
+// 			"uri":          form.uri,
+// 			"creators":     form.creators,
+// 			"copyrighters": form.copyrighters,
+// 		},
+// 	)
+// }
 
-type MintFormBSONUnmarshaler struct {
-	Hint         string   `bson:"_hint"`
-	Hash         string   `bson:"hash"`
-	URI          string   `bson:"uri"`
-	Creators     bson.Raw `bson:"creators"`
-	Copyrighters bson.Raw `bson:"copyrighters"`
-}
+// type MintFormBSONUnmarshaler struct {
+// 	Hint         string   `bson:"_hint"`
+// 	Hash         string   `bson:"hash"`
+// 	URI          string   `bson:"uri"`
+// 	Creators     bson.Raw `bson:"creators"`
+// 	Copyrighters bson.Raw `bson:"copyrighters"`
+// }
 
-func (form *MintForm) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringErrorFunc("failed to decode bson of MintForm")
+// func (form *MintForm) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+// 	e := util.StringErrorFunc("failed to decode bson of MintForm")
 
-	var u MintFormBSONUnmarshaler
-	if err := bson.Unmarshal(b, &u); err != nil {
-		return e(err, "")
-	}
+// 	var u MintFormBSONUnmarshaler
+// 	if err := bson.Unmarshal(b, &u); err != nil {
+// 		return e(err, "")
+// 	}
 
-	ht, err := hint.ParseHint(u.Hint)
-	if err != nil {
-		return e(err, "")
-	}
+// 	ht, err := hint.ParseHint(u.Hint)
+// 	if err != nil {
+// 		return e(err, "")
+// 	}
 
-	return form.unmarshal(enc, ht, u.Hash, u.URI, u.Creators, u.Copyrighters)
-}
+// 	return form.unmarshal(enc, ht, u.Hash, u.URI, u.Creators, u.Copyrighters)
+// }
 
 func (it MintItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
@@ -50,7 +50,9 @@ func (it MintItem) MarshalBSON() ([]byte, error) {
 			"_hint":      it.Hint().String(),
 			"contract":   it.contract,
 			"collection": it.collection,
-			"form":       it.form,
+			"hash":       it.hash,
+			"uri":        it.uri,
+			"creators":   it.creators,
 			"currency":   it.currency,
 		},
 	)
@@ -60,7 +62,9 @@ type MintItemBSONUnmarshaler struct {
 	Hint       string   `bson:"_hint"`
 	Contract   string   `bson:"contract"`
 	Collection string   `bson:"collection"`
-	Form       bson.Raw `bson:"form"`
+	Hash       string   `bson:"hash"`
+	Uri        string   `bson:"uri"`
+	Creators   bson.Raw `bson:"creators"`
 	Currency   string   `bson:"currency"`
 }
 
@@ -77,5 +81,5 @@ func (it *MintItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e(err, "")
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.Form, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.Hash, u.Uri, u.Creators, u.Currency)
 }

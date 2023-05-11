@@ -128,7 +128,7 @@ func (ipp *ApproveItemProcessor) Process(
 		return nil, errors.Errorf("nft value not found, %q: %w", nid, err)
 	}
 
-	n := nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), ipp.item.Approved(), nv.Creators(), nv.Copyrighters())
+	n := nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), ipp.item.Approved(), nv.Creators())
 	if err := n.IsValid(nil); err != nil {
 		return nil, err
 	}

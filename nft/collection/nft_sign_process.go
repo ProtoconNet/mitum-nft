@@ -87,10 +87,6 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 		if nv.Creators().IsSignedByAddress(ipp.sender) {
 			return errors.Errorf("already signed nft, %q-%q", ipp.sender, nv.ID())
 		}
-	case CopyrighterQualification:
-		if nv.Copyrighters().IsSignedByAddress(ipp.sender) {
-			return errors.Errorf("already signed nft, %q-%q", ipp.sender, nv.ID())
-		}
 	default:
 		return errors.Errorf("wrong qualification, %q", ipp.item.Qualification())
 	}
@@ -118,8 +114,6 @@ func (ipp *NFTSignItemProcessor) Process(
 	switch ipp.item.Qualification() {
 	case CreatorQualification:
 		signers = nv.Creators()
-	case CopyrighterQualification:
-		signers = nv.Copyrighters()
 	default:
 		return nil, errors.Errorf("wrong qualification, %q", ipp.item.Qualification())
 	}
@@ -141,9 +135,9 @@ func (ipp *NFTSignItemProcessor) Process(
 
 	var n nft.NFT
 	if ipp.item.Qualification() == CreatorQualification {
-		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), *sns, nv.Copyrighters())
+		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), *sns)
 	} else {
-		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), nv.Creators(), *sns)
+		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), nv.Creators())
 	}
 
 	if err := n.IsValid(nil); err != nil {

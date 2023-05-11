@@ -2,7 +2,6 @@ package collection
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
@@ -16,7 +15,7 @@ func (it *ApproveItem) unmarshal(
 	ht hint.Hint,
 	ca, col,
 	ap string,
-	bn []byte,
+	idx uint64,
 	cid string,
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal ApproveItem")
@@ -36,14 +35,7 @@ func (it *ApproveItem) unmarshal(
 		return e(err, "")
 	}
 	it.approved = approved
-
-	if hinter, err := enc.Decode(bn); err != nil {
-		return e(err, "")
-	} else if n, ok := hinter.(nft.NFTID); !ok {
-		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
-	} else {
-		it.nft = n
-	}
+	it.idx = idx
 
 	return nil
 }

@@ -16,23 +16,23 @@ type NFTTransferItem struct {
 	contract   base.Address
 	collection extensioncurrency.ContractID
 	receiver   base.Address
-	nft        nft.NFTID
+	nft        uint64
 	currency   currency.CurrencyID
 }
 
-func NewNFTTransferItem(contract base.Address, collection extensioncurrency.ContractID, receiver base.Address, n nft.NFTID, currency currency.CurrencyID) NFTTransferItem {
+func NewNFTTransferItem(contract base.Address, collection extensioncurrency.ContractID, receiver base.Address, nft uint64, currency currency.CurrencyID) NFTTransferItem {
 	return NFTTransferItem{
 		BaseHinter: hint.NewBaseHinter(NFTTransferItemHint),
 		contract:   contract,
 		collection: collection,
 		receiver:   receiver,
-		nft:        n,
+		nft:        nft,
 		currency:   currency,
 	}
 }
 
 func (it NFTTransferItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.receiver, it.nft, it.currency)
+	return util.CheckIsValiders(nil, false, it.BaseHinter, it.receiver, it.currency)
 }
 
 func (it NFTTransferItem) Bytes() []byte {
@@ -40,7 +40,7 @@ func (it NFTTransferItem) Bytes() []byte {
 		it.contract.Bytes(),
 		it.collection.Bytes(),
 		it.receiver.Bytes(),
-		it.nft.Bytes(),
+		util.Uint64ToBytes(it.nft),
 		it.currency.Bytes(),
 	)
 }
@@ -64,7 +64,8 @@ func (it NFTTransferItem) Addresses() ([]base.Address, error) {
 }
 
 func (it NFTTransferItem) NFT() nft.NFTID {
-	return it.nft
+	nftID := nft.NewNFTID(it.collection, it.nft)
+	return nftID
 }
 
 func (it NFTTransferItem) Currency() currency.CurrencyID {

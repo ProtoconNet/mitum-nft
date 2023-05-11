@@ -3,6 +3,7 @@ package collection
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -19,7 +20,10 @@ type CollectionPolicyUpdaterFact struct {
 	sender     base.Address
 	contract   base.Address
 	collection extensioncurrency.ContractID
-	policy     CollectionPolicy
+	name       CollectionName
+	royalty    nft.PaymentParameter
+	uri        nft.URI
+	whitelist  []base.Address
 	currency   currency.CurrencyID
 }
 
@@ -27,7 +31,10 @@ func NewCollectionPolicyUpdaterFact(
 	token []byte,
 	sender, contract base.Address,
 	collection extensioncurrency.ContractID,
-	policy CollectionPolicy,
+	name CollectionName,
+	royalty nft.PaymentParameter,
+	uri nft.URI,
+	whitelist []base.Address,
 	currency currency.CurrencyID,
 ) CollectionPolicyUpdaterFact {
 	bf := base.NewBaseFact(CollectionPolicyUpdaterFactHint, token)
@@ -37,7 +44,10 @@ func NewCollectionPolicyUpdaterFact(
 		sender:     sender,
 		contract:   contract,
 		collection: collection,
-		policy:     policy,
+		name:       name,
+		royalty:    royalty,
+		uri:        uri,
+		whitelist:  whitelist,
 		currency:   currency,
 	}
 	fact.SetHash(fact.GenerateHash())
@@ -54,15 +64,32 @@ func (fact CollectionPolicyUpdaterFact) IsValid(b []byte) error {
 		return err
 	}
 
+	if l := len(fact.whitelist); l > MaxWhites {
+		return util.ErrInvalid.Errorf("whites over allowed, %d > %d", l, MaxWhites)
+	}
+
 	if err := util.CheckIsValiders(
 		nil, false,
 		fact.sender,
 		fact.contract,
 		fact.collection,
-		fact.policy,
+		fact.name,
+		fact.royalty,
+		fact.uri,
 		fact.currency,
 	); err != nil {
 		return err
+	}
+
+	founds := map[string]struct{}{}
+	for _, white := range fact.whitelist {
+		if err := white.IsValid(nil); err != nil {
+			return err
+		}
+		if _, found := founds[white.String()]; found {
+			return util.ErrInvalid.Errorf("duplicate whitelist account found, %q", white)
+		}
+		founds[white.String()] = struct{}{}
 	}
 
 	return nil
@@ -77,13 +104,21 @@ func (fact CollectionPolicyUpdaterFact) GenerateHash() util.Hash {
 }
 
 func (fact CollectionPolicyUpdaterFact) Bytes() []byte {
+	as := make([][]byte, len(fact.whitelist))
+	for i, white := range fact.whitelist {
+		as[i] = white.Bytes()
+	}
+
 	return util.ConcatBytesSlice(
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
 		fact.collection.Bytes(),
-		fact.policy.Bytes(),
+		fact.name.Bytes(),
+		fact.royalty.Bytes(),
+		fact.uri.Bytes(),
 		fact.currency.Bytes(),
+		util.ConcatBytesSlice(as...),
 	)
 }
 
@@ -103,8 +138,20 @@ func (fact CollectionPolicyUpdaterFact) Collection() extensioncurrency.ContractI
 	return fact.collection
 }
 
-func (fact CollectionPolicyUpdaterFact) Policy() CollectionPolicy {
-	return fact.policy
+func (fact CollectionPolicyUpdaterFact) Name() CollectionName {
+	return fact.name
+}
+
+func (fact CollectionPolicyUpdaterFact) Royalty() nft.PaymentParameter {
+	return fact.royalty
+}
+
+func (fact CollectionPolicyUpdaterFact) URI() nft.URI {
+	return fact.uri
+}
+
+func (fact CollectionPolicyUpdaterFact) Whitelist() []base.Address {
+	return fact.whitelist
 }
 
 func (fact CollectionPolicyUpdaterFact) Currency() currency.CurrencyID {

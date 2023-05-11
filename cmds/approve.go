@@ -4,7 +4,6 @@ import (
 	"context"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
 
@@ -20,13 +19,12 @@ type ApproveCommand struct {
 	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
 	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
 	Approved   cmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
-	NFT        NFTIDFlag           `arg:"" name:"nft" help:"target nft to approve; \"<collection>,<idx>\""`
+	NFTidx     uint64              `arg:"" name:"nft" help:"target nft idx to approve"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	sender     base.Address
 	contract   base.Address
 	collection extensioncurrency.ContractID
 	approved   base.Address
-	nft        nft.NFTID
 }
 
 func NewApproveCommand() ApproveCommand {
@@ -86,12 +84,6 @@ func (cmd *ApproveCommand) parseFlags() error {
 		cmd.approved = a
 	}
 
-	n := nft.NewNFTID(cmd.NFT.collection, cmd.NFT.idx)
-	if err := n.IsValid(nil); err != nil {
-		return err
-	}
-	cmd.nft = n
-
 	return nil
 
 }
@@ -99,7 +91,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 func (cmd *ApproveCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create approve operation")
 
-	item := collection.NewApproveItem(cmd.contract, cmd.collection, cmd.approved, cmd.nft, cmd.Currency.CID)
+	item := collection.NewApproveItem(cmd.contract, cmd.collection, cmd.approved, cmd.NFTidx, cmd.Currency.CID)
 
 	fact := collection.NewApproveFact(
 		[]byte(cmd.Token),
