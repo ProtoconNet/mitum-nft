@@ -22,12 +22,12 @@ func (it NFTSignItem) MarshalBSON() ([]byte, error) {
 }
 
 type NFTSignItemBSONUnmarshaler struct {
-	Hint          string   `bson:"_hint"`
-	Contract      string   `bson:"contract"`
-	Collection    string   `bson:"collection"`
-	Qualification string   `bson:"qualification"`
-	NFT           bson.Raw `bson:"nft"`
-	Currency      string   `bson:"currency"`
+	Hint          string `bson:"_hint"`
+	Contract      string `bson:"contract"`
+	Collection    string `bson:"collection"`
+	Qualification string `bson:"qualification"`
+	NFT           uint64 `bson:"nft"`
+	Currency      string `bson:"currency"`
 }
 
 func (it *NFTSignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {

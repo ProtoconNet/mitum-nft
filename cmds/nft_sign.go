@@ -4,7 +4,6 @@ import (
 	"context"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
 
@@ -16,17 +15,14 @@ import (
 type NFTSignCommand struct {
 	baseCommand
 	cmds.OperationFlags
-	Sender        cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract      cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection    string              `arg:"" name:"collection" help:"collection id" required:"true"`
-	NFT           NFTIDFlag           `arg:"" name:"nft" help:"target nft; \"<collection>,<idx>\""`
-	Currency      cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Qualification string              `name:"qualification" help:"target qualification; creator | copyrighter" optional:""`
-	sender        base.Address
-	contract      base.Address
-	collection    extensioncurrency.ContractID
-	nft           nft.NFTID
-	qualification collection.Qualification
+	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
+	NFT        uint64              `arg:"" name:"nft" help:"target nft; \"<collection>,<idx>\""`
+	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	sender     base.Address
+	contract   base.Address
+	collection extensioncurrency.ContractID
 }
 
 func NewNFTSignCommand() NFTSignCommand {
@@ -80,22 +76,6 @@ func (cmd *NFTSignCommand) parseFlags() error {
 		cmd.collection = col
 	}
 
-	n := nft.NewNFTID(cmd.NFT.collection, cmd.NFT.idx)
-	if err := n.IsValid(nil); err != nil {
-		return err
-	}
-	cmd.nft = n
-
-	if cmd.Qualification == "" {
-		cmd.qualification = collection.CreatorQualification
-	} else {
-		q := collection.Qualification(cmd.Qualification)
-		if err := q.IsValid(nil); err != nil {
-			return err
-		}
-		cmd.qualification = q
-	}
-
 	return nil
 
 }
@@ -103,7 +83,7 @@ func (cmd *NFTSignCommand) parseFlags() error {
 func (cmd *NFTSignCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create nft-sign operation")
 
-	item := collection.NewNFTSignItem(cmd.contract, cmd.collection, cmd.qualification, cmd.nft, cmd.Currency.CID)
+	item := collection.NewNFTSignItem(cmd.contract, cmd.collection, cmd.NFT, cmd.Currency.CID)
 
 	fact := collection.NewNFTSignFact(
 		[]byte(cmd.Token),

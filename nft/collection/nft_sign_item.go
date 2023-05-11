@@ -9,47 +9,23 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var (
-	CreatorQualification     = Qualification("creator")
-	CopyrighterQualification = Qualification("copyrighter")
-)
-
-type Qualification string
-
-func (q Qualification) Bytes() []byte {
-	return []byte(q)
-}
-
-func (q Qualification) String() string {
-	return string(q)
-}
-
-func (q Qualification) IsValid([]byte) error {
-	if !(q == CreatorQualification || q == CopyrighterQualification) {
-		return util.ErrInvalid.Errorf("invalid qualification, %q", q)
-	}
-	return nil
-}
-
 var NFTSignItemHint = hint.MustNewHint("mitum-nft-sign-item-v0.0.1")
 
 type NFTSignItem struct {
 	hint.BaseHinter
-	contract      base.Address
-	collection    extensioncurrency.ContractID
-	qualification Qualification
-	nft           nft.NFTID
-	currency      currency.CurrencyID
+	contract   base.Address
+	collection extensioncurrency.ContractID
+	nft        uint64
+	currency   currency.CurrencyID
 }
 
-func NewNFTSignItem(contract base.Address, collection extensioncurrency.ContractID, q Qualification, n nft.NFTID, currency currency.CurrencyID) NFTSignItem {
+func NewNFTSignItem(contract base.Address, collection extensioncurrency.ContractID, n uint64, currency currency.CurrencyID) NFTSignItem {
 	return NFTSignItem{
-		BaseHinter:    hint.NewBaseHinter(NFTSignItemHint),
-		contract:      contract,
-		collection:    collection,
-		qualification: q,
-		nft:           n,
-		currency:      currency,
+		BaseHinter: hint.NewBaseHinter(NFTSignItemHint),
+		contract:   contract,
+		collection: collection,
+		nft:        n,
+		currency:   currency,
 	}
 }
 
@@ -57,22 +33,17 @@ func (it NFTSignItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
 		it.collection.Bytes(),
-		it.qualification.Bytes(),
-		it.nft.Bytes(),
+		util.Uint64ToBytes(it.nft),
 		it.currency.Bytes(),
 	)
 }
 
 func (it NFTSignItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.collection, it.qualification, it.nft, it.currency)
-}
-
-func (it NFTSignItem) Qualification() Qualification {
-	return it.qualification
+	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.collection, it.currency)
 }
 
 func (it NFTSignItem) NFT() nft.NFTID {
-	return it.nft
+	return nft.NewNFTID(it.collection, it.nft)
 }
 
 func (it NFTSignItem) Contract() base.Address {

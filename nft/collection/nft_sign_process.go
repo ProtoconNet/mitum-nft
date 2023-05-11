@@ -82,13 +82,8 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 		return errors.Errorf("burned nft, %q", nid)
 	}
 
-	switch ipp.item.Qualification() {
-	case CreatorQualification:
-		if nv.Creators().IsSignedByAddress(ipp.sender) {
-			return errors.Errorf("already signed nft, %q-%q", ipp.sender, nv.ID())
-		}
-	default:
-		return errors.Errorf("wrong qualification, %q", ipp.item.Qualification())
+	if nv.Creators().IsSignedByAddress(ipp.sender) {
+		return errors.Errorf("already signed nft, %q-%q", ipp.sender, nv.ID())
 	}
 
 	return nil
@@ -109,14 +104,7 @@ func (ipp *NFTSignItemProcessor) Process(
 		return nil, errors.Errorf("nft value not found, %q: %w", nid, err)
 	}
 
-	var signers nft.Signers
-
-	switch ipp.item.Qualification() {
-	case CreatorQualification:
-		signers = nv.Creators()
-	default:
-		return nil, errors.Errorf("wrong qualification, %q", ipp.item.Qualification())
-	}
+	signers := nv.Creators()
 
 	idx := signers.IndexByAddress(ipp.sender)
 	if idx < 0 {
@@ -133,12 +121,7 @@ func (ipp *NFTSignItemProcessor) Process(
 		return nil, errors.Errorf("failed to set signer for signers, %q: %w", signer, err)
 	}
 
-	var n nft.NFT
-	if ipp.item.Qualification() == CreatorQualification {
-		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), *sns)
-	} else {
-		n = nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), nv.Creators())
-	}
+	n := nft.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), *sns)
 
 	if err := n.IsValid(nil); err != nil {
 		return nil, errors.Errorf("invalid nft, %q: %w", n.ID(), err)

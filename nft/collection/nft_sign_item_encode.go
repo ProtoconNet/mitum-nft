@@ -2,7 +2,6 @@ package collection
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
@@ -14,15 +13,13 @@ import (
 func (it *NFTSignItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	ca, col,
-	qual string,
-	bn []byte,
+	ca, col string,
+	nft uint64,
 	cid string,
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal NFTSignItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.qualification = Qualification(qual)
 	it.currency = currency.CurrencyID(cid)
 	it.collection = extensioncurrency.ContractID(col)
 	switch a, err := base.DecodeAddress(ca, enc); {
@@ -32,13 +29,7 @@ func (it *NFTSignItem) unmarshal(
 		it.contract = a
 	}
 
-	if hinter, err := enc.Decode(bn); err != nil {
-		return e(err, "")
-	} else if n, ok := hinter.(nft.NFTID); !ok {
-		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
-	} else {
-		it.nft = n
-	}
+	it.nft = nft
 
 	return nil
 }
