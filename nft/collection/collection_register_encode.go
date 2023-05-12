@@ -7,51 +7,55 @@ import (
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
-	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (form *CollectionRegisterForm) unmarshal(
+// func (form *CollectionRegisterForm) unmarshal(
+// 	enc encoder.Encoder,
+// 	ht hint.Hint,
+// 	ca string,
+// 	sb string,
+// 	nm string,
+// 	ry uint,
+// 	uri string,
+// 	bws []string,
+// ) error {
+// 	e := util.StringErrorFunc("failed to unmarshal CollectionRegisterForm")
+
+// 	form.BaseHinter = hint.NewBaseHinter(ht)
+// 	form.collection = extensioncurrency.ContractID(sb)
+// 	form.name = CollectionName(nm)
+// 	form.royalty = nft.PaymentParameter(ry)
+// 	form.uri = nft.URI(uri)
+
+// 	contract, err := base.DecodeAddress(ca, enc)
+// 	if err != nil {
+// 		return e(err, "")
+// 	}
+// 	form.contract = contract
+
+// 	whites := make([]base.Address, len(bws))
+// 	for i, bw := range bws {
+// 		white, err := base.DecodeAddress(bw, enc)
+// 		if err != nil {
+// 			return e(err, "")
+// 		}
+// 		whites[i] = white
+
+// 	}
+// 	form.whites = whites
+
+// 	return nil
+// }
+
+func (fact *CollectionRegisterFact) unmarshal(
 	enc encoder.Encoder,
-	ht hint.Hint,
+	sd string,
 	ca string,
 	sb string,
 	nm string,
 	ry uint,
 	uri string,
 	bws []string,
-) error {
-	e := util.StringErrorFunc("failed to unmarshal CollectionRegisterForm")
-
-	form.BaseHinter = hint.NewBaseHinter(ht)
-	form.collection = extensioncurrency.ContractID(sb)
-	form.name = CollectionName(nm)
-	form.royalty = nft.PaymentParameter(ry)
-	form.uri = nft.URI(uri)
-
-	contract, err := base.DecodeAddress(ca, enc)
-	if err != nil {
-		return e(err, "")
-	}
-	form.contract = contract
-
-	whites := make([]base.Address, len(bws))
-	for i, bw := range bws {
-		white, err := base.DecodeAddress(bw, enc)
-		if err != nil {
-			return e(err, "")
-		}
-		whites[i] = white
-
-	}
-	form.whites = whites
-
-	return nil
-}
-
-func (fact *CollectionRegisterFact) unmarshal(
-	enc encoder.Encoder,
-	sd string,
-	bf []byte,
 	cid string,
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal CollectionRegisterFact")
@@ -64,13 +68,27 @@ func (fact *CollectionRegisterFact) unmarshal(
 	}
 	fact.sender = sender
 
-	if hinter, err := enc.Decode(bf); err != nil {
+	fact.collection = extensioncurrency.ContractID(sb)
+	fact.name = CollectionName(nm)
+	fact.royalty = nft.PaymentParameter(ry)
+	fact.uri = nft.URI(uri)
+
+	contract, err := base.DecodeAddress(ca, enc)
+	if err != nil {
 		return e(err, "")
-	} else if form, ok := hinter.(CollectionRegisterForm); !ok {
-		return e(util.ErrWrongType.Errorf("expected CollectionRegisterForm, not %T", hinter), "")
-	} else {
-		fact.form = form
 	}
+	fact.contract = contract
+
+	whites := make([]base.Address, len(bws))
+	for i, bw := range bws {
+		white, err := base.DecodeAddress(bw, enc)
+		if err != nil {
+			return e(err, "")
+		}
+		whites[i] = white
+
+	}
+	fact.whitelist = whites
 
 	return nil
 }

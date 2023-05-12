@@ -80,14 +80,14 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("invalid signing: %w", err), nil
 	}
 
-	st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Form().Contract()), "key of contract account", getStateFunc)
+	st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
 	if err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("target contract account not found, %q: %w", fact.Form().Contract(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("target contract account not found, %q: %w", fact.Contract(), err), nil
 	}
 
 	ca, err := extensioncurrency.StateContractAccountValue(st)
 	if err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q: %w", fact.Form().Contract(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q: %w", fact.Contract(), err), nil
 	}
 
 	if !ca.Owner().Equal(fact.Sender()) {
@@ -95,18 +95,18 @@ func (opp *CollectionRegisterProcessor) PreProcess(
 	}
 
 	if !ca.IsActive() {
-		return ctx, base.NewBaseOperationProcessReasonError("deactivated contract account, %q", fact.Form().Contract()), nil
+		return ctx, base.NewBaseOperationProcessReasonError("deactivated contract account, %q", fact.Contract()), nil
 	}
 
-	if err := checkNotExistsState(NFTStateKey(fact.Form().contract, fact.Form().Collection(), CollectionKey), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("collection design already exists, %q: %w", fact.Form().Collection(), err), nil
+	if err := checkNotExistsState(NFTStateKey(fact.contract, fact.Collection(), CollectionKey), getStateFunc); err != nil {
+		return ctx, base.NewBaseOperationProcessReasonError("collection design already exists, %q: %w", fact.Collection(), err), nil
 	}
 
-	if err := checkNotExistsState(NFTStateKey(fact.Form().contract, fact.Form().Collection(), LastIDXKey), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("last index of collection design already exists, %q: %w", fact.Form().Collection(), err), nil
+	if err := checkNotExistsState(NFTStateKey(fact.contract, fact.Collection(), LastIDXKey), getStateFunc); err != nil {
+		return ctx, base.NewBaseOperationProcessReasonError("last index of collection design already exists, %q: %w", fact.Collection(), err), nil
 	}
 
-	whites := fact.Form().Whites()
+	whites := fact.Whites()
 	for _, white := range whites {
 		if err := checkExistsState(currency.StateKeyAccount(white), getStateFunc); err != nil {
 			return ctx, base.NewBaseOperationProcessReasonError("whitelist account not found, %q: %w", white, err), nil
@@ -131,10 +131,10 @@ func (opp *CollectionRegisterProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 3)
 
-	policy := NewCollectionPolicy(fact.Form().Name(), fact.Form().Royalty(), fact.Form().URI(), fact.Form().Whites())
-	design := NewCollectionDesign(fact.Form().Contract(), fact.Sender(), fact.Form().Collection(), true, policy)
+	policy := NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.Whites())
+	design := NewCollectionDesign(fact.Contract(), fact.Sender(), fact.Collection(), true, policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid collection design, %q: %w", fact.Form().Collection(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid collection design, %q: %w", fact.Collection(), err), nil
 	}
 
 	sts[0] = NewStateMergeValue(

@@ -27,7 +27,11 @@ type CollectionRegisterCommand struct {
 	White      cmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
 	sender     base.Address
 	contract   base.Address
-	form       nftcollection.CollectionRegisterForm
+	collection extensioncurrency.ContractID
+	name       nftcollection.CollectionName
+	royalty    nft.PaymentParameter
+	uri        nft.URI
+	whitelist  []base.Address
 }
 
 func NewCollectionRegisterCommand() CollectionRegisterCommand {
@@ -86,33 +90,37 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 	collection := extensioncurrency.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.collection = collection
 	}
 
 	name := nftcollection.CollectionName(cmd.Name)
 	if err := name.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.name = name
 	}
 
 	royalty := nft.PaymentParameter(cmd.Royalty)
 	if err := royalty.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.royalty = royalty
 	}
 
 	uri := nft.URI(cmd.URI)
 	if err := uri.IsValid(nil); err != nil {
 		return err
+	} else {
+		cmd.uri = uri
 	}
 
-	whites := []base.Address{}
+	whitelist := []base.Address{}
 	if white != nil {
-		whites = append(whites, white)
+		whitelist = append(whitelist, white)
+	} else {
+		cmd.whitelist = whitelist
 	}
-
-	form := nftcollection.NewCollectionRegisterForm(cmd.contract, collection, name, royalty, uri, whites)
-	if err := form.IsValid(nil); err != nil {
-		return err
-	}
-	cmd.form = form
 
 	return nil
 }
@@ -120,7 +128,17 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 func (cmd *CollectionRegisterCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create collection-register operation")
 
-	fact := nftcollection.NewCollectionRegisterFact([]byte(cmd.Token), cmd.sender, cmd.form, cmd.Currency.CID)
+	fact := nftcollection.NewCollectionRegisterFact(
+		[]byte(cmd.Token),
+		cmd.sender,
+		cmd.contract,
+		cmd.collection,
+		cmd.name,
+		cmd.royalty,
+		cmd.uri,
+		cmd.whitelist,
+		cmd.Currency.CID,
+	)
 
 	op, err := nftcollection.NewCollectionRegister(fact)
 	if err != nil {

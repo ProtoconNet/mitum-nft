@@ -84,7 +84,6 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: collection.CollectionPolicyHint, Instance: collection.CollectionPolicy{}},
 	{Hint: collection.CollectionDesignHint, Instance: collection.CollectionDesign{}},
 	{Hint: collection.CollectionStateValueHint, Instance: collection.CollectionStateValue{}},
-	{Hint: collection.CollectionRegisterFormHint, Instance: collection.CollectionRegisterForm{}},
 	{Hint: collection.CollectionRegisterHint, Instance: collection.CollectionRegister{}},
 	{Hint: collection.CollectionPolicyUpdaterHint, Instance: collection.CollectionPolicyUpdater{}},
 	{Hint: collection.MintItemHint, Instance: collection.MintItem{}},
