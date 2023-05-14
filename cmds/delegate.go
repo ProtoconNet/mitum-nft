@@ -70,7 +70,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 	if a, err := cmd.Contract.Encode(enc); err != nil {
 		return errors.Wrapf(err, "invalid contract address format; %q", cmd.Contract)
 	} else {
-		cmd.sender = a
+		cmd.contract = a
 	}
 
 	collection := extensioncurrency.ContractID(cmd.Collection)

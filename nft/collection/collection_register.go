@@ -217,8 +217,8 @@ func (fact CollectionRegisterFact) Bytes() []byte {
 		fact.name.Bytes(),
 		fact.royalty.Bytes(),
 		fact.uri.Bytes(),
-		util.ConcatBytesSlice(as...),
 		fact.currency.Bytes(),
+		util.ConcatBytesSlice(as...),
 	)
 }
 

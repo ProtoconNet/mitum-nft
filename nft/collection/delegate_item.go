@@ -60,6 +60,7 @@ func NewDelegateItem(contract base.Address, collection extensioncurrency.Contrac
 func (it DelegateItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
+		it.contract,
 		it.collection,
 		it.operator,
 		it.mode,
@@ -69,11 +70,16 @@ func (it DelegateItem) IsValid([]byte) error {
 
 func (it DelegateItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
+		it.contract.Bytes(),
 		it.collection.Bytes(),
 		it.operator.Bytes(),
 		it.mode.Bytes(),
 		it.currency.Bytes(),
 	)
+}
+
+func (it DelegateItem) Contract() base.Address {
+	return it.contract
 }
 
 func (it DelegateItem) Collection() extensioncurrency.ContractID {
