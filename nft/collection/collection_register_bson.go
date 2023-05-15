@@ -10,45 +10,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-// func (form CollectionRegisterForm) MarshalBSON() ([]byte, error) {
-// 	return bsonenc.Marshal(
-// 		bson.M{
-// 			"_hint":      form.Hint().String(),
-// 			"contract":   form.contract,
-// 			"collection": form.collection,
-// 			"name":       form.name,
-// 			"royalty":    form.royalty,
-// 			"uri":        form.uri,
-// 			"whites":     form.whites,
-// 		})
-// }
-
-// type CollectionRegisterFormBSONUnmarshaler struct {
-// 	Hint       string   `bson:"_hint"`
-// 	Contract   string   `bson:"contract"`
-// 	Collection string   `bson:"collection"`
-// 	Name       string   `bson:"name"`
-// 	Royalty    uint     `bson:"royalty"`
-// 	URI        string   `bson:"uri"`
-// 	Whites     []string `bson:"whites"`
-// }
-
-// func (form *CollectionRegisterForm) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-// 	e := util.StringErrorFunc("failed to decode bson of CollectionRegisterForm")
-
-// 	var u CollectionRegisterFormBSONUnmarshaler
-// 	if err := bson.Unmarshal(b, &u); err != nil {
-// 		return e(err, "")
-// 	}
-
-// 	ht, err := hint.ParseHint(u.Hint)
-// 	if err != nil {
-// 		return e(err, "")
-// 	}
-
-// 	return form.unmarshal(enc, ht, u.Contract, u.Collection, u.Name, u.Royalty, u.URI, u.Whites)
-// }
-
 func (fact CollectionRegisterFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
 		"_hint":      fact.Hint().String(),

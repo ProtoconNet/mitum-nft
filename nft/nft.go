@@ -136,6 +136,32 @@ func (n NFT) Creators() Signers {
 	return n.creators
 }
 
+func (n NFT) Addresses() []base.Address {
+	var as []base.Address
+	copy(as, n.Creators().Addresses())
+	for i, a := range as {
+		if n.approved != a {
+			break
+		}
+		if i == (len(as) - 1) {
+			as = append(as, n.approved)
+		}
+	}
+	as = append(as)
+
+	for i, a := range as {
+		if n.owner != a {
+			break
+		}
+		if i == (len(as) - 1) {
+			as = append(as, n.owner)
+		}
+	}
+	as = append(as)
+
+	return as
+}
+
 func (n NFT) Equal(cn NFT) bool {
 	if !n.ID().Equal(cn.ID()) {
 		return false

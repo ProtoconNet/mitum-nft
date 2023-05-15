@@ -1,6 +1,8 @@
 package collection
 
 import (
+	"strings"
+
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
@@ -38,10 +40,10 @@ var CollectionStateValueHint = hint.MustNewHint("collection-state-value-v0.0.1")
 
 type CollectionStateValue struct {
 	hint.BaseHinter
-	Design CollectionDesign
+	Design nft.Design
 }
 
-func NewCollectionStateValue(design CollectionDesign) CollectionStateValue {
+func NewCollectionStateValue(design nft.Design) CollectionStateValue {
 	return CollectionStateValue{
 		BaseHinter: hint.NewBaseHinter(CollectionStateValueHint),
 		Design:     design,
@@ -70,33 +72,31 @@ func (cs CollectionStateValue) HashBytes() []byte {
 	return cs.Design.Bytes()
 }
 
-func StateCollectionValue(st base.State) (CollectionDesign, error) {
+func StateCollectionValue(st base.State) (*nft.Design, error) {
 	v := st.Value()
 	if v == nil {
-		return CollectionDesign{}, util.ErrNotFound.Errorf("collection design not found in State")
+		return nil, util.ErrNotFound.Errorf("collection design not found in State")
 	}
 
 	d, ok := v.(CollectionStateValue)
 	if !ok {
-		return CollectionDesign{}, errors.Errorf("invalid collection value found, %T", v)
+		return nil, errors.Errorf("invalid collection value found, %T", v)
 	}
 
-	return d.Design, nil
+	return &d.Design, nil
 }
 
 var LastNFTIndexStateValueHint = hint.MustNewHint("collection-last-nft-index-state-value-v0.0.1")
 
 type LastNFTIndexStateValue struct {
 	hint.BaseHinter
-	// Collection extensioncurrency.ContractID
-	Index uint64
+	id nft.NFTID
 }
 
-func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ index uint64) LastNFTIndexStateValue {
+func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ id nft.NFTID) LastNFTIndexStateValue {
 	return LastNFTIndexStateValue{
 		BaseHinter: hint.NewBaseHinter(LastNFTIndexStateValueHint),
-		// Collection: collection,
-		Index: index,
+		id:         id,
 	}
 }
 
@@ -111,29 +111,25 @@ func (is LastNFTIndexStateValue) IsValid([]byte) error {
 		return e.Wrap(err)
 	}
 
-	// if err := is.Collection.IsValid(nil); err != nil {
-	// 	return e.Wrap(err)
-	// }
-
 	return nil
 }
 
 func (is LastNFTIndexStateValue) HashBytes() []byte {
-	return util.ConcatBytesSlice( /*is.Collection.Bytes(), */ util.Uint64ToBytes(is.Index))
+	return is.id.Bytes()
 }
 
-func StateLastNFTIndexValue(st base.State) (uint64, error) {
+func StateLastNFTIndexValue(st base.State) (*nft.NFTID, error) {
 	v := st.Value()
 	if v == nil {
-		return 0, util.ErrNotFound.Errorf("collection last nft index not found in State")
+		return nil, util.ErrNotFound.Errorf("collection last nft index not found in State")
 	}
 
 	isv, ok := v.(LastNFTIndexStateValue)
 	if !ok {
-		return 0, errors.Errorf("invalid collection last nft index value found, %T", v)
+		return nil, errors.Errorf("invalid collection last nft index value found, %T", v)
 	}
 
-	return isv.Index, nil
+	return &isv.id, nil
 }
 
 var (
@@ -286,6 +282,22 @@ func StateOperatorsBookValue(st base.State) (OperatorsBook, error) {
 	}
 
 	return ob.Operators, nil
+}
+
+// ParsedStateKey is the function that parses the state key.
+// The length of state key is 4 or 5.
+// In case of length 4 it forms as NFTPrefix:{contract}:{collection}:{Suffix}.
+// In case of length 5 it forms as NFTPrefix:{contract}:{collection}:{key_value}:{Suffix}
+func ParseStateKey(key string) ([]string, error) {
+	parsedKey := strings.Split(key, ":")
+	if parsedKey[0] != NFTPrefix {
+		return nil, errors.Errorf("State Key not include NFTPrefix, %s", parsedKey)
+	}
+	if len(parsedKey) < 3 {
+		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
+	} else {
+		return parsedKey, nil
+	}
 }
 
 func checkExistsState(

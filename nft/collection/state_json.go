@@ -11,7 +11,7 @@ import (
 
 type CollectionDesignStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	Design CollectionDesign `json:"collectiondesign"`
+	Design nft.Design `json:"collectiondesign"`
 }
 
 func (s CollectionStateValue) MarshalJSON() ([]byte, error) {
@@ -36,31 +36,32 @@ func (s *CollectionStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error 
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
 
-	var cd CollectionDesign
-	if err := cd.DecodeJSON(u.Design, enc); err != nil {
+	var nd nft.Design
+	if err := nd.DecodeJSON(u.Design, enc); err != nil {
 		return e(err, "")
 	}
-	s.Design = cd
+	s.Design = nd
 
 	return nil
 }
 
 type LastNFTIndexStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	// Collection extensioncurrency.ContractID `json:"collection"`
-	Index uint64 `json:"index"`
+	Index nft.NFTID `json:"index"`
 }
 
 func (s LastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(
-		LastNFTIndexStateValueJSONMarshaler(s),
+		LastNFTIndexStateValueJSONMarshaler{
+			BaseHinter: s.BaseHinter,
+			Index:      s.id,
+		},
 	)
 }
 
 type LastNFTIndexStateValueJSONUnmarshaler struct {
-	Hint hint.Hint `json:"_hint"`
-	// Collection string    `json:"collection"`
-	Index uint64 `json:"index"`
+	Hint  hint.Hint       `json:"_hint"`
+	Index json.RawMessage `json:"index"`
 }
 
 func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -72,8 +73,17 @@ func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) erro
 	}
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
-	// s.Collection = extensioncurrency.ContractID(u.Collection)
-	s.Index = u.Index
+
+	hinter, err := enc.Decode(u.Index)
+	if err != nil {
+		return e(err, "")
+	}
+	id, ok := hinter.(nft.NFTID)
+	if !ok {
+		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
+	} else {
+		s.id = id
+	}
 
 	return nil
 }

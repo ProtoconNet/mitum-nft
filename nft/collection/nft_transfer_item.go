@@ -64,7 +64,7 @@ func (it NFTTransferItem) Addresses() ([]base.Address, error) {
 }
 
 func (it NFTTransferItem) NFT() nft.NFTID {
-	nftID := nft.NewNFTID(it.collection, it.nft)
+	nftID := nft.NFTID(it.nft)
 	return nftID
 }
 

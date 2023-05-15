@@ -43,7 +43,7 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 
 	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.collection, CollectionKey), "key of design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
+		return errors.Errorf("collection design not found, %q: %w", ipp.item.collection, err)
 	}
 
 	design, err := StateCollectionValue(st)
@@ -52,7 +52,7 @@ func (ipp *NFTSignItemProcessor) PreProcess(
 	}
 
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", nid.Collection())
+		return errors.Errorf("deactivated collection, %q", ipp.item.collection)
 	}
 	st, err = existsState(extensioncurrency.StateKeyContractAccount(ipp.item.contract), "contract account", getStateFunc)
 	if err != nil {

@@ -36,11 +36,11 @@ func (s *CollectionStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error 
 	}
 	s.BaseHinter = hint.NewBaseHinter(ht)
 
-	var cd CollectionDesign
-	if err := cd.DecodeBSON(u.Design, enc); err != nil {
+	var nd nft.Design
+	if err := nd.DecodeBSON(u.Design, enc); err != nil {
 		return e(err, "")
 	}
-	s.Design = cd
+	s.Design = nd
 
 	return nil
 }
@@ -49,16 +49,14 @@ func (s LastNFTIndexStateValue) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": s.Hint().String(),
-			// "collection": s.Collection,
-			"index": s.Index,
+			"index": s.id,
 		},
 	)
 }
 
 type CollectionLastNFTIndexStateValueBSONUnmarshaler struct {
-	Hint string `bson:"_hint"`
-	// Collection string `bson:"collection"`
-	Index uint64 `bson:"index"`
+	Hint  string   `bson:"_hint"`
+	Index bson.Raw `bson:"index"`
 }
 
 func (s *LastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -75,8 +73,16 @@ func (s *LastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) erro
 	}
 	s.BaseHinter = hint.NewBaseHinter(ht)
 
-	// s.Collection = extensioncurrency.ContractID(u.Collection)
-	s.Index = u.Index
+	hinter, err := enc.Decode(u.Index)
+	if err != nil {
+		return e(err, "")
+	}
+	id, ok := hinter.(nft.NFTID)
+	if !ok {
+		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
+	} else {
+		s.id = id
+	}
 
 	return nil
 }

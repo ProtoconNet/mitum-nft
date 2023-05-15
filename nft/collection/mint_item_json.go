@@ -13,43 +13,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-// type MintFormJSONMarshaler struct {
-// 	hint.BaseHinter
-// 	Hash         nft.NFTHash `json:"hash"`
-// 	URI          nft.URI     `json:"uri"`
-// 	Creators     nft.Signers `json:"creators"`
-// 	Copyrighters nft.Signers `json:"copyrighters"`
-// }
-
-// func (form MintForm) MarshalJSON() ([]byte, error) {
-// 	return util.MarshalJSON(MintFormJSONMarshaler{
-// 		BaseHinter:   form.BaseHinter,
-// 		Hash:         form.hash,
-// 		URI:          form.uri,
-// 		Creators:     form.creators,
-// 		Copyrighters: form.copyrighters,
-// 	})
-// }
-
-// type MintFormJSONUnmarshaler struct {
-// 	Hint         hint.Hint       `json:"_hint"`
-// 	Hash         string          `json:"hash"`
-// 	URI          string          `json:"uri"`
-// 	Creators     json.RawMessage `json:"creators"`
-// 	Copyrighters json.RawMessage `json:"copyrighters"`
-// }
-
-// func (form *MintForm) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
-// 	e := util.StringErrorFunc("failed to decode json of MintForm")
-
-// 	var u MintFormJSONUnmarshaler
-// 	if err := enc.Unmarshal(b, &u); err != nil {
-// 		return e(err, "")
-// 	}
-
-// 	return form.unmarshal(enc, u.Hint, u.Hash, u.URI, u.Creators, u.Copyrighters)
-// }
-
 type MintItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract   base.Address                 `json:"contract"`

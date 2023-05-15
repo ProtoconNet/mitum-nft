@@ -94,13 +94,13 @@ func (nbx NFTBox) Exists(id nft.NFTID) bool {
 	return false
 }
 
-func (nbx NFTBox) Get(id nft.NFTID) (nft.NFTID, error) {
+func (nbx NFTBox) Get(id nft.NFTID) (*nft.NFTID, error) {
 	for _, n := range nbx.nfts {
 		if id.Equal(n) {
-			return n, nil
+			return &n, nil
 		}
 	}
-	return nft.NFTID{}, errors.Errorf("nft not found in NFTBox, %q", id)
+	return nil, errors.Errorf("nft not found in NFTBox, %q", id)
 }
 
 func (nbx *NFTBox) Append(n nft.NFTID) error {
@@ -127,7 +127,6 @@ func (nbx *NFTBox) Remove(n nft.NFTID) error {
 	for i := range nbx.nfts {
 		if n.Equal(nbx.nfts[i]) {
 			nbx.nfts[i] = nbx.nfts[len(nbx.nfts)-1]
-			nbx.nfts[len(nbx.nfts)-1] = nft.NFTID{}
 			nbx.nfts = nbx.nfts[:len(nbx.nfts)-1]
 			return nil
 		}

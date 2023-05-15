@@ -63,7 +63,7 @@ func (it ApproveItem) Addresses() ([]base.Address, error) {
 }
 
 func (it ApproveItem) NFT() nft.NFTID {
-	nftID := nft.NewNFTID(it.collection, it.idx)
+	nftID := nft.NFTID(it.idx)
 	return nftID
 }
 

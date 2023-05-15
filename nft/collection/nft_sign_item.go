@@ -43,7 +43,7 @@ func (it NFTSignItem) IsValid([]byte) error {
 }
 
 func (it NFTSignItem) NFT() nft.NFTID {
-	return nft.NewNFTID(it.collection, it.nft)
+	return nft.NFTID(it.nft)
 }
 
 func (it NFTSignItem) Contract() base.Address {

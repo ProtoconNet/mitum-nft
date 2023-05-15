@@ -71,7 +71,6 @@ var hinters = []encoder.DecodeDetail{
 
 	{Hint: nft.SignerHint, Instance: nft.Signer{}},
 	{Hint: nft.SignersHint, Instance: nft.Signers{}},
-	{Hint: nft.NFTIDHint, Instance: nft.NFTID{}},
 	{Hint: nft.NFTHint, Instance: nft.NFT{}},
 	{Hint: nft.DesignHint, Instance: nft.Design{}},
 

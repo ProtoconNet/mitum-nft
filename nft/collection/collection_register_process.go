@@ -6,6 +6,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -132,7 +133,7 @@ func (opp *CollectionRegisterProcessor) Process(
 	sts := make([]base.StateMergeValue, 3)
 
 	policy := NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.Whites())
-	design := NewCollectionDesign(fact.Contract(), fact.Sender(), fact.Collection(), true, policy)
+	design := nft.NewDesign(fact.Contract(), fact.Sender(), fact.Collection(), true, policy)
 	if err := design.IsValid(nil); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("invalid collection design, %q: %w", fact.Collection(), err), nil
 	}

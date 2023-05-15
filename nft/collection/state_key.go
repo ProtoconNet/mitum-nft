@@ -60,10 +60,10 @@ func StateKeyOperators(contract base.Address, collectionID extensioncurrency.Con
 }
 
 func StateKeyNFT(contract base.Address, collectionID extensioncurrency.ContractID, id nft.NFTID) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), id, StateKeyNFTSuffix)
+	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), id.String(), StateKeyNFTSuffix)
 }
 
-func parseNFTStateKey(key string) (StateKey, error) {
+func ParseNFTStateKey(key string) (StateKey, error) {
 	switch {
 	case strings.HasSuffix(key, StateKeyCollectionSuffix):
 		return CollectionKey, nil

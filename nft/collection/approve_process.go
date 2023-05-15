@@ -43,19 +43,18 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return errors.Errorf("approved not found, %q: %w", ipp.item.Approved(), err)
 	}
 
-	nid := ipp.item.NFT()
 	st, err := existsState(NFTStateKey(ipp.item.contract, ipp.item.collection, CollectionKey), "key of design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q: %w", nid.Collection(), err)
+		return errors.Errorf("collection design not found, %q: %w", ipp.item.contract, err)
 	}
 
 	design, err := StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design value not found, %q: %w", nid.Collection(), err)
+		return errors.Errorf("collection design value not found, %q: %w", ipp.item.collection, err)
 	}
 
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", nid.Collection())
+		return errors.Errorf("deactivated collection, %q", ipp.item.collection)
 	}
 
 	st, err = existsState(extensioncurrency.StateKeyContractAccount(design.Parent()), "contract account", getStateFunc)
@@ -72,22 +71,26 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", design.Parent())
 	}
 
-	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
+	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nft.NFTID(ipp.item.idx)), "key of nft", getStateFunc)
 	if err != nil {
-		return errors.Errorf("nft not found, %q: %w", nid, err)
+		return errors.Errorf("nft not found, %q: %w", ipp.item.idx, err)
 	}
 
 	nv, err := StateNFTValue(st)
 	if err != nil {
-		return errors.Errorf("nft value not found, %q: %w", nid, err)
+		return errors.Errorf("nft value not found, %q: %w", ipp.item.idx, err)
 	}
 
 	if !nv.Active() {
-		return errors.Errorf("burned nft, %q", nid)
+		return errors.Errorf("burned nft, %q", ipp.item.idx)
 	}
 
 	if ipp.item.Approved().Equal(nv.Approved()) {
 		return errors.Errorf("already approved, %q", ipp.item.Approved())
+	}
+
+	if ipp.item.Approved().Equal(nv.Owner()) {
+		return errors.Errorf("approved account is same with owner, %q", ipp.item.Approved())
 	}
 
 	if !nv.Owner().Equal(ipp.sender) {
@@ -95,14 +98,14 @@ func (ipp *ApproveItemProcessor) PreProcess(
 			return errors.Errorf("nft owner not found, %q: %w", nv.Owner(), err)
 		}
 
-		st, err = existsState(StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), "key of operators", getStateFunc)
+		st, err = existsState(StateKeyOperators(ipp.item.contract, ipp.item.collection, nv.Owner()), "key of operators", getStateFunc)
 		if err != nil {
 			return errors.Errorf("unauthorized sender, %q: %w", ipp.sender, err)
 		}
 
 		operators, err := StateOperatorsBookValue(st)
 		if err != nil {
-			return errors.Errorf("operators book value not found, %q: %w", StateKeyOperators(ipp.item.contract, nv.ID().Collection(), nv.Owner()), err)
+			return errors.Errorf("operators book value not found, %q: %w", StateKeyOperators(ipp.item.contract, ipp.item.collection, nv.Owner()), err)
 		}
 
 		if !operators.Exists(ipp.sender) {

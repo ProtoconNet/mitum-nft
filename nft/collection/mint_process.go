@@ -41,7 +41,7 @@ type MintItemProcessor struct {
 func (ipp *MintItemProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) error {
-	id := nft.NewNFTID(ipp.item.Collection(), ipp.idx)
+	id := nft.NFTID(ipp.idx)
 	if err := id.IsValid(nil); err != nil {
 		return errors.Errorf("invalid nft id, %q: %w", id, err)
 	}
@@ -74,7 +74,7 @@ func (ipp *MintItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	sts := make([]base.StateMergeValue, 1)
 
-	id := nft.NewNFTID(ipp.item.Collection(), ipp.idx)
+	id := nft.NFTID(ipp.idx)
 	if err := id.IsValid(nil); err != nil {
 		return nil, errors.Errorf("invalid nft id, %q: %w", id, err)
 	}
@@ -219,12 +219,12 @@ func (opp *MintProcessor) PreProcess(
 				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q: %w", collection, err), nil
 			}
 
-			idx, err := StateLastNFTIndexValue(st)
+			nftID, err := StateLastNFTIndexValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q: %w", collection, err), nil
 			}
 
-			idxes[collection] = idx
+			idxes[collection] = nftID.Index()
 		}
 	}
 
@@ -276,12 +276,12 @@ func (opp *MintProcessor) Process( // nolint:dupl
 				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q: %w", collection, err), nil
 			}
 
-			idx, err := StateLastNFTIndexValue(st)
+			nftID, err := StateLastNFTIndexValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q: %w", collection, err), nil
 			}
 
-			idxes[idxKey] = idx
+			idxes[idxKey] = nftID.Index()
 		}
 		nftsKey := NFTStateKey(item.contract, collection, NFTsKey)
 		if _, found := boxes[nftsKey]; !found {
@@ -335,7 +335,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	for key, idx := range idxes {
-		iv := NewStateMergeValue(key, NewLastNFTIndexStateValue(idx))
+		iv := NewStateMergeValue(key, NewLastNFTIndexStateValue(nft.NFTID(idx)))
 		sts = append(sts, iv)
 	}
 
