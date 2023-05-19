@@ -1,6 +1,10 @@
-module github.com/ProtoconNet/mitum-nft
+module github.com/ProtoconNet/mitum-nft/v2
 
 go 1.19
+
+replace github.com/ProtoconNet/mitum-currency-extension/v2 => /Users/soonkukkang/go/src/github.com/soonkuk/mitum-currency-extension-v2
+replace github.com/ProtoconNet/mitum2 => /Users/soonkukkang/go/src/github.com/spikeekips/mitum2
+
 
 require (
 	github.com/ProtoconNet/mitum-currency-extension/v2 v2.0.0-alpha.0.20230425054211-ba50abaa4b00

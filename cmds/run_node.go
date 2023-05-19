@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
+	"github.com/ProtoconNet/mitum-nft/v2/digest"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"

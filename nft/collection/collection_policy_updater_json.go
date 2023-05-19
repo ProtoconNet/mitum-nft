@@ -1,9 +1,10 @@
 package collection
 
 import (
+	"encoding/json"
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -12,6 +13,7 @@ import (
 type CollectionPolicyUpdaterFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
 	Sender     base.Address                 `json:"sender"`
+	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Name       CollectionName               `json:"name"`
 	Royalty    nft.PaymentParameter         `json:"royalty"`
@@ -24,6 +26,7 @@ func (fact CollectionPolicyUpdaterFact) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CollectionPolicyUpdaterFactJSONMarshaler{
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Sender:                fact.sender,
+		Contract:              fact.contract,
 		Collection:            fact.collection,
 		Name:                  fact.name,
 		Royalty:               fact.royalty,
@@ -35,13 +38,14 @@ func (fact CollectionPolicyUpdaterFact) MarshalJSON() ([]byte, error) {
 
 type CollectionPolicyUpdaterFactJSONUnmarshaler struct {
 	base.BaseFactJSONUnmarshaler
-	Sender     string   `json:"sender"`
-	Collection string   `json:"collection"`
-	Name       string   `json:"name"`
-	Royalty    uint     `json:"royalty"`
-	URI        string   `json:"uri"`
-	Whitelist  []string `json:"whitelist"`
-	Currency   string   `json:"currency"`
+	Sender     string          `json:"sender"`
+	Contract   string          `json:"contract"`
+	Collection string          `json:"collection"`
+	Name       string          `json:"name"`
+	Royalty    uint            `json:"royalty"`
+	URI        string          `json:"uri"`
+	Whitelist  json.RawMessage `json:"whitelist"`
+	Currency   string          `json:"currency"`
 }
 
 func (fact *CollectionPolicyUpdaterFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -54,7 +58,7 @@ func (fact *CollectionPolicyUpdaterFact) DecodeJSON(b []byte, enc *jsonenc.Encod
 
 	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
 
-	return fact.unmarshal(enc, u.Sender, u.Collection, u.Name, u.Royalty, u.URI, u.Whitelist, u.Currency)
+	return fact.unmarshal(enc, u.Sender, u.Contract, u.Collection, u.Name, u.Royalty, u.URI, u.Whitelist, u.Currency)
 }
 
 type collectionPolicyUpdaterMarshaler struct {

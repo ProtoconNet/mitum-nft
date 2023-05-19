@@ -5,7 +5,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -13,12 +13,12 @@ import (
 )
 
 type StateValueMerger struct {
-	*base.BaseStateValueMerger
+	*currency.BaseStateValueMerger
 }
 
 func NewStateValueMerger(height base.Height, key string, st base.State) *StateValueMerger {
 	s := &StateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
+		BaseStateValueMerger: currency.NewBaseStateValueMerger(height, key, st),
 	}
 
 	return s
@@ -90,10 +90,10 @@ var LastNFTIndexStateValueHint = hint.MustNewHint("collection-last-nft-index-sta
 
 type LastNFTIndexStateValue struct {
 	hint.BaseHinter
-	id nft.NFTID
+	id uint64
 }
 
-func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ id nft.NFTID) LastNFTIndexStateValue {
+func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ id uint64) LastNFTIndexStateValue {
 	return LastNFTIndexStateValue{
 		BaseHinter: hint.NewBaseHinter(LastNFTIndexStateValueHint),
 		id:         id,
@@ -115,21 +115,21 @@ func (is LastNFTIndexStateValue) IsValid([]byte) error {
 }
 
 func (is LastNFTIndexStateValue) HashBytes() []byte {
-	return is.id.Bytes()
+	return util.Uint64ToBytes(is.id)
 }
 
-func StateLastNFTIndexValue(st base.State) (*nft.NFTID, error) {
+func StateLastNFTIndexValue(st base.State) (uint64, error) {
 	v := st.Value()
 	if v == nil {
-		return nil, util.ErrNotFound.Errorf("collection last nft index not found in State")
+		return 0, util.ErrNotFound.Errorf("collection last nft index not found in State")
 	}
 
 	isv, ok := v.(LastNFTIndexStateValue)
 	if !ok {
-		return nil, errors.Errorf("invalid collection last nft index value found, %T", v)
+		return 0, errors.Errorf("invalid collection last nft index value found, %T", v)
 	}
 
-	return &isv.id, nil
+	return isv.id, nil
 }
 
 var (
@@ -170,18 +170,18 @@ func (ns NFTStateValue) HashBytes() []byte {
 	return ns.NFT.Bytes()
 }
 
-func StateNFTValue(st base.State) (nft.NFT, error) {
+func StateNFTValue(st base.State) (*nft.NFT, error) {
 	v := st.Value()
 	if v == nil {
-		return nft.NFT{}, util.ErrNotFound.Errorf("nft not found in State")
+		return nil, util.ErrNotFound.Errorf("nft not found in State")
 	}
 
 	ns, ok := v.(NFTStateValue)
 	if !ok {
-		return nft.NFT{}, errors.Errorf("invalid nft value found, %T", v)
+		return nil, errors.Errorf("invalid nft value found, %T", v)
 	}
 
-	return ns.NFT, nil
+	return &ns.NFT, nil
 }
 
 var NFTBoxStateValueHint = hint.MustNewHint("nft-box-state-value-v0.0.1")
@@ -270,18 +270,18 @@ func (ob OperatorsBookStateValue) HashBytes() []byte {
 	return ob.Operators.Bytes()
 }
 
-func StateOperatorsBookValue(st base.State) (OperatorsBook, error) {
+func StateOperatorsBookValue(st base.State) (*OperatorsBook, error) {
 	v := st.Value()
 	if v == nil {
-		return OperatorsBook{}, util.ErrNotFound.Errorf("operators book not found in State")
+		return nil, util.ErrNotFound.Errorf("operators book not found in State")
 	}
 
 	ob, ok := v.(OperatorsBookStateValue)
 	if !ok {
-		return OperatorsBook{}, errors.Errorf("invalid operators book value found, %T", v)
+		return nil, errors.Errorf("invalid operators book value found, %T", v)
 	}
 
-	return ob.Operators, nil
+	return &ob.Operators, nil
 }
 
 // ParsedStateKey is the function that parses the state key.
@@ -290,7 +290,7 @@ func StateOperatorsBookValue(st base.State) (OperatorsBook, error) {
 // In case of length 5 it forms as NFTPrefix:{contract}:{collection}:{key_value}:{Suffix}
 func ParseStateKey(key string) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
-	if parsedKey[0] != NFTPrefix {
+	if parsedKey[0] != NFTPrefix[:len(NFTPrefix)-1] {
 		return nil, errors.Errorf("State Key not include NFTPrefix, %s", parsedKey)
 	}
 	if len(parsedKey) < 3 {

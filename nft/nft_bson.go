@@ -23,7 +23,7 @@ func (n NFT) MarshalBSON() ([]byte, error) {
 
 type NFTBSONUnmarshaler struct {
 	Hint     string   `bson:"_hint"`
-	ID       bson.Raw `bson:"id"`
+	ID       uint64   `bson:"id"`
 	Active   bool     `bson:"active"`
 	Owner    string   `bson:"owner"`
 	Hash     string   `bson:"hash"`

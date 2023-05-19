@@ -10,7 +10,7 @@ import (
 func (n *NFT) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	bid []byte,
+	id uint64,
 	ac bool,
 	ow string,
 	hs string,
@@ -36,14 +36,7 @@ func (n *NFT) unmarshal(
 		return e(err, "")
 	}
 	n.approved = approved
-
-	if hinter, err := enc.Decode(bid); err != nil {
-		return e(err, "")
-	} else if id, ok := hinter.(NFTID); !ok {
-		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
-	} else {
-		n.id = id
-	}
+	n.id = id
 
 	if hinter, err := enc.Decode(bcrs); err != nil {
 		return e(err, "")

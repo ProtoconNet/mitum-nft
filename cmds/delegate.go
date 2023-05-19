@@ -4,7 +4,7 @@ import (
 	"context"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	nftcollection "github.com/ProtoconNet/mitum-nft/nft/collection"
+	nftcollection "github.com/ProtoconNet/mitum-nft/v2/nft/collection"
 
 	"github.com/pkg/errors"
 

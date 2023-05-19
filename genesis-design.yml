@@ -29,7 +29,7 @@ facts:
         amount: 
           _hint: mitum-currency-amount-v0.0.1
           amount: "1000000000000000000000000000"
-          currency: MCC
+          currency: PEN
         genesis_account:
         policy:
           _hint: mitum-currency-currency-policy-v0.0.1

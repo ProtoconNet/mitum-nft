@@ -8,6 +8,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	timestampservice "github.com/ProtoconNet/mitum-nft/v2/timestamp/service"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -272,6 +273,20 @@ func (opr *OperationProcessor) checkDuplication(op base.Operation) error {
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
+	case timestampservice.ServiceRegister:
+		fact, ok := t.Fact().(timestampservice.ServiceRegisterFact)
+		if !ok {
+			return errors.Errorf("expected ServiceRegisterFact, not %T", t.Fact())
+		}
+		did = fact.Sender().String()
+		didtype = DuplicationTypeSender
+	case timestampservice.Append:
+		fact, ok := t.Fact().(timestampservice.AppendFact)
+		if !ok {
+			return errors.Errorf("expected AppendFact, not %T", t.Fact())
+		}
+		did = fact.Sender().String()
+		didtype = DuplicationTypeSender
 	default:
 		return nil
 	}
@@ -355,7 +370,9 @@ func (opr *OperationProcessor) getNewProcessor(op base.Operation) (base.Operatio
 		NFTTransfer,
 		Delegate,
 		Approve,
-		NFTSign:
+		NFTSign,
+		timestampservice.ServiceRegister,
+		timestampservice.Append:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil

@@ -15,7 +15,7 @@ type NFTTransferItemJSONMarshaler struct {
 	Contract   base.Address                 `json:"contract"`
 	Collection extensioncurrency.ContractID `json:"collection"`
 	Receiver   base.Address                 `json:"receiver"`
-	NFTidx     uint64                       `json:"nftidx"`
+	NFTidx     uint64                       `json:"nft"`
 	Currency   currency.CurrencyID          `json:"currency"`
 }
 
@@ -35,7 +35,7 @@ type NFTTransferItemJSONUnmarshaler struct {
 	Contract   string    `json:"contract"`
 	Collection string    `json:"collection"`
 	Receiver   string    `json:"receiver"`
-	NFTidx     uint64    `json:"nftidx"`
+	NFTidx     uint64    `json:"nft"`
 	Currency   string    `json:"currency"`
 }
 

@@ -6,7 +6,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -59,7 +59,6 @@ func (opp *CollectionPolicyUpdaterProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
 	e := util.StringErrorFunc("failed to preprocess CollectionPolicyUpdater")
-
 	fact, ok := op.Fact().(CollectionPolicyUpdaterFact)
 	if !ok {
 		return ctx, nil, e(nil, "not CollectionPolicyUpdaterFact, %T", op.Fact())
@@ -112,7 +111,6 @@ func (opp *CollectionPolicyUpdaterProcessor) PreProcess(
 	if !ca.IsActive() {
 		return nil, base.NewBaseOperationProcessReasonError("deactivated contract account, %q", design.Parent()), nil
 	}
-
 	return ctx, nil, nil
 }
 
@@ -121,7 +119,6 @@ func (opp *CollectionPolicyUpdaterProcessor) Process(
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	e := util.StringErrorFunc("failed to process CollectionPolicyUpdater")
-
 	fact, ok := op.Fact().(CollectionPolicyUpdaterFact)
 	if !ok {
 		return nil, nil, e(nil, "expected CollectionPolicyUpdaterFact, not %T", op.Fact())
@@ -179,7 +176,6 @@ func (opp *CollectionPolicyUpdaterProcessor) Process(
 		sb.Key(),
 		currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))),
 	)
-
 	return sts, nil, nil
 }
 

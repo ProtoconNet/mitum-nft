@@ -2,10 +2,10 @@ package collection
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
@@ -17,7 +17,7 @@ const (
 	CollectionKey
 	OperatorsKey
 	LastIDXKey
-	NFTsKey
+	NFTBoxKey
 	NFTKey
 )
 
@@ -26,7 +26,7 @@ var (
 	StateKeyCollectionSuffix = ":collection"
 	StateKeyOperatorsSuffix  = ":operators"
 	StateKeyLastNFTIDXSuffix = ":lastnftidx"
-	StateKeyNFTsSuffix       = ":nfts"
+	StateKeyNFTBoxSuffix     = ":nftbox"
 	StateKeyNFTSuffix        = ":nft"
 )
 
@@ -48,8 +48,8 @@ func NFTStateKey(
 		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyOperatorsSuffix)
 	case LastIDXKey:
 		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyLastNFTIDXSuffix)
-	case NFTsKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyNFTsSuffix)
+	case NFTBoxKey:
+		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyNFTBoxSuffix)
 	}
 
 	return stateKey
@@ -59,16 +59,16 @@ func StateKeyOperators(contract base.Address, collectionID extensioncurrency.Con
 	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), addr.String(), StateKeyOperatorsSuffix)
 }
 
-func StateKeyNFT(contract base.Address, collectionID extensioncurrency.ContractID, id nft.NFTID) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), id.String(), StateKeyNFTSuffix)
+func StateKeyNFT(contract base.Address, collectionID extensioncurrency.ContractID, id uint64) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
 }
 
 func ParseNFTStateKey(key string) (StateKey, error) {
 	switch {
 	case strings.HasSuffix(key, StateKeyCollectionSuffix):
 		return CollectionKey, nil
-	case strings.HasSuffix(key, StateKeyNFTsSuffix):
-		return NFTsKey, nil
+	case strings.HasSuffix(key, StateKeyNFTBoxSuffix):
+		return NFTBoxKey, nil
 	case strings.HasSuffix(key, StateKeyNFTSuffix):
 		return NFTKey, nil
 	case strings.HasSuffix(key, StateKeyLastNFTIDXSuffix):

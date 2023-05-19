@@ -15,7 +15,7 @@ func (it NFTTransferItem) MarshalBSON() ([]byte, error) {
 			"contract":   it.contract,
 			"collection": it.collection,
 			"receiver":   it.receiver,
-			"nftidx":     it.nft,
+			"nft":        it.nft,
 			"currency":   it.currency,
 		},
 	)
@@ -26,7 +26,7 @@ type NFTTransferItemBSONUnmarshaler struct {
 	Contract   string `bson:"contract"`
 	Collection string `bson:"collection"`
 	Receiver   string `bson:"receiver"`
-	NFTidx     uint64 `bson:"nftidx"`
+	NFTidx     uint64 `bson:"nft"`
 	Currency   string `bson:"currency"`
 }
 

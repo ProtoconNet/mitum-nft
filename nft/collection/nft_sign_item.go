@@ -3,7 +3,6 @@ package collection
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -42,8 +41,8 @@ func (it NFTSignItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.collection, it.currency)
 }
 
-func (it NFTSignItem) NFT() nft.NFTID {
-	return nft.NFTID(it.nft)
+func (it NFTSignItem) NFT() uint64 {
+	return it.nft
 }
 
 func (it NFTSignItem) Contract() base.Address {

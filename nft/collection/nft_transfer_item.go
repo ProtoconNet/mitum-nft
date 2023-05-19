@@ -1,9 +1,9 @@
 package collection
 
 import (
+	"fmt"
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -36,6 +36,9 @@ func (it NFTTransferItem) IsValid([]byte) error {
 }
 
 func (it NFTTransferItem) Bytes() []byte {
+	fmt.Printf("%08b", util.ConcatBytesSlice(
+		util.Uint64ToBytes(it.nft),
+	))
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
 		it.collection.Bytes(),
@@ -63,9 +66,8 @@ func (it NFTTransferItem) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-func (it NFTTransferItem) NFT() nft.NFTID {
-	nftID := nft.NFTID(it.nft)
-	return nftID
+func (it NFTTransferItem) NFT() uint64 {
+	return it.nft
 }
 
 func (it NFTTransferItem) Currency() currency.CurrencyID {

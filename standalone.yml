@@ -7,12 +7,12 @@ network:
 storage:
   base: ./mitum-data
   database: leveldb://
-# digest:
-#   network:
-#     bind: http://localhost:54320
-#     url: http://localhost:54320
-#   database: 
-#     uri: mongodb://127.0.0.1:27017/mc-sto
+digest:
+  network:
+    bind: http://localhost:54320
+    url: http://localhost:54320
+  database: 
+    uri: mongodb://127.0.0.1:27017/mc-nft
 parameters:
   threshold: 100
   interval_broadcast_ballot: 3s

@@ -3,7 +3,7 @@ package collection
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -47,7 +47,7 @@ func (s *CollectionStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error 
 
 type LastNFTIndexStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	Index nft.NFTID `json:"index"`
+	Index uint64 `json:"index"`
 }
 
 func (s LastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
@@ -60,8 +60,8 @@ func (s LastNFTIndexStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type LastNFTIndexStateValueJSONUnmarshaler struct {
-	Hint  hint.Hint       `json:"_hint"`
-	Index json.RawMessage `json:"index"`
+	Hint  hint.Hint `json:"_hint"`
+	Index uint64    `json:"index"`
 }
 
 func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -74,17 +74,7 @@ func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) erro
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
 
-	hinter, err := enc.Decode(u.Index)
-	if err != nil {
-		return e(err, "")
-	}
-	id, ok := hinter.(nft.NFTID)
-	if !ok {
-		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
-	} else {
-		s.id = id
-	}
-
+	s.id = u.Index
 	return nil
 }
 

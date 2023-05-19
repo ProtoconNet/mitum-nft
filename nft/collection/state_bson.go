@@ -2,7 +2,7 @@ package collection
 
 import (
 	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"go.mongodb.org/mongo-driver/bson"
@@ -55,8 +55,8 @@ func (s LastNFTIndexStateValue) MarshalBSON() ([]byte, error) {
 }
 
 type CollectionLastNFTIndexStateValueBSONUnmarshaler struct {
-	Hint  string   `bson:"_hint"`
-	Index bson.Raw `bson:"index"`
+	Hint  string `bson:"_hint"`
+	Index uint64 `bson:"index"`
 }
 
 func (s *LastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -73,16 +73,7 @@ func (s *LastNFTIndexStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) erro
 	}
 	s.BaseHinter = hint.NewBaseHinter(ht)
 
-	hinter, err := enc.Decode(u.Index)
-	if err != nil {
-		return e(err, "")
-	}
-	id, ok := hinter.(nft.NFTID)
-	if !ok {
-		return e(util.ErrWrongType.Errorf("expected NFTID, not %T", hinter), "")
-	} else {
-		s.id = id
-	}
+	s.id = u.Index
 
 	return nil
 }

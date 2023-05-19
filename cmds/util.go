@@ -19,12 +19,13 @@ import (
 
 	extensioncurrencycmds "github.com/ProtoconNet/mitum-currency-extension/v2/cmds"
 	"github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	mongodbstorage "github.com/ProtoconNet/mitum-currency-extension/v2/digest/mongodb"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
 	mitumcurrency "github.com/ProtoconNet/mitum-currency/v2/currency"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
 	isaacoperation "github.com/ProtoconNet/mitum-currency/v2/isaac"
-	"github.com/ProtoconNet/mitum-nft/nft/collection"
+	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
+	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	timestampservice "github.com/ProtoconNet/mitum-nft/v2/timestamp/service"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	isaacblock "github.com/ProtoconNet/mitum2/isaac/block"
@@ -182,6 +183,8 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	opr.SetProcessor(collection.DelegateHint, collection.NewDelegateProcessor())
 	opr.SetProcessor(collection.ApproveHint, collection.NewApproveProcessor())
 	opr.SetProcessor(collection.NFTSignHint, collection.NewNFTSignProcessor())
+	opr.SetProcessor(timestampservice.ServiceRegisterHint, timestampservice.NewServiceRegisterProcessor())
+	opr.SetProcessor(timestampservice.AppendHint, timestampservice.NewAppendProcessor(db.LastBlockMap))
 
 	_ = set.Add(mitumcurrency.CreateAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
@@ -310,6 +313,24 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	})
 
 	_ = set.Add(collection.NFTSignHint, func(height base.Height) (base.OperationProcessor, error) {
+		return opr.New(
+			height,
+			db.State,
+			nil,
+			nil,
+		)
+	})
+
+	_ = set.Add(timestampservice.AppendHint, func(height base.Height) (base.OperationProcessor, error) {
+		return opr.New(
+			height,
+			db.State,
+			nil,
+			nil,
+		)
+	})
+
+	_ = set.Add(timestampservice.ServiceRegisterHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,

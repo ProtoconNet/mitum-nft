@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"sort"
 
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -15,11 +15,11 @@ var NFTBoxHint = hint.MustNewHint("mitum-nft-nft-box-v0.0.1")
 
 type NFTBox struct {
 	hint.BaseHinter
-	nfts []nft.NFTID
+	nfts []uint64
 }
 
-func NewNFTBox(nfts []nft.NFTID) NFTBox {
-	ns := []nft.NFTID{}
+func NewNFTBox(nfts []uint64) NFTBox {
+	var ns []uint64
 
 	if nfts != nil {
 		ns = nfts
@@ -31,7 +31,7 @@ func NewNFTBox(nfts []nft.NFTID) NFTBox {
 func (nbx NFTBox) Bytes() []byte {
 	bns := make([][]byte, len(nbx.nfts))
 	for i, n := range nbx.nfts {
-		bns[i] = n.Bytes()
+		bns[i] = util.Uint64ToBytes(n)
 	}
 
 	return util.ConcatBytesSlice(bns...)
@@ -54,11 +54,6 @@ func (nbx NFTBox) IsEmpty() bool {
 }
 
 func (nbx NFTBox) IsValid([]byte) error {
-	for _, n := range nbx.nfts {
-		if err := n.IsValid(nil); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -66,7 +61,7 @@ func (nbx NFTBox) Equal(b NFTBox) bool {
 	nbx.Sort(true)
 	b.Sort(true)
 	for i := range nbx.nfts {
-		if !nbx.nfts[i].Equal(b.nfts[i]) {
+		if !(nbx.nfts[i] == (b.nfts[i])) {
 			return false
 		}
 	}
@@ -76,37 +71,34 @@ func (nbx NFTBox) Equal(b NFTBox) bool {
 func (nbx *NFTBox) Sort(ascending bool) {
 	sort.Slice(nbx.nfts, func(i, j int) bool {
 		if ascending {
-			return bytes.Compare(nbx.nfts[j].Bytes(), nbx.nfts[i].Bytes()) > 0
+			return bytes.Compare(util.Uint64ToBytes(nbx.nfts[j]), util.Uint64ToBytes(nbx.nfts[i])) > 0
 		}
-		return bytes.Compare(nbx.nfts[j].Bytes(), nbx.nfts[i].Bytes()) < 0
+		return bytes.Compare(util.Uint64ToBytes(nbx.nfts[j]), util.Uint64ToBytes(nbx.nfts[i])) < 0
 	})
 }
 
-func (nbx NFTBox) Exists(id nft.NFTID) bool {
+func (nbx NFTBox) Exists(id uint64) bool {
 	if len(nbx.nfts) < 1 {
 		return false
 	}
 	for _, n := range nbx.nfts {
-		if id.Equal(n) {
+		if id == n {
 			return true
 		}
 	}
 	return false
 }
 
-func (nbx NFTBox) Get(id nft.NFTID) (*nft.NFTID, error) {
-	for _, n := range nbx.nfts {
-		if id.Equal(n) {
-			return &n, nil
-		}
-	}
-	return nil, errors.Errorf("nft not found in NFTBox, %q", id)
-}
+//func (nbx NFTBox) Get(id uint64) (*nft.NFTID, error) {
+//	for _, n := range nbx.nfts {
+//		if id.Equal(n) {
+//			return &n, nil
+//		}
+//	}
+//	return nil, errors.Errorf("nft not found in NFTBox, %q", id)
+//}
 
-func (nbx *NFTBox) Append(n nft.NFTID) error {
-	if err := n.IsValid(nil); err != nil {
-		return err
-	}
+func (nbx *NFTBox) Append(n uint64) error {
 	if nbx.Exists(n) {
 		return errors.Errorf("nft already exists in NFTBox, %q", n)
 	}
@@ -117,15 +109,12 @@ func (nbx *NFTBox) Append(n nft.NFTID) error {
 	return nil
 }
 
-func (nbx *NFTBox) Remove(n nft.NFTID) error {
-	if err := n.IsValid(nil); err != nil {
-		return err
-	}
+func (nbx *NFTBox) Remove(n uint64) error {
 	if !nbx.Exists(n) {
 		return errors.Errorf("nft not found in NFTBox, %q", n)
 	}
 	for i := range nbx.nfts {
-		if n.Equal(nbx.nfts[i]) {
+		if n == nbx.nfts[i] {
 			nbx.nfts[i] = nbx.nfts[len(nbx.nfts)-1]
 			nbx.nfts = nbx.nfts[:len(nbx.nfts)-1]
 			return nil
@@ -134,6 +123,6 @@ func (nbx *NFTBox) Remove(n nft.NFTID) error {
 	return nil
 }
 
-func (nbx NFTBox) NFTs() []nft.NFTID {
+func (nbx NFTBox) NFTs() []uint64 {
 	return nbx.nfts
 }

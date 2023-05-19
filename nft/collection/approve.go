@@ -6,6 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"strconv"
 )
 
 var MaxApproveItems = 10
@@ -59,16 +60,13 @@ func (fact ApproveFact) IsValid(b []byte) error {
 			return err
 		}
 
-		n := item.NFT()
-		if err := n.IsValid(nil); err != nil {
-			return err
-		}
+		n := strconv.FormatUint(item.NFT(), 10)
 
-		if _, found := founds[n.String()]; found {
+		if _, found := founds[n]; found {
 			return util.ErrInvalid.Errorf("duplicate nft found, %q", n)
 		}
 
-		founds[n.String()] = struct{}{}
+		founds[n] = struct{}{}
 	}
 
 	return nil

@@ -2,8 +2,6 @@ package collection
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
-
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -62,9 +60,8 @@ func (it ApproveItem) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-func (it ApproveItem) NFT() nft.NFTID {
-	nftID := nft.NFTID(it.idx)
-	return nftID
+func (it ApproveItem) NFT() uint64 {
+	return it.idx
 }
 
 func (it ApproveItem) Currency() currency.CurrencyID {

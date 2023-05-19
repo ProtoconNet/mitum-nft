@@ -35,11 +35,10 @@ func (hs NFTHash) String() string {
 var NFTHint = hint.MustNewHint("mitum-nft-nft-v0.0.1")
 
 var MaxCreators = 10
-var MaxCopyrighters = 10
 
 type NFT struct {
 	hint.BaseHinter
-	id       NFTID
+	id       uint64
 	active   bool
 	owner    base.Address
 	hash     NFTHash
@@ -49,7 +48,7 @@ type NFT struct {
 }
 
 func NewNFT(
-	id NFTID,
+	id uint64,
 	active bool,
 	owner base.Address,
 	hash NFTHash,
@@ -71,7 +70,6 @@ func NewNFT(
 
 func (n NFT) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
-		n.id,
 		n.owner,
 		n.hash,
 		n.uri,
@@ -98,7 +96,7 @@ func (n NFT) Bytes() []byte {
 	}
 
 	return util.ConcatBytesSlice(
-		n.id.Bytes(),
+		util.Uint64ToBytes(n.id),
 		ba,
 		n.owner.Bytes(),
 		n.hash.Bytes(),
@@ -108,7 +106,7 @@ func (n NFT) Bytes() []byte {
 	)
 }
 
-func (n NFT) ID() NFTID {
+func (n NFT) ID() uint64 {
 	return n.id
 }
 
@@ -163,7 +161,7 @@ func (n NFT) Addresses() []base.Address {
 }
 
 func (n NFT) Equal(cn NFT) bool {
-	if !n.ID().Equal(cn.ID()) {
+	if !(n.ID() == cn.ID()) {
 		return false
 	}
 
@@ -191,7 +189,7 @@ func (n NFT) Equal(cn NFT) bool {
 		return false
 	}
 
-	return n.ID().Equal(cn.ID())
+	return n.ID() == cn.ID()
 }
 
 func (n NFT) ExistsApproved() bool {

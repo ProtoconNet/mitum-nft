@@ -6,7 +6,7 @@ import (
 	"os"
 
 	extensioncmds "github.com/ProtoconNet/mitum-currency-extension/v2/cmds"
-	"github.com/ProtoconNet/mitum-nft/cmds"
+	"github.com/ProtoconNet/mitum-nft/v2/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util"
@@ -44,6 +44,7 @@ var flagDefaults = kong.Vars{
 	"create_account_threshold":          "100",
 	"create_contract_account_threshold": "100",
 	"safe_threshold":                    base.SafeThreshold.String(),
+	"network-id":                        "mitum",
 }
 
 func main() {

@@ -214,19 +214,21 @@ func (opp *DelegateProcessor) Process(
 	for _, item := range fact.Items() {
 		ak := StateKeyOperators(item.contract, item.Collection(), fact.Sender())
 
-		var box OperatorsBook
+		var operators OperatorsBook
 		switch st, found, err := getStateFunc(ak); {
 		case err != nil:
 			return nil, base.NewBaseOperationProcessReasonError("failed to get state of operators book, %q: %w", ak, err), nil
 		case !found:
-			box = NewOperatorsBook(item.Collection(), nil)
+			operators = NewOperatorsBook(item.Collection(), nil)
 		default:
-			box, err = StateOperatorsBookValue(st)
+			o, err := StateOperatorsBookValue(st)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError("operators book value not found, %q: %w", ak, err), nil
+			} else {
+				operators = *o
 			}
 		}
-		boxes[ak] = &box
+		boxes[ak] = &operators
 	}
 
 	var sts []base.StateMergeValue // nolint:prealloc

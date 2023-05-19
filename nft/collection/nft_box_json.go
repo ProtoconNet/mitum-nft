@@ -1,9 +1,6 @@
 package collection
 
 import (
-	"encoding/json"
-
-	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -11,7 +8,7 @@ import (
 
 type NFTBoxJSONMarshaler struct {
 	hint.BaseHinter
-	NFTs []nft.NFTID `json:"nfts"`
+	NFTs []uint64 `json:"nfts"`
 }
 
 func (nbx NFTBox) MarshalJSON() ([]byte, error) {
@@ -22,8 +19,8 @@ func (nbx NFTBox) MarshalJSON() ([]byte, error) {
 }
 
 type NFTBoxJSONUnmarshaler struct {
-	Hint hint.Hint       `json:"_hint"`
-	NFTs json.RawMessage `json:"nfts"`
+	Hint hint.Hint `json:"_hint"`
+	NFTs []uint64  `json:"nfts"`
 }
 
 func (nbx *NFTBox) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -31,6 +28,7 @@ func (nbx *NFTBox) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 
 	var u NFTBoxJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
+
 		return e(err, "")
 	}
 

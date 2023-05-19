@@ -18,7 +18,7 @@ func (nbx NFTBox) MarshalBSON() ([]byte, error) {
 
 type NFTBoxBSONUnmarshaler struct {
 	Hint string   `bson:"_hint"`
-	NFTs bson.Raw `bson:"nfts"`
+	NFTs []uint64 `bson:"nfts"`
 }
 
 func (nbx *NFTBox) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {

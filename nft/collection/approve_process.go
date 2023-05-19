@@ -6,7 +6,7 @@ import (
 
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -71,7 +71,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", design.Parent())
 	}
 
-	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, nft.NFTID(ipp.item.idx)), "key of nft", getStateFunc)
+	st, err = existsState(StateKeyNFT(ipp.item.contract, ipp.item.collection, ipp.item.idx), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q: %w", ipp.item.idx, err)
 	}

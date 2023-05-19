@@ -2,12 +2,14 @@ package cmds
 
 import (
 	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	digestisaac "github.com/ProtoconNet/mitum-currency/v2/digest/isaac"
 	isaacoperation "github.com/ProtoconNet/mitum-currency/v2/isaac"
-	"github.com/ProtoconNet/mitum-nft/nft"
-	"github.com/ProtoconNet/mitum-nft/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/digest"
+	digestisaac "github.com/ProtoconNet/mitum-nft/v2/digest/isaac"
+	"github.com/ProtoconNet/mitum-nft/v2/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/timestamp"
+	timestampservice "github.com/ProtoconNet/mitum-nft/v2/timestamp/service"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
@@ -54,6 +56,13 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: extensioncurrency.WithdrawsHint, Instance: extensioncurrency.Withdraws{}},
 	{Hint: extensioncurrency.GenesisCurrenciesHint, Instance: extensioncurrency.GenesisCurrencies{}},
 	{Hint: extensioncurrency.GenesisCurrenciesFactHint, Instance: extensioncurrency.GenesisCurrenciesFact{}},
+	{Hint: timestamp.DesignHint, Instance: timestamp.Design{}},
+	{Hint: timestamp.TimeStampItemHint, Instance: timestamp.TimeStampItem{}},
+	{Hint: timestampservice.AppendHint, Instance: timestampservice.Append{}},
+	{Hint: timestampservice.ServiceRegisterHint, Instance: timestampservice.ServiceRegister{}},
+	{Hint: timestampservice.TimeStampItemStateValueHint, Instance: timestampservice.TimeStampItemStateValue{}},
+	{Hint: timestampservice.ServiceDesignStateValueHint, Instance: timestampservice.ServiceDesignStateValue{}},
+	{Hint: timestampservice.TimeStampLastIndexStateValueHint, Instance: timestampservice.TimeStampLastIndexStateValue{}},
 
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
 	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
@@ -121,6 +130,9 @@ var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
 	{Hint: collection.DelegateFactHint, Instance: collection.DelegateFact{}},
 	{Hint: collection.ApproveFactHint, Instance: collection.ApproveFact{}},
 	{Hint: collection.NFTSignFactHint, Instance: collection.NFTSignFact{}},
+
+	{Hint: timestampservice.AppendFactHint, Instance: timestampservice.AppendFact{}},
+	{Hint: timestampservice.ServiceRegisterFactHint, Instance: timestampservice.ServiceRegisterFact{}},
 }
 
 func init() {
