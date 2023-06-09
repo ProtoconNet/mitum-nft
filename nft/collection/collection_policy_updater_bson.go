@@ -1,8 +1,8 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -39,7 +39,7 @@ type CollectionPolicyUpdaterFactBSONUnmarshaler struct {
 func (fact *CollectionPolicyUpdaterFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode bson of CollectionPolicyUpdaterFact")
 
-	var u currency.BaseFactBSONUnmarshaler
+	var u currencybase.BaseFactBSONUnmarshaler
 
 	err := enc.Unmarshal(b, &u)
 	if err != nil {
@@ -76,7 +76,7 @@ func (op CollectionPolicyUpdater) MarshalBSON() ([]byte, error) {
 func (op *CollectionPolicyUpdater) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode bson of CollectionPolicyUpdater")
 
-	var ubo currency.BaseOperation
+	var ubo currencybase.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
 		return e(err, "")
 	}

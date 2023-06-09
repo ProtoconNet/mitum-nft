@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -40,7 +40,7 @@ func (fact MintFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -110,11 +110,11 @@ func (fact MintFact) Items() []MintItem {
 }
 
 type Mint struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewMint(fact MintFact) (Mint, error) {
-	return Mint{BaseOperation: currency.NewBaseOperation(MintHint, fact)}, nil
+	return Mint{BaseOperation: currencybase.NewBaseOperation(MintHint, fact)}, nil
 }
 
 func (op *Mint) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

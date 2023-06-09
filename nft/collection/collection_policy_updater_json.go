@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -11,13 +10,13 @@ import (
 
 type CollectionPolicyUpdaterFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Sender     base.Address                 `json:"sender"`
-	Collection extensioncurrency.ContractID `json:"collection"`
-	Name       CollectionName               `json:"name"`
-	Royalty    nft.PaymentParameter         `json:"royalty"`
-	URI        nft.URI                      `json:"uri"`
-	Whitelist  []base.Address               `json:"whitelist"`
-	Currency   currency.CurrencyID          `json:"currency"`
+	Sender     base.Address            `json:"sender"`
+	Collection currencybase.ContractID `json:"collection"`
+	Name       CollectionName          `json:"name"`
+	Royalty    nft.PaymentParameter    `json:"royalty"`
+	URI        nft.URI                 `json:"uri"`
+	Whitelist  []base.Address          `json:"whitelist"`
+	Currency   currencybase.CurrencyID `json:"currency"`
 }
 
 func (fact CollectionPolicyUpdaterFact) MarshalJSON() ([]byte, error) {
@@ -58,7 +57,7 @@ func (fact *CollectionPolicyUpdaterFact) DecodeJSON(b []byte, enc *jsonenc.Encod
 }
 
 type collectionPolicyUpdaterMarshaler struct {
-	currency.BaseOperationJSONMarshaler
+	currencybase.BaseOperationJSONMarshaler
 }
 
 func (op CollectionPolicyUpdater) MarshalJSON() ([]byte, error) {
@@ -70,7 +69,7 @@ func (op CollectionPolicyUpdater) MarshalJSON() ([]byte, error) {
 func (op *CollectionPolicyUpdater) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode json of CollectionPolicyUpdater")
 
-	var ubo currency.BaseOperation
+	var ubo currencybase.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return e(err, "")
 	}

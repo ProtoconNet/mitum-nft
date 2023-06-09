@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"github.com/ProtoconNet/mitum-currency-extension/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
 )
 
 type OperationCommand struct {

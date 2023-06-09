@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -11,14 +10,14 @@ import (
 
 type CollectionRegisterFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Sender     base.Address                 `json:"sender"`
-	Contract   base.Address                 `json:"contract"`
-	Collection extensioncurrency.ContractID `json:"collection"`
-	Name       CollectionName               `json:"name"`
-	Royalty    nft.PaymentParameter         `json:"royalty"`
-	URI        nft.URI                      `json:"uri"`
-	Whites     []base.Address               `json:"whites"`
-	Currency   currency.CurrencyID          `json:"currency"`
+	Sender     base.Address            `json:"sender"`
+	Contract   base.Address            `json:"contract"`
+	Collection currencybase.ContractID `json:"collection"`
+	Name       CollectionName          `json:"name"`
+	Royalty    nft.PaymentParameter    `json:"royalty"`
+	URI        nft.URI                 `json:"uri"`
+	Whites     []base.Address          `json:"whites"`
+	Currency   currencybase.CurrencyID `json:"currency"`
 }
 
 func (fact CollectionRegisterFact) MarshalJSON() ([]byte, error) {
@@ -61,7 +60,7 @@ func (fact *CollectionRegisterFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) e
 }
 
 type collectionRegisterMarshaler struct {
-	currency.BaseOperationJSONMarshaler
+	currencybase.BaseOperationJSONMarshaler
 }
 
 func (op CollectionRegister) MarshalJSON() ([]byte, error) {
@@ -73,7 +72,7 @@ func (op CollectionRegister) MarshalJSON() ([]byte, error) {
 func (op *CollectionRegister) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode json of CurrecyRegister")
 
-	var ubo currency.BaseOperation
+	var ubo currencybase.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return e(err, "")
 	}

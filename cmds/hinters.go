@@ -1,11 +1,14 @@
 package cmds
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	digestisaac "github.com/ProtoconNet/mitum-currency/v2/digest/isaac"
-	isaacoperation "github.com/ProtoconNet/mitum-currency/v2/isaac"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	"github.com/ProtoconNet/mitum-currency/v3/digest"
+	digestisaac "github.com/ProtoconNet/mitum-currency/v3/digest/isaac"
+	mitumcurrency "github.com/ProtoconNet/mitum-currency/v3/operation/currency"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/operation/extension"
+	isaacoperation "github.com/ProtoconNet/mitum-currency/v3/operation/isaac"
+	currencystate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	extensionstate "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/ProtoconNet/mitum2/launch"
@@ -18,54 +21,55 @@ var SupportedProposalOperationFactHinters []encoder.DecodeDetail
 
 var hinters = []encoder.DecodeDetail{
 	// revive:disable-next-line:line-length-limit
-	{Hint: currency.BaseStateHint, Instance: currency.BaseState{}},
-	{Hint: currency.NodeHint, Instance: currency.BaseNode{}},
-	{Hint: currency.AddressHint, Instance: currency.Address{}},
-	{Hint: currency.AmountHint, Instance: currency.Amount{}},
-	{Hint: currency.AccountHint, Instance: currency.Account{}},
-	{Hint: currency.AccountStateValueHint, Instance: currency.AccountStateValue{}},
-	{Hint: currency.BalanceStateValueHint, Instance: currency.BalanceStateValue{}},
-	{Hint: currency.AccountKeysHint, Instance: currency.BaseAccountKeys{}},
-	{Hint: currency.AccountKeyHint, Instance: currency.BaseAccountKey{}},
-	{Hint: currency.CreateAccountsItemMultiAmountsHint, Instance: currency.CreateAccountsItemMultiAmounts{}},
-	{Hint: currency.CreateAccountsItemSingleAmountHint, Instance: currency.CreateAccountsItemSingleAmount{}},
-	{Hint: currency.CreateAccountsHint, Instance: currency.CreateAccounts{}},
-	{Hint: currency.KeyUpdaterHint, Instance: currency.KeyUpdater{}},
-	{Hint: currency.TransfersItemMultiAmountsHint, Instance: currency.TransfersItemMultiAmounts{}},
-	{Hint: currency.TransfersItemSingleAmountHint, Instance: currency.TransfersItemSingleAmount{}},
-	{Hint: currency.TransfersHint, Instance: currency.Transfers{}},
-	{Hint: currency.SuffrageInflationHint, Instance: currency.SuffrageInflation{}},
+	{Hint: currencybase.BaseStateHint, Instance: currencybase.BaseState{}},
+	{Hint: currencybase.NodeHint, Instance: currencybase.BaseNode{}},
+	{Hint: currencybase.AccountHint, Instance: currencybase.Account{}},
+	{Hint: currencybase.AddressHint, Instance: currencybase.Address{}},
+	{Hint: currencybase.AmountHint, Instance: currencybase.Amount{}},
+	{Hint: currencybase.AccountKeysHint, Instance: currencybase.BaseAccountKeys{}},
+	{Hint: currencybase.AccountKeyHint, Instance: currencybase.BaseAccountKey{}},
+	{Hint: mitumcurrency.CreateAccountsItemMultiAmountsHint, Instance: mitumcurrency.CreateAccountsItemMultiAmounts{}},
+	{Hint: mitumcurrency.CreateAccountsItemSingleAmountHint, Instance: mitumcurrency.CreateAccountsItemSingleAmount{}},
+	{Hint: mitumcurrency.CreateAccountsHint, Instance: mitumcurrency.CreateAccounts{}},
+	{Hint: mitumcurrency.KeyUpdaterHint, Instance: mitumcurrency.KeyUpdater{}},
+	{Hint: mitumcurrency.TransfersItemMultiAmountsHint, Instance: mitumcurrency.TransfersItemMultiAmounts{}},
+	{Hint: mitumcurrency.TransfersItemSingleAmountHint, Instance: mitumcurrency.TransfersItemSingleAmount{}},
+	{Hint: mitumcurrency.TransfersHint, Instance: mitumcurrency.Transfers{}},
+	{Hint: mitumcurrency.SuffrageInflationItemHint, Instance: mitumcurrency.SuffrageInflationItem{}},
+	{Hint: mitumcurrency.SuffrageInflationHint, Instance: mitumcurrency.SuffrageInflation{}},
+	{Hint: currencystate.AccountStateValueHint, Instance: currencystate.AccountStateValue{}},
+	{Hint: currencystate.BalanceStateValueHint, Instance: currencystate.BalanceStateValue{}},
 
-	{Hint: extensioncurrency.NilFeeerHint, Instance: extensioncurrency.NilFeeer{}},
-	{Hint: extensioncurrency.FixedFeeerHint, Instance: extensioncurrency.FixedFeeer{}},
-	{Hint: extensioncurrency.RatioFeeerHint, Instance: extensioncurrency.RatioFeeer{}},
-	{Hint: extensioncurrency.CurrencyPolicyHint, Instance: extensioncurrency.CurrencyPolicy{}},
-	{Hint: extensioncurrency.CurrencyDesignHint, Instance: extensioncurrency.CurrencyDesign{}},
-	{Hint: extensioncurrency.CurrencyDesignStateValueHint, Instance: extensioncurrency.CurrencyDesignStateValue{}},
-	{Hint: extensioncurrency.CurrencyRegisterHint, Instance: extensioncurrency.CurrencyRegister{}},
-	{Hint: extensioncurrency.CurrencyPolicyUpdaterHint, Instance: extensioncurrency.CurrencyPolicyUpdater{}},
-	{Hint: extensioncurrency.ContractAccountKeysHint, Instance: extensioncurrency.ContractAccountKeys{}},
-	{Hint: extensioncurrency.ContractAccountStateValueHint, Instance: extensioncurrency.ContractAccountStateValue{}},
+	{Hint: currencybase.CurrencyDesignHint, Instance: currencybase.CurrencyDesign{}},
+	{Hint: currencybase.CurrencyPolicyHint, Instance: currencybase.CurrencyPolicy{}},
+	{Hint: mitumcurrency.CurrencyRegisterHint, Instance: mitumcurrency.CurrencyRegister{}},
+	{Hint: mitumcurrency.CurrencyPolicyUpdaterHint, Instance: mitumcurrency.CurrencyPolicyUpdater{}},
+	{Hint: currencybase.ContractAccountKeysHint, Instance: currencybase.ContractAccountKeys{}},
 	{Hint: extensioncurrency.CreateContractAccountsItemMultiAmountsHint, Instance: extensioncurrency.CreateContractAccountsItemMultiAmounts{}},
 	{Hint: extensioncurrency.CreateContractAccountsItemSingleAmountHint, Instance: extensioncurrency.CreateContractAccountsItemSingleAmount{}},
 	{Hint: extensioncurrency.CreateContractAccountsHint, Instance: extensioncurrency.CreateContractAccounts{}},
 	{Hint: extensioncurrency.WithdrawsItemMultiAmountsHint, Instance: extensioncurrency.WithdrawsItemMultiAmounts{}},
 	{Hint: extensioncurrency.WithdrawsItemSingleAmountHint, Instance: extensioncurrency.WithdrawsItemSingleAmount{}},
 	{Hint: extensioncurrency.WithdrawsHint, Instance: extensioncurrency.Withdraws{}},
-	{Hint: extensioncurrency.GenesisCurrenciesHint, Instance: extensioncurrency.GenesisCurrencies{}},
-	{Hint: extensioncurrency.GenesisCurrenciesFactHint, Instance: extensioncurrency.GenesisCurrenciesFact{}},
+	{Hint: mitumcurrency.GenesisCurrenciesFactHint, Instance: mitumcurrency.GenesisCurrenciesFact{}},
+	{Hint: mitumcurrency.GenesisCurrenciesHint, Instance: mitumcurrency.GenesisCurrencies{}},
+	{Hint: currencybase.NilFeeerHint, Instance: currencybase.NilFeeer{}},
+	{Hint: currencybase.FixedFeeerHint, Instance: currencybase.FixedFeeer{}},
+	{Hint: currencybase.RatioFeeerHint, Instance: currencybase.RatioFeeer{}},
+	{Hint: extensionstate.ContractAccountStateValueHint, Instance: extensionstate.ContractAccountStateValue{}},
+	{Hint: currencystate.CurrencyDesignStateValueHint, Instance: currencystate.CurrencyDesignStateValue{}},
 
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
 	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
 	{Hint: digest.OperationValueHint, Instance: digest.OperationValue{}},
 
+	{Hint: isaacoperation.GenesisNetworkPolicyHint, Instance: isaacoperation.GenesisNetworkPolicy{}},
+	{Hint: isaacoperation.SuffrageCandidateHint, Instance: isaacoperation.SuffrageCandidate{}},
+	{Hint: isaacoperation.SuffrageGenesisJoinHint, Instance: isaacoperation.SuffrageGenesisJoin{}},
+	{Hint: isaacoperation.SuffrageDisjoinHint, Instance: isaacoperation.SuffrageDisjoin{}},
+	{Hint: isaacoperation.SuffrageJoinHint, Instance: isaacoperation.SuffrageJoin{}},
 	{Hint: isaacoperation.NetworkPolicyHint, Instance: isaacoperation.NetworkPolicy{}},
 	{Hint: isaacoperation.NetworkPolicyStateValueHint, Instance: isaacoperation.NetworkPolicyStateValue{}},
-	{Hint: isaacoperation.GenesisNetworkPolicyHint, Instance: isaacoperation.GenesisNetworkPolicy{}},
-	{Hint: isaacoperation.SuffrageGenesisJoinHint, Instance: isaacoperation.SuffrageGenesisJoin{}},
-	{Hint: isaacoperation.SuffrageCandidateHint, Instance: isaacoperation.SuffrageCandidate{}},
-	{Hint: isaacoperation.SuffrageJoinHint, Instance: isaacoperation.SuffrageJoin{}},
-	{Hint: isaacoperation.SuffrageDisjoinHint, Instance: isaacoperation.SuffrageDisjoin{}},
 	{Hint: isaacoperation.FixedSuffrageCandidateLimiterRuleHint, Instance: isaacoperation.FixedSuffrageCandidateLimiterRule{}},
 	{Hint: isaacoperation.MajoritySuffrageCandidateLimiterRuleHint, Instance: isaacoperation.MajoritySuffrageCandidateLimiterRule{}},
 
@@ -98,21 +102,21 @@ var hinters = []encoder.DecodeDetail{
 }
 
 var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
-	{Hint: currency.CreateAccountsFactHint, Instance: currency.CreateAccountsFact{}},
-	{Hint: currency.KeyUpdaterFactHint, Instance: currency.KeyUpdaterFact{}},
-	{Hint: currency.TransfersFactHint, Instance: currency.TransfersFact{}},
-	{Hint: currency.SuffrageInflationFactHint, Instance: currency.SuffrageInflationFact{}},
+	{Hint: mitumcurrency.CreateAccountsFactHint, Instance: mitumcurrency.CreateAccountsFact{}},
+	{Hint: mitumcurrency.KeyUpdaterFactHint, Instance: mitumcurrency.KeyUpdaterFact{}},
+	{Hint: mitumcurrency.TransfersFactHint, Instance: mitumcurrency.TransfersFact{}},
+	{Hint: mitumcurrency.SuffrageInflationFactHint, Instance: mitumcurrency.SuffrageInflationFact{}},
 
-	{Hint: extensioncurrency.CurrencyRegisterFactHint, Instance: extensioncurrency.CurrencyRegisterFact{}},
-	{Hint: extensioncurrency.CurrencyPolicyUpdaterFactHint, Instance: extensioncurrency.CurrencyPolicyUpdaterFact{}},
+	{Hint: mitumcurrency.CurrencyRegisterFactHint, Instance: mitumcurrency.CurrencyRegisterFact{}},
+	{Hint: mitumcurrency.CurrencyPolicyUpdaterFactHint, Instance: mitumcurrency.CurrencyPolicyUpdaterFact{}},
 	{Hint: extensioncurrency.CreateContractAccountsFactHint, Instance: extensioncurrency.CreateContractAccountsFact{}},
 	{Hint: extensioncurrency.WithdrawsFactHint, Instance: extensioncurrency.WithdrawsFact{}},
 
 	{Hint: isaacoperation.GenesisNetworkPolicyFactHint, Instance: isaacoperation.GenesisNetworkPolicyFact{}},
-	{Hint: isaacoperation.SuffrageGenesisJoinFactHint, Instance: isaacoperation.SuffrageGenesisJoinFact{}},
 	{Hint: isaacoperation.SuffrageCandidateFactHint, Instance: isaacoperation.SuffrageCandidateFact{}},
-	{Hint: isaacoperation.SuffrageJoinFactHint, Instance: isaacoperation.SuffrageJoinFact{}},
 	{Hint: isaacoperation.SuffrageDisjoinFactHint, Instance: isaacoperation.SuffrageDisjoinFact{}},
+	{Hint: isaacoperation.SuffrageJoinFactHint, Instance: isaacoperation.SuffrageJoinFact{}},
+	{Hint: isaacoperation.SuffrageGenesisJoinFactHint, Instance: isaacoperation.SuffrageGenesisJoinFact{}},
 
 	{Hint: collection.CollectionRegisterFactHint, Instance: collection.CollectionRegisterFact{}},
 	{Hint: collection.CollectionPolicyUpdaterFactHint, Instance: collection.CollectionPolicyUpdaterFact{}},

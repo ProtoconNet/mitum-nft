@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -38,7 +38,7 @@ func (fact NFTSignFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -113,11 +113,11 @@ func (fact NFTSignFact) Addresses() ([]base.Address, error) {
 }
 
 type NFTSign struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewNFTSign(fact NFTSignFact) (NFTSign, error) {
-	return NFTSign{BaseOperation: currency.NewBaseOperation(NFTSignHint, fact)}, nil
+	return NFTSign{BaseOperation: currencybase.NewBaseOperation(NFTSignHint, fact)}, nil
 }
 
 func (op *NFTSign) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

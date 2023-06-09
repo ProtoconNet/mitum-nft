@@ -1,7 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -10,8 +10,8 @@ import (
 
 type OperatorsBookJSONMarshaler struct {
 	hint.BaseHinter
-	Collection extensioncurrency.ContractID `json:"collection"`
-	Operators  []base.Address               `json:"operators"`
+	Collection currencybase.ContractID `json:"collection"`
+	Operators  []base.Address          `json:"operators"`
 }
 
 func (ob OperatorsBook) MarshalJSON() ([]byte, error) {

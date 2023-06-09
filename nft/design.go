@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -65,12 +65,12 @@ type Design struct {
 	hint.BaseHinter
 	parent     base.Address
 	creator    base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	active     bool
 	policy     BasePolicy
 }
 
-func NewDesign(parent base.Address, creator base.Address, collection extensioncurrency.ContractID, active bool, policy BasePolicy) Design {
+func NewDesign(parent base.Address, creator base.Address, collection currencybase.ContractID, active bool, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		parent:     parent,
@@ -132,7 +132,7 @@ func (de Design) Creator() base.Address {
 	return de.creator
 }
 
-func (de Design) Collection() extensioncurrency.ContractID {
+func (de Design) Collection() currencybase.ContractID {
 	return de.collection
 }
 

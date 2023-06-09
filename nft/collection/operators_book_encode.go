@@ -1,7 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -17,7 +17,7 @@ func (ob *OperatorsBook) unmarshal(
 	e := util.StringErrorFunc("failed to unmarshal operators book")
 
 	ob.BaseHinter = hint.NewBaseHinter(ht)
-	ob.collection = extensioncurrency.ContractID(col)
+	ob.collection = currencybase.ContractID(col)
 
 	operators := make([]base.Address, len(bags))
 	for i, bag := range bags {

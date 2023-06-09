@@ -3,28 +3,27 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	nftcollection "github.com/ProtoconNet/mitum-nft/nft/collection"
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
 type DelegateCommand struct {
 	baseCommand
-	cmds.OperationFlags
-	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
-	Operator   cmds.AddressFlag    `arg:"" name:"operator" help:"operator account address"`
-	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Mode       string              `name:"mode" help:"delegate mode" optional:""`
+	OperationFlags
+	Sender     AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Collection string         `arg:"" name:"collection" help:"collection id" required:"true"`
+	Operator   AddressFlag    `arg:"" name:"operator" help:"operator account address"`
+	Currency   CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Mode       string         `name:"mode" help:"delegate mode" optional:""`
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	operator   base.Address
 	mode       nftcollection.DelegateMode
 }
@@ -73,7 +72,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	collection := extensioncurrency.ContractID(cmd.Collection)
+	collection := currencybase.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	}

@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -19,24 +18,24 @@ type CollectionRegisterFact struct {
 	base.BaseFact
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	name       CollectionName
 	royalty    nft.PaymentParameter
 	uri        nft.URI
 	whitelist  []base.Address
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
 func NewCollectionRegisterFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	collection extensioncurrency.ContractID,
+	collection currencybase.ContractID,
 	name CollectionName,
 	royalty nft.PaymentParameter,
 	uri nft.URI,
 	whitelist []base.Address,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) CollectionRegisterFact {
 	bf := base.NewBaseFact(CollectionRegisterFactHint, token)
 	fact := CollectionRegisterFact{
@@ -60,7 +59,7 @@ func (fact CollectionRegisterFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -122,7 +121,7 @@ func (fact CollectionRegisterFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CollectionRegisterFact) Collection() extensioncurrency.ContractID {
+func (fact CollectionRegisterFact) Collection() currencybase.ContractID {
 	return fact.collection
 }
 
@@ -154,16 +153,16 @@ func (fact CollectionRegisterFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-func (fact CollectionRegisterFact) Currency() currency.CurrencyID {
+func (fact CollectionRegisterFact) Currency() currencybase.CurrencyID {
 	return fact.currency
 }
 
 type CollectionRegister struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewCollectionRegister(fact CollectionRegisterFact) (CollectionRegister, error) {
-	return CollectionRegister{BaseOperation: currency.NewBaseOperation(CollectionRegisterHint, fact)}, nil
+	return CollectionRegister{BaseOperation: currencybase.NewBaseOperation(CollectionRegisterHint, fact)}, nil
 }
 
 func (op *CollectionRegister) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

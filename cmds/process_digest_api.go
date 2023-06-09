@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum2/base"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
 	"github.com/ProtoconNet/mitum2/launch"

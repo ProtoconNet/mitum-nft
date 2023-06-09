@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -14,13 +13,13 @@ var NFTTransferItemHint = hint.MustNewHint("mitum-nft-transfer-item-v0.0.1")
 type NFTTransferItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	receiver   base.Address
 	nft        uint64
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
-func NewNFTTransferItem(contract base.Address, collection extensioncurrency.ContractID, receiver base.Address, nft uint64, currency currency.CurrencyID) NFTTransferItem {
+func NewNFTTransferItem(contract base.Address, collection currencybase.ContractID, receiver base.Address, nft uint64, currency currencybase.CurrencyID) NFTTransferItem {
 	return NFTTransferItem{
 		BaseHinter: hint.NewBaseHinter(NFTTransferItemHint),
 		contract:   contract,
@@ -49,7 +48,7 @@ func (it NFTTransferItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it NFTTransferItem) Collection() extensioncurrency.ContractID {
+func (it NFTTransferItem) Collection() currencybase.ContractID {
 	return it.collection
 }
 
@@ -68,6 +67,6 @@ func (it NFTTransferItem) NFT() nft.NFTID {
 	return nftID
 }
 
-func (it NFTTransferItem) Currency() currency.CurrencyID {
+func (it NFTTransferItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }

@@ -1,7 +1,7 @@
 package nft
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -20,7 +20,7 @@ func (de *Design) unmarshal(
 	e := util.StringErrorFunc("failed to unmarshal Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.collection = extensioncurrency.ContractID(sb)
+	de.collection = currencybase.ContractID(sb)
 	de.active = ac
 
 	parent, err := base.DecodeAddress(pr, enc)

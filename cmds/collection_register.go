@@ -3,31 +3,30 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	nftcollection "github.com/ProtoconNet/mitum-nft/nft/collection"
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
 type CollectionRegisterCommand struct {
 	baseCommand
-	cmds.OperationFlags
-	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract account to register policy" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
-	Name       string              `arg:"" name:"name" help:"collection name" required:"true"`
-	Royalty    uint                `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
-	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	URI        string              `name:"uri" help:"collection uri" optional:""`
-	White      cmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
+	OperationFlags
+	Sender     AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   AddressFlag    `arg:"" name:"contract" help:"contract account to register policy" required:"true"`
+	Collection string         `arg:"" name:"collection" help:"collection id" required:"true"`
+	Name       string         `arg:"" name:"name" help:"collection name" required:"true"`
+	Royalty    uint           `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
+	Currency   CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	URI        string         `name:"uri" help:"collection uri" optional:""`
+	White      AddressFlag    `name:"white" help:"whitelisted address" optional:""`
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	name       nftcollection.CollectionName
 	royalty    nft.PaymentParameter
 	uri        nft.URI
@@ -87,7 +86,7 @@ func (cmd *CollectionRegisterCommand) parseFlags() error {
 		}
 	}
 
-	collection := extensioncurrency.ContractID(cmd.Collection)
+	collection := currencybase.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	} else {

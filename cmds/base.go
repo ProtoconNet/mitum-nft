@@ -10,6 +10,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/localtime"
 	"github.com/ProtoconNet/mitum2/util/logging"
 	"github.com/ProtoconNet/mitum2/util/ps"
 	"github.com/rs/zerolog"
@@ -81,4 +82,19 @@ func PAddHinters(ctx context.Context) (context.Context, error) {
 	}
 
 	return ctx, nil
+}
+
+type OperationFlags struct {
+	Privatekey PrivatekeyFlag `arg:"" name:"privatekey" help:"privatekey to sign operation" required:"true"`
+	Token      string         `help:"token for operation" optional:""`
+	NetworkID  NetworkIDFlag  `name:"network-id" help:"network-id" required:"true"`
+	Pretty     bool           `name:"pretty" help:"pretty format"`
+}
+
+func (op *OperationFlags) IsValid([]byte) error {
+	if len(op.Token) < 1 {
+		op.Token = localtime.Now().UTC().String()
+	}
+
+	return op.NetworkID.NetworkID().IsValid(nil)
 }

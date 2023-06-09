@@ -3,7 +3,7 @@ package nft
 import (
 	"encoding/json"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -12,11 +12,11 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Parent     base.Address                 `json:"parent"`
-	Creator    base.Address                 `json:"creator"`
-	Collection extensioncurrency.ContractID `json:"collection"`
-	Active     bool                         `json:"active"`
-	Policy     BasePolicy                   `json:"policy"`
+	Parent     base.Address            `json:"parent"`
+	Creator    base.Address            `json:"creator"`
+	Collection currencybase.ContractID `json:"collection"`
+	Active     bool                    `json:"active"`
+	Policy     BasePolicy              `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {

@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -40,13 +39,13 @@ var DelegateItemHint = hint.MustNewHint("mitum-nft-delegate-item-v0.0.1")
 type DelegateItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	operator   base.Address
 	mode       DelegateMode
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
-func NewDelegateItem(contract base.Address, collection extensioncurrency.ContractID, operator base.Address, mode DelegateMode, currency currency.CurrencyID) DelegateItem {
+func NewDelegateItem(contract base.Address, collection currencybase.ContractID, operator base.Address, mode DelegateMode, currency currencybase.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
 		contract:   contract,
@@ -82,7 +81,7 @@ func (it DelegateItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it DelegateItem) Collection() extensioncurrency.ContractID {
+func (it DelegateItem) Collection() currencybase.ContractID {
 	return it.collection
 }
 
@@ -100,6 +99,6 @@ func (it DelegateItem) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-func (it DelegateItem) Currency() currency.CurrencyID {
+func (it DelegateItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }

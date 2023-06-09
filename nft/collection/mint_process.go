@@ -4,8 +4,11 @@ import (
 	"context"
 	"sync"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	currencyoperation "github.com/ProtoconNet/mitum-currency/v3/operation/currency"
+	types "github.com/ProtoconNet/mitum-currency/v3/operation/type"
+	currency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -109,7 +112,7 @@ type MintProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewMintProcessor() extensioncurrency.GetNewProcessor {
+func NewMintProcessor() types.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -162,7 +165,7 @@ func (opp *MintProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("invalid signing: %w", err), nil
 	}
 
-	idxes := map[extensioncurrency.ContractID]uint64{}
+	idxes := map[currencybase.ContractID]uint64{}
 	for _, item := range fact.Items() {
 		collection := item.Collection()
 
@@ -361,7 +364,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee: %w", err), nil
 	}
-	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
+	sb, err := currencyoperation.CheckEnoughBalance(fact.sender, required, getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance: %w", err), nil
 	}
@@ -372,7 +375,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 			return nil, nil, e(nil, "expected BalanceStateValue, not %T", sb[i].Value())
 		}
 		stv := currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, currency.NewBalanceStateMergeValue(sb[i].Key(), stv))
+		sts = append(sts, NewStateMergeValue(sb[i].Key(), stv))
 	}
 
 	return sts, nil, nil

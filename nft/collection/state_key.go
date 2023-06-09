@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
@@ -30,13 +30,13 @@ var (
 	StateKeyNFTSuffix        = ":nft"
 )
 
-func StateKeyNFTPrefix(addr base.Address, collectionID extensioncurrency.ContractID) string {
+func StateKeyNFTPrefix(addr base.Address, collectionID currencybase.ContractID) string {
 	return fmt.Sprintf("%s%s:%s", NFTPrefix, addr.String(), collectionID.String())
 }
 
 func NFTStateKey(
 	contract base.Address,
-	collectionID extensioncurrency.ContractID,
+	collectionID currencybase.ContractID,
 	keyType StateKey,
 ) string {
 	prefix := StateKeyNFTPrefix(contract, collectionID)
@@ -55,11 +55,11 @@ func NFTStateKey(
 	return stateKey
 }
 
-func StateKeyOperators(contract base.Address, collectionID extensioncurrency.ContractID, addr base.Address) string {
+func StateKeyOperators(contract base.Address, collectionID currencybase.ContractID, addr base.Address) string {
 	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), addr.String(), StateKeyOperatorsSuffix)
 }
 
-func StateKeyNFT(contract base.Address, collectionID extensioncurrency.ContractID, id nft.NFTID) string {
+func StateKeyNFT(contract base.Address, collectionID currencybase.ContractID, id nft.NFTID) string {
 	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), id.String(), StateKeyNFTSuffix)
 }
 

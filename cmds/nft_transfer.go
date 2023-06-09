@@ -3,28 +3,27 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft/collection"
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
 type NFTTransferCommand struct {
 	baseCommand
-	cmds.OperationFlags
-	Sender     cmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Receiver   cmds.AddressFlag    `arg:"" name:"receiver" help:"nft owner" required:"true"`
-	Contract   cmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string              `arg:"" name:"collection" help:"collection id" required:"true"`
-	NFT        uint64              `arg:"" name:"nft" help:"target nft"`
-	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	OperationFlags
+	Sender     AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Receiver   AddressFlag    `arg:"" name:"receiver" help:"nft owner" required:"true"`
+	Contract   AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Collection string         `arg:"" name:"collection" help:"collection id" required:"true"`
+	NFT        uint64         `arg:"" name:"nft" help:"target nft"`
+	Currency   CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	sender     base.Address
 	receiver   base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 }
 
 func NewNFTTranfserCommand() NFTTransferCommand {
@@ -77,7 +76,7 @@ func (cmd *NFTTransferCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	col := extensioncurrency.ContractID(cmd.Collection)
+	col := currencybase.ContractID(cmd.Collection)
 	if err := col.IsValid(nil); err != nil {
 		return err
 	} else {

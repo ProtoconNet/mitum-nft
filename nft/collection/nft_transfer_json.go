@@ -3,7 +3,7 @@ package collection
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -43,7 +43,7 @@ func (fact *NFTTransferFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 }
 
 type nftTransferMarshaler struct {
-	currency.BaseOperationJSONMarshaler
+	currencybase.BaseOperationJSONMarshaler
 }
 
 func (op NFTTransfer) MarshalJSON() ([]byte, error) {
@@ -55,7 +55,7 @@ func (op NFTTransfer) MarshalJSON() ([]byte, error) {
 func (op *NFTTransfer) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode json of NFTTransfer")
 
-	var ubo currency.BaseOperation
+	var ubo currencybase.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return e(err, "")
 	}

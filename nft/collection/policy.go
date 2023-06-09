@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"sort"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -177,7 +177,7 @@ type CollectionDesign struct {
 	nft.Design
 }
 
-func NewCollectionDesign(parent base.Address, creator base.Address, collection extensioncurrency.ContractID, active bool, policy CollectionPolicy) CollectionDesign {
+func NewCollectionDesign(parent base.Address, creator base.Address, collection currencybase.ContractID, active bool, policy CollectionPolicy) CollectionDesign {
 	design := nft.NewDesign(parent, creator, collection, active, policy)
 
 	return CollectionDesign{

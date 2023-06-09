@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -19,23 +18,23 @@ type CollectionPolicyUpdaterFact struct {
 	base.BaseFact
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	name       CollectionName
 	royalty    nft.PaymentParameter
 	uri        nft.URI
 	whitelist  []base.Address
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
 func NewCollectionPolicyUpdaterFact(
 	token []byte,
 	sender, contract base.Address,
-	collection extensioncurrency.ContractID,
+	collection currencybase.ContractID,
 	name CollectionName,
 	royalty nft.PaymentParameter,
 	uri nft.URI,
 	whitelist []base.Address,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) CollectionPolicyUpdaterFact {
 	bf := base.NewBaseFact(CollectionPolicyUpdaterFactHint, token)
 
@@ -60,7 +59,7 @@ func (fact CollectionPolicyUpdaterFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -134,7 +133,7 @@ func (fact CollectionPolicyUpdaterFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CollectionPolicyUpdaterFact) Collection() extensioncurrency.ContractID {
+func (fact CollectionPolicyUpdaterFact) Collection() currencybase.ContractID {
 	return fact.collection
 }
 
@@ -154,7 +153,7 @@ func (fact CollectionPolicyUpdaterFact) Whitelist() []base.Address {
 	return fact.whitelist
 }
 
-func (fact CollectionPolicyUpdaterFact) Currency() currency.CurrencyID {
+func (fact CollectionPolicyUpdaterFact) Currency() currencybase.CurrencyID {
 	return fact.currency
 }
 
@@ -165,11 +164,11 @@ func (fact CollectionPolicyUpdaterFact) Addresses() ([]base.Address, error) {
 }
 
 type CollectionPolicyUpdater struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewCollectionPolicyUpdater(fact CollectionPolicyUpdaterFact) (CollectionPolicyUpdater, error) {
-	return CollectionPolicyUpdater{BaseOperation: currency.NewBaseOperation(CollectionPolicyUpdaterHint, fact)}, nil
+	return CollectionPolicyUpdater{BaseOperation: currencybase.NewBaseOperation(CollectionPolicyUpdaterHint, fact)}, nil
 }
 
 func (op *CollectionPolicyUpdater) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

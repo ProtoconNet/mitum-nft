@@ -1,10 +1,9 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -13,7 +12,7 @@ import (
 type CollectionItem interface {
 	util.Byter
 	util.IsValider
-	Currency() currency.CurrencyID
+	Currency() currencybase.CurrencyID
 }
 
 var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
@@ -21,20 +20,20 @@ var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
 type MintItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	hash       nft.NFTHash
 	uri        nft.URI
 	creators   nft.Signers
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
 func NewMintItem(
 	contract base.Address,
-	collection extensioncurrency.ContractID,
+	collection currencybase.ContractID,
 	hash nft.NFTHash,
 	uri nft.URI,
 	creators nft.Signers,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) MintItem {
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
@@ -66,7 +65,7 @@ func (it MintItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it MintItem) Collection() extensioncurrency.ContractID {
+func (it MintItem) Collection() currencybase.ContractID {
 	return it.collection
 }
 
@@ -89,6 +88,6 @@ func (it MintItem) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-func (it MintItem) Currency() currency.CurrencyID {
+func (it MintItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }

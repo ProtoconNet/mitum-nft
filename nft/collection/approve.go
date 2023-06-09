@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -39,7 +39,7 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -120,11 +120,11 @@ func (fact ApproveFact) Addresses() ([]base.Address, error) {
 }
 
 type Approve struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewApprove(fact ApproveFact) (Approve, error) {
-	return Approve{BaseOperation: currency.NewBaseOperation(ApproveHint, fact)}, nil
+	return Approve{BaseOperation: currencybase.NewBaseOperation(ApproveHint, fact)}, nil
 }
 
 func (op *Approve) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

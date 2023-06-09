@@ -3,8 +3,8 @@ package collection
 import (
 	"strings"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	currency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -93,7 +93,7 @@ type LastNFTIndexStateValue struct {
 	id nft.NFTID
 }
 
-func NewLastNFTIndexStateValue( /*collection extensioncurrency.ContractID,*/ id nft.NFTID) LastNFTIndexStateValue {
+func NewLastNFTIndexStateValue( /*collection currencybase.ContractID,*/ id nft.NFTID) LastNFTIndexStateValue {
 	return LastNFTIndexStateValue{
 		BaseHinter: hint.NewBaseHinter(LastNFTIndexStateValueHint),
 		id:         id,
@@ -396,18 +396,18 @@ func notExistsState(
 	return st, nil
 }
 
-func existsCurrencyPolicy(cid currency.CurrencyID, getStateFunc base.GetStateFunc) (extensioncurrency.CurrencyPolicy, error) {
-	var policy extensioncurrency.CurrencyPolicy
+func existsCurrencyPolicy(cid currencybase.CurrencyID, getStateFunc base.GetStateFunc) (currencybase.CurrencyPolicy, error) {
+	var policy currencybase.CurrencyPolicy
 
-	switch st, found, err := getStateFunc(extensioncurrency.StateKeyCurrencyDesign(cid)); {
+	switch st, found, err := getStateFunc(currency.StateKeyCurrencyDesign(cid)); {
 	case err != nil:
-		return extensioncurrency.CurrencyPolicy{}, err
+		return currencybase.CurrencyPolicy{}, err
 	case !found:
-		return extensioncurrency.CurrencyPolicy{}, errors.Errorf("currency not found, %v", cid)
+		return currencybase.CurrencyPolicy{}, errors.Errorf("currency not found, %v", cid)
 	default:
-		design, ok := st.Value().(extensioncurrency.CurrencyDesignStateValue) //nolint:forcetypeassert //...
+		design, ok := st.Value().(currency.CurrencyDesignStateValue) //nolint:forcetypeassert //...
 		if !ok {
-			return extensioncurrency.CurrencyPolicy{}, errors.Errorf("expected CurrencyDesignStateValue, not %T", st.Value())
+			return currencybase.CurrencyPolicy{}, errors.Errorf("expected CurrencyDesignStateValue, not %T", st.Value())
 		}
 		policy = design.CurrencyDesign.Policy()
 	}
@@ -415,7 +415,7 @@ func existsCurrencyPolicy(cid currency.CurrencyID, getStateFunc base.GetStateFun
 	return policy, nil
 }
 
-func existsCollectionPolicy(contract base.Address, id extensioncurrency.ContractID, getStateFunc base.GetStateFunc) (CollectionPolicy, error) {
+func existsCollectionPolicy(contract base.Address, id currencybase.ContractID, getStateFunc base.GetStateFunc) (CollectionPolicy, error) {
 	var policy CollectionPolicy
 
 	switch st, found, err := getStateFunc(NFTStateKey(contract, id, CollectionKey)); {

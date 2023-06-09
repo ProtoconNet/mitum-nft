@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"sort"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -17,11 +16,11 @@ var OperatorsBookHint = hint.MustNewHint("mitum-nft-operator-book-v0.0.1")
 
 type OperatorsBook struct {
 	hint.BaseHinter
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	operators  []base.Address
 }
 
-func NewOperatorsBook(collection extensioncurrency.ContractID, operators []base.Address) OperatorsBook {
+func NewOperatorsBook(collection currencybase.ContractID, operators []base.Address) OperatorsBook {
 	if operators == nil {
 		return OperatorsBook{BaseHinter: hint.NewBaseHinter(OperatorsBookHint), collection: collection, operators: []base.Address{}}
 	}
@@ -60,7 +59,7 @@ func (ob OperatorsBook) IsEmpty() bool {
 	return len(ob.operators) < 1
 }
 
-func (ob OperatorsBook) Collection() extensioncurrency.ContractID {
+func (ob OperatorsBook) Collection() currencybase.ContractID {
 	return ob.collection
 }
 
@@ -108,7 +107,7 @@ func (ob OperatorsBook) Get(ag base.Address) (base.Address, error) {
 		}
 	}
 
-	return currency.Address{}, errors.Errorf("account not in operators book, %q", ag)
+	return currencybase.Address{}, errors.Errorf("account not in operators book, %q", ag)
 }
 
 func (ob *OperatorsBook) Append(ag base.Address) error {
@@ -137,7 +136,7 @@ func (ob *OperatorsBook) Remove(ag base.Address) error {
 	for i := range ob.operators {
 		if ag.String() == ob.operators[i].String() {
 			ob.operators[i] = ob.operators[len(ob.operators)-1]
-			ob.operators[len(ob.operators)-1] = currency.Address{}
+			ob.operators[len(ob.operators)-1] = currencybase.Address{}
 			ob.operators = ob.operators[:len(ob.operators)-1]
 
 			return nil

@@ -1,8 +1,7 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum-nft/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -21,8 +20,8 @@ func (fact *CollectionPolicyUpdaterFact) unmarshal(
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal CollectionPolicyUpdaterFact")
 
-	fact.collection = extensioncurrency.ContractID(col)
-	fact.currency = currency.CurrencyID(cid)
+	fact.collection = currencybase.ContractID(col)
+	fact.currency = currencybase.CurrencyID(cid)
 
 	sender, err := base.DecodeAddress(sd, enc)
 	if err != nil {

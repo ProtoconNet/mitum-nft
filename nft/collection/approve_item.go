@@ -1,10 +1,9 @@
 package collection
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-nft/nft"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -15,13 +14,13 @@ var ApproveItemHint = hint.MustNewHint("mitum-nft-approve-item-v0.0.1")
 type ApproveItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection currencybase.ContractID
 	approved   base.Address
 	idx        uint64
-	currency   currency.CurrencyID
+	currency   currencybase.CurrencyID
 }
 
-func NewApproveItem(contract base.Address, collection extensioncurrency.ContractID, approved base.Address, idx uint64, currency currency.CurrencyID) ApproveItem {
+func NewApproveItem(contract base.Address, collection currencybase.ContractID, approved base.Address, idx uint64, currency currencybase.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		contract:   contract,
@@ -67,6 +66,6 @@ func (it ApproveItem) NFT() nft.NFTID {
 	return nftID
 }
 
-func (it ApproveItem) Currency() currency.CurrencyID {
+func (it ApproveItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }

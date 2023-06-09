@@ -1,12 +1,12 @@
 package collection
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
 
-func checkThreshold(fs []base.Sign, keys currency.AccountKeys) error {
+func checkThreshold(fs []base.Sign, keys currencybase.AccountKeys) error {
 	var sum uint
 	for i := range fs {
 		ky, found := keys.Key(fs[i].Signer())
