@@ -1,5 +1,5 @@
 address: no0sas
-privatekey: 5VYUTw5LWwTiSegXU4LQCadNG1eW8uVxkDdESkPN1dR7mpr
+privatekey: EYc4WdFjP9qkgfwJZfnsVXeh827rsNppm5HUSjSDeMFFmpr
 network_id: mitum
 network:
   bind: 0.0.0.0:4320
@@ -12,7 +12,7 @@ digest:
     bind: http://localhost:54320
     url: http://localhost:54320
   database: 
-    uri: mongodb://127.0.0.1:27017/mc-nft
+    uri: mongodb://127.0.0.1:27017/mc2
 parameters:
   threshold: 100
   interval_broadcast_ballot: 3s

@@ -3,7 +3,7 @@ module github.com/ProtoconNet/mitum-nft/v2
 go 1.19
 
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230612004413-7a6cc06138b5
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230612091421-5bc7cf380b7f
 	github.com/ProtoconNet/mitum2 v0.0.0-20230530074946-8de13b10ff9e
 	github.com/alecthomas/kong v0.7.1
 	github.com/arl/statsviz v0.5.1

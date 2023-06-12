@@ -3,7 +3,7 @@ facts:
     nodes:
       - _hint: currency-node-v0.0.1
         address: no0sas
-        publickey: cqau9ymXjiVVU5Q5Hk1niAt6H38756JSkXdyvMw9LhV9mpu
+        publickey: bXTT1hoetSKYPUmfu3bMRcs8aU342MTTzhgeCQ1bTavBmpu
 
   - _hint: currency-genesis-network-policy-fact-v0.0.1
     policy:
@@ -15,7 +15,7 @@ facts:
         limit: 1
       max_suffrage_size: 3
   - _hint: mitum-currency-genesis-currencies-operation-fact-v0.0.1
-    genesis_node_key: cqau9ymXjiVVU5Q5Hk1niAt6H38756JSkXdyvMw9LhV9mpu
+    genesis_node_key: bXTT1hoetSKYPUmfu3bMRcs8aU342MTTzhgeCQ1bTavBmpu
     keys:
       _hint: mitum-currency-keys-v0.0.1  
       keys: 
@@ -29,7 +29,7 @@ facts:
         amount: 
           _hint: mitum-currency-amount-v0.0.1
           amount: "1000000000000000000000000000"
-          currency: PEN
+          currency: MCC
         genesis_account:
         policy:
           _hint: mitum-currency-currency-policy-v0.0.1
@@ -38,5 +38,4 @@ facts:
             _hint: mitum-currency-fixed-feeer-v0.0.1
             receiver: 2E5qNuz9HsXydeTTdG1a3SZtj1iBWNUyVyfHYNcs4gSgmca
             amount: "1"
-            exchange_min_amount: "1"
         aggregate: "1000000000000000000000000000"
