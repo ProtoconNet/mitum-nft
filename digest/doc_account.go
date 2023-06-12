@@ -1,11 +1,12 @@
 package digest
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
+	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
-	"github.com/ProtoconNet/mitum2/base"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
 )
@@ -13,7 +14,7 @@ import (
 type AccountDoc struct {
 	mongodbstorage.BaseDoc
 	address string
-	height  base.Height
+	height  mitumbase.Height
 	pubs    []string
 }
 
@@ -57,12 +58,12 @@ func (doc AccountDoc) MarshalBSON() ([]byte, error) {
 
 type BalanceDoc struct {
 	mongodbstorage.BaseDoc
-	st base.State
-	am currency.Amount
+	st mitumbase.State
+	am types.Amount
 }
 
 // NewBalanceDoc gets the State of Amount
-func NewBalanceDoc(st base.State, enc encoder.Encoder) (BalanceDoc, error) {
+func NewBalanceDoc(st mitumbase.State, enc encoder.Encoder) (BalanceDoc, error) {
 	am, err := currency.StateBalanceValue(st)
 	if err != nil {
 		return BalanceDoc{}, errors.Wrap(err, "BalanceDoc needs Amount state")
@@ -96,11 +97,11 @@ func (doc BalanceDoc) MarshalBSON() ([]byte, error) {
 
 type ContractAccountDoc struct {
 	mongodbstorage.BaseDoc
-	st base.State
+	st mitumbase.State
 }
 
 // NewContractAccountDoc gets the State of contract account status
-func NewContractAccountDoc(st base.State, enc encoder.Encoder) (ContractAccountDoc, error) {
+func NewContractAccountDoc(st mitumbase.State, enc encoder.Encoder) (ContractAccountDoc, error) {
 	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return ContractAccountDoc{}, err
@@ -116,7 +117,7 @@ func (doc ContractAccountDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	address := doc.st.Key()[:len(doc.st.Key())-len(extensioncurrency.StateKeyContractAccountSuffix)]
+	address := doc.st.Key()[:len(doc.st.Key())-len(extension.StateKeyContractAccountSuffix)]
 	m["address"] = address
 	m["height"] = doc.st.Height()
 

@@ -3,7 +3,7 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v2/cmds"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
 	isaacdatabase "github.com/ProtoconNet/mitum2/isaac/database"
 	"github.com/ProtoconNet/mitum2/launch"

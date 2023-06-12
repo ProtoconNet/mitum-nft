@@ -3,14 +3,13 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	nftcollection "github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
 
-	"github.com/pkg/errors"
-
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
+	"github.com/pkg/errors"
 )
 
 type DelegateCommand struct {
@@ -24,9 +23,9 @@ type DelegateCommand struct {
 	Mode       string              `name:"mode" help:"delegate mode" optional:""`
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection types.ContractID
 	operator   base.Address
-	mode       nftcollection.DelegateMode
+	mode       nft.DelegateMode
 }
 
 func NewDelegateCommand() DelegateCommand {
@@ -73,7 +72,7 @@ func (cmd *DelegateCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	collection := extensioncurrency.ContractID(cmd.Collection)
+	collection := types.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	}
@@ -86,9 +85,9 @@ func (cmd *DelegateCommand) parseFlags() error {
 	}
 
 	if len(cmd.Mode) < 1 {
-		cmd.mode = nftcollection.DelegateAllow
+		cmd.mode = nft.DelegateAllow
 	} else {
-		mode := nftcollection.DelegateMode(cmd.Mode)
+		mode := nft.DelegateMode(cmd.Mode)
 		if err := mode.IsValid(nil); err != nil {
 			return err
 		}
@@ -102,11 +101,11 @@ func (cmd *DelegateCommand) parseFlags() error {
 func (cmd *DelegateCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create delegate operation")
 
-	items := []nftcollection.DelegateItem{nftcollection.NewDelegateItem(cmd.contract, cmd.collection, cmd.operator, cmd.mode, cmd.Currency.CID)}
+	items := []nft.DelegateItem{nft.NewDelegateItem(cmd.contract, cmd.collection, cmd.operator, cmd.mode, cmd.Currency.CID)}
 
-	fact := nftcollection.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
+	fact := nft.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
 
-	op, err := nftcollection.NewDelegate(fact)
+	op, err := nft.NewDelegate(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

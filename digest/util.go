@@ -7,8 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -31,40 +32,40 @@ func Unmarshal(b []byte, v interface{}) error {
 	return JSON.Unmarshal(b, v)
 }
 
-func IsAccountState(st base.State) (currency.Account, bool, error) {
+func IsAccountState(st mitumbase.State) (types.Account, bool, error) {
 	if !currency.IsStateAccountKey(st.Key()) {
-		return currency.Account{}, false, nil
+		return types.Account{}, false, nil
 	}
 
 	ac, err := currency.LoadStateAccountValue(st)
 	if err != nil {
-		return currency.Account{}, false, err
+		return types.Account{}, false, err
 	}
 	return ac, true, nil
 }
 
-func IsBalanceState(st base.State) (currency.Amount, bool, error) {
+func IsBalanceState(st mitumbase.State) (types.Amount, bool, error) {
 	if !currency.IsStateBalanceKey(st.Key()) {
-		return currency.Amount{}, false, nil
+		return types.Amount{}, false, nil
 	}
 
 	am, err := currency.StateBalanceValue(st)
 	if err != nil {
-		return currency.Amount{}, false, err
+		return types.Amount{}, false, err
 	}
 	return am, true, nil
 }
 
-func parseHeightFromPath(s string) (base.Height, error) {
+func parseHeightFromPath(s string) (mitumbase.Height, error) {
 	s = strings.TrimSpace(s)
 
 	if len(s) < 1 {
-		return base.NilHeight, errors.Errorf("empty height")
+		return mitumbase.NilHeight, errors.Errorf("empty height")
 	} else if len(s) > 1 && strings.HasPrefix(s, "0") {
-		return base.NilHeight, errors.Errorf("invalid height, %q", s)
+		return mitumbase.NilHeight, errors.Errorf("invalid height, %q", s)
 	}
 
-	return base.ParseHeightString(s)
+	return mitumbase.ParseHeightString(s)
 }
 
 func parseIdxFromPath(s string) (uint64, error) {

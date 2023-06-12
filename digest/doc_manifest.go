@@ -3,7 +3,7 @@ package digest
 import (
 	"time"
 
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"

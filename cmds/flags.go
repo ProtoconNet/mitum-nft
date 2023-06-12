@@ -5,19 +5,20 @@ import (
 	"strconv"
 	"strings"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
+
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
 )
 
 type ContractIDFlag struct {
-	CID extensioncurrency.ContractID
+	CID currencytypes.ContractID
 }
 
 func (v *ContractIDFlag) UnmarshalText(b []byte) error {
-	cid := extensioncurrency.ContractID(string(b))
+	cid := currencytypes.ContractID(string(b))
 	if err := cid.IsValid(nil); err != nil {
 		return err
 	}
@@ -45,8 +46,8 @@ func (v *SignerFlag) UnmarshalText(b []byte) error {
 
 	if share, err := strconv.ParseUint(l[1], 10, 8); err != nil {
 		return err
-	} else if share > uint64(nft.MaxSignerShare) {
-		return errors.Errorf("share is over max; %d > %d", share, nft.MaxSignerShare)
+	} else if share > uint64(types.MaxSignerShare) {
+		return errors.Errorf("share is over max; %d > %d", share, types.MaxSignerShare)
 	} else {
 		v.share = uint(share)
 	}
@@ -64,7 +65,7 @@ func (v *SignerFlag) Encode(enc encoder.Encoder) (base.Address, error) {
 }
 
 type NFTIDFlag struct {
-	collection extensioncurrency.ContractID
+	collection currencytypes.ContractID
 	idx        uint64
 }
 
@@ -76,7 +77,7 @@ func (v *NFTIDFlag) UnmarshalText(b []byte) error {
 
 	s, id := l[0], l[1]
 
-	collection := extensioncurrency.ContractID(s)
+	collection := currencytypes.ContractID(s)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	}

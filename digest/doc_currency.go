@@ -1,8 +1,9 @@
 package digest
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
+	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -12,12 +13,12 @@ import (
 type CurrencyDoc struct {
 	mongodbstorage.BaseDoc
 	st base.State
-	cd extensioncurrency.CurrencyDesign
+	cd types.CurrencyDesign
 }
 
 // NewBalanceDoc gets the State of Amount
 func NewCurrencyDoc(st base.State, enc encoder.Encoder) (CurrencyDoc, error) {
-	cd, err := extensioncurrency.StateCurrencyDesignValue(st)
+	cd, err := currency.StateCurrencyDesignValue(st)
 	if err != nil {
 		return CurrencyDoc{}, errors.Wrap(err, "CurrencyDoc needs CurrencyDesign state")
 	}

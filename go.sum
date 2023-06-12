@@ -1,12 +1,10 @@
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Masterminds/semver/v3 v3.2.0 h1:3MEsd0SM6jqZojhjLWWeBY+Kcjy9i6MQAeY7YgDP83g=
 github.com/Masterminds/semver/v3 v3.2.0/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
-github.com/ProtoconNet/mitum-currency/v2 v2.0.0-20230508143724-e411584507ab h1:0m7uaJSJn5B9YZ8n9f6eqen11feVTIIIdswFRVeVfUA=
-github.com/ProtoconNet/mitum-currency/v2 v2.0.0-20230508143724-e411584507ab/go.mod h1:ulDIYC1qDUcARt02XrB5FYpbEOu5ZdNGWV9z/fRMezA=
-github.com/ProtoconNet/mitum-timestamp v0.0.0-20230502074400-22c462ebd297 h1:cTZrTjWwnArPoI56iwprscoBfsXfmsHGGr88sqcpNZg=
-github.com/ProtoconNet/mitum-timestamp v0.0.0-20230502074400-22c462ebd297/go.mod h1:m+sGlg159Jp1Mc+pWoivOFw2c7xEDLSZi/2vYf4E1M4=
-github.com/ProtoconNet/mitum2 v0.0.0-20230327234451-801228e1e81f h1:2rRjpD8oPq3AdIJ5VWTANv09SHUSTJGoH09YVh9Br48=
-github.com/ProtoconNet/mitum2 v0.0.0-20230327234451-801228e1e81f/go.mod h1:gjY90ADYXWm4hw2kcso/3vKhT1NvzH1iKCqLTwmtU+I=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230612004413-7a6cc06138b5 h1:7TuMEEHkkZqg6rsyPBsvY3cJiAikUTFb+aEjN/EmrqM=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230612004413-7a6cc06138b5/go.mod h1:BTa7+EQQoJK6b31T+fYht7GifMSXhh3XpIVxQL7+kQY=
+github.com/ProtoconNet/mitum2 v0.0.0-20230530074946-8de13b10ff9e h1:6f0SG9H7LA7oXYXDSgdEvYxiNvoRP19tC1uMthX76yg=
+github.com/ProtoconNet/mitum2 v0.0.0-20230530074946-8de13b10ff9e/go.mod h1:hBs6S3Neb0fFPPRzmNKHHAN0WMYrTPbZaBL5H3XKet0=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/alecthomas/assert/v2 v2.1.0 h1:tbredtNcQnoSd3QBhQWI7QZ3XHOVkw1Moklp2ojoH/0=
 github.com/alecthomas/kong v0.7.1 h1:azoTh0IOfwlAX3qN9sHWTxACE2oV8Bg2gAwBsMwDQY4=

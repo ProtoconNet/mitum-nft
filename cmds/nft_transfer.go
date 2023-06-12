@@ -3,11 +3,12 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -24,7 +25,7 @@ type NFTTransferCommand struct {
 	sender     base.Address
 	receiver   base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection types.ContractID
 }
 
 func NewNFTTranfserCommand() NFTTransferCommand {
@@ -77,7 +78,7 @@ func (cmd *NFTTransferCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	col := extensioncurrency.ContractID(cmd.Collection)
+	col := types.ContractID(cmd.Collection)
 	if err := col.IsValid(nil); err != nil {
 		return err
 	} else {
@@ -91,14 +92,14 @@ func (cmd *NFTTransferCommand) parseFlags() error {
 func (cmd *NFTTransferCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create nft-transfer operation")
 
-	item := collection.NewNFTTransferItem(cmd.contract, cmd.collection, cmd.receiver, cmd.NFT, cmd.Currency.CID)
-	fact := collection.NewNFTTransferFact(
+	item := nft.NewNFTTransferItem(cmd.contract, cmd.collection, cmd.receiver, cmd.NFT, cmd.Currency.CID)
+	fact := nft.NewNFTTransferFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		[]collection.NFTTransferItem{item},
+		[]nft.NFTTransferItem{item},
 	)
 
-	op, err := collection.NewNFTTransfer(fact)
+	op, err := nft.NewNFTTransfer(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

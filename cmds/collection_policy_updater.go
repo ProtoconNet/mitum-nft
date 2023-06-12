@@ -3,14 +3,14 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
-	nftcollection "github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
-	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
@@ -25,13 +25,13 @@ type CollectionPolicyUpdaterCommand struct {
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	URI        string              `name:"uri" help:"collection uri" optional:""`
 	White      cmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
-	sender     base.Address
-	contract   base.Address
-	collection extensioncurrency.ContractID
-	name       nftcollection.CollectionName
-	royalty    nft.PaymentParameter
-	uri        nft.URI
-	white      []base.Address
+	sender     mitumbase.Address
+	contract   mitumbase.Address
+	collection currencytypes.ContractID
+	name       types.CollectionName
+	royalty    types.PaymentParameter
+	uri        types.URI
+	white      []mitumbase.Address
 }
 
 func NewCollectionPolicyUpdaterCommand() CollectionPolicyUpdaterCommand {
@@ -76,7 +76,7 @@ func (cmd *CollectionPolicyUpdaterCommand) parseFlags() error {
 		if a, err := cmd.White.Encode(enc); err != nil {
 			return errors.Wrapf(err, "invalid whitelist address format, %q", cmd.White)
 		} else {
-			cmd.white = []base.Address{a}
+			cmd.white = []mitumbase.Address{a}
 		}
 	}
 
@@ -86,28 +86,28 @@ func (cmd *CollectionPolicyUpdaterCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	collection := extensioncurrency.ContractID(cmd.Collection)
+	collection := currencytypes.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.collection = collection
 	}
 
-	name := nftcollection.CollectionName(cmd.Name)
+	name := types.CollectionName(cmd.Name)
 	if err := name.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.name = name
 	}
 
-	royalty := nft.PaymentParameter(cmd.Royalty)
+	royalty := types.PaymentParameter(cmd.Royalty)
 	if err := royalty.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.royalty = royalty
 	}
 
-	uri := nft.URI(cmd.URI)
+	uri := types.URI(cmd.URI)
 	if err := uri.IsValid(nil); err != nil {
 		return err
 	} else {
@@ -117,10 +117,10 @@ func (cmd *CollectionPolicyUpdaterCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *CollectionPolicyUpdaterCommand) createOperation() (base.Operation, error) {
+func (cmd *CollectionPolicyUpdaterCommand) createOperation() (mitumbase.Operation, error) {
 	e := util.StringErrorFunc("failed to create collection-policy-updater operation")
 
-	fact := nftcollection.NewCollectionPolicyUpdaterFact(
+	fact := nft.NewCollectionPolicyUpdaterFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
@@ -132,7 +132,7 @@ func (cmd *CollectionPolicyUpdaterCommand) createOperation() (base.Operation, er
 		cmd.Currency.CID,
 	)
 
-	op, err := nftcollection.NewCollectionPolicyUpdater(fact)
+	op, err := nft.NewCollectionPolicyUpdater(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

@@ -3,32 +3,32 @@ package digest
 import (
 	"time"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
-	"github.com/ProtoconNet/mitum2/base"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type OperationDoc struct {
 	mongodbstorage.BaseDoc
 	va        OperationValue
-	op        base.Operation
+	op        mitumbase.Operation
 	addresses []string
-	height    base.Height
+	height    mitumbase.Height
 }
 
 func NewOperationDoc(
-	op base.Operation,
+	op mitumbase.Operation,
 	enc encoder.Encoder,
-	height base.Height,
+	height mitumbase.Height,
 	confirmedAt time.Time,
 	inState bool,
-	reason base.OperationProcessReasonError,
+	reason mitumbase.OperationProcessReasonError,
 	index uint64,
 ) (OperationDoc, error) {
 	var addresses []string
-	if ads, ok := op.Fact().(currency.Addresses); ok {
+	if ads, ok := op.Fact().(types.Addresses); ok {
 		as, err := ads.Addresses()
 		if err != nil {
 			return OperationDoc{}, err

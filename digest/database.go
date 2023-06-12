@@ -7,15 +7,14 @@ import (
 	"strconv"
 	"sync"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum-nft/v2/state"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
+
+	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
 	"github.com/ProtoconNet/mitum-nft/v2/digest/util"
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
-	"github.com/ProtoconNet/mitum-nft/v2/timestamp"
-	timestampservice "github.com/ProtoconNet/mitum-nft/v2/timestamp/service"
-	"github.com/ProtoconNet/mitum2/base"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	isaacdatabase "github.com/ProtoconNet/mitum2/isaac/database"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/logging"
@@ -61,7 +60,7 @@ type Database struct {
 	mitum     *isaacdatabase.Center
 	database  *mongodbstorage.Database
 	readonly  bool
-	lastBlock base.Height
+	lastBlock mitumbase.Height
 }
 
 func NewDatabase(mitum *isaacdatabase.Center, st *mongodbstorage.Database) (*Database, error) {
@@ -71,7 +70,7 @@ func NewDatabase(mitum *isaacdatabase.Center, st *mongodbstorage.Database) (*Dat
 		}),
 		mitum:     mitum,
 		database:  st,
-		lastBlock: base.NilHeight,
+		lastBlock: mitumbase.NilHeight,
 	}
 	_ = nst.SetLogging(mitum.Logging)
 
@@ -116,7 +115,7 @@ func (st *Database) Initialize() error {
 	case err != nil:
 		return errors.Wrap(err, "failed to initialize digest database")
 	case !found:
-		st.lastBlock = base.NilHeight
+		st.lastBlock = mitumbase.NilHeight
 		st.Log().Debug().Msg("last block for digest not found")
 	default:
 		st.lastBlock = h
@@ -159,14 +158,14 @@ func (st *Database) createIndex() error {
 	return nil
 }
 
-func (st *Database) LastBlock() base.Height {
+func (st *Database) LastBlock() mitumbase.Height {
 	st.RLock()
 	defer st.RUnlock()
 
 	return st.lastBlock
 }
 
-func (st *Database) SetLastBlock(height base.Height) error {
+func (st *Database) SetLastBlock(height mitumbase.Height) error {
 	if st.readonly {
 		return errors.Errorf("readonly mode")
 	}
@@ -181,7 +180,7 @@ func (st *Database) SetLastBlock(height base.Height) error {
 	return st.setLastBlock(height)
 }
 
-func (st *Database) setLastBlock(height base.Height) error {
+func (st *Database) setLastBlock(height mitumbase.Height) error {
 	if err := st.database.SetInfo(DigestStorageLastBlockKey, height.Bytes()); err != nil {
 		st.Log().Debug().Int64("height", height.Int64()).Msg("failed to set last block")
 
@@ -223,7 +222,7 @@ func (st *Database) clean(ctx context.Context) error {
 		st.Log().Debug().Str("collection", col).Msg("drop collection by height")
 	}
 
-	if err := st.setLastBlock(base.NilHeight); err != nil {
+	if err := st.setLastBlock(mitumbase.NilHeight); err != nil {
 		return err
 	}
 
@@ -232,7 +231,7 @@ func (st *Database) clean(ctx context.Context) error {
 	return nil
 }
 
-func (st *Database) CleanByHeight(ctx context.Context, height base.Height) error {
+func (st *Database) CleanByHeight(ctx context.Context, height mitumbase.Height) error {
 	if st.readonly {
 		return errors.Errorf("readonly mode")
 	}
@@ -243,8 +242,8 @@ func (st *Database) CleanByHeight(ctx context.Context, height base.Height) error
 	return st.cleanByHeight(ctx, height)
 }
 
-func (st *Database) cleanByHeight(ctx context.Context, height base.Height) error {
-	if height <= base.GenesisHeight {
+func (st *Database) cleanByHeight(ctx context.Context, height mitumbase.Height) error {
+	if height <= mitumbase.GenesisHeight {
 		return st.clean(ctx)
 	}
 
@@ -278,7 +277,7 @@ func (st *Database) cleanByHeight(ctx context.Context, height base.Height) error
 }
 
 /*
-func (st *Database) Manifest(h mitumutil.Hash) (base.Manifest, bool, error) {
+func (st *Database) Manifest(h mitumutil.Hash) (mitumbase.Manifest, bool, error) {
 	return st.mitum.Manifest(h)
 }
 */
@@ -287,12 +286,12 @@ func (st *Database) Manifest(h mitumutil.Hash) (base.Manifest, bool, error) {
 func (st *Database) Manifests(
 	load bool,
 	reverse bool,
-	offset base.Height,
+	offset mitumbase.Height,
 	limit int64,
-	callback func(base.Height, base.Manifest, uint64) (bool, error),
+	callback func(mitumbase.Height, mitumbase.Manifest, uint64) (bool, error),
 ) error {
 	var filter bson.M
-	if offset > base.NilHeight {
+	if offset > mitumbase.NilHeight {
 		if reverse {
 			filter = bson.M{"height": bson.M{"$lt": offset}}
 		} else {
@@ -341,7 +340,7 @@ func (st *Database) Manifests(
 // *  offset: returns from next of offset, usually it is combination of
 // "<height>,<fact>".
 func (st *Database) OperationsByAddress(
-	address base.Address,
+	address mitumbase.Address,
 	load,
 	reverse bool,
 	offset string,
@@ -488,7 +487,7 @@ func (st *Database) Operations(
 }
 
 // Account returns AccountValue.
-func (st *Database) Account(a base.Address) (AccountValue, bool /* exists */, error) {
+func (st *Database) Account(a mitumbase.Address) (AccountValue, bool /* exists */, error) {
 	var rs AccountValue
 	if err := st.database.Client().GetByFilter(
 		defaultColNameAccount,
@@ -527,14 +526,14 @@ func (st *Database) Account(a base.Address) (AccountValue, bool /* exists */, er
 // Publickey.
 // *  offset: returns from next of offset, usually it is "<height>,<address>".
 func (st *Database) AccountsByPublickey(
-	pub base.Publickey,
+	pub mitumbase.Publickey,
 	loadBalance bool,
-	offsetHeight base.Height,
+	offsetHeight mitumbase.Height,
 	offsetAddress string,
 	limit int64,
 	callback func(AccountValue) (bool, error),
 ) error {
-	if offsetHeight <= base.NilHeight {
+	if offsetHeight <= mitumbase.NilHeight {
 		return errors.Errorf("offset height should be over nil height")
 	}
 
@@ -597,11 +596,11 @@ end:
 	return nil
 }
 
-func (st *Database) balance(a base.Address) ([]currency.Amount, base.Height, error) {
-	lastHeight := base.NilHeight
+func (st *Database) balance(a mitumbase.Address) ([]currencytypes.Amount, mitumbase.Height, error) {
+	lastHeight := mitumbase.NilHeight
 	var cids []string
 
-	amm := map[currency.CurrencyID]currency.Amount{}
+	amm := map[currencytypes.CurrencyID]currencytypes.Amount{}
 	for {
 		filter := util.NewBSONFilter("address", a.String())
 
@@ -612,7 +611,7 @@ func (st *Database) balance(a base.Address) ([]currency.Amount, base.Height, err
 			q = filter.Add("currency", bson.M{"$nin": cids}).D()
 		}
 
-		var sta base.State
+		var sta mitumbase.State
 		if err := st.database.Client().GetByFilter(
 			defaultColNameBalance,
 			q,
@@ -634,7 +633,7 @@ func (st *Database) balance(a base.Address) ([]currency.Amount, base.Height, err
 			return nil, lastHeight, err
 		}
 
-		i, err := currency.StateBalanceValue(sta)
+		i, err := statecurrency.StateBalanceValue(sta)
 		if err != nil {
 			return nil, lastHeight, err
 		}
@@ -647,7 +646,7 @@ func (st *Database) balance(a base.Address) ([]currency.Amount, base.Height, err
 		}
 	}
 
-	ams := make([]currency.Amount, len(amm))
+	ams := make([]currencytypes.Amount, len(amm))
 	var i int
 	for k := range amm {
 		ams[i] = amm[k]
@@ -673,7 +672,7 @@ func (st *Database) currencies() ([]string, error) {
 		opt := options.FindOne().SetSort(
 			util.NewBSONFilter("height", -1).D(),
 		)
-		var sta base.State
+		var sta mitumbase.State
 		if err := st.database.Client().GetByFilter(
 			defaultColNameCurrency,
 			q,
@@ -695,7 +694,7 @@ func (st *Database) currencies() ([]string, error) {
 		}
 
 		if sta != nil {
-			i, err := extensioncurrency.StateCurrencyDesignValue(sta)
+			i, err := statecurrency.StateCurrencyDesignValue(sta)
 			if err != nil {
 				return nil, err
 			}
@@ -709,10 +708,10 @@ func (st *Database) currencies() ([]string, error) {
 	return cids, nil
 }
 
-func (st *Database) ManifestByHeight(height base.Height) (base.Manifest, uint64, error) {
+func (st *Database) ManifestByHeight(height mitumbase.Height) (mitumbase.Manifest, uint64, error) {
 	q := util.NewBSONFilter("height", height).D()
 
-	var m base.Manifest
+	var m mitumbase.Manifest
 	var operations uint64
 	if err := st.database.Client().GetByFilter(
 		defaultColNameBlock,
@@ -737,10 +736,10 @@ func (st *Database) ManifestByHeight(height base.Height) (base.Manifest, uint64,
 	}
 }
 
-func (st *Database) ManifestByHash(hash mitumutil.Hash) (base.Manifest, uint64, error) {
+func (st *Database) ManifestByHash(hash mitumutil.Hash) (mitumbase.Manifest, uint64, error) {
 	q := util.NewBSONFilter("block", hash).D()
 
-	var m base.Manifest
+	var m mitumbase.Manifest
 	var operations uint64
 	if err := st.database.Client().GetByFilter(
 		defaultColNameBlock,
@@ -765,13 +764,13 @@ func (st *Database) ManifestByHash(hash mitumutil.Hash) (base.Manifest, uint64, 
 	}
 }
 
-func (st *Database) currency(cid string) (extensioncurrency.CurrencyDesign, base.State, error) {
+func (st *Database) currency(cid string) (currencytypes.CurrencyDesign, mitumbase.State, error) {
 	q := util.NewBSONFilter("currency", cid).D()
 
 	opt := options.FindOne().SetSort(
 		util.NewBSONFilter("height", -1).D(),
 	)
-	var sta base.State
+	var sta mitumbase.State
 	if err := st.database.Client().GetByFilter(
 		defaultColNameCurrency,
 		q,
@@ -785,97 +784,21 @@ func (st *Database) currency(cid string) (extensioncurrency.CurrencyDesign, base
 		},
 		opt,
 	); err != nil {
-		return extensioncurrency.CurrencyDesign{}, nil, err
+		return currencytypes.CurrencyDesign{}, nil, err
 	}
 
 	if sta != nil {
-		de, err := extensioncurrency.StateCurrencyDesignValue(sta)
+		de, err := statecurrency.StateCurrencyDesignValue(sta)
 		if err != nil {
-			return extensioncurrency.CurrencyDesign{}, nil, err
+			return currencytypes.CurrencyDesign{}, nil, err
 		}
 		return de, sta, nil
 	} else {
-		return extensioncurrency.CurrencyDesign{}, nil, errors.Errorf("state is nil")
+		return currencytypes.CurrencyDesign{}, nil, errors.Errorf("state is nil")
 	}
 }
 
-func (st *Database) timestamp(contract, service string) (timestamp.Design, base.State, error) {
-	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("timestampservice", service)
-	filter = filter.Add("isItem", false)
-	q := filter.D()
-
-	opt := options.FindOne().SetSort(
-		util.NewBSONFilter("height", -1).D(),
-	)
-	var sta base.State
-	if err := st.database.Client().GetByFilter(
-		defaultColNameTimeStamp,
-		q,
-		func(res *mongo.SingleResult) error {
-			i, err := LoadState(res.Decode, st.database.Encoders())
-			if err != nil {
-				return err
-			}
-			sta = i
-			return nil
-		},
-		opt,
-	); err != nil {
-		return timestamp.Design{}, nil, err
-	}
-
-	if sta != nil {
-		de, err := timestampservice.StateServiceDesignValue(sta)
-		if err != nil {
-			return timestamp.Design{}, nil, err
-		}
-		return de, sta, nil
-	} else {
-		return timestamp.Design{}, nil, errors.Errorf("state is nil")
-	}
-}
-
-func (st *Database) timestampItem(contract, service, project string, idx uint64) (timestamp.TimeStampItem, base.State, error) {
-	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("timestampservice", service)
-	filter = filter.Add("project", project)
-	filter = filter.Add("timestampidx", idx)
-	filter = filter.Add("isItem", true)
-	q := filter.D()
-
-	opt := options.FindOne().SetSort(
-		util.NewBSONFilter("height", -1).D(),
-	)
-	var sta base.State
-	if err := st.database.Client().GetByFilter(
-		defaultColNameTimeStamp,
-		q,
-		func(res *mongo.SingleResult) error {
-			i, err := LoadState(res.Decode, st.database.Encoders())
-			if err != nil {
-				return err
-			}
-			sta = i
-			return nil
-		},
-		opt,
-	); err != nil {
-		return timestamp.TimeStampItem{}, nil, err
-	}
-
-	if sta != nil {
-		it, err := timestampservice.StateTimeStampItemValue(sta)
-		if err != nil {
-			return timestamp.TimeStampItem{}, nil, err
-		}
-		return it, sta, nil
-	} else {
-		return timestamp.TimeStampItem{}, nil, errors.Errorf("state is nil")
-	}
-}
-
-func (st *Database) topHeightByPublickey(pub base.Publickey) (base.Height, error) {
+func (st *Database) topHeightByPublickey(pub mitumbase.Publickey) (mitumbase.Height, error) {
 	var sas []string
 	switch r, err := st.database.Client().Collection(defaultColNameAccount).Distinct(
 		context.Background(),
@@ -883,9 +806,9 @@ func (st *Database) topHeightByPublickey(pub base.Publickey) (base.Height, error
 		buildAccountsFilterByPublickey(pub),
 	); {
 	case err != nil:
-		return base.NilHeight, err
+		return mitumbase.NilHeight, err
 	case len(r) < 1:
-		return base.NilHeight, err
+		return mitumbase.NilHeight, err
 	default:
 		sas = make([]string, len(r))
 		for i := range r {
@@ -893,7 +816,7 @@ func (st *Database) topHeightByPublickey(pub base.Publickey) (base.Height, error
 		}
 	}
 
-	var top base.Height
+	var top mitumbase.Height
 	for i := int64(0); i < int64(math.Ceil(float64(len(sas))/50.0)); i++ {
 		l := (i + 1) + 50
 		if n := int64(len(sas)); l > n {
@@ -902,8 +825,8 @@ func (st *Database) topHeightByPublickey(pub base.Publickey) (base.Height, error
 
 		switch h, err := st.partialTopHeightByPublickey(sas[i*50 : l]); {
 		case err != nil:
-			return base.NilHeight, err
-		case top <= base.NilHeight:
+			return mitumbase.NilHeight, err
+		case top <= mitumbase.NilHeight:
 			top = h
 		case h > top:
 			top = h
@@ -913,8 +836,8 @@ func (st *Database) topHeightByPublickey(pub base.Publickey) (base.Height, error
 	return top, nil
 }
 
-func (st *Database) partialTopHeightByPublickey(as []string) (base.Height, error) {
-	var top base.Height
+func (st *Database) partialTopHeightByPublickey(as []string) (mitumbase.Height, error) {
+	var top mitumbase.Height
 	err := st.database.Client().Find(
 		context.Background(),
 		defaultColNameAccount,
@@ -958,7 +881,7 @@ func (st *Database) addressesByPublickey(filter bson.M) ([]string, error) {
 }
 
 func (st *Database) filterAccountByPublickey(
-	pub base.Publickey,
+	pub mitumbase.Publickey,
 	addresses []string,
 	limit int64,
 	loadBalance bool,
@@ -1029,29 +952,29 @@ func (st *Database) filterAccountByPublickey(
 	return stopped || called == limit, nil
 }
 
-func loadLastBlock(st *Database) (base.Height, bool, error) {
+func loadLastBlock(st *Database) (mitumbase.Height, bool, error) {
 	switch b, found, err := st.database.Info(DigestStorageLastBlockKey); {
 	case err != nil:
-		return base.NilHeight, false, errors.Wrap(err, "failed to get last block for digest")
+		return mitumbase.NilHeight, false, errors.Wrap(err, "failed to get last block for digest")
 	case !found:
-		return base.NilHeight, false, nil
+		return mitumbase.NilHeight, false, nil
 	default:
-		h, err := base.ParseHeightBytes(b)
+		h, err := mitumbase.ParseHeightBytes(b)
 		if err != nil {
-			return base.NilHeight, false, err
+			return mitumbase.NilHeight, false, err
 		}
 		return h, true, nil
 	}
 }
 
 type heightDoc struct {
-	H base.Height `bson:"height"`
+	H mitumbase.Height `bson:"height"`
 }
 
-func loadHeightDoc(decoder func(interface{}) error) (base.Height, error) {
+func loadHeightDoc(decoder func(interface{}) error) (mitumbase.Height, error) {
 	var h heightDoc
 	if err := decoder(&h); err != nil {
-		return base.NilHeight, err
+		return mitumbase.NilHeight, err
 	}
 
 	return h.H, nil
@@ -1061,10 +984,10 @@ type briefAccountDoc struct {
 	ID      primitive.ObjectID `bson:"_id"`
 	Address string             `bson:"address"`
 	Pubs    []string           `bson:"pubs"`
-	Height  base.Height        `bson:"height"`
+	Height  mitumbase.Height   `bson:"height"`
 }
 
-func (doc briefAccountDoc) pubExists(k base.PKKey) bool {
+func (doc briefAccountDoc) pubExists(k mitumbase.PKKey) bool {
 	if len(doc.Pubs) < 1 {
 		return false
 	}
@@ -1087,12 +1010,12 @@ func loadBriefAccountDoc(decoder func(interface{}) error) (briefAccountDoc, erro
 	return a, nil
 }
 
-func (st *Database) NFTCollection(contract, col string) (*nft.Design, base.State, error) {
+func (st *Database) NFTCollection(contract, col string) (*types.Design, mitumbase.State, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("collection", col)
 
-	var design *nft.Design
-	var sta base.State
+	var design *types.Design
+	var sta mitumbase.State
 	var err error
 	if err := st.database.Client().GetByFilter(
 		defaultColNameNFTCollection,
@@ -1103,7 +1026,7 @@ func (st *Database) NFTCollection(contract, col string) (*nft.Design, base.State
 				return err
 			}
 
-			design, err = collection.StateCollectionValue(sta)
+			design, err = state.StateCollectionValue(sta)
 			if err != nil {
 				return err
 			}
@@ -1118,13 +1041,13 @@ func (st *Database) NFTCollection(contract, col string) (*nft.Design, base.State
 	return design, nil, nil
 }
 
-func (st *Database) NFT(contract, col, idx string) (*nft.NFT, base.State, error) {
+func (st *Database) NFT(contract, col, idx string) (*types.NFT, mitumbase.State, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("collection", col)
 	filter = filter.Add("nftid", idx)
 
-	var nft *nft.NFT
-	var sta base.State
+	var nft *types.NFT
+	var sta mitumbase.State
 	var err error
 	if err = st.database.Client().GetByFilter(
 		defaultColNameNFT,
@@ -1134,7 +1057,7 @@ func (st *Database) NFT(contract, col, idx string) (*nft.NFT, base.State, error)
 			if err != nil {
 				return err
 			}
-			nft, err = collection.StateNFTValue(sta)
+			nft, err = state.StateNFTValue(sta)
 			if err != nil {
 				return err
 			}
@@ -1150,12 +1073,12 @@ func (st *Database) NFT(contract, col, idx string) (*nft.NFT, base.State, error)
 }
 
 func (st *Database) NFTsByAddress(
-	address base.Address,
+	address mitumbase.Address,
 	reverse bool,
 	offset string,
 	limit int64,
 	collectionid string,
-	callback func(string /* nft id */, nft.NFT) (bool, error),
+	callback func(string /* nft id */, types.NFT) (bool, error),
 ) error {
 	filter, err := buildNFTsFilterByAddress(address, offset, reverse, collectionid)
 	if err != nil {
@@ -1188,7 +1111,7 @@ func (st *Database) NFTsByAddress(
 			if err != nil {
 				return false, err
 			}
-			nft, err := collection.StateNFTValue(st)
+			nft, err := state.StateNFTValue(st)
 			if err != nil {
 				return false, err
 			}
@@ -1205,7 +1128,7 @@ func (st *Database) NFTsByCollection(
 	reverse bool,
 	offset string,
 	limit int64,
-	callback func(nft nft.NFT, st base.State) (bool, error),
+	callback func(nft types.NFT, st mitumbase.State) (bool, error),
 ) error {
 	filter, err := buildNFTsFilterByCollection(contract, col, offset, reverse)
 	if err != nil {
@@ -1238,7 +1161,7 @@ func (st *Database) NFTsByCollection(
 			if err != nil {
 				return false, err
 			}
-			nft, err := collection.StateNFTValue(st)
+			nft, err := state.StateNFTValue(st)
 			if err != nil {
 				return false, err
 			}
@@ -1248,13 +1171,13 @@ func (st *Database) NFTsByCollection(
 	)
 }
 
-func (st *Database) NFTOperators(contract, col, account string) (*collection.OperatorsBook, base.State, error) {
+func (st *Database) NFTOperators(contract, col, account string) (*types.OperatorsBook, mitumbase.State, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("collection", col)
 	filter = filter.Add("account", account)
 
-	var operators *collection.OperatorsBook
-	var sta base.State
+	var operators *types.OperatorsBook
+	var sta mitumbase.State
 	var err error
 	if err := st.database.Client().GetByFilter(
 		defaultColNameNFTOperator,
@@ -1265,7 +1188,7 @@ func (st *Database) NFTOperators(contract, col, account string) (*collection.Ope
 				return err
 			}
 
-			operators, err = collection.StateOperatorsBookValue(sta)
+			operators, err = state.StateOperatorsBookValue(sta)
 			if err != nil {
 				return err
 			}
@@ -1280,19 +1203,18 @@ func (st *Database) NFTOperators(contract, col, account string) (*collection.Ope
 	return operators, nil, nil
 }
 
-func (st *Database) cleanByHeightColNameNFTId(
+func (st *Database) cleanByHeightColName(
 	ctx context.Context,
-	height base.Height,
-	colName string,
-	nftid string,
+	height mitumbase.Height,
+	colName, key, value string,
 ) error {
-	if height <= base.GenesisHeight {
+	if height <= mitumbase.GenesisHeight {
 		return st.clean(ctx)
 	}
 
 	opts := options.BulkWrite().SetOrdered(true)
 	removeByHeight := mongo.NewDeleteManyModel().SetFilter(
-		bson.M{"nftid": nftid, "height": bson.M{"$lte": height}},
+		bson.M{key: value, "height": bson.M{"$lte": height}},
 	)
 
 	res, err := st.database.Client().Collection(colName).BulkWrite(

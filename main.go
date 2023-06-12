@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	extensioncmds "github.com/ProtoconNet/mitum-currency-extension/v2/cmds"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/v2/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/launch"
@@ -26,13 +26,13 @@ var (
 //revive:disable:nested-structs
 type CLI struct { //nolint:govet //...
 	launch.BaseFlags
-	Import    cmds.ImportCommand           `cmd:"" help:"import from block data"`
-	Init      cmds.INITCommand             `cmd:"" help:"init node"`
-	Run       cmds.RunCommand              `cmd:"" help:"run node"`
-	Operation cmds.OperationCommand        `cmd:"" help:"create operation"`
-	Network   extensioncmds.NetworkCommand `cmd:"" help:"network"`
-	Key       extensioncmds.KeyCommand     `cmd:"" help:"key"`
-	Version   struct{}                     `cmd:"" help:"version"`
+	Import    cmds.ImportCommand          `cmd:"" help:"import from block data"`
+	Init      cmds.INITCommand            `cmd:"" help:"init node"`
+	Run       cmds.RunCommand             `cmd:"" help:"run node"`
+	Operation cmds.OperationCommand       `cmd:"" help:"create operation"`
+	Network   currencycmds.NetworkCommand `cmd:"" help:"network"`
+	Key       currencycmds.KeyCommand     `cmd:"" help:"key"`
+	Version   struct{}                    `cmd:"" help:"version"`
 }
 
 var flagDefaults = kong.Vars{
@@ -44,7 +44,7 @@ var flagDefaults = kong.Vars{
 	"create_account_threshold":          "100",
 	"create_contract_account_threshold": "100",
 	"safe_threshold":                    base.SafeThreshold.String(),
-	"network-id":                        "mitum",
+	"network_id":                        "mitum",
 }
 
 func main() {
@@ -53,8 +53,8 @@ func main() {
 		Init:      cmds.NewINITCommand(),
 		Run:       cmds.NewRunCommand(),
 		Operation: cmds.NewOperationCommand(),
-		Network:   extensioncmds.NewNetworkCommand(),
-		Key:       extensioncmds.NewKeyCommand(),
+		Network:   currencycmds.NewNetworkCommand(),
+		Key:       currencycmds.NewKeyCommand(),
 	}
 
 	kctx := kong.Parse(&cli, flagDefaults)

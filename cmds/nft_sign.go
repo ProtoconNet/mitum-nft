@@ -3,11 +3,12 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -22,7 +23,7 @@ type NFTSignCommand struct {
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	sender     base.Address
 	contract   base.Address
-	collection extensioncurrency.ContractID
+	collection types.ContractID
 }
 
 func NewNFTSignCommand() NFTSignCommand {
@@ -69,7 +70,7 @@ func (cmd *NFTSignCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	col := extensioncurrency.ContractID(cmd.Collection)
+	col := types.ContractID(cmd.Collection)
 	if err := col.IsValid(nil); err != nil {
 		return err
 	} else {
@@ -83,15 +84,15 @@ func (cmd *NFTSignCommand) parseFlags() error {
 func (cmd *NFTSignCommand) createOperation() (base.Operation, error) {
 	e := util.StringErrorFunc("failed to create nft-sign operation")
 
-	item := collection.NewNFTSignItem(cmd.contract, cmd.collection, cmd.NFT, cmd.Currency.CID)
+	item := nft.NewNFTSignItem(cmd.contract, cmd.collection, cmd.NFT, cmd.Currency.CID)
 
-	fact := collection.NewNFTSignFact(
+	fact := nft.NewNFTSignFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		[]collection.NFTSignItem{item},
+		[]nft.NFTSignItem{item},
 	)
 
-	op, err := collection.NewNFTSign(fact)
+	op, err := nft.NewNFTSign(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

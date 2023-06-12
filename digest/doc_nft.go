@@ -1,10 +1,10 @@
 package digest
 
 import (
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	mongodbstorage "github.com/ProtoconNet/mitum-nft/v2/digest/mongodb"
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-nft/v2/state"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"strconv"
@@ -13,11 +13,11 @@ import (
 type NFTCollectionDoc struct {
 	mongodbstorage.BaseDoc
 	st base.State
-	de nft.Design
+	de types.Design
 }
 
 func NewNFTCollectionDoc(st base.State, enc encoder.Encoder) (NFTCollectionDoc, error) {
-	de, err := collection.StateCollectionValue(st)
+	de, err := state.StateCollectionValue(st)
 	if err != nil {
 		return NFTCollectionDoc{}, err
 	}
@@ -50,13 +50,13 @@ func (doc NFTCollectionDoc) MarshalBSON() ([]byte, error) {
 type NFTDoc struct {
 	mongodbstorage.BaseDoc
 	st        base.State
-	nft       nft.NFT
+	nft       types.NFT
 	addresses []base.Address
 	owner     string
 }
 
 func NewNFTDoc(st base.State, enc encoder.Encoder) (*NFTDoc, error) {
-	nft, err := collection.StateNFTValue(st)
+	nft, err := state.StateNFTValue(st)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	parsedKey, err := collection.ParseStateKey(doc.st.Key())
+	parsedKey, err := state.ParseStateKey(doc.st.Key())
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +95,7 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 	m["nftid"] = strconv.FormatUint(doc.nft.ID(), 10)
 	m["owner"] = doc.nft.Owner()
 	m["addresses"] = doc.addresses
+	m["istoken"] = true
 	m["height"] = doc.st.Height()
 
 	return bsonenc.Marshal(m)
@@ -103,11 +104,11 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 type NFTOperatorDoc struct {
 	mongodbstorage.BaseDoc
 	st        base.State
-	operators collection.OperatorsBook
+	operators types.OperatorsBook
 }
 
 func NewNFTOperatorDoc(st base.State, enc encoder.Encoder) (*NFTOperatorDoc, error) {
-	operators, err := collection.StateOperatorsBookValue(st)
+	operators, err := state.StateOperatorsBookValue(st)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +129,7 @@ func (doc NFTOperatorDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := collection.ParseStateKey(doc.st.Key())
+	parsedKey, err := state.ParseStateKey(doc.st.Key())
 	if err != nil {
 		return nil, err
 	}
@@ -145,11 +146,11 @@ func (doc NFTOperatorDoc) MarshalBSON() ([]byte, error) {
 type NFTBoxDoc struct {
 	mongodbstorage.BaseDoc
 	st     base.State
-	nftbox collection.NFTBox
+	nftbox types.NFTBox
 }
 
 func NewNFTBoxDoc(st base.State, enc encoder.Encoder) (*NFTBoxDoc, error) {
-	nftbox, err := collection.StateNFTBoxValue(st)
+	nftbox, err := state.StateNFTBoxValue(st)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +171,7 @@ func (doc NFTBoxDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := collection.ParseStateKey(doc.st.Key())
+	parsedKey, err := state.ParseStateKey(doc.st.Key())
 	if err != nil {
 		return nil, err
 	}
@@ -178,6 +179,7 @@ func (doc NFTBoxDoc) MarshalBSON() ([]byte, error) {
 	m["contract"] = parsedKey[1]
 	m["collection"] = parsedKey[2]
 	m["nfts"] = doc.nftbox.NFTs()
+	m["istoken"] = false
 	m["height"] = doc.st.Height()
 
 	return bsonenc.Marshal(m)
@@ -190,7 +192,7 @@ type NFTLastIndexDoc struct {
 }
 
 func NewNFTLastIndexDoc(st base.State, enc encoder.Encoder) (*NFTLastIndexDoc, error) {
-	nftID, err := collection.StateLastNFTIndexValue(st)
+	nftID, err := state.StateLastNFTIndexValue(st)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +213,7 @@ func (doc NFTLastIndexDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := collection.ParseStateKey(doc.st.Key())
+	parsedKey, err := state.ParseStateKey(doc.st.Key())
 	if err != nil {
 		return nil, err
 	}

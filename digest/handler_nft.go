@@ -1,11 +1,10 @@
 package digest
 
 import (
+	"github.com/ProtoconNet/mitum-nft/v2/types"
 	"net/http"
 	"time"
 
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
@@ -62,7 +61,7 @@ func (hd *Handlers) handleNFTInGroup(contract, collection, id string) (interface
 	}
 }
 
-func (hd *Handlers) buildNFTHal(contract, collection string, nft nft.NFT, st base.State) (Hal, error) {
+func (hd *Handlers) buildNFTHal(contract, collection string, nft types.NFT, st base.State) (Hal, error) {
 	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "collection", collection, "id", string(nft.ID()))
 	if err != nil {
 		return nil, err
@@ -118,8 +117,8 @@ func (hd *Handlers) handleNFTCollectionInGroup(contract, collection string) (int
 	}
 }
 
-func (hd *Handlers) buildNFTCollectionHal(contract, collection string, design nft.Design, st base.State) (Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFTBox, "contract", contract, "collection", collection)
+func (hd *Handlers) buildNFTCollectionHal(contract, collection string, design types.Design, st base.State) (Hal, error) {
+	h, err := hd.combineURL(HandlerPathNFTs, "contract", contract, "collection", collection)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +128,7 @@ func (hd *Handlers) buildNFTCollectionHal(contract, collection string, design nf
 	return hal, nil
 }
 
-func (hd *Handlers) handleNFTBox(w http.ResponseWriter, r *http.Request) {
+func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 	limit := parseLimitQuery(r.URL.Query().Get("limit"))
 	offset := parseStringQuery(r.URL.Query().Get("offset"))
 	reverse := parseBoolQuery(r.URL.Query().Get("reverse"))
@@ -166,7 +165,7 @@ func (hd *Handlers) handleNFTBox(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		i, filled, err := hd.handleNFTBoxInGroup(contract, collection, offset, reverse, limit)
+		i, filled, err := hd.handleNFTsInGroup(contract, collection, offset, reverse, limit)
 
 		return []interface{}{i, filled}, err
 	})
@@ -198,7 +197,7 @@ func (hd *Handlers) handleNFTBox(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleNFTBoxInGroup(
+func (hd *Handlers) handleNFTsInGroup(
 	contract, collection string,
 	offset string,
 	reverse bool,
@@ -214,7 +213,7 @@ func (hd *Handlers) handleNFTBoxInGroup(
 	var vas []Hal
 	if err := hd.database.NFTsByCollection(
 		contract, collection, reverse, offset, limit,
-		func(nft nft.NFT, st base.State) (bool, error) {
+		func(nft types.NFT, st base.State) (bool, error) {
 			hal, err := hd.buildNFTHal(contract, collection, nft, st)
 			if err != nil {
 				return false, err
@@ -244,7 +243,7 @@ func (hd *Handlers) buildCollectionNFTsHal(
 	offset string,
 	reverse bool,
 ) (Hal, error) {
-	baseSelf, err := hd.combineURL(HandlerPathNFTBox, "contract", contract, "collection", col)
+	baseSelf, err := hd.combineURL(HandlerPathNFTs, "contract", contract, "collection", col)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +259,7 @@ func (hd *Handlers) buildCollectionNFTsHal(
 	var hal Hal
 	hal = NewBaseHal(vas, NewHalLink(self, nil))
 
-	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "collection", col)
+	h, err := hd.combineURL(HandlerPathNFTCollection, "contract", contract, "collection", col)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +268,7 @@ func (hd *Handlers) buildCollectionNFTsHal(
 	var nextoffset string
 
 	if len(vas) > 0 {
-		va := vas[len(vas)-1].Interface().(nft.NFT)
+		va := vas[len(vas)-1].Interface().(types.NFT)
 		nextoffset = string(va.ID())
 	}
 
@@ -341,7 +340,7 @@ func (hd *Handlers) handleNFTOperatorsInGroup(contract, collection, account stri
 	}
 }
 
-func (hd *Handlers) buildNFTOperatorsHal(contract, collection, account string, operators collection.OperatorsBook, st base.State) (Hal, error) {
+func (hd *Handlers) buildNFTOperatorsHal(contract, collection, account string, operators types.OperatorsBook, st base.State) (Hal, error) {
 	h, err := hd.combineURL(HandlerPathNFTOperators, "contract", contract, "collection", collection, "account", account)
 	if err != nil {
 		return nil, err

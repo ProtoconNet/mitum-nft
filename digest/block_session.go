@@ -3,18 +3,20 @@ package digest
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
+
+	"github.com/ProtoconNet/mitum-nft/v2/state"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	"github.com/ProtoconNet/mitum-nft/v2/digest/isaac"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
-	timestampservice "github.com/ProtoconNet/mitum-nft/v2/timestamp/service"
-	"github.com/ProtoconNet/mitum2/base"
+
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/fixedtree"
 )
@@ -23,28 +25,33 @@ var bulkWriteLimit = 500
 
 type BlockSession struct {
 	sync.RWMutex
-	block                 base.BlockMap
-	ops                   []base.Operation
+	block                 mitumbase.BlockMap
+	ops                   []mitumbase.Operation
 	opstree               fixedtree.Tree
-	sts                   []base.State
+	sts                   []mitumbase.State
 	st                    *Database
-	opsTreeNodes          map[string]base.OperationFixedtreeNode
+	opsTreeNodes          map[string]mitumbase.OperationFixedtreeNode
 	blockModels           []mongo.WriteModel
 	operationModels       []mongo.WriteModel
 	accountModels         []mongo.WriteModel
 	balanceModels         []mongo.WriteModel
 	currencyModels        []mongo.WriteModel
-	timestampModels       []mongo.WriteModel
 	contractAccountModels []mongo.WriteModel
 	nftCollectionModels   []mongo.WriteModel
 	nftModels             []mongo.WriteModel
 	nftBoxModels          []mongo.WriteModel
 	nftOperatorModels     []mongo.WriteModel
 	statesValue           *sync.Map
-	nftList               []string
+	nftMap                map[string]struct{}
 }
 
-func NewBlockSession(st *Database, blk base.BlockMap, ops []base.Operation, opstree fixedtree.Tree, sts []base.State) (*BlockSession, error) {
+func NewBlockSession(
+	st *Database,
+	blk mitumbase.BlockMap,
+	ops []mitumbase.Operation,
+	opstree fixedtree.Tree,
+	sts []mitumbase.State,
+) (*BlockSession, error) {
 	if st.Readonly() {
 		return nil, errors.Errorf("readonly mode")
 	}
@@ -61,6 +68,7 @@ func NewBlockSession(st *Database, blk base.BlockMap, ops []base.Operation, opst
 		opstree:     opstree,
 		sts:         sts,
 		statesValue: &sync.Map{},
+		nftMap:      map[string]struct{}{},
 	}, nil
 }
 
@@ -77,9 +85,6 @@ func (bs *BlockSession) Prepare() error {
 		return err
 	}
 	if err := bs.prepareCurrencies(); err != nil {
-		return err
-	}
-	if err := bs.prepareTimeStamps(); err != nil {
 		return err
 	}
 	if err := bs.prepareNFTs(); err != nil {
@@ -116,10 +121,6 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		return err
 	}
 
-	if err := bs.writeModels(ctx, defaultColNameTimeStamp, bs.timestampModels); err != nil {
-		return err
-	}
-
 	if len(bs.nftCollectionModels) > 0 {
 		if err := bs.writeModels(ctx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
 			return err
@@ -127,22 +128,21 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}
 
 	if len(bs.nftModels) > 0 {
-		// for i := range bs.nftList {
-		// 	err := bs.st.cleanByHeightColNameNFTId(
-		// 		ctx,
-		// 		bs.block.Manifest().Height(),
-		// 		defaultColNameNFT,
-		// 		bs.nftList[i],
-		// 	)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
-
-		if len(bs.nftModels) > 0 {
-			if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
+		for nft, _ := range bs.nftMap {
+			err := bs.st.cleanByHeightColName(
+				ctx,
+				bs.block.Manifest().Height(),
+				defaultColNameNFT,
+				"nftid",
+				nft,
+			)
+			if err != nil {
 				return err
 			}
+		}
+
+		if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
+			return err
 		}
 	}
 
@@ -169,10 +169,10 @@ func (bs *BlockSession) Close() error {
 }
 
 func (bs *BlockSession) prepareOperationsTree() error {
-	nodes := map[string]base.OperationFixedtreeNode{}
+	nodes := map[string]mitumbase.OperationFixedtreeNode{}
 
 	if err := bs.opstree.Traverse(func(_ uint64, no fixedtree.Node) (bool, error) {
-		nno := no.(base.OperationFixedtreeNode)
+		nno := no.(mitumbase.OperationFixedtreeNode)
 		nodes[nno.Key()] = nno
 
 		return true, nil
@@ -216,7 +216,7 @@ func (bs *BlockSession) prepareOperations() error {
 		return nil
 	}
 
-	node := func(h mitumutil.Hash) (bool, bool, base.OperationProcessReasonError) {
+	node := func(h mitumutil.Hash) (bool, bool, mitumbase.OperationProcessReasonError) {
 		no, found := bs.opsTreeNodes[h.String()]
 		if !found {
 			return false, false, nil
@@ -264,13 +264,13 @@ func (bs *BlockSession) prepareAccounts() error {
 		st := bs.sts[i]
 
 		switch {
-		case currency.IsStateAccountKey(st.Key()):
+		case statecurrency.IsStateAccountKey(st.Key()):
 			j, err := bs.handleAccountState(st)
 			if err != nil {
 				return err
 			}
 			accountModels = append(accountModels, j...)
-		case currency.IsStateBalanceKey(st.Key()):
+		case statecurrency.IsStateBalanceKey(st.Key()):
 			j, err := bs.handleBalanceState(st)
 			if err != nil {
 				return err
@@ -296,7 +296,7 @@ func (bs *BlockSession) prepareCurrencies() error {
 	for i := range bs.sts {
 		st := bs.sts[i]
 		switch {
-		case currency.IsStateCurrencyDesignKey(st.Key()):
+		case statecurrency.IsStateCurrencyDesignKey(st.Key()):
 			j, err := bs.handleCurrencyState(st)
 			if err != nil {
 				return err
@@ -308,37 +308,6 @@ func (bs *BlockSession) prepareCurrencies() error {
 	}
 
 	bs.currencyModels = currencyModels
-
-	return nil
-}
-
-func (bs *BlockSession) prepareTimeStamps() error {
-	if len(bs.sts) < 1 {
-		return nil
-	}
-
-	var timestampModels []mongo.WriteModel
-	for i := range bs.sts {
-		st := bs.sts[i]
-		switch {
-		case timestampservice.IsStateServiceDesignKey(st.Key()):
-			j, err := bs.handleTimeStampServiceDesignState(st)
-			if err != nil {
-				return err
-			}
-			timestampModels = append(timestampModels, j...)
-		case timestampservice.IsStateTimeStampItemKey(st.Key()):
-			j, err := bs.handleTimeStampItemState(st)
-			if err != nil {
-				return err
-			}
-			timestampModels = append(timestampModels, j...)
-		default:
-			continue
-		}
-	}
-
-	bs.timestampModels = timestampModels
 
 	return nil
 }
@@ -355,35 +324,36 @@ func (bs *BlockSession) prepareNFTs() error {
 
 	for i := range bs.sts {
 		st := bs.sts[i]
-		stateKey, err := collection.ParseNFTStateKey(st.Key())
+		stateKey, err := state.ParseNFTStateKey(st.Key())
 		if err != nil {
 			continue
 		}
 		switch stateKey {
-		case collection.CollectionKey:
+		case state.CollectionKey:
 			j, err := bs.handleNFTCollectionState(st)
 			if err != nil {
 				return err
 			}
 			nftCollectionModels = append(nftCollectionModels, j...)
-		case collection.OperatorsKey:
+		case state.OperatorsKey:
 			j, err := bs.handleNFTOperatorsState(st)
 			if err != nil {
 				return err
 			}
 			nftOperatorModels = append(nftOperatorModels, j...)
-		case collection.NFTBoxKey:
+		case state.NFTBoxKey:
 			j, err := bs.handleNFTBoxState(st)
 			if err != nil {
 				return err
 			}
 			nftBoxModels = append(nftBoxModels, j...)
-		case collection.NFTKey:
-			j, err := bs.handleNFTState(st)
+		case state.NFTKey:
+			j, nft, err := bs.handleNFTState(st)
 			if err != nil {
 				return err
 			}
 			nftModels = append(nftModels, j...)
+			bs.nftMap[strconv.FormatUint(nft, 10)] = struct{}{}
 		default:
 			continue
 		}
@@ -397,7 +367,7 @@ func (bs *BlockSession) prepareNFTs() error {
 	return nil
 }
 
-func (bs *BlockSession) handleAccountState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleAccountState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if rs, err := NewAccountValue(st); err != nil {
 		return nil, err
 	} else if doc, err := NewAccountDoc(rs, bs.st.database.Encoder()); err != nil {
@@ -407,7 +377,7 @@ func (bs *BlockSession) handleAccountState(st base.State) ([]mongo.WriteModel, e
 	}
 }
 
-func (bs *BlockSession) handleBalanceState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleBalanceState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	doc, err := NewBalanceDoc(st, bs.st.database.Encoder())
 	if err != nil {
 		return nil, err
@@ -415,7 +385,7 @@ func (bs *BlockSession) handleBalanceState(st base.State) ([]mongo.WriteModel, e
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
-func (bs *BlockSession) handleContractAccountState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleContractAccountState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	doc, err := NewContractAccountDoc(st, bs.st.database.Encoder())
 	if err != nil {
 		return nil, err
@@ -423,7 +393,7 @@ func (bs *BlockSession) handleContractAccountState(st base.State) ([]mongo.Write
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
-func (bs *BlockSession) handleCurrencyState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleCurrencyState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	doc, err := NewCurrencyDoc(st, bs.st.database.Encoder())
 	if err != nil {
 		return nil, err
@@ -431,27 +401,7 @@ func (bs *BlockSession) handleCurrencyState(st base.State) ([]mongo.WriteModel, 
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
 }
 
-func (bs *BlockSession) handleTimeStampServiceDesignState(st base.State) ([]mongo.WriteModel, error) {
-	if serviceDesignDoc, err := NewTimeStampServiceDesignDoc(st, bs.st.database.Encoder()); err != nil {
-		return nil, err
-	} else {
-		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(serviceDesignDoc),
-		}, nil
-	}
-}
-
-func (bs *BlockSession) handleTimeStampItemState(st base.State) ([]mongo.WriteModel, error) {
-	if TimeStampItemDoc, err := NewTimeStampItemDoc(st, bs.st.database.Encoder()); err != nil {
-		return nil, err
-	} else {
-		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(TimeStampItemDoc),
-		}, nil
-	}
-}
-
-func (bs *BlockSession) handleNFTCollectionState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleNFTCollectionState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if nftCollectionDoc, err := NewNFTCollectionDoc(st, bs.st.database.Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -461,7 +411,7 @@ func (bs *BlockSession) handleNFTCollectionState(st base.State) ([]mongo.WriteMo
 	}
 }
 
-func (bs *BlockSession) handleNFTOperatorsState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleNFTOperatorsState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if nftCollectionDoc, err := NewNFTOperatorDoc(st, bs.st.database.Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -471,17 +421,17 @@ func (bs *BlockSession) handleNFTOperatorsState(st base.State) ([]mongo.WriteMod
 	}
 }
 
-func (bs *BlockSession) handleNFTState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleNFTState(st mitumbase.State) ([]mongo.WriteModel, uint64, error) {
 	if nftDoc, err := NewNFTDoc(st, bs.st.database.Encoder()); err != nil {
-		return nil, err
+		return nil, 0, err
 	} else {
 		return []mongo.WriteModel{
 			mongo.NewInsertOneModel().SetDocument(nftDoc),
-		}, nil
+		}, nftDoc.nft.ID(), nil
 	}
 }
 
-func (bs *BlockSession) handleNFTBoxState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleNFTBoxState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if nftBoxDoc, err := NewNFTBoxDoc(st, bs.st.database.Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -491,7 +441,7 @@ func (bs *BlockSession) handleNFTBoxState(st base.State) ([]mongo.WriteModel, er
 	}
 }
 
-func (bs *BlockSession) handleNFTLastIndexState(st base.State) ([]mongo.WriteModel, error) {
+func (bs *BlockSession) handleNFTLastIndexState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if nftLastIndexDoc, err := NewNFTLastIndexDoc(st, bs.st.database.Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -551,7 +501,6 @@ func (bs *BlockSession) close() error {
 	bs.currencyModels = nil
 	bs.accountModels = nil
 	bs.balanceModels = nil
-	bs.timestampModels = nil
 	bs.contractAccountModels = nil
 	bs.nftCollectionModels = nil
 	bs.nftModels = nil

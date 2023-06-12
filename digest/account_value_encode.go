@@ -1,15 +1,15 @@
 package digest
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (va *AccountValue) unpack(enc encoder.Encoder, ht hint.Hint, bac []byte, bl []byte, height base.Height) error {
+func (va *AccountValue) unpack(enc encoder.Encoder, ht hint.Hint, bac []byte, bl []byte, height mitumbase.Height) error {
 	va.BaseHinter = hint.NewBaseHinter(ht)
 
 	ac, err := enc.Decode(bac)
@@ -17,7 +17,7 @@ func (va *AccountValue) unpack(enc encoder.Encoder, ht hint.Hint, bac []byte, bl
 	case err != nil:
 		return err
 	case ac != nil:
-		if v, ok := ac.(currency.Account); !ok {
+		if v, ok := ac.(types.Account); !ok {
 			return util.ErrWrongType.Errorf("expected Account, not %T", ac)
 		} else {
 			va.ac = v
@@ -29,9 +29,9 @@ func (va *AccountValue) unpack(enc encoder.Encoder, ht hint.Hint, bac []byte, bl
 		return err
 	}
 
-	balance := make([]currency.Amount, len(hbl))
+	balance := make([]types.Amount, len(hbl))
 	for i := range hbl {
-		j, ok := hbl[i].(currency.Amount)
+		j, ok := hbl[i].(types.Amount)
 		if !ok {
 			return mitumutil.ErrWrongType.Errorf("expected currency.Amount, not %T", hbl[i])
 		}

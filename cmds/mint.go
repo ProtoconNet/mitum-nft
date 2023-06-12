@@ -3,13 +3,13 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -27,10 +27,10 @@ type MintCommand struct {
 	CreatorTotal uint                `name:"creator-total" help:"creators total share" optional:""`
 	sender       base.Address
 	contract     base.Address
-	collection   extensioncurrency.ContractID
-	hash         nft.NFTHash
-	uri          nft.URI
-	creators     nft.Signers
+	collection   currencytypes.ContractID
+	hash         types.NFTHash
+	uri          types.URI
+	creators     types.Signers
 }
 
 func NewMintCommand() MintCommand {
@@ -79,35 +79,35 @@ func (cmd *MintCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	col := extensioncurrency.ContractID(cmd.Collection)
+	col := currencytypes.ContractID(cmd.Collection)
 	if err = col.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.collection = col
 	}
 
-	hash := nft.NFTHash(cmd.Hash)
+	hash := types.NFTHash(cmd.Hash)
 	if err := hash.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.hash = hash
 	}
 
-	uri := nft.URI(cmd.Uri)
+	uri := types.URI(cmd.Uri)
 	if err := uri.IsValid(nil); err != nil {
 		return err
 	} else {
 		cmd.uri = uri
 	}
 
-	var crts = []nft.Signer{}
+	var crts = []types.Signer{}
 	if len(cmd.Creator.address) > 0 {
 		a, err := cmd.Creator.Encode(enc)
 		if err != nil {
 			return errors.Wrapf(err, "invalid creator address format, %q", cmd.Creator)
 		}
 
-		signer := nft.NewSigner(a, cmd.Creator.share, false)
+		signer := types.NewSigner(a, cmd.Creator.share, false)
 		if err = signer.IsValid(nil); err != nil {
 			return err
 		}
@@ -115,7 +115,7 @@ func (cmd *MintCommand) parseFlags() error {
 		crts = append(crts, signer)
 	}
 
-	creators := nft.NewSigners(cmd.CreatorTotal, crts)
+	creators := types.NewSigners(cmd.CreatorTotal, crts)
 	if err := creators.IsValid(nil); err != nil {
 		return err
 	} else {
@@ -129,10 +129,10 @@ func (cmd *MintCommand) parseFlags() error {
 func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:dupl
 	e := util.StringErrorFunc("failed to create mint operation")
 
-	item := collection.NewMintItem(cmd.contract, cmd.collection, cmd.hash, cmd.uri, cmd.creators, cmd.Currency.CID)
-	fact := collection.NewMintFact([]byte(cmd.Token), cmd.sender, []collection.MintItem{item})
+	item := nft.NewMintItem(cmd.contract, cmd.collection, cmd.hash, cmd.uri, cmd.creators, cmd.Currency.CID)
+	fact := nft.NewMintFact([]byte(cmd.Token), cmd.sender, []nft.MintItem{item})
 
-	op, err := collection.NewMint(fact)
+	op, err := nft.NewMint(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

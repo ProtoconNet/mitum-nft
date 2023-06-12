@@ -3,8 +3,8 @@ package digest
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,9 +12,9 @@ import (
 
 type AccountValueJSONMarshaler struct {
 	hint.BaseHinter
-	currency.AccountJSONMarshaler
-	Balance []currency.Amount `json:"balance,omitempty"`
-	Height  base.Height       `json:"height"`
+	types.AccountJSONMarshaler
+	Balance []types.Amount   `json:"balance,omitempty"`
+	Height  mitumbase.Height `json:"height"`
 }
 
 func (va AccountValue) MarshalJSON() ([]byte, error) {
@@ -28,8 +28,8 @@ func (va AccountValue) MarshalJSON() ([]byte, error) {
 
 type AccountValueJSONUnmarshaler struct {
 	Hint    hint.Hint
-	Balance json.RawMessage `json:"balance"`
-	Height  base.Height     `json:"height"`
+	Balance json.RawMessage  `json:"balance"`
+	Height  mitumbase.Height `json:"height"`
 }
 
 func (va *AccountValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -38,7 +38,7 @@ func (va *AccountValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return err
 	}
 
-	ac := new(currency.Account)
+	ac := new(types.Account)
 	if err := va.unpack(enc, uva.Hint, nil, uva.Balance, uva.Height); err != nil {
 		return err
 	} else if err := ac.DecodeJSON(b, enc); err != nil {

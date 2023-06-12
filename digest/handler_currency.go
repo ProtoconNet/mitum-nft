@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -86,7 +86,7 @@ func (hd *Handlers) handleCurrency(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hd *Handlers) handleCurrencyInGroup(cid string) ([]byte, error) {
-	var de extensioncurrency.CurrencyDesign
+	var de types.CurrencyDesign
 	var st base.State
 
 	de, st, err := hd.database.currency(cid)
@@ -101,7 +101,7 @@ func (hd *Handlers) handleCurrencyInGroup(cid string) ([]byte, error) {
 	return hd.enc.Marshal(i)
 }
 
-func (hd *Handlers) buildCurrency(de extensioncurrency.CurrencyDesign, st base.State) (Hal, error) {
+func (hd *Handlers) buildCurrency(de types.CurrencyDesign, st base.State) (Hal, error) {
 	h, err := hd.combineURL(HandlerPathCurrency, "currencyid", de.Currency().String())
 	if err != nil {
 		return nil, err

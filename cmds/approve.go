@@ -3,12 +3,13 @@ package cmds
 import (
 	"context"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-nft/v2/nft/collection"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/cmds"
-	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum-currency/v3/cmds"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
@@ -21,10 +22,10 @@ type ApproveCommand struct {
 	Approved   cmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
 	NFTidx     uint64              `arg:"" name:"nft" help:"target nft idx to approve"`
 	Currency   cmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	sender     base.Address
-	contract   base.Address
-	collection extensioncurrency.ContractID
-	approved   base.Address
+	sender     mitumbase.Address
+	contract   mitumbase.Address
+	collection types.ContractID
+	approved   mitumbase.Address
 }
 
 func NewApproveCommand() ApproveCommand {
@@ -71,7 +72,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	collection := extensioncurrency.ContractID(cmd.Collection)
+	collection := types.ContractID(cmd.Collection)
 	if err := collection.IsValid(nil); err != nil {
 		return err
 	} else {
@@ -88,18 +89,18 @@ func (cmd *ApproveCommand) parseFlags() error {
 
 }
 
-func (cmd *ApproveCommand) createOperation() (base.Operation, error) {
+func (cmd *ApproveCommand) createOperation() (mitumbase.Operation, error) {
 	e := util.StringErrorFunc("failed to create approve operation")
 
-	item := collection.NewApproveItem(cmd.contract, cmd.collection, cmd.approved, cmd.NFTidx, cmd.Currency.CID)
+	item := nft.NewApproveItem(cmd.contract, cmd.collection, cmd.approved, cmd.NFTidx, cmd.Currency.CID)
 
-	fact := collection.NewApproveFact(
+	fact := nft.NewApproveFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		[]collection.ApproveItem{item},
+		[]nft.ApproveItem{item},
 	)
 
-	op, err := collection.NewApprove(fact)
+	op, err := nft.NewApprove(fact)
 	if err != nil {
 		return nil, e(err, "")
 	}

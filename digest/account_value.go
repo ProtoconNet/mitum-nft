@@ -1,11 +1,11 @@
 package digest
 
 import (
-	"github.com/ProtoconNet/mitum2/base"
+	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 )
 
 var (
@@ -14,18 +14,18 @@ var (
 
 type AccountValue struct {
 	hint.BaseHinter
-	ac      currency.Account
-	balance []currency.Amount
-	height  base.Height
+	ac      types.Account
+	balance []types.Amount
+	height  mitumbase.Height
 }
 
-func NewAccountValue(st base.State) (AccountValue, error) {
-	var ac currency.Account
+func NewAccountValue(st mitumbase.State) (AccountValue, error) {
+	var ac types.Account
 	switch a, ok, err := IsAccountState(st); {
 	case err != nil:
 		return AccountValue{}, err
 	case !ok:
-		return AccountValue{}, errors.Errorf("not state for currency.Account, %T", st.Value())
+		return AccountValue{}, errors.Errorf("not state for types.Account, %T", st.Value())
 	default:
 		ac = a
 	}
@@ -37,25 +37,25 @@ func NewAccountValue(st base.State) (AccountValue, error) {
 	}, nil
 }
 
-func (va AccountValue) Account() currency.Account {
+func (va AccountValue) Account() types.Account {
 	return va.ac
 }
 
-func (va AccountValue) Balance() []currency.Amount {
+func (va AccountValue) Balance() []types.Amount {
 	return va.balance
 }
 
-func (va AccountValue) Height() base.Height {
+func (va AccountValue) Height() mitumbase.Height {
 	return va.height
 }
 
-func (va AccountValue) SetHeight(height base.Height) AccountValue {
+func (va AccountValue) SetHeight(height mitumbase.Height) AccountValue {
 	va.height = height
 
 	return va
 }
 
-func (va AccountValue) SetBalance(balance []currency.Amount) AccountValue {
+func (va AccountValue) SetBalance(balance []types.Amount) AccountValue {
 	va.balance = balance
 
 	return va

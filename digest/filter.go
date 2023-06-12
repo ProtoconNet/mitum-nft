@@ -147,6 +147,8 @@ func buildNFTsFilterByCollection(contract, col string, offset string, reverse bo
 
 	// filter fot matching collection
 	filterSymbol := bson.D{{"collection", bson.D{{"$in", []string{col}}}}}
+	filterToken := bson.D{{"istoken", true}}
+	filterA = append(filterA, filterToken)
 	filterA = append(filterA, filterSymbol)
 
 	// if offset exist, apply offset

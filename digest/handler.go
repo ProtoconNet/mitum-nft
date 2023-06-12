@@ -44,9 +44,7 @@ var (
 	// HandlerPathAccountNFTs                = `/account/{address:(?i)` + base.REStringAddressString + `}/nfts`                                                                                      // revive:disable-line:line-length-limit
 	HandlerPathNFTCollection              = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}`
 	HandlerPathNFT                        = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/{id:.*}`
-	HandlerPathNFTBox                     = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/nfts`
-	HandlerPathTimeStampService           = `/timestamp/{contract:.*}/service/{service:.*}`
-	HandlerPathTimeStampItem              = `/timestamp/{contract:.*}/service/{service:.*}/project/{project:.*}/id/{tid:[0-9]+}`
+	HandlerPathNFTs                       = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/nfts`
 	HandlerPathOperationBuildFactTemplate = `/builder/operation/fact/template/{fact:[\w][\w\-]*}`
 	HandlerPathOperationBuildFact         = `/builder/operation/fact`
 	HandlerPathOperationBuildSign         = `/builder/operation/sign`
@@ -73,9 +71,7 @@ var RateLimitHandlerMap = map[string]string{
 	// "nft-box":HandlerPathAccountNFTs,
 	"nft-collection":                  HandlerPathNFTCollection,
 	"nft-item":                        HandlerPathNFT,
-	"nft-box":                         HandlerPathNFTBox,
-	"timestamp-service":               HandlerPathTimeStampService,
-	"timestamp-item":                  HandlerPathTimeStampItem,
+	"nft-box":                         HandlerPathNFTs,
 	"builder-operation-fact-template": HandlerPathOperationBuildFactTemplate,
 	"builder-operation-fact":          HandlerPathOperationBuildFact,
 	"builder-operation-sign":          HandlerPathOperationBuildSign,
@@ -199,16 +195,11 @@ func (hd *Handlers) setHandlers() {
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTBox, hd.handleNFTBox, true).
+	_ = hd.setHandler(HandlerPathNFTs, hd.handleNFTs, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFTOperators, hd.handleNFTOperators, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
-		Methods(http.MethodOptions, "GET")
-
-	_ = hd.setHandler(HandlerPathTimeStampItem, hd.handleTimeStampItem, true).
-		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathTimeStampService, hd.handleTimeStamp, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathAccountOperations, hd.handleAccountOperations, true).
 		Methods(http.MethodOptions, "GET")
