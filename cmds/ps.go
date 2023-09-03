@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"context"
+
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
 	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
@@ -40,13 +41,13 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 	if err := opr.SetProcessor(
-		nft.CollectionRegisterHint,
-		nft.NewCollectionRegisterProcessor(),
+		nft.CreateCollectionHint,
+		nft.NewCreateCollectionProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.CollectionPolicyUpdaterHint,
-		nft.NewCollectionPolicyUpdaterProcessor(),
+		nft.UpdateCollectionPolicyHint,
+		nft.NewUpdateCollectionPolicyProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
@@ -55,8 +56,8 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.NFTTransferHint,
-		nft.NewNFTTransferProcessor(),
+		nft.TransferHint,
+		nft.NewTransferProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
@@ -70,13 +71,13 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.NFTSignHint,
-		nft.NewNFTSignProcessor(),
+		nft.SignHint,
+		nft.NewSignProcessor(),
 	); err != nil {
 		return pctx, err
 	}
 
-	_ = set.Add(nft.CollectionRegisterHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(nft.CreateCollectionHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -85,7 +86,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(nft.CollectionPolicyUpdaterHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(nft.UpdateCollectionPolicyHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -103,7 +104,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(nft.NFTTransferHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(nft.TransferHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,
@@ -130,7 +131,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		)
 	})
 
-	_ = set.Add(nft.NFTSignHint, func(height base.Height) (base.OperationProcessor, error) {
+	_ = set.Add(nft.SignHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,

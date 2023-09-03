@@ -82,17 +82,17 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 		did = fact.Currency().String()
 		didtype = DuplicationTypeCurrency
 	case currency.SuffrageInflation:
-	case nft.CollectionRegister:
-		fact, ok := t.Fact().(nft.CollectionRegisterFact)
+	case nft.CreateCollection:
+		fact, ok := t.Fact().(nft.CreateCollectionFact)
 		if !ok {
-			return errors.Errorf("expected CollectionRegisterFact, not %T", t.Fact())
+			return errors.Errorf("expected CreateCollectionFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case nft.CollectionPolicyUpdater:
-		fact, ok := t.Fact().(nft.CollectionPolicyUpdaterFact)
+	case nft.UpdateCollectionPolicy:
+		fact, ok := t.Fact().(nft.UpdateCollectionPolicyFact)
 		if !ok {
-			return errors.Errorf("expected CollectionPolicyUpdaterFact, not %T", t.Fact())
+			return errors.Errorf("expected UpdateCollectionPolicyFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
@@ -103,10 +103,10 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case nft.NFTTransfer:
-		fact, ok := t.Fact().(nft.NFTTransferFact)
+	case nft.Transfer:
+		fact, ok := t.Fact().(nft.TransferFact)
 		if !ok {
-			return errors.Errorf("expected NFTTransferFact, not %T", t.Fact())
+			return errors.Errorf("expected TransferFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
@@ -124,10 +124,10 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case nft.NFTSign:
-		fact, ok := t.Fact().(nft.NFTSignFact)
+	case nft.Sign:
+		fact, ok := t.Fact().(nft.SignFact)
 		if !ok {
-			return errors.Errorf("expected NFTSignFact, not %T", t.Fact())
+			return errors.Errorf("expected SignFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
@@ -176,13 +176,13 @@ func GetNewProcessor(opr *currencyprocessor.OperationProcessor, op mitumbase.Ope
 		currency.CurrencyRegister,
 		currency.CurrencyPolicyUpdater,
 		currency.SuffrageInflation,
-		nft.CollectionRegister,
-		nft.CollectionPolicyUpdater,
+		nft.CreateCollection,
+		nft.UpdateCollectionPolicy,
 		nft.Mint,
-		nft.NFTTransfer,
+		nft.Transfer,
 		nft.Delegate,
 		nft.Approve,
-		nft.NFTSign:
+		nft.Sign:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil
