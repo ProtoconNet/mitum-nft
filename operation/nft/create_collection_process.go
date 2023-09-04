@@ -74,7 +74,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
@@ -83,7 +83,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(stateextension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender is contract account, %q", fact.Sender()), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is contract account, %q", fact.Sender()), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -92,20 +92,20 @@ func (opp *CreateCollectionProcessor) PreProcess(
 
 	st, err := currencystate.ExistsState(stateextension.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
 	if err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("target contract account not found, %q; %w", fact.Contract(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("target contract account not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	ca, err := stateextension.StateContractAccountValue(st)
 	if err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
 	}
 
 	if !ca.Owner().Equal(fact.Sender()) {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender is not owner of contract account, %q, %q", fact.Sender(), ca.Owner()), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is not owner of contract account, %q, %q", fact.Sender(), ca.Owner()), nil
 	}
 
-	if !ca.IsActive() {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("deactivated contract account, %q", fact.Contract()), nil
+	if ca.IsActive() {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("a design is already registered, %q", fact.Contract().String()), nil
 	}
 
 	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, fact.Collection(), statenft.CollectionKey), getStateFunc); err != nil {
@@ -139,7 +139,7 @@ func (opp *CreateCollectionProcessor) Process(
 		return nil, nil, e.Errorf("expected CreateCollectionFact, not %T", op.Fact())
 	}
 
-	sts := make([]mitumbase.StateMergeValue, 3)
+	sts := make([]mitumbase.StateMergeValue, 4)
 
 	policy := types.NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.Whites())
 	design := types.NewDesign(fact.Contract(), fact.Sender(), fact.Collection(), true, policy)
@@ -156,6 +156,22 @@ func (opp *CreateCollectionProcessor) Process(
 		statenft.NewLastNFTIndexStateValue(0),
 	)
 
+	st, err := currencystate.ExistsState(stateextension.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	if err != nil {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("target contract account not found, %q; %w", fact.Contract(), err), nil
+	}
+
+	ca, err := stateextension.StateContractAccountValue(st)
+	if err != nil {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
+	}
+	ca.SetIsActive(true)
+
+	sts[2] = currencystate.NewStateMergeValue(
+		stateextension.StateKeyContractAccount(fact.Contract()),
+		stateextension.NewContractAccountStateValue(ca),
+	)
+
 	currencyPolicy, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("currency not found, %q; %w", fact.Currency(), err), nil
@@ -166,7 +182,7 @@ func (opp *CreateCollectionProcessor) Process(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check fee of currency, %q; %w", fact.Currency(), err), nil
 	}
 
-	st, err := currencystate.ExistsState(statecurrency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
+	st, err = currencystate.ExistsState(statecurrency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("sender balance not found, %q; %w", fact.Sender(), err), nil
 	}
@@ -183,7 +199,7 @@ func (opp *CreateCollectionProcessor) Process(
 	if !ok {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", sb.Value()), nil
 	}
-	sts[2] = currencystate.NewStateMergeValue(
+	sts[3] = currencystate.NewStateMergeValue(
 		sb.Key(),
 		statecurrency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))),
 	)
