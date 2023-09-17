@@ -26,11 +26,6 @@ type TransferCommand struct {
 	collection types.ContractID
 }
 
-func NewNFTTranfserCommand() TransferCommand {
-	cmd := NewBaseCommand()
-	return TransferCommand{BaseCommand: *cmd}
-}
-
 func (cmd *TransferCommand) Run(pctx context.Context) error { // nolint:dupl
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err

@@ -33,11 +33,6 @@ type CreateCollectionCommand struct {
 	whitelist  []mitumbase.Address
 }
 
-func NewCreateCollectionCommand() CreateCollectionCommand {
-	cmd := NewBaseCommand()
-	return CreateCollectionCommand{BaseCommand: *cmd}
-}
-
 func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err

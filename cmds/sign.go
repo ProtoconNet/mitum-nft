@@ -24,11 +24,6 @@ type SignCommand struct {
 	collection types.ContractID
 }
 
-func NewSignCommand() SignCommand {
-	cmd := NewBaseCommand()
-	return SignCommand{BaseCommand: *cmd}
-}
-
 func (cmd *SignCommand) Run(pctx context.Context) error { // nolint:dupl
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err

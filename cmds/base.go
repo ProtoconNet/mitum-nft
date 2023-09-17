@@ -23,12 +23,6 @@ type BaseCommand struct {
 	Out      io.Writer `kong:"-"`
 }
 
-func NewBaseCommand() *BaseCommand {
-	return &BaseCommand{
-		Out: os.Stdout,
-	}
-}
-
 func (cmd *BaseCommand) prepare(pctx context.Context) (context.Context, error) {
 	cmd.Out = os.Stdout
 	pps := ps.NewPS("cmd")

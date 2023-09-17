@@ -32,11 +32,6 @@ type UpdateCollectionPolicyCommand struct {
 	white      []mitumbase.Address
 }
 
-func NewUpdateCollectionPolicyCommand() UpdateCollectionPolicyCommand {
-	cmd := NewBaseCommand()
-	return UpdateCollectionPolicyCommand{BaseCommand: *cmd}
-}
-
 func (cmd *UpdateCollectionPolicyCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err

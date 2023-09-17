@@ -30,11 +30,6 @@ type MintCommand struct {
 	creators     types.Signers
 }
 
-func NewMintCommand() MintCommand {
-	cmd := NewBaseCommand()
-	return MintCommand{BaseCommand: *cmd}
-}
-
 func (cmd *MintCommand) Run(pctx context.Context) error { // nolint:dupl
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err

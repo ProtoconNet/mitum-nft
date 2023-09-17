@@ -26,11 +26,6 @@ type DelegateCommand struct {
 	mode       nft.DelegateMode
 }
 
-func NewDelegateCommand() DelegateCommand {
-	cmd := NewBaseCommand()
-	return DelegateCommand{BaseCommand: *cmd}
-}
-
 func (cmd *DelegateCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
