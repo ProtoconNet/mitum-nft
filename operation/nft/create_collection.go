@@ -17,21 +17,19 @@ var (
 
 type CreateCollectionFact struct {
 	mitumbase.BaseFact
-	sender     mitumbase.Address
-	contract   mitumbase.Address
-	collection currencytypes.ContractID
-	name       types.CollectionName
-	royalty    types.PaymentParameter
-	uri        types.URI
-	whitelist  []mitumbase.Address
-	currency   currencytypes.CurrencyID
+	sender    mitumbase.Address
+	contract  mitumbase.Address
+	name      types.CollectionName
+	royalty   types.PaymentParameter
+	uri       types.URI
+	whitelist []mitumbase.Address
+	currency  currencytypes.CurrencyID
 }
 
 func NewCreateCollectionFact(
 	token []byte,
 	sender mitumbase.Address,
 	contract mitumbase.Address,
-	collection currencytypes.ContractID,
 	name types.CollectionName,
 	royalty types.PaymentParameter,
 	uri types.URI,
@@ -40,15 +38,14 @@ func NewCreateCollectionFact(
 ) CreateCollectionFact {
 	bf := mitumbase.NewBaseFact(CreateCollectionFactHint, token)
 	fact := CreateCollectionFact{
-		BaseFact:   bf,
-		sender:     sender,
-		contract:   contract,
-		collection: collection,
-		name:       name,
-		royalty:    royalty,
-		uri:        uri,
-		whitelist:  whitelist,
-		currency:   currency,
+		BaseFact:  bf,
+		sender:    sender,
+		contract:  contract,
+		name:      name,
+		royalty:   royalty,
+		uri:       uri,
+		whitelist: whitelist,
+		currency:  currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -67,7 +64,6 @@ func (fact CreateCollectionFact) IsValid(b []byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		fact.sender,
 		fact.contract,
-		fact.collection,
 		fact.name,
 		fact.royalty,
 		fact.uri,
@@ -101,7 +97,6 @@ func (fact CreateCollectionFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.collection.Bytes(),
 		fact.name.Bytes(),
 		fact.royalty.Bytes(),
 		fact.uri.Bytes(),
@@ -122,10 +117,6 @@ func (fact CreateCollectionFact) Contract() mitumbase.Address {
 	return fact.contract
 }
 
-func (fact CreateCollectionFact) Collection() currencytypes.ContractID {
-	return fact.collection
-}
-
 func (fact CreateCollectionFact) Name() types.CollectionName {
 	return fact.name
 }
@@ -138,7 +129,7 @@ func (fact CreateCollectionFact) URI() types.URI {
 	return fact.uri
 }
 
-func (fact CreateCollectionFact) Whites() []mitumbase.Address {
+func (fact CreateCollectionFact) WhiteList() []mitumbase.Address {
 	return fact.whitelist
 }
 

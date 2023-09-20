@@ -12,30 +12,28 @@ import (
 func (fact UpdateCollectionPolicyFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      fact.Hint().String(),
-			"hash":       fact.BaseFact.Hash().String(),
-			"token":      fact.BaseFact.Token(),
-			"sender":     fact.sender,
-			"contract":   fact.contract,
-			"collection": fact.collection,
-			"name":       fact.name,
-			"royalty":    fact.royalty,
-			"uri":        fact.uri,
-			"whitelist":  fact.whitelist,
-			"currency":   fact.currency,
+			"_hint":     fact.Hint().String(),
+			"hash":      fact.BaseFact.Hash().String(),
+			"token":     fact.BaseFact.Token(),
+			"sender":    fact.sender,
+			"contract":  fact.contract,
+			"name":      fact.name,
+			"royalty":   fact.royalty,
+			"uri":       fact.uri,
+			"whitelist": fact.whitelist,
+			"currency":  fact.currency,
 		})
 }
 
 type UpdateCollectionPolicyFactBSONUnmarshaler struct {
-	Hint       string   `bson:"_hint"`
-	Sender     string   `bson:"sender"`
-	Contract   string   `bson:"contract"`
-	Collection string   `bson:"collection"`
-	Name       string   `bson:"name"`
-	Royalty    uint     `bson:"royalty"`
-	URI        string   `bson:"uri"`
-	Whitelist  []string `bson:"whitelist"`
-	Currency   string   `bson:"currency"`
+	Hint      string   `bson:"_hint"`
+	Sender    string   `bson:"sender"`
+	Contract  string   `bson:"contract"`
+	Name      string   `bson:"name"`
+	Royalty   uint     `bson:"royalty"`
+	URI       string   `bson:"uri"`
+	Whitelist []string `bson:"whitelist"`
+	Currency  string   `bson:"currency"`
 }
 
 func (fact *UpdateCollectionPolicyFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -62,7 +60,7 @@ func (fact *UpdateCollectionPolicyFact) DecodeBSON(b []byte, enc *bsonenc.Encode
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unmarshal(enc, uf.Sender, uf.Contract, uf.Collection, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency)
+	return fact.unmarshal(enc, uf.Sender, uf.Contract, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency)
 }
 
 func (op UpdateCollectionPolicy) MarshalBSON() ([]byte, error) {

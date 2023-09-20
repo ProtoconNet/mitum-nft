@@ -1,7 +1,6 @@
 package types
 
 import (
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -11,16 +10,14 @@ import (
 func (ob *OperatorsBook) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	col string,
-	bags []string,
+	oprs []string,
 ) error {
 	e := util.StringError("failed to unmarshal operators book")
 
 	ob.BaseHinter = hint.NewBaseHinter(ht)
-	ob.collection = currencytypes.ContractID(col)
 
-	operators := make([]mitumbase.Address, len(bags))
-	for i, bag := range bags {
+	operators := make([]mitumbase.Address, len(oprs))
+	for i, bag := range oprs {
 		operator, err := mitumbase.DecodeAddress(bag, enc)
 		if err != nil {
 			return e.Wrap(err)

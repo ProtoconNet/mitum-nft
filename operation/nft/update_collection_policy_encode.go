@@ -12,7 +12,6 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 	enc encoder.Encoder,
 	sd string,
 	ct string,
-	col string,
 	nm string,
 	ry uint,
 	uri string,
@@ -21,7 +20,6 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 ) error {
 	e := util.StringError("failed to unmarshal UpdateCollectionPolicyFact")
 
-	fact.collection = currencytypes.ContractID(col)
 	fact.currency = currencytypes.CurrencyID(cid)
 
 	sender, err := mitumbase.DecodeAddress(sd, enc)
@@ -39,6 +37,13 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 	fact.name = types.CollectionName(nm)
 	fact.royalty = types.PaymentParameter(ry)
 	fact.uri = types.URI(uri)
+
+	switch a, err := mitumbase.DecodeAddress(ct, enc); {
+	case err != nil:
+		return e.Wrap(err)
+	default:
+		fact.contract = a
+	}
 
 	whitelist := make([]mitumbase.Address, len(bws))
 	for i, bw := range bws {

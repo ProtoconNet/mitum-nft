@@ -38,19 +38,17 @@ var DelegateItemHint = hint.MustNewHint("mitum-nft-delegate-item-v0.0.1")
 
 type DelegateItem struct {
 	hint.BaseHinter
-	contract   mitumbase.Address
-	collection types.ContractID
-	operator   mitumbase.Address
-	mode       DelegateMode
-	currency   types.CurrencyID
+	contract  mitumbase.Address
+	delegatee mitumbase.Address
+	mode      DelegateMode
+	currency  types.CurrencyID
 }
 
-func NewDelegateItem(contract mitumbase.Address, collection types.ContractID, operator mitumbase.Address, mode DelegateMode, currency types.CurrencyID) DelegateItem {
+func NewDelegateItem(contract mitumbase.Address, operator mitumbase.Address, mode DelegateMode, currency types.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
 		contract:   contract,
-		collection: collection,
-		operator:   operator,
+		delegatee:  operator,
 		mode:       mode,
 		currency:   currency,
 	}
@@ -60,8 +58,7 @@ func (it DelegateItem) IsValid([]byte) error {
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,
-		it.collection,
-		it.operator,
+		it.delegatee,
 		it.mode,
 		it.currency,
 	)
@@ -70,8 +67,7 @@ func (it DelegateItem) IsValid([]byte) error {
 func (it DelegateItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.collection.Bytes(),
-		it.operator.Bytes(),
+		it.delegatee.Bytes(),
 		it.mode.Bytes(),
 		it.currency.Bytes(),
 	)
@@ -81,12 +77,8 @@ func (it DelegateItem) Contract() mitumbase.Address {
 	return it.contract
 }
 
-func (it DelegateItem) Collection() types.ContractID {
-	return it.collection
-}
-
-func (it DelegateItem) Operator() mitumbase.Address {
-	return it.operator
+func (it DelegateItem) Delegatee() mitumbase.Address {
+	return it.delegatee
 }
 
 func (it DelegateItem) Mode() DelegateMode {
@@ -95,7 +87,7 @@ func (it DelegateItem) Mode() DelegateMode {
 
 func (it DelegateItem) Addresses() ([]mitumbase.Address, error) {
 	as := make([]mitumbase.Address, 1)
-	as[0] = it.operator
+	as[0] = it.delegatee
 	return as, nil
 }
 

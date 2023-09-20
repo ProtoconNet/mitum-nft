@@ -9,16 +9,14 @@ import (
 
 func (ob OperatorsBook) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
-		"_hint":      ob.Hint().String(),
-		"collection": ob.collection,
-		"operators":  ob.operators,
+		"_hint":     ob.Hint().String(),
+		"operators": ob.operators,
 	})
 }
 
 type OperatorsBookBSONUnmarshaler struct {
-	Hint       string   `bson:"_hint"`
-	Collection string   `bson:"collection"`
-	Operators  []string `bson:"operators"`
+	Hint      string   `bson:"_hint"`
+	Operators []string `bson:"operators"`
 }
 
 func (ob *OperatorsBook) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -34,5 +32,5 @@ func (ob *OperatorsBook) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return ob.unmarshal(enc, ht, u.Collection, u.Operators)
+	return ob.unmarshal(enc, ht, u.Operators)
 }

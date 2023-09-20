@@ -18,15 +18,20 @@ var OperatorsBookHint = hint.MustNewHint("mitum-nft-operator-book-v0.0.1")
 
 type OperatorsBook struct {
 	hint.BaseHinter
-	collection currencytypes.ContractID
-	operators  []mitumbase.Address
+	operators []mitumbase.Address
 }
 
-func NewOperatorsBook(collection currencytypes.ContractID, operators []mitumbase.Address) OperatorsBook {
+func NewOperatorsBook(operators []mitumbase.Address) OperatorsBook {
 	if operators == nil {
-		return OperatorsBook{BaseHinter: hint.NewBaseHinter(OperatorsBookHint), collection: collection, operators: []mitumbase.Address{}}
+		return OperatorsBook{
+			BaseHinter: hint.NewBaseHinter(OperatorsBookHint),
+			operators:  []mitumbase.Address{},
+		}
 	}
-	return OperatorsBook{BaseHinter: hint.NewBaseHinter(OperatorsBookHint), collection: collection, operators: operators}
+	return OperatorsBook{
+		BaseHinter: hint.NewBaseHinter(OperatorsBookHint),
+		operators:  operators,
+	}
 }
 
 func (ob OperatorsBook) IsValid([]byte) error {
@@ -59,10 +64,6 @@ func (ob OperatorsBook) GenerateHash() util.Hash {
 
 func (ob OperatorsBook) IsEmpty() bool {
 	return len(ob.operators) < 1
-}
-
-func (ob OperatorsBook) Collection() currencytypes.ContractID {
-	return ob.collection
 }
 
 func (ob OperatorsBook) Equal(b OperatorsBook) bool {

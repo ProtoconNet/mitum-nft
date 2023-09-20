@@ -8,13 +8,13 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (p CollectionPolicy) MarshalBSON() ([]byte, error) {
+func (policy CollectionPolicy) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
-		"_hint":     p.Hint().String(),
-		"name":      p.name,
-		"royalty":   p.royalty,
-		"uri":       p.uri,
-		"whitelist": p.whitelist,
+		"_hint":     policy.Hint().String(),
+		"name":      policy.name,
+		"royalty":   policy.royalty,
+		"uri":       policy.uri,
+		"whitelist": policy.whitelist,
 	})
 }
 
@@ -26,7 +26,7 @@ type PolicyBSONUnmarshaler struct {
 	Whites  []string `bson:"whitelist"`
 }
 
-func (p *CollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (policy *CollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringError("failed to decode bson of CollectionPolicy")
 
 	var u PolicyBSONUnmarshaler
@@ -39,5 +39,5 @@ func (p *CollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return p.unmarshal(enc, ht, u.Name, u.Royalty, u.URI, u.Whites)
+	return policy.unmarshal(enc, ht, u.Name, u.Royalty, u.URI, u.Whites)
 }

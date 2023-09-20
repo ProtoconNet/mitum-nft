@@ -23,20 +23,12 @@ func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, err
 	return s, nil, http.StatusOK
 }
 
-func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool, collection string) (bson.D, error) {
+func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
 	// filter fot matching address
 	filterAddress := bson.D{{"owner", bson.D{{"$in", []string{address.String()}}}}}
 	filterA = append(filterA, filterAddress)
-
-	// if collection query exist, find by collection first
-	if len(collection) > 0 {
-		filterCollection := bson.D{
-			{"collection", bson.D{{"$eq", collection}}},
-		}
-		filterA = append(filterA, filterCollection)
-	}
 
 	// if offset exist, apply offset
 	if len(offset) > 0 {
@@ -64,15 +56,13 @@ func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool,
 	return filter, nil
 }
 
-func buildNFTsFilterByCollection(contract, col string, offset string, reverse bool) (bson.D, error) {
+func buildNFTsFilterByContract(contract string, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
 	// filter fot matching collection
 	filterContract := bson.D{{"contract", bson.D{{"$in", []string{contract}}}}}
-	filterSymbol := bson.D{{"collection", bson.D{{"$in", []string{col}}}}}
 	filterToken := bson.D{{"istoken", true}}
 	filterA = append(filterA, filterToken)
-	filterA = append(filterA, filterSymbol)
 	filterA = append(filterA, filterContract)
 
 	// if offset exist, apply offset

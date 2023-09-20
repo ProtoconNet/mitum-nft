@@ -10,28 +10,25 @@ import (
 
 type SignItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract   mitumbase.Address `json:"contract"`
-	Collection types.ContractID  `json:"collection"`
-	NFT        uint64            `json:"nft"`
-	Currency   types.CurrencyID  `json:"currency"`
+	Contract mitumbase.Address `json:"contract"`
+	NFT      uint64            `json:"nft"`
+	Currency types.CurrencyID  `json:"currency"`
 }
 
 func (it SignItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(SignItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
-		Collection: it.collection,
 		NFT:        it.nft,
 		Currency:   it.currency,
 	})
 }
 
 type SignItemJSONUnmarshaler struct {
-	Hint       hint.Hint `json:"_hint"`
-	Contract   string    `json:"contract"`
-	Collection string    `json:"collection"`
-	NFT        uint64    `json:"nft"`
-	Currency   string    `json:"currency"`
+	Hint     hint.Hint `json:"_hint"`
+	Contract string    `json:"contract"`
+	NFT      uint64    `json:"nft"`
+	Currency string    `json:"currency"`
 }
 
 func (it *SignItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -42,5 +39,5 @@ func (it *SignItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.NFT, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.NFT, u.Currency)
 }

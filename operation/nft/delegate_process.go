@@ -50,12 +50,12 @@ func (ipp *DelegateItemProcessor) PreProcess(
 		return err
 	}
 
-	if err := state.CheckExistsState(statecurrency.StateKeyAccount(ipp.item.Operator()), getStateFunc); err != nil {
+	if err := state.CheckExistsState(statecurrency.StateKeyAccount(ipp.item.Delegatee()), getStateFunc); err != nil {
 		return err
 	}
 
-	if ipp.sender.Equal(ipp.item.Operator()) {
-		return errors.Errorf("sender cannot be operator itself, %q", ipp.item.Operator())
+	if ipp.sender.Equal(ipp.item.Delegatee()) {
+		return errors.Errorf("sender cannot be operator itself, %q", ipp.item.Delegatee())
 	}
 
 	return nil
@@ -65,16 +65,16 @@ func (ipp *DelegateItemProcessor) Process(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	if ipp.box == nil {
-		return nil, errors.Errorf("nft box not found, %q", statenft.StateKeyOperators(ipp.item.contract, ipp.item.Collection(), ipp.sender))
+		return nil, errors.Errorf("nft box not found, %q", statenft.StateKeyOperators(ipp.item.contract, ipp.sender))
 	}
 
 	switch ipp.item.Mode() {
 	case DelegateAllow:
-		if err := ipp.box.Append(ipp.item.Operator()); err != nil {
+		if err := ipp.box.Append(ipp.item.Delegatee()); err != nil {
 			return nil, err
 		}
 	case DelegateCancel:
-		if err := ipp.box.Remove(ipp.item.Operator()); err != nil {
+		if err := ipp.box.Remove(ipp.item.Delegatee()); err != nil {
 			return nil, err
 		}
 	default:
@@ -155,18 +155,18 @@ func (opp *DelegateProcessor) PreProcess(
 	}
 
 	for _, item := range fact.Items() {
-		st, err := state.ExistsState(statenft.NFTStateKey(item.contract, item.Collection(), statenft.CollectionKey), "key of design", getStateFunc)
+		st, err := state.ExistsState(statenft.NFTStateKey(item.contract, statenft.CollectionKey), "key of design", getStateFunc)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", item.Collection(), err), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", item.Contract(), err), nil
 		}
 
 		design, err := statenft.StateCollectionValue(st)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", item.Collection(), err), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", item.Contract(), err), nil
 		}
 
 		if !design.Active() {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", item.Collection()), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", item.Contract()), nil
 		}
 
 		st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
@@ -219,14 +219,14 @@ func (opp *DelegateProcessor) Process(
 
 	boxes := map[string]*types.OperatorsBook{}
 	for _, item := range fact.Items() {
-		ak := statenft.StateKeyOperators(item.contract, item.Collection(), fact.Sender())
+		ak := statenft.StateKeyOperators(item.contract, fact.Sender())
 
 		var operators types.OperatorsBook
 		switch st, found, err := getStateFunc(ak); {
 		case err != nil:
 			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state of operators book, %q; %w", ak, err), nil
 		case !found:
-			operators = types.NewOperatorsBook(item.Collection(), nil)
+			operators = types.NewOperatorsBook(nil)
 		default:
 			o, err := statenft.StateOperatorsBookValue(st)
 			if err != nil {
@@ -251,7 +251,7 @@ func (opp *DelegateProcessor) Process(
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
 		ipc.item = item
-		ipc.box = boxes[statenft.StateKeyOperators(item.contract, item.Collection(), fact.Sender())]
+		ipc.box = boxes[statenft.StateKeyOperators(item.contract, fact.Sender())]
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {

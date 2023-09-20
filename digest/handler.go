@@ -19,10 +19,10 @@ import (
 )
 
 var (
-	HandlerPathNFTOperators  = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}`
-	HandlerPathNFT           = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/{id:.*}`
-	HandlerPathNFTs          = `/nft/{contract:.*}/collection/{collection:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/nfts`
+	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection = `/nft/{contract:.*}/collection`
+	HandlerPathNFT           = `/nft/{contract:.*}/{id:.*}`
+	HandlerPathNFTs          = `/nft/{contract:.*}/nfts`
 )
 
 func init() {

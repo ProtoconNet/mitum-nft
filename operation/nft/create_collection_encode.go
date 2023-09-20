@@ -12,7 +12,6 @@ func (fact *CreateCollectionFact) unmarshal(
 	enc encoder.Encoder,
 	sd string,
 	ca string,
-	sb string,
 	nm string,
 	ry uint,
 	uri string,
@@ -29,7 +28,6 @@ func (fact *CreateCollectionFact) unmarshal(
 	}
 	fact.sender = sender
 
-	fact.collection = currencytypes.ContractID(sb)
 	fact.name = types.CollectionName(nm)
 	fact.royalty = types.PaymentParameter(ry)
 	fact.uri = types.URI(uri)

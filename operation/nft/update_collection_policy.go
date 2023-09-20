@@ -17,20 +17,18 @@ var (
 
 type UpdateCollectionPolicyFact struct {
 	mitumbase.BaseFact
-	sender     mitumbase.Address
-	contract   mitumbase.Address
-	collection currencytypes.ContractID
-	name       types.CollectionName
-	royalty    types.PaymentParameter
-	uri        types.URI
-	whitelist  []mitumbase.Address
-	currency   currencytypes.CurrencyID
+	sender    mitumbase.Address
+	contract  mitumbase.Address
+	name      types.CollectionName
+	royalty   types.PaymentParameter
+	uri       types.URI
+	whitelist []mitumbase.Address
+	currency  currencytypes.CurrencyID
 }
 
 func NewUpdateCollectionPolicyFact(
 	token []byte,
 	sender, contract mitumbase.Address,
-	collection currencytypes.ContractID,
 	name types.CollectionName,
 	royalty types.PaymentParameter,
 	uri types.URI,
@@ -40,15 +38,14 @@ func NewUpdateCollectionPolicyFact(
 	bf := mitumbase.NewBaseFact(UpdateCollectionPolicyFactHint, token)
 
 	fact := UpdateCollectionPolicyFact{
-		BaseFact:   bf,
-		sender:     sender,
-		contract:   contract,
-		collection: collection,
-		name:       name,
-		royalty:    royalty,
-		uri:        uri,
-		whitelist:  whitelist,
-		currency:   currency,
+		BaseFact:  bf,
+		sender:    sender,
+		contract:  contract,
+		name:      name,
+		royalty:   royalty,
+		uri:       uri,
+		whitelist: whitelist,
+		currency:  currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -72,7 +69,6 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 		nil, false,
 		fact.sender,
 		fact.contract,
-		fact.collection,
 		fact.name,
 		fact.royalty,
 		fact.uri,
@@ -113,7 +109,6 @@ func (fact UpdateCollectionPolicyFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.collection.Bytes(),
 		fact.name.Bytes(),
 		fact.royalty.Bytes(),
 		fact.uri.Bytes(),
@@ -132,10 +127,6 @@ func (fact UpdateCollectionPolicyFact) Sender() mitumbase.Address {
 
 func (fact UpdateCollectionPolicyFact) Contract() mitumbase.Address {
 	return fact.contract
-}
-
-func (fact UpdateCollectionPolicyFact) Collection() currencytypes.ContractID {
-	return fact.collection
 }
 
 func (fact UpdateCollectionPolicyFact) Name() types.CollectionName {

@@ -15,13 +15,13 @@ type CollectionPolicyJSONMarshaler struct {
 	Whitelist []base.Address   `json:"whitelist"`
 }
 
-func (p CollectionPolicy) MarshalJSON() ([]byte, error) {
+func (policy CollectionPolicy) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CollectionPolicyJSONMarshaler{
-		BaseHinter: p.BaseHinter,
-		Name:       p.name,
-		Royalty:    p.royalty,
-		URI:        p.uri,
-		Whitelist:  p.whitelist,
+		BaseHinter: policy.BaseHinter,
+		Name:       policy.name,
+		Royalty:    policy.royalty,
+		URI:        policy.uri,
+		Whitelist:  policy.whitelist,
 	})
 }
 
@@ -33,7 +33,7 @@ type CollectionPolicyJSONUnmarshaler struct {
 	Whitelist []string  `json:"whitelist"`
 }
 
-func (p *CollectionPolicy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (policy *CollectionPolicy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringError("failed to decode json of CollectionPolicy")
 
 	var u CollectionPolicyJSONUnmarshaler
@@ -41,5 +41,5 @@ func (p *CollectionPolicy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return p.unmarshal(enc, u.Hint, u.Name, u.Royalty, u.URI, u.Whitelist)
+	return policy.unmarshal(enc, u.Hint, u.Name, u.Royalty, u.URI, u.Whitelist)
 }

@@ -285,9 +285,9 @@ func StateOperatorsBookValue(st mitumbase.State) (*types.OperatorsBook, error) {
 }
 
 // ParsedStateKey is the function that parses the state key.
-// The length of state key is 4 or 5.
-// In case of length 4 it forms as NFTPrefix:{contract}:{collection}:{Suffix}.
-// In case of length 5 it forms as NFTPrefix:{contract}:{collection}:{key_value}:{Suffix}
+// The length of state key is 3 or 4.
+// In case of length 3 it forms as NFTPrefix:{contract}:{Suffix}.
+// In case of length 4 it forms as NFTPrefix:{contract}:{key_value}:{Suffix}
 func ParseStateKey(key string, Prefix string) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
 	if parsedKey[0] != Prefix[:len(Prefix)-1] {

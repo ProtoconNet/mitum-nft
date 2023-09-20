@@ -100,23 +100,23 @@ func (opp *CreateCollectionProcessor) PreProcess(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
 	}
 
-	if !ca.Owner().Equal(fact.Sender()) {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is not owner of contract account, %q, %q", fact.Sender(), ca.Owner()), nil
+	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
 	}
 
 	if ca.IsActive() {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("a design is already registered, %q", fact.Contract().String()), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, fact.Collection(), statenft.CollectionKey), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("collection design already exists, %q; %w", fact.Collection(), err), nil
+	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), getStateFunc); err != nil {
+		return ctx, mitumbase.NewBaseOperationProcessReasonError("collection design already exists, %q; %w", fact.Contract(), err), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, fact.Collection(), statenft.LastIDXKey), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("last index of collection design already exists, %q; %w", fact.Collection(), err), nil
+	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, statenft.LastIDXKey), getStateFunc); err != nil {
+		return ctx, mitumbase.NewBaseOperationProcessReasonError("last index of collection design already exists, %q; %w", fact.Contract(), err), nil
 	}
 
-	whitelist := fact.Whites()
+	whitelist := fact.WhiteList()
 	for _, white := range whitelist {
 		if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(white), getStateFunc); err != nil {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError("whitelist account not found, %q; %w", white, err), nil
@@ -141,18 +141,18 @@ func (opp *CreateCollectionProcessor) Process(
 
 	sts := make([]mitumbase.StateMergeValue, 4)
 
-	policy := types.NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.Whites())
-	design := types.NewDesign(fact.Contract(), fact.Sender(), fact.Collection(), true, policy)
+	policy := types.NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.WhiteList())
+	design := types.NewDesign(fact.Contract(), fact.Sender(), true, policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("invalid collection design, %q; %w", fact.Collection(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("invalid collection design, %q; %w", fact.Contract(), err), nil
 	}
 
 	sts[0] = currencystate.NewStateMergeValue(
-		statenft.NFTStateKey(design.Parent(), design.Collection(), statenft.CollectionKey),
+		statenft.NFTStateKey(design.Parent(), statenft.CollectionKey),
 		statenft.NewCollectionStateValue(design),
 	)
 	sts[1] = currencystate.NewStateMergeValue(
-		statenft.NFTStateKey(design.Parent(), design.Collection(), statenft.LastIDXKey),
+		statenft.NFTStateKey(design.Parent(), statenft.LastIDXKey),
 		statenft.NewLastNFTIndexStateValue(0),
 	)
 

@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -63,19 +62,17 @@ var DesignHint = hint.MustNewHint("mitum-nft-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	parent     mitumbase.Address
-	creator    mitumbase.Address
-	collection types.ContractID
-	active     bool
-	policy     BasePolicy
+	parent  mitumbase.Address
+	creator mitumbase.Address
+	active  bool
+	policy  BasePolicy
 }
 
-func NewDesign(parent mitumbase.Address, creator mitumbase.Address, collection types.ContractID, active bool, policy BasePolicy) Design {
+func NewDesign(parent mitumbase.Address, creator mitumbase.Address, active bool, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		parent:     parent,
 		creator:    creator,
-		collection: collection,
 		active:     active,
 		policy:     policy,
 	}
@@ -86,7 +83,6 @@ func (de Design) IsValid([]byte) error {
 		de.BaseHinter,
 		de.parent,
 		de.creator,
-		de.collection,
 		de.policy,
 	); err != nil {
 		return err
@@ -110,7 +106,6 @@ func (de Design) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		de.parent.Bytes(),
 		de.creator.Bytes(),
-		de.collection.Bytes(),
 		ab,
 		de.policy.Bytes(),
 	)
@@ -130,10 +125,6 @@ func (de Design) Parent() mitumbase.Address {
 
 func (de Design) Creator() mitumbase.Address {
 	return de.creator
-}
-
-func (de Design) Collection() types.ContractID {
-	return de.collection
 }
 
 func (de Design) Active() bool {
@@ -165,10 +156,6 @@ func (de Design) Equal(cd Design) bool {
 	}
 
 	if !de.creator.Equal(cd.creator) {
-		return false
-	}
-
-	if de.collection != cd.collection {
 		return false
 	}
 

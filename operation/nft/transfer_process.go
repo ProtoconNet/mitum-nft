@@ -56,17 +56,17 @@ func (ipp *TransferItemProcessor) PreProcess(
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.contract, ipp.item.collection, statenft.CollectionKey), "design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.contract, statenft.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.collection, err)
+		return errors.Errorf("collection design not found, %q; %w", ipp.item.contract, err)
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.collection, err)
+		return errors.Errorf("collection design not found, %q; %w", ipp.item.contract, err)
 	}
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", design.Collection())
+		return errors.Errorf("deactivated collection, %q", design.Parent())
 	}
 
 	st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
@@ -83,7 +83,7 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", design.Parent())
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -98,7 +98,7 @@ func (ipp *TransferItemProcessor) PreProcess(
 	}
 
 	if !(nv.Owner().Equal(ipp.sender) || nv.Approved().Equal(ipp.sender)) {
-		if st, err := state.ExistsState(statenft.StateKeyOperators(ipp.item.contract, ipp.item.collection, nv.Owner()), "operators", getStateFunc); err != nil {
+		if st, err := state.ExistsState(statenft.StateKeyOperators(ipp.item.contract, nv.Owner()), "operators", getStateFunc); err != nil {
 			return errors.Errorf("unauthorized sender, %q; %w", ipp.sender, err)
 		} else if box, err := statenft.StateOperatorsBookValue(st); err != nil {
 			return errors.Errorf("operator book value not found, %q; %w", ipp.sender, err)
@@ -116,7 +116,7 @@ func (ipp *TransferItemProcessor) Process(
 	receiver := ipp.item.Receiver()
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
+	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -133,7 +133,7 @@ func (ipp *TransferItemProcessor) Process(
 
 	sts := make([]mitumbase.StateMergeValue, 1)
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, ipp.item.NFT()), statenft.NewNFTStateValue(n))
+	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.item.NFT()), statenft.NewNFTStateValue(n))
 
 	return sts, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -14,16 +13,14 @@ import (
 type ApproveCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
-	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract   currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection string                      `arg:"" name:"collection" help:"collection id" required:"true"`
-	Approved   currencycmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
-	NFTidx     uint64                      `arg:"" name:"nft" help:"target nft idx to approve"`
-	Currency   currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	sender     mitumbase.Address
-	contract   mitumbase.Address
-	collection types.ContractID
-	approved   mitumbase.Address
+	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Approved currencycmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
+	NFTidx   uint64                      `arg:"" name:"nft" help:"target nft idx to approve"`
+	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	sender   mitumbase.Address
+	contract mitumbase.Address
+	approved mitumbase.Address
 }
 
 func (cmd *ApproveCommand) Run(pctx context.Context) error { // nolint:dupl
@@ -65,13 +62,6 @@ func (cmd *ApproveCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	collection := types.ContractID(cmd.Collection)
-	if err := collection.IsValid(nil); err != nil {
-		return err
-	} else {
-		cmd.collection = collection
-	}
-
 	if a, err := cmd.Approved.Encode(enc); err != nil {
 		return errors.Wrapf(err, "invalid approved format, %q", cmd.Approved)
 	} else {
@@ -85,7 +75,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 func (cmd *ApproveCommand) createOperation() (mitumbase.Operation, error) {
 	e := util.StringError("failed to create approve operation")
 
-	item := nft.NewApproveItem(cmd.contract, cmd.collection, cmd.approved, cmd.NFTidx, cmd.Currency.CID)
+	item := nft.NewApproveItem(cmd.contract, cmd.approved, cmd.NFTidx, cmd.Currency.CID)
 
 	fact := nft.NewApproveFact(
 		[]byte(cmd.Token),

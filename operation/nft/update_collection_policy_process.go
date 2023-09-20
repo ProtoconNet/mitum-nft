@@ -85,22 +85,22 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
-	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, fact.collection, statenft.CollectionKey), "key of collection design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), "key of collection design", getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", fact.Collection(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", fact.Collection(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	if !design.Active() {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", fact.Collection()), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", fact.Contract()), nil
 	}
 
 	if !design.Creator().Equal(fact.Sender()) {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("not creator of collection design, %q", fact.Collection()), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("not creator of collection design, %q", fact.Contract()), nil
 	}
 
 	st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
@@ -111,6 +111,10 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 	ca, err := stateextension.StateContractAccountValue(st)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("contract account value not found, %q; %w", design.Parent(), err), nil
+	}
+
+	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
 	}
 
 	if !ca.IsActive() {
@@ -129,14 +133,14 @@ func (opp *UpdateCollectionPolicyProcessor) Process(
 		return nil, nil, e.Errorf("expected UpdateCollectionPolicyFact, not %T", op.Fact())
 	}
 
-	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, fact.collection, statenft.CollectionKey), "key of design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), "key of design", getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", fact.Collection(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", fact.Collection(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	sts := make([]mitumbase.StateMergeValue, 2)
@@ -144,11 +148,10 @@ func (opp *UpdateCollectionPolicyProcessor) Process(
 	de := types.NewDesign(
 		design.Parent(),
 		design.Creator(),
-		design.Collection(),
 		design.Active(),
 		types.NewCollectionPolicy(fact.name, fact.royalty, fact.uri, fact.whitelist),
 	)
-	sts[0] = state.NewStateMergeValue(statenft.NFTStateKey(fact.contract, design.Collection(), statenft.CollectionKey), statenft.NewCollectionStateValue(de))
+	sts[0] = state.NewStateMergeValue(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), statenft.NewCollectionStateValue(de))
 
 	currencyPolicy, err := state.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {

@@ -26,9 +26,8 @@ var (
 	defaultColNameNFTOperator   = "digest_nftoperator"
 )
 
-func NFTCollection(st *currencydigest.Database, contract, col string) (*types.Design, error) {
+func NFTCollection(st *currencydigest.Database, contract string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("collection", col)
 
 	var design *types.Design
 	var sta mitumbase.State
@@ -57,9 +56,8 @@ func NFTCollection(st *currencydigest.Database, contract, col string) (*types.De
 	return design, nil
 }
 
-func NFT(st *currencydigest.Database, contract, col, idx string) (*types.NFT, error) {
+func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("collection", col)
 	filter = filter.Add("nftid", idx)
 
 	var nft *types.NFT
@@ -94,10 +92,9 @@ func NFTsByAddress(
 	reverse bool,
 	offset string,
 	limit int64,
-	collectionid string,
 	callback func(string /* nft id */, types.NFT) (bool, error),
 ) error {
-	filter, err := buildNFTsFilterByAddress(address, offset, reverse, collectionid)
+	filter, err := buildNFTsFilterByAddress(address, offset, reverse)
 	if err != nil {
 		return err
 	}
@@ -141,14 +138,13 @@ func NFTsByAddress(
 
 func NFTsByCollection(
 	st *currencydigest.Database,
-	contract,
-	col string,
+	contract string,
 	reverse bool,
 	offset string,
 	limit int64,
 	callback func(nft types.NFT, st mitumbase.State) (bool, error),
 ) error {
-	filter, err := buildNFTsFilterByCollection(contract, col, offset, reverse)
+	filter, err := buildNFTsFilterByContract(contract, offset, reverse)
 	if err != nil {
 		return err
 	}
@@ -191,10 +187,9 @@ func NFTsByCollection(
 
 func NFTOperators(
 	st *currencydigest.Database,
-	contract, col, account string,
+	contract, account string,
 ) (*types.OperatorsBook, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("collection", col)
 	filter = filter.Add("account", account)
 
 	var operators *types.OperatorsBook

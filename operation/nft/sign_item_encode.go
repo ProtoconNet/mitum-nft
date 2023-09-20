@@ -11,7 +11,7 @@ import (
 func (it *SignItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	ca, col string,
+	ca string,
 	nft uint64,
 	cid string,
 ) error {
@@ -19,7 +19,6 @@ func (it *SignItem) unmarshal(
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.currency = types.CurrencyID(cid)
-	it.collection = types.ContractID(col)
 	switch a, err := mitumbase.DecodeAddress(ca, enc); {
 	case err != nil:
 		return e.Wrap(err)

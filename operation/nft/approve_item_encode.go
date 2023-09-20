@@ -11,8 +11,7 @@ import (
 func (it *ApproveItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	ca, col,
-	ap string,
+	cAdr, appr string,
 	idx uint64,
 	cid string,
 ) error {
@@ -20,15 +19,14 @@ func (it *ApproveItem) unmarshal(
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.currency = types.CurrencyID(cid)
-	it.collection = types.ContractID(col)
-	switch a, err := mitumbase.DecodeAddress(ca, enc); {
+	switch a, err := mitumbase.DecodeAddress(cAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		it.contract = a
 	}
 
-	approved, err := mitumbase.DecodeAddress(ap, enc)
+	approved, err := mitumbase.DecodeAddress(appr, enc)
 	if err != nil {
 		return e.Wrap(err)
 	}

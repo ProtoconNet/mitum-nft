@@ -11,25 +11,23 @@ import (
 func (it MintItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      it.Hint().String(),
-			"contract":   it.contract,
-			"collection": it.collection,
-			"hash":       it.hash,
-			"uri":        it.uri,
-			"creators":   it.creators,
-			"currency":   it.currency,
+			"_hint":    it.Hint().String(),
+			"contract": it.contract,
+			"hash":     it.hash,
+			"uri":      it.uri,
+			"creators": it.creators,
+			"currency": it.currency,
 		},
 	)
 }
 
 type MintItemBSONUnmarshaler struct {
-	Hint       string   `bson:"_hint"`
-	Contract   string   `bson:"contract"`
-	Collection string   `bson:"collection"`
-	Hash       string   `bson:"hash"`
-	Uri        string   `bson:"uri"`
-	Creators   bson.Raw `bson:"creators"`
-	Currency   string   `bson:"currency"`
+	Hint     string   `bson:"_hint"`
+	Contract string   `bson:"contract"`
+	Hash     string   `bson:"hash"`
+	Uri      string   `bson:"uri"`
+	Creators bson.Raw `bson:"creators"`
+	Currency string   `bson:"currency"`
 }
 
 func (it *MintItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -45,5 +43,5 @@ func (it *MintItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.Hash, u.Uri, u.Creators, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.Hash, u.Uri, u.Creators, u.Currency)
 }

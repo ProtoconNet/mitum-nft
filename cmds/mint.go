@@ -3,7 +3,6 @@ package cmds
 import (
 	"context"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/v2/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -16,7 +15,6 @@ type MintCommand struct {
 	currencycmds.OperationFlags
 	Sender       currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract     currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Collection   string                      `arg:"" name:"collection" help:"collection id" required:"true"`
 	Hash         string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
 	Uri          string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
 	Currency     currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
@@ -24,7 +22,6 @@ type MintCommand struct {
 	CreatorTotal uint                        `name:"creator-total" help:"creators total share" optional:""`
 	sender       base.Address
 	contract     base.Address
-	collection   currencytypes.ContractID
 	hash         types.NFTHash
 	uri          types.URI
 	creators     types.Signers
@@ -71,13 +68,6 @@ func (cmd *MintCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	col := currencytypes.ContractID(cmd.Collection)
-	if err = col.IsValid(nil); err != nil {
-		return err
-	} else {
-		cmd.collection = col
-	}
-
 	hash := types.NFTHash(cmd.Hash)
 	if err := hash.IsValid(nil); err != nil {
 		return err
@@ -121,7 +111,7 @@ func (cmd *MintCommand) parseFlags() error {
 func (cmd *MintCommand) createOperation() (base.Operation, error) { // nolint:dupl
 	e := util.StringError("failed to create mint operation")
 
-	item := nft.NewMintItem(cmd.contract, cmd.collection, cmd.hash, cmd.uri, cmd.creators, cmd.Currency.CID)
+	item := nft.NewMintItem(cmd.contract, cmd.hash, cmd.uri, cmd.creators, cmd.Currency.CID)
 	fact := nft.NewMintFact([]byte(cmd.Token), cmd.sender, []nft.MintItem{item})
 
 	op, err := nft.NewMint(fact)

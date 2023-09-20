@@ -19,17 +19,15 @@ var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
 
 type MintItem struct {
 	hint.BaseHinter
-	contract   mitumbase.Address
-	collection currencytypes.ContractID
-	hash       types.NFTHash
-	uri        types.URI
-	creators   types.Signers
-	currency   currencytypes.CurrencyID
+	contract mitumbase.Address
+	hash     types.NFTHash
+	uri      types.URI
+	creators types.Signers
+	currency currencytypes.CurrencyID
 }
 
 func NewMintItem(
 	contract mitumbase.Address,
-	collection currencytypes.ContractID,
 	hash types.NFTHash,
 	uri types.URI,
 	creators types.Signers,
@@ -38,7 +36,6 @@ func NewMintItem(
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
 		contract:   contract,
-		collection: collection,
 		hash:       hash,
 		uri:        uri,
 		creators:   creators,
@@ -49,7 +46,6 @@ func NewMintItem(
 func (it MintItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.collection.Bytes(),
 		it.hash.Bytes(),
 		it.uri.Bytes(),
 		it.creators.Bytes(),
@@ -58,15 +54,19 @@ func (it MintItem) Bytes() []byte {
 }
 
 func (it MintItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.collection, it.hash, it.uri, it.creators, it.currency)
+	return util.CheckIsValiders(
+		nil,
+		false,
+		it.BaseHinter,
+		it.hash,
+		it.uri,
+		it.creators,
+		it.currency,
+	)
 }
 
 func (it MintItem) Contract() mitumbase.Address {
 	return it.contract
-}
-
-func (it MintItem) Collection() currencytypes.ContractID {
-	return it.collection
 }
 
 func (it MintItem) NFTHash() types.NFTHash {

@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ProtoconNet/mitum-currency/v3/types"
-
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
@@ -31,16 +29,15 @@ var (
 	StateKeyNFTSuffix        = ":nft"
 )
 
-func StateKeyNFTPrefix(addr mitumbase.Address, collectionID types.ContractID) string {
-	return fmt.Sprintf("%s%s:%s", NFTPrefix, addr.String(), collectionID.String())
+func StateKeyNFTPrefix(addr mitumbase.Address) string {
+	return fmt.Sprintf("%s%s", NFTPrefix, addr.String())
 }
 
 func NFTStateKey(
 	contract mitumbase.Address,
-	collectionID types.ContractID,
 	keyType StateKey,
 ) string {
-	prefix := StateKeyNFTPrefix(contract, collectionID)
+	prefix := StateKeyNFTPrefix(contract)
 	var stateKey string
 	switch keyType {
 	case CollectionKey:
@@ -56,12 +53,12 @@ func NFTStateKey(
 	return stateKey
 }
 
-func StateKeyOperators(contract mitumbase.Address, collectionID types.ContractID, addr mitumbase.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), addr.String(), StateKeyOperatorsSuffix)
+func StateKeyOperators(contract mitumbase.Address, addr mitumbase.Address) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract), addr.String(), StateKeyOperatorsSuffix)
 }
 
-func StateKeyNFT(contract mitumbase.Address, collectionID types.ContractID, id uint64) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract, collectionID), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
+func StateKeyNFT(contract mitumbase.Address, id uint64) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
 }
 
 func ParseNFTStateKey(key string) (StateKey, error) {

@@ -46,18 +46,18 @@ func (ipp *SignItemProcessor) PreProcess(
 ) error {
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.contract, ipp.item.collection, statenft.CollectionKey), "key of design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.contract, statenft.CollectionKey), "key of design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.collection, err)
+		return errors.Errorf("collection design not found, %q; %w", ipp.item.contract, err)
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design value not found, %q; %w", ipp.item.collection, err)
+		return errors.Errorf("collection design value not found, %q; %w", ipp.item.contract, err)
 	}
 
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", ipp.item.collection)
+		return errors.Errorf("deactivated collection, %q", ipp.item.contract)
 	}
 	st, err = state.ExistsState(stateextension.StateKeyContractAccount(ipp.item.contract), "contract account", getStateFunc)
 	if err != nil {
@@ -73,7 +73,7 @@ func (ipp *SignItemProcessor) PreProcess(
 		return errors.Errorf("deactivated contract account, %q", ipp.item.contract)
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -99,7 +99,7 @@ func (ipp *SignItemProcessor) Process(
 ) ([]mitumbase.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, nid), "key of nft", getStateFunc)
+	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -134,7 +134,7 @@ func (ipp *SignItemProcessor) Process(
 
 	sts := make([]mitumbase.StateMergeValue, 1)
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, n.ID()), statenft.NewNFTStateValue(n))
+	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, n.ID()), statenft.NewNFTStateValue(n))
 
 	return sts, nil
 }

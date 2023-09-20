@@ -11,17 +11,15 @@ var SignItemHint = hint.MustNewHint("mitum-nft-sign-item-v0.0.1")
 
 type SignItem struct {
 	hint.BaseHinter
-	contract   mitumbase.Address
-	collection types.ContractID
-	nft        uint64
-	currency   types.CurrencyID
+	contract mitumbase.Address
+	nft      uint64
+	currency types.CurrencyID
 }
 
-func NewSignItem(contract mitumbase.Address, collection types.ContractID, n uint64, currency types.CurrencyID) SignItem {
+func NewSignItem(contract mitumbase.Address, n uint64, currency types.CurrencyID) SignItem {
 	return SignItem{
 		BaseHinter: hint.NewBaseHinter(SignItemHint),
 		contract:   contract,
-		collection: collection,
 		nft:        n,
 		currency:   currency,
 	}
@@ -30,14 +28,13 @@ func NewSignItem(contract mitumbase.Address, collection types.ContractID, n uint
 func (it SignItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.collection.Bytes(),
 		util.Uint64ToBytes(it.nft),
 		it.currency.Bytes(),
 	)
 }
 
 func (it SignItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.collection, it.currency)
+	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.currency)
 }
 
 func (it SignItem) NFT() uint64 {
@@ -50,8 +47,4 @@ func (it SignItem) Contract() mitumbase.Address {
 
 func (it SignItem) Currency() types.CurrencyID {
 	return it.currency
-}
-
-func (it SignItem) Collection() types.ContractID {
-	return it.collection
 }

@@ -14,14 +14,13 @@ import (
 func (it *MintItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	ca, col, hs, uri string,
+	ca, hs, uri string,
 	bcr []byte,
 	cid string,
 ) error {
 	e := util.StringError("failed to unmarshal MintItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.collection = currencytypes.ContractID(col)
 	it.hash = types.NFTHash(hs)
 	it.uri = types.URI(uri)
 

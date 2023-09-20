@@ -58,16 +58,15 @@ func (fact DelegateFact) IsValid(b []byte) error {
 			return err
 		}
 
-		operator := item.Operator()
-		collection := item.Collection()
+		delegatee := item.Delegatee()
 
-		if addressMap, collectionFound := founds[collection.String()]; !collectionFound {
-			founds[collection.String()] = make(map[string]struct{})
-		} else if _, addressFound := addressMap[operator.String()]; addressFound {
-			return util.ErrInvalid.Errorf("duplicate collection-operator found, %q-%q", collection, operator)
+		if addressMap, collectionFound := founds[item.contract.String()]; !collectionFound {
+			founds[item.contract.String()] = make(map[string]struct{})
+		} else if _, addressFound := addressMap[delegatee.String()]; addressFound {
+			return util.ErrInvalid.Errorf("duplicate collection-operator found, %q-%q", item.contract, delegatee)
 		}
 
-		founds[collection.String()][operator.String()] = struct{}{}
+		founds[item.contract.String()][delegatee.String()] = struct{}{}
 	}
 
 	return nil
@@ -108,7 +107,7 @@ func (fact DelegateFact) Addresses() ([]mitumbase.Address, error) {
 	as := make([]mitumbase.Address, l+1)
 
 	for i, item := range fact.items {
-		as[i] = item.Operator()
+		as[i] = item.Delegatee()
 	}
 
 	as[l] = fact.sender

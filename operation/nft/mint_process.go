@@ -46,7 +46,7 @@ type MintItemProcessor struct {
 func (ipp *MintItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
-	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, ipp.idx), getStateFunc); err != nil {
+	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.idx), getStateFunc); err != nil {
 		return errors.Errorf("nft already exists, %q; %w", ipp.idx, err)
 	}
 
@@ -79,7 +79,7 @@ func (ipp *MintItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %q; %w", ipp.idx, err)
 	}
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.item.collection, ipp.idx), statenft.NewNFTStateValue(n))
+	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.idx), statenft.NewNFTStateValue(n))
 
 	if err := ipp.box.Append(n.ID()); err != nil {
 		return nil, errors.Errorf("failed to append nft id to nft box, %q; %w", n.ID(), err)
@@ -157,23 +157,21 @@ func (opp *MintProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
-	idxes := map[currencytypes.ContractID]uint64{}
+	idxes := map[string]uint64{}
 	for _, item := range fact.Items() {
-		collection := item.Collection()
-
-		if _, found := idxes[collection]; !found {
-			st, err := state.ExistsState(statenft.NFTStateKey(item.contract, collection, statenft.CollectionKey), "key of collection design", getStateFunc)
+		if _, found := idxes[item.contract.String()]; !found {
+			st, err := state.ExistsState(statenft.NFTStateKey(item.contract, statenft.CollectionKey), "key of collection design", getStateFunc)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection design not found, %q; %w", item.contract, err), nil
 			}
 
 			design, err := statenft.StateCollectionValue(st)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection design value not found, %q; %w", item.contract, err), nil
 			}
 
 			if !design.Active() {
-				return nil, base.NewBaseOperationProcessReasonError("deactivated collection, %q", collection), nil
+				return nil, base.NewBaseOperationProcessReasonError("deactivated collection, %q", item.contract), nil
 			}
 
 			//policy, ok := design.Policy().(CollectionPolicy)
@@ -213,17 +211,17 @@ func (opp *MintProcessor) PreProcess(
 			//	}
 			//}
 
-			st, err = state.ExistsState(statenft.NFTStateKey(item.contract, collection, statenft.LastIDXKey), "key of collection index", getStateFunc)
+			st, err = state.ExistsState(statenft.NFTStateKey(item.contract, statenft.LastIDXKey), "key of collection index", getStateFunc)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection last index not found, %q; %w", item.contract, err), nil
 			}
 
 			nftID, err := statenft.StateLastNFTIndexValue(st)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q; %w", item.contract, err), nil
 			}
 
-			idxes[collection] = nftID
+			idxes[item.contract.String()] = nftID
 		}
 	}
 
@@ -237,13 +235,13 @@ func (opp *MintProcessor) PreProcess(
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
 		ipc.item = item
-		ipc.idx = idxes[item.Collection()]
+		ipc.idx = idxes[item.contract.String()]
 		ipc.box = nil
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError("fail to preprocess MintItem; %w", err), nil
 		}
-		idxes[item.Collection()] += 1
+		idxes[item.contract.String()] += 1
 
 		ipc.Close()
 	}
@@ -266,35 +264,34 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	boxes := map[string]*types.NFTBox{}
 
 	for _, item := range fact.items {
-		collection := item.Collection()
-		idxKey := statenft.NFTStateKey(item.contract, collection, statenft.LastIDXKey)
+		idxKey := statenft.NFTStateKey(item.contract, statenft.LastIDXKey)
 		if _, found := idxes[idxKey]; !found {
 			st, err := state.ExistsState(idxKey, "key of collection index", getStateFunc)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection last index state not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection last index state not found, %q; %w", item.contract, err), nil
 			}
 
 			nftID, err := statenft.StateLastNFTIndexValue(st)
 			if err != nil {
-				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("collection last index value not found, %q; %w", item.contract, err), nil
 			}
 
 			idxes[idxKey] = nftID
 		}
 
-		nftsKey := statenft.NFTStateKey(item.contract, collection, statenft.NFTBoxKey)
+		nftsKey := statenft.NFTStateKey(item.contract, statenft.NFTBoxKey)
 		if _, found := boxes[nftsKey]; !found {
 			var box types.NFTBox
 
 			switch st, found, err := getStateFunc(nftsKey); {
 			case err != nil:
-				return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state, %q; %w", collection, err), nil
+				return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state, %q; %w", item.contract, err), nil
 			case !found:
 				box = types.NewNFTBox(nil)
 			default:
 				b, err := statenft.StateNFTBoxValue(st)
 				if err != nil {
-					return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state value, %q; %w", collection, err), nil
+					return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state value, %q; %w", item.contract, err), nil
 				}
 				box = b
 			}
@@ -307,9 +304,8 @@ func (opp *MintProcessor) Process( // nolint:dupl
 
 	ipcs := make([]*MintItemProcessor, len(fact.Items()))
 	for i, item := range fact.Items() {
-		collection := item.Collection()
-		idxKey := statenft.NFTStateKey(item.contract, collection, statenft.LastIDXKey)
-		nftsKey := statenft.NFTStateKey(item.contract, collection, statenft.NFTBoxKey)
+		idxKey := statenft.NFTStateKey(item.contract, statenft.LastIDXKey)
+		nftsKey := statenft.NFTStateKey(item.contract, statenft.NFTBoxKey)
 		ip := mintItemProcessorPool.Get()
 		ipc, ok := ip.(*MintItemProcessor)
 		if !ok {

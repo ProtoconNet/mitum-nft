@@ -11,18 +11,16 @@ var TransferItemHint = hint.MustNewHint("mitum-nft-transfer-item-v0.0.1")
 
 type TransferItem struct {
 	hint.BaseHinter
-	contract   mitumbase.Address
-	collection types.ContractID
-	receiver   mitumbase.Address
-	nft        uint64
-	currency   types.CurrencyID
+	contract mitumbase.Address
+	receiver mitumbase.Address
+	nft      uint64
+	currency types.CurrencyID
 }
 
-func NewTransferItem(contract mitumbase.Address, collection types.ContractID, receiver mitumbase.Address, nft uint64, currency types.CurrencyID) TransferItem {
+func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft uint64, currency types.CurrencyID) TransferItem {
 	return TransferItem{
 		BaseHinter: hint.NewBaseHinter(TransferItemHint),
 		contract:   contract,
-		collection: collection,
 		receiver:   receiver,
 		nft:        nft,
 		currency:   currency,
@@ -36,7 +34,6 @@ func (it TransferItem) IsValid([]byte) error {
 func (it TransferItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.collection.Bytes(),
 		it.receiver.Bytes(),
 		util.Uint64ToBytes(it.nft),
 		it.currency.Bytes(),
@@ -45,10 +42,6 @@ func (it TransferItem) Bytes() []byte {
 
 func (it TransferItem) Contract() mitumbase.Address {
 	return it.contract
-}
-
-func (it TransferItem) Collection() types.ContractID {
-	return it.collection
 }
 
 func (it TransferItem) Receiver() mitumbase.Address {

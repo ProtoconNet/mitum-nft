@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -176,8 +175,8 @@ type CollectionDesign struct {
 	Design
 }
 
-func NewCollectionDesign(parent mitumbase.Address, creator mitumbase.Address, collection types.ContractID, active bool, policy CollectionPolicy) CollectionDesign {
-	design := NewDesign(parent, creator, collection, active, policy)
+func NewCollectionDesign(parent mitumbase.Address, creator mitumbase.Address, active bool, policy CollectionPolicy) CollectionDesign {
+	design := NewDesign(parent, creator, active, policy)
 
 	return CollectionDesign{
 		Design: design,

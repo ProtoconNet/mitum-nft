@@ -1,7 +1,6 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -10,22 +9,19 @@ import (
 
 type OperatorsBookJSONMarshaler struct {
 	hint.BaseHinter
-	Collection types.ContractID `json:"collection"`
-	Operators  []base.Address   `json:"operators"`
+	Operators []base.Address `json:"operators"`
 }
 
 func (ob OperatorsBook) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(OperatorsBookJSONMarshaler{
 		BaseHinter: ob.BaseHinter,
-		Collection: ob.collection,
 		Operators:  ob.operators,
 	})
 }
 
 type OperatorsBookJSONUnmarshaler struct {
-	Hint       hint.Hint `json:"_hint"`
-	Collection string    `json:"collection"`
-	Operators  []string  `json:"operators"`
+	Hint      hint.Hint `json:"_hint"`
+	Operators []string  `json:"operators"`
 }
 
 func (ob *OperatorsBook) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -36,5 +32,5 @@ func (ob *OperatorsBook) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return ob.unmarshal(enc, u.Hint, u.Collection, u.Operators)
+	return ob.unmarshal(enc, u.Hint, u.Operators)
 }

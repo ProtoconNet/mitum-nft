@@ -10,18 +10,16 @@ import (
 
 type TransferItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract   mitumbase.Address `json:"contract"`
-	Collection types.ContractID  `json:"collection"`
-	Receiver   mitumbase.Address `json:"receiver"`
-	NFTidx     uint64            `json:"nft"`
-	Currency   types.CurrencyID  `json:"currency"`
+	Contract mitumbase.Address `json:"contract"`
+	Receiver mitumbase.Address `json:"receiver"`
+	NFTidx   uint64            `json:"nft"`
+	Currency types.CurrencyID  `json:"currency"`
 }
 
 func (it TransferItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(TransferItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
-		Collection: it.collection,
 		Receiver:   it.receiver,
 		NFTidx:     it.nft,
 		Currency:   it.currency,
@@ -29,12 +27,11 @@ func (it TransferItem) MarshalJSON() ([]byte, error) {
 }
 
 type TransferItemJSONUnmarshaler struct {
-	Hint       hint.Hint `json:"_hint"`
-	Contract   string    `json:"contract"`
-	Collection string    `json:"collection"`
-	Receiver   string    `json:"receiver"`
-	NFTidx     uint64    `json:"nft"`
-	Currency   string    `json:"currency"`
+	Hint     hint.Hint `json:"_hint"`
+	Contract string    `json:"contract"`
+	Receiver string    `json:"receiver"`
+	NFTidx   uint64    `json:"nft"`
+	Currency string    `json:"currency"`
 }
 
 func (it *TransferItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -45,5 +42,5 @@ func (it *TransferItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Collection, u.Receiver, u.NFTidx, u.Currency)
+	return it.unmarshal(enc, u.Hint, u.Contract, u.Receiver, u.NFTidx, u.Currency)
 }

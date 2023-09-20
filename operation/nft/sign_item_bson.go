@@ -11,21 +11,19 @@ import (
 func (it SignItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      it.Hint().String(),
-			"contract":   it.contract,
-			"collection": it.collection,
-			"nft":        it.nft,
-			"currency":   it.currency,
+			"_hint":    it.Hint().String(),
+			"contract": it.contract,
+			"nft":      it.nft,
+			"currency": it.currency,
 		},
 	)
 }
 
 type SignItemBSONUnmarshaler struct {
-	Hint       string `bson:"_hint"`
-	Contract   string `bson:"contract"`
-	Collection string `bson:"collection"`
-	NFT        uint64 `bson:"nft"`
-	Currency   string `bson:"currency"`
+	Hint     string `bson:"_hint"`
+	Contract string `bson:"contract"`
+	NFT      uint64 `bson:"nft"`
+	Currency string `bson:"currency"`
 }
 
 func (it *SignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -41,5 +39,5 @@ func (it *SignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.NFT, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.NFT, u.Currency)
 }

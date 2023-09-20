@@ -11,22 +11,20 @@ import (
 func (it ApproveItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      it.Hint().String(),
-			"contract":   it.contract,
-			"collection": it.collection,
-			"approved":   it.approved,
-			"nftidx":     it.idx,
-			"currency":   it.currency,
+			"_hint":    it.Hint().String(),
+			"contract": it.contract,
+			"approved": it.approved,
+			"nftidx":   it.idx,
+			"currency": it.currency,
 		})
 }
 
 type ApproveItemBSONUnmarshaler struct {
-	Hint       string `bson:"_hint"`
-	Contract   string `bson:"contract"`
-	Collection string `bson:"collection"`
-	Approved   string `bson:"approved"`
-	NFTidx     uint64 `bson:"nftidx"`
-	Currency   string `bson:"currency"`
+	Hint     string `bson:"_hint"`
+	Contract string `bson:"contract"`
+	Approved string `bson:"approved"`
+	NFTidx   uint64 `bson:"nftidx"`
+	Currency string `bson:"currency"`
 }
 
 func (it *ApproveItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -42,5 +40,5 @@ func (it *ApproveItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Collection, u.Approved, u.NFTidx, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.Approved, u.NFTidx, u.Currency)
 }

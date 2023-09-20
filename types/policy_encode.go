@@ -7,7 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (p *CollectionPolicy) unmarshal(
+func (policy *CollectionPolicy) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	nm string,
@@ -17,10 +17,10 @@ func (p *CollectionPolicy) unmarshal(
 ) error {
 	e := util.StringError("failed to unmarshal CollectionPoicy")
 
-	p.BaseHinter = hint.NewBaseHinter(ht)
-	p.name = CollectionName(nm)
-	p.royalty = PaymentParameter(ry)
-	p.uri = URI(uri)
+	policy.BaseHinter = hint.NewBaseHinter(ht)
+	policy.name = CollectionName(nm)
+	policy.royalty = PaymentParameter(ry)
+	policy.uri = URI(uri)
 
 	whitelist := make([]base.Address, len(bws))
 	for i, bw := range bws {
@@ -30,7 +30,7 @@ func (p *CollectionPolicy) unmarshal(
 		}
 		whitelist[i] = white
 	}
-	p.whitelist = whitelist
+	policy.whitelist = whitelist
 
 	return nil
 }

@@ -1,7 +1,6 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -12,31 +11,29 @@ import (
 func (de *Design) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	pr string,
-	cr string,
-	sb string,
-	ac bool,
-	bpo []byte,
+	pAdr string,
+	crAdr string,
+	active bool,
+	bPcy []byte,
 ) error {
 	e := util.StringError("failed to unmarshal Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.collection = types.ContractID(sb)
-	de.active = ac
+	de.active = active
 
-	parent, err := mitumbase.DecodeAddress(pr, enc)
+	parent, err := mitumbase.DecodeAddress(pAdr, enc)
 	if err != nil {
 		return e.Wrap(err)
 	}
 	de.parent = parent
 
-	creator, err := mitumbase.DecodeAddress(cr, enc)
+	creator, err := mitumbase.DecodeAddress(crAdr, enc)
 	if err != nil {
 		return e.Wrap(err)
 	}
 	de.creator = creator
 
-	if hinter, err := enc.Decode(bpo); err != nil {
+	if hinter, err := enc.Decode(bPcy); err != nil {
 		return e.Wrap(err)
 	} else if po, ok := hinter.(BasePolicy); !ok {
 		return e.Wrap(errors.Errorf("expected BasePolicy, not %T", hinter))
