@@ -117,11 +117,3 @@ type Sign struct {
 func NewSign(fact SignFact) (Sign, error) {
 	return Sign{BaseOperation: common.NewBaseOperation(SignHint, fact)}, nil
 }
-
-func (op *Sign) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

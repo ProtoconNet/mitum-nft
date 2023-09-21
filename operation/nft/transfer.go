@@ -129,11 +129,3 @@ type Transfer struct {
 func NewTransfer(fact TransferFact) (Transfer, error) {
 	return Transfer{BaseOperation: common.NewBaseOperation(TransferHint, fact)}, nil
 }
-
-func (op *Transfer) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

@@ -156,11 +156,3 @@ type CreateCollection struct {
 func NewCreateCollection(fact CreateCollectionFact) (CreateCollection, error) {
 	return CreateCollection{BaseOperation: common.NewBaseOperation(CreateCollectionHint, fact)}, nil
 }
-
-func (op *CreateCollection) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

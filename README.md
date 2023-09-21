@@ -29,7 +29,7 @@ $ go build -o ./mitum-nft
 ```sh
 $ ./mitum-nft init --design=<config file> <genesis file>
 
-$ ./mitum-nft run <config file>
+$ ./mitum-nft run <config file> --dev.allow-consensus
 ```
 
 [standalong.yml](standalone.yml) is a sample of `config file`.

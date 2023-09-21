@@ -125,11 +125,3 @@ type Approve struct {
 func NewApprove(fact ApproveFact) (Approve, error) {
 	return Approve{BaseOperation: common.NewBaseOperation(ApproveHint, fact)}, nil
 }
-
-func (op *Approve) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

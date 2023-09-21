@@ -116,11 +116,3 @@ type Mint struct {
 func NewMint(fact MintFact) (Mint, error) {
 	return Mint{BaseOperation: common.NewBaseOperation(MintHint, fact)}, nil
 }
-
-func (op *Mint) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

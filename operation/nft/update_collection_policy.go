@@ -162,11 +162,3 @@ type UpdateCollectionPolicy struct {
 func NewUpdateCollectionPolicy(fact UpdateCollectionPolicyFact) (UpdateCollectionPolicy, error) {
 	return UpdateCollectionPolicy{BaseOperation: common.NewBaseOperation(UpdateCollectionPolicyHint, fact)}, nil
 }
-
-func (op *UpdateCollectionPolicy) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

@@ -127,7 +127,7 @@ func (cmd *CreateCollectionCommand) createOperation() (mitumbase.Operation, erro
 	if err != nil {
 		return nil, e.Wrap(err)
 	}
-	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

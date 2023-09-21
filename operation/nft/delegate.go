@@ -126,11 +126,3 @@ type Delegate struct {
 func NewDelegate(fact DelegateFact) (Delegate, error) {
 	return Delegate{BaseOperation: common.NewBaseOperation(DelegateHint, fact)}, nil
 }
-
-func (op *Delegate) HashSign(priv mitumbase.Privatekey, networkID mitumbase.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
