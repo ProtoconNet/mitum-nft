@@ -105,7 +105,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	}
 
 	if ca.IsActive() {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("a design is already registered, %q", fact.Contract().String()), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("a contract account is already used, %q", fact.Contract().String()), nil
 	}
 
 	if err := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), getStateFunc); err != nil {
@@ -165,11 +165,11 @@ func (opp *CreateCollectionProcessor) Process(
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
 	}
-	ca.SetIsActive(true)
+	nca := ca.SetIsActive(true)
 
 	sts[2] = currencystate.NewStateMergeValue(
 		stateextension.StateKeyContractAccount(fact.Contract()),
-		stateextension.NewContractAccountStateValue(ca),
+		stateextension.NewContractAccountStateValue(nca),
 	)
 
 	currencyPolicy, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
