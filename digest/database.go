@@ -16,14 +16,15 @@ import (
 var maxLimit int64 = 50
 
 var (
-	defaultColNameAccount       = "digest_ac"
-	defaultColNameBalance       = "digest_bl"
-	defaultColNameCurrency      = "digest_cr"
-	defaultColNameOperation     = "digest_op"
-	defaultColNameBlock         = "digest_bm"
-	defaultColNameNFTCollection = "digest_nftcollection"
-	defaultColNameNFT           = "digest_nft"
-	defaultColNameNFTOperator   = "digest_nftoperator"
+	defaultColNameAccount         = "digest_ac"
+	defaultColNameContractAccount = "digest_ca"
+	defaultColNameBalance         = "digest_bl"
+	defaultColNameCurrency        = "digest_cr"
+	defaultColNameOperation       = "digest_op"
+	defaultColNameBlock           = "digest_bm"
+	defaultColNameNFTCollection   = "digest_nftcollection"
+	defaultColNameNFT             = "digest_nft"
+	defaultColNameNFTOperator     = "digest_nftoperator"
 )
 
 func NFTCollection(st *currencydigest.Database, contract string) (*types.Design, error) {

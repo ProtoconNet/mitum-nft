@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"sync"
 	"time"
 
@@ -20,6 +21,12 @@ import (
 )
 
 var bulkWriteLimit = 500
+
+type BlockSessioner interface {
+	Prepare() error
+	Commit(context.Context) error
+	Close() error
+}
 
 type BlockSession struct {
 	sync.RWMutex
@@ -126,9 +133,13 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		}
 	}
 
+	if len(bs.contractAccountModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+			return err
+		}
+	}
+
 	if len(bs.nftCollectionModels) > 0 {
-		fmt.Println("||||||||||||||||||", len(bs.nftCollectionModels))
-		fmt.Printf("%s", bs.nftCollectionModels[0])
 		if err := bs.writeModels(ctx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
 			return err
 		}
@@ -186,7 +197,11 @@ func (bs *BlockSession) prepareOperationsTree() error {
 
 	if err := bs.opstree.Traverse(func(_ uint64, no fixedtree.Node) (bool, error) {
 		nno := no.(mitumbase.OperationFixedtreeNode)
-		nodes[nno.Key()] = nno
+		if nno.InState() {
+			nodes[nno.Key()] = nno
+		} else {
+			nodes[nno.Key()[:len(nno.Key())-1]] = nno
+		}
 
 		return true, nil
 	}); err != nil {
@@ -283,6 +298,7 @@ func (bs *BlockSession) prepareAccounts() error {
 
 	var accountModels []mongo.WriteModel
 	var balanceModels []mongo.WriteModel
+	var contractAccountModels []mongo.WriteModel
 	for i := range bs.sts {
 		st := bs.sts[i]
 
@@ -300,12 +316,19 @@ func (bs *BlockSession) prepareAccounts() error {
 			}
 			balanceModels = append(balanceModels, j...)
 			bs.balanceAddressList = append(bs.balanceAddressList, address)
+		case stateextension.IsStateContractAccountKey(st.Key()):
+			j, err := bs.handleContractAccountState(st)
+			if err != nil {
+				return err
+			}
+			contractAccountModels = append(contractAccountModels, j...)
 		default:
 			continue
 		}
 	}
 
 	bs.accountModels = accountModels
+	bs.contractAccountModels = contractAccountModels
 	bs.balanceModels = balanceModels
 
 	return nil
