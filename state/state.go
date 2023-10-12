@@ -5,36 +5,11 @@ import (
 
 	"github.com/ProtoconNet/mitum-nft/v2/types"
 
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
 )
-
-type StateValueMerger struct {
-	*common.BaseStateValueMerger
-}
-
-func NewStateValueMerger(height mitumbase.Height, key string, st mitumbase.State) *StateValueMerger {
-	s := &StateValueMerger{
-		BaseStateValueMerger: common.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewStateMergeValue(key string, stv mitumbase.StateValue) mitumbase.StateMergeValue {
-	StateValueMergerFunc := func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-		return NewStateValueMerger(height, key, st)
-	}
-
-	return mitumbase.NewBaseStateMergeValue(
-		key,
-		stv,
-		StateValueMergerFunc,
-	)
-}
 
 var CollectionStateValueHint = hint.MustNewHint("collection-state-value-v0.0.1")
 
