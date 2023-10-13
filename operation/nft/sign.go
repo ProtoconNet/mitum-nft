@@ -40,10 +40,6 @@ func (fact SignFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if l := len(fact.items); l < 1 {
 		return util.ErrInvalid.Errorf("empty items for SignFact")
 	} else if l > int(MaxSignItems) {
@@ -66,6 +62,10 @@ func (fact SignFact) IsValid(b []byte) error {
 		}
 
 		founds[nid] = struct{}{}
+	}
+
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil

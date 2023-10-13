@@ -11,7 +11,7 @@ import (
 type DelegateItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract  mitumbase.Address `json:"contract"`
-	Delegatee mitumbase.Address `json:"operator"`
+	Delegatee mitumbase.Address `json:"delegatee"`
 	Mode      DelegateMode      `json:"mode"`
 	Currency  types.CurrencyID  `json:"currency"`
 }

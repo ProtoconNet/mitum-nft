@@ -41,10 +41,6 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if l := len(fact.items); l < 1 {
 		return util.ErrInvalid.Errorf("empty items for ApproveFact")
 	} else if l > int(MaxApproveItems) {
@@ -70,6 +66,9 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		founds[n] = struct{}{}
 	}
 
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
+	}
 	return nil
 }
 

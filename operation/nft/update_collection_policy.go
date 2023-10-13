@@ -57,10 +57,6 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if l := len(fact.whitelist); l > types.MaxWhitelist {
 		return util.ErrInvalid.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)
 	}
@@ -86,6 +82,10 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 			return util.ErrInvalid.Errorf("duplicate whitelist account found, %q", white)
 		}
 		founds[white.String()] = struct{}{}
+	}
+
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil

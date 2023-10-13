@@ -38,10 +38,6 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if l := len(fact.items); l < 1 {
 		return util.ErrInvalid.Errorf("empty items for DelegateFact")
 	} else if l > int(MaxDelegateItems) {
@@ -67,6 +63,9 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		}
 
 		founds[item.contract.String()][delegatee.String()] = struct{}{}
+	}
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil

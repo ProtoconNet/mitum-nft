@@ -40,10 +40,6 @@ func (fact MintFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if l := len(fact.items); l < 1 {
 		return util.ErrInvalid.Errorf("empty items for MintFact")
 	} else if l > int(MaxMintItems) {
@@ -54,6 +50,10 @@ func (fact MintFact) IsValid(b []byte) error {
 		if err := item.IsValid(nil); err != nil {
 			return err
 		}
+	}
+
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil
