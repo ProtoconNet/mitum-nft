@@ -13,6 +13,7 @@ func (it MintItem) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"_hint":    it.Hint().String(),
 			"contract": it.contract,
+			"receiver": it.receiver,
 			"hash":     it.hash,
 			"uri":      it.uri,
 			"creators": it.creators,
@@ -24,6 +25,7 @@ func (it MintItem) MarshalBSON() ([]byte, error) {
 type MintItemBSONUnmarshaler struct {
 	Hint     string   `bson:"_hint"`
 	Contract string   `bson:"contract"`
+	Receiver string   `bson:"receiver"`
 	Hash     string   `bson:"hash"`
 	Uri      string   `bson:"uri"`
 	Creators bson.Raw `bson:"creators"`
@@ -43,5 +45,5 @@ func (it *MintItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Hash, u.Uri, u.Creators, u.Currency)
+	return it.unmarshal(enc, ht, u.Contract, u.Receiver, u.Hash, u.Uri, u.Creators, u.Currency)
 }

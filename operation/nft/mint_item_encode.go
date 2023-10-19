@@ -14,7 +14,7 @@ import (
 func (it *MintItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	ca, hs, uri string,
+	ca, ra, hs, uri string,
 	bcr []byte,
 	cid string,
 ) error {
@@ -29,6 +29,13 @@ func (it *MintItem) unmarshal(
 		return e.Wrap(err)
 	default:
 		it.contract = a
+	}
+
+	switch a, err := mitumbase.DecodeAddress(ra, enc); {
+	case err != nil:
+		return e.Wrap(err)
+	default:
+		it.receiver = a
 	}
 
 	if hinter, err := enc.Decode(bcr); err != nil {

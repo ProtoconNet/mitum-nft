@@ -20,6 +20,7 @@ var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
 type MintItem struct {
 	hint.BaseHinter
 	contract mitumbase.Address
+	receiver mitumbase.Address
 	hash     types.NFTHash
 	uri      types.URI
 	creators types.Signers
@@ -28,6 +29,7 @@ type MintItem struct {
 
 func NewMintItem(
 	contract mitumbase.Address,
+	receiver mitumbase.Address,
 	hash types.NFTHash,
 	uri types.URI,
 	creators types.Signers,
@@ -36,6 +38,7 @@ func NewMintItem(
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
 		contract:   contract,
+		receiver:   receiver,
 		hash:       hash,
 		uri:        uri,
 		creators:   creators,
@@ -46,6 +49,7 @@ func NewMintItem(
 func (it MintItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
+		it.receiver.Bytes(),
 		it.hash.Bytes(),
 		it.uri.Bytes(),
 		it.creators.Bytes(),
@@ -58,6 +62,8 @@ func (it MintItem) IsValid([]byte) error {
 		nil,
 		false,
 		it.BaseHinter,
+		it.contract,
+		it.receiver,
 		it.hash,
 		it.uri,
 		it.creators,
@@ -67,6 +73,10 @@ func (it MintItem) IsValid([]byte) error {
 
 func (it MintItem) Contract() mitumbase.Address {
 	return it.contract
+}
+
+func (it MintItem) Receiver() mitumbase.Address {
+	return it.receiver
 }
 
 func (it MintItem) NFTHash() types.NFTHash {
@@ -83,6 +93,7 @@ func (it MintItem) Creators() types.Signers {
 
 func (it MintItem) Addresses() ([]mitumbase.Address, error) {
 	as := []mitumbase.Address{}
+	as = append(as, it.receiver)
 	as = append(as, it.creators.Addresses()...)
 
 	return as, nil

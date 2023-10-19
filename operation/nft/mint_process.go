@@ -46,8 +46,16 @@ type MintItemProcessor struct {
 func (ipp *MintItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
+	if err := state.CheckExistsState(stateextension.StateKeyContractAccount(ipp.item.Contract()), getStateFunc); err != nil {
+		return errors.Errorf("contract not found, %q; %q", ipp.item.Contract(), err)
+	}
+
+	if err := state.CheckExistsState(statecurrency.StateKeyAccount(ipp.item.Receiver()), getStateFunc); err != nil {
+		return errors.Errorf("receiver not found, %q; %q", ipp.item.receiver, err)
+	}
+
 	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.idx), getStateFunc); err != nil {
-		return errors.Errorf("nft already exists, %q; %w", ipp.idx, err)
+		return errors.Errorf("nft already exists, %q; %q", ipp.idx, err)
 	}
 
 	if ipp.item.Creators().Total() != 0 {
@@ -74,7 +82,7 @@ func (ipp *MintItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	sts := make([]base.StateMergeValue, 1)
 
-	n := types.NewNFT(ipp.idx, true, ipp.sender, ipp.item.NFTHash(), ipp.item.URI(), ipp.sender, ipp.item.Creators())
+	n := types.NewNFT(ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(), ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators())
 	if err := n.IsValid(nil); err != nil {
 		return nil, errors.Errorf("invalid nft, %q; %w", ipp.idx, err)
 	}
