@@ -70,6 +70,7 @@ func NewCollectionPolicy(name CollectionName, royalty PaymentParameter, uri URI,
 
 func (policy CollectionPolicy) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
+		policy.BaseHinter,
 		policy.name,
 		policy.royalty,
 		policy.uri,

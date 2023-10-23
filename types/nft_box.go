@@ -53,6 +53,11 @@ func (nbx NFTBox) IsEmpty() bool {
 }
 
 func (nbx NFTBox) IsValid([]byte) error {
+	if err := util.CheckIsValiders(nil, false,
+		nbx.BaseHinter,
+	); err != nil {
+		return err
+	}
 	return nil
 }
 

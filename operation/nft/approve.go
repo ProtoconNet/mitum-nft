@@ -41,10 +41,10 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if l := len(fact.items); l < 1 {
+	if n := len(fact.items); n < 1 {
 		return util.ErrInvalid.Errorf("empty items for ApproveFact")
-	} else if l > int(MaxApproveItems) {
-		return util.ErrInvalid.Errorf("items over allowed, %d > %d", l, MaxApproveItems)
+	} else if n > int(MaxApproveItems) {
+		return util.ErrInvalid.Errorf("items over allowed, %d > %d", n, MaxApproveItems)
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {

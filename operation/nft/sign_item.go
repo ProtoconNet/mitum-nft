@@ -34,7 +34,11 @@ func (it SignItem) Bytes() []byte {
 }
 
 func (it SignItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.contract, it.currency)
+	return util.CheckIsValiders(nil, false,
+		it.BaseHinter,
+		it.contract,
+		it.currency,
+	)
 }
 
 func (it SignItem) NFT() uint64 {

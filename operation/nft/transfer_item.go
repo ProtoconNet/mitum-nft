@@ -28,7 +28,12 @@ func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft
 }
 
 func (it TransferItem) IsValid([]byte) error {
-	return util.CheckIsValiders(nil, false, it.BaseHinter, it.receiver, it.currency)
+	return util.CheckIsValiders(nil, false,
+		it.BaseHinter,
+		it.contract,
+		it.receiver,
+		it.currency,
+	)
 }
 
 func (it TransferItem) Bytes() []byte {

@@ -27,7 +27,10 @@ func NewSigner(account base.Address, share uint, signed bool) Signer {
 }
 
 func (sgn Signer) IsValid([]byte) error {
-	if err := util.CheckIsValiders(nil, false, sgn.BaseHinter, sgn.account); err != nil {
+	if err := util.CheckIsValiders(nil, false,
+		sgn.BaseHinter,
+		sgn.account,
+	); err != nil {
 		return err
 	}
 

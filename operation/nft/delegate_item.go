@@ -5,7 +5,6 @@ import (
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -56,12 +55,6 @@ func NewDelegateItem(contract mitumbase.Address, operator mitumbase.Address, mod
 }
 
 func (it DelegateItem) IsValid([]byte) error {
-	if it.contract == nil {
-		return errors.Errorf("contract is nil in DelegateItem")
-	}
-	if it.delegatee == nil {
-		return errors.Errorf("delegatee is nil in DelegateItem")
-	}
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,

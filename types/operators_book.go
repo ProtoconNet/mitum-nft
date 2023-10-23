@@ -35,6 +35,11 @@ func NewOperatorsBook(operators []mitumbase.Address) OperatorsBook {
 }
 
 func (ob OperatorsBook) IsValid([]byte) error {
+	if err := util.CheckIsValiders(nil, false,
+		ob.BaseHinter,
+	); err != nil {
+		return err
+	}
 	for i := range ob.operators {
 		if err := ob.operators[i].IsValid(nil); err != nil {
 			return err
