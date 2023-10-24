@@ -5,6 +5,7 @@ import (
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-nft/v2/state"
 	"github.com/ProtoconNet/mitum-nft/v2/types"
+	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"strconv"
 
 	"github.com/ProtoconNet/mitum-currency/v3/digest/util"
@@ -51,7 +52,7 @@ func NFTCollection(st *currencydigest.Database, contract string) (*types.Design,
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, err
+		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft collection, contract %s", contract)
 	}
 
 	return design, nil
@@ -81,7 +82,7 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, err
+		return nil, mitumutil.ErrNotFound.Errorf("nft token, contract %s, nftid %s", contract, idx)
 	}
 
 	return nft, nil
@@ -214,7 +215,7 @@ func NFTOperators(
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, err
+		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft operators by contract %s and account %s", contract, account)
 	}
 
 	return operators, nil
