@@ -184,7 +184,7 @@ func (opp *CreateCollectionProcessor) Process(
 
 	st, err = currencystate.ExistsState(statecurrency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("sender balance not found, %q; %w", fact.Sender(), err), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender account balance not found, %q; %w", fact.Sender(), err), nil
 	}
 	sb := currencystate.NewStateMergeValue(st.Key(), st.Value())
 

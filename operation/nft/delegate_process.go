@@ -55,7 +55,7 @@ func (ipp *DelegateItemProcessor) PreProcess(
 	}
 
 	if ipp.sender.Equal(ipp.item.Delegatee()) {
-		return errors.Errorf("sender cannot be operator itself, %q", ipp.item.Delegatee())
+		return errors.Errorf("sender account cannot delegate to itself, %q", ipp.item.Delegatee())
 	}
 
 	return nil
@@ -135,7 +135,7 @@ func (opp *DelegateProcessor) PreProcess(
 
 	fact, ok := op.Fact().(DelegateFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected DelgateFact, not %T", op.Fact())
+		return ctx, nil, e.Errorf("expected %T, not %T", DelegateFact{}, op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -143,7 +143,7 @@ func (opp *DelegateProcessor) PreProcess(
 	}
 
 	if err := state.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
+		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender account not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
@@ -245,7 +245,7 @@ func (opp *DelegateProcessor) Process(
 		ip := delegateItemProcessorPool.Get()
 		ipc, ok := ip.(*DelegateItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected DelegateItemProcessor, not %T", ip)
+			return nil, nil, e.Errorf("expected %T, not %T", &DelegateItemProcessor{}, ip)
 		}
 
 		ipc.h = op.Hash()

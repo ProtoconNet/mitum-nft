@@ -154,11 +154,11 @@ func (opp *MintProcessor) PreProcess(
 	}
 
 	if err := state.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("sender account not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot mint nfts, %q", fact.Sender()), nil
+		return ctx, base.NewBaseOperationProcessReasonError("contract account can not mint nft, %q", fact.Sender()), nil
 	}
 
 	if err := state.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
@@ -182,15 +182,15 @@ func (opp *MintProcessor) PreProcess(
 				return nil, base.NewBaseOperationProcessReasonError("deactivated collection, %q", item.contract), nil
 			}
 
-			//policy, ok := design.Policy().(CollectionPolicy)
-			//if !ok {
-			//	return nil, base.NewBaseOperationProcessReasonError("expected CollectionPolicy, not %T", design.Policy()), nil
-			//}
+			policy, ok := design.Policy().(types.CollectionPolicy)
+			if !ok {
+				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", types.CollectionPolicy{}, design.Policy()), nil
+			}
 
-			//whites := policy.Whitelist()
-			//if len(whites) == 0 {
-			//	return nil, base.NewBaseOperationProcessReasonError("empty whitelist, %q", collection), nil
-			//}
+			whitelist := policy.Whitelist()
+			if len(whitelist) == 0 {
+				return nil, base.NewBaseOperationProcessReasonError("empty whitelist, %s", item.contract.String()), nil
+			}
 
 			st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
 			if err != nil {
@@ -203,21 +203,19 @@ func (opp *MintProcessor) PreProcess(
 			}
 
 			if !parent.Owner().Equal(fact.Sender()) {
-				return ctx, base.NewBaseOperationProcessReasonError("sender is not owner of contract account, %q, %q", fact.Sender(), parent.Owner()), nil
+				for i := range whitelist {
+					if whitelist[i].Equal(fact.Sender()) {
+						break
+					}
+					if i == len(whitelist)-1 {
+						return nil, base.NewBaseOperationProcessReasonError("sender account is neither the owner of contract account nor on the whitelist, %q", fact.Sender()), nil
+					}
+				}
 			}
 
 			if !parent.IsActive() {
 				return nil, base.NewBaseOperationProcessReasonError("deactivated parent account, %q", design.Parent()), nil
 			}
-
-			//for i := range whites {
-			//	if whites[i].Equal(fact.Sender()) {
-			//		break
-			//	}
-			//	if i == len(whites)-1 {
-			//		return nil, base.NewBaseOperationProcessReasonError("sender not in whitelist, %q", fact.Sender()), nil
-			//	}
-			//}
 
 			st, err = state.ExistsState(statenft.NFTStateKey(item.contract, statenft.LastIDXKey), "key of collection index", getStateFunc)
 			if err != nil {
