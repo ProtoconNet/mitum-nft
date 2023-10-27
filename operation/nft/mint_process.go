@@ -188,9 +188,9 @@ func (opp *MintProcessor) PreProcess(
 			}
 
 			whitelist := policy.Whitelist()
-			if len(whitelist) == 0 {
-				return nil, base.NewBaseOperationProcessReasonError("empty whitelist, %s", item.contract.String()), nil
-			}
+			//if len(whitelist) == 0 {
+			//	return nil, base.NewBaseOperationProcessReasonError("empty whitelist, %s", item.contract.String()), nil
+			//}
 
 			st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
 			if err != nil {
