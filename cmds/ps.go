@@ -77,68 +77,75 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 
-	_ = set.Add(nft.CreateCollectionHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.CreateCollectionHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.UpdateCollectionPolicyHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.UpdateCollectionPolicyHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.MintHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.MintHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.TransferHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.TransferHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.DelegateHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.DelegateHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.ApproveHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.ApproveHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(nft.SignHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(nft.SignHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
 	var f currencycmds.ProposalOperationFactHintFunc = IsSupportedProposalOperationFactHintFunc
 
