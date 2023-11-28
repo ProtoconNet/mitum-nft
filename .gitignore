@@ -30,3 +30,5 @@ tests/*/*/coverage/
 /openapi
 /sh
 .envrc
+/config.yml
+/genesis.yml
