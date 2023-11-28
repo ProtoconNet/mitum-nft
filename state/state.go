@@ -263,13 +263,13 @@ func StateOperatorsBookValue(st mitumbase.State) (*types.OperatorsBook, error) {
 // The length of state key is 3 or 4.
 // In case of length 3 it forms as NFTPrefix:{contract}:{Suffix}.
 // In case of length 4 it forms as NFTPrefix:{contract}:{key_value}:{Suffix}
-func ParseStateKey(key string, Prefix string) ([]string, error) {
+func ParseStateKey(key string, Prefix string, expected int) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
 	if parsedKey[0] != Prefix[:len(Prefix)-1] {
-		return nil, errors.Errorf("State Key not include NFTPrefix, %s", parsedKey)
+		return nil, errors.Errorf("State Key not include Prefix, %s", parsedKey)
 	}
-	if len(parsedKey) < 3 {
-		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
+	if len(parsedKey) < expected {
+		return nil, errors.Errorf("parsed State Key length under %v", expected)
 	} else {
 		return parsedKey, nil
 	}

@@ -21,16 +21,16 @@ const (
 )
 
 var (
-	NFTPrefix                = "nft:"
-	StateKeyCollectionSuffix = ":collection"
-	StateKeyOperatorsSuffix  = ":operators"
-	StateKeyLastNFTIDXSuffix = ":lastnftidx"
-	StateKeyNFTBoxSuffix     = ":nftbox"
-	StateKeyNFTSuffix        = ":nft"
+	NFTPrefix                = "nft"
+	StateKeyCollectionSuffix = "collection"
+	StateKeyOperatorsSuffix  = "operators"
+	StateKeyLastNFTIDXSuffix = "lastnftidx"
+	StateKeyNFTBoxSuffix     = "nftbox"
+	StateKeyNFTSuffix        = "nft"
 )
 
 func StateKeyNFTPrefix(addr mitumbase.Address) string {
-	return fmt.Sprintf("%s%s", NFTPrefix, addr.String())
+	return fmt.Sprintf("%s:%s", NFTPrefix, addr.String())
 }
 
 func NFTStateKey(
@@ -41,24 +41,22 @@ func NFTStateKey(
 	var stateKey string
 	switch keyType {
 	case CollectionKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyCollectionSuffix)
-	case OperatorsKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyOperatorsSuffix)
+		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyCollectionSuffix)
 	case LastIDXKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyLastNFTIDXSuffix)
+		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyLastNFTIDXSuffix)
 	case NFTBoxKey:
-		stateKey = fmt.Sprintf("%s%s", prefix, StateKeyNFTBoxSuffix)
+		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyNFTBoxSuffix)
 	}
 
 	return stateKey
 }
 
 func StateKeyOperators(contract mitumbase.Address, addr mitumbase.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract), addr.String(), StateKeyOperatorsSuffix)
+	return fmt.Sprintf("%s:%s:%s", StateKeyNFTPrefix(contract), addr.String(), StateKeyOperatorsSuffix)
 }
 
 func StateKeyNFT(contract mitumbase.Address, id uint64) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyNFTPrefix(contract), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
+	return fmt.Sprintf("%s:%s:%s", StateKeyNFTPrefix(contract), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
 }
 
 func ParseNFTStateKey(key string) (StateKey, error) {
