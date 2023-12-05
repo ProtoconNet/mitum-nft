@@ -60,6 +60,9 @@ func StateKeyNFT(contract mitumbase.Address, id uint64) string {
 }
 
 func ParseNFTStateKey(key string) (StateKey, error) {
+	if !strings.HasPrefix(key, NFTPrefix) {
+		return NilKey, errors.Errorf("invalid NFT State Key")
+	}
 	switch {
 	case strings.HasSuffix(key, StateKeyCollectionSuffix):
 		return CollectionKey, nil
