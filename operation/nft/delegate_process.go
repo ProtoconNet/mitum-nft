@@ -271,7 +271,12 @@ func (opp *DelegateProcessor) Process(
 		ipc.Close()
 	}
 
-	required, err := opp.calculateItemsFee(op, getStateFunc)
+	items := make([]CollectionItem, len(fact.items))
+	for i := range fact.items {
+		items[i] = fact.items[i]
+	}
+
+	feeReceiveBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
@@ -280,13 +285,38 @@ func (opp *DelegateProcessor) Process(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}
 
-	for i := range sb {
-		v, ok := sb[i].Value().(statecurrency.BalanceStateValue)
+	for cid := range sb {
+		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
 		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[i].Value())
+			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
 		}
-		stv := statecurrency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, state.NewStateMergeValue(sb[i].Key(), stv))
+
+		if sb[cid].Key() != feeReceiveBalSts[cid].Key() {
+			stmv := common.NewBaseStateMergeValue(
+				sb[cid].Key(),
+				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
+				func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
+					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
+				},
+			)
+
+			r, ok := feeReceiveBalSts[cid].Value().(statecurrency.BalanceStateValue)
+			if !ok {
+				return nil, mitumbase.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiveBalSts[cid].Value()), nil
+			}
+			sts = append(
+				sts,
+				common.NewBaseStateMergeValue(
+					feeReceiveBalSts[cid].Key(),
+					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
+					func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
+						return statecurrency.NewBalanceStateValueMerger(height, feeReceiveBalSts[cid].Key(), cid, st)
+					},
+				),
+			)
+
+			sts = append(sts, stmv)
+		}
 	}
 
 	return sts, nil, nil
@@ -296,18 +326,4 @@ func (opp *DelegateProcessor) Close() error {
 	delegateProcessorPool.Put(opp)
 
 	return nil
-}
-
-func (opp *DelegateProcessor) calculateItemsFee(op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc) (map[currencytypes.CurrencyID][2]common.Big, error) {
-	fact, ok := op.Fact().(DelegateFact)
-	if !ok {
-		return nil, errors.Errorf("expected DelegateFact, not %T", op.Fact())
-	}
-
-	items := make([]CollectionItem, len(fact.items))
-	for i := range fact.items {
-		items[i] = fact.items[i]
-	}
-
-	return CalculateCollectionItemsFee(getStateFunc, items)
 }
