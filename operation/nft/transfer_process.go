@@ -263,7 +263,7 @@ func (opp *TransferProcessor) Process( // nolint:dupl
 		items[i] = fact.Items()[i]
 	}
 
-	feeReceiveBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
+	feeReceiverBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
@@ -278,7 +278,9 @@ func (opp *TransferProcessor) Process( // nolint:dupl
 			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
 		}
 
-		if sb[cid].Key() != feeReceiveBalSts[cid].Key() {
+		_, feeReceiverFound := feeReceiverBalSts[cid]
+
+		if feeReceiverFound && (sb[cid].Key() != feeReceiverBalSts[cid].Key()) {
 			stmv := common.NewBaseStateMergeValue(
 				sb[cid].Key(),
 				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
@@ -287,17 +289,17 @@ func (opp *TransferProcessor) Process( // nolint:dupl
 				},
 			)
 
-			r, ok := feeReceiveBalSts[cid].Value().(statecurrency.BalanceStateValue)
+			r, ok := feeReceiverBalSts[cid].Value().(statecurrency.BalanceStateValue)
 			if !ok {
-				return nil, mitumbase.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiveBalSts[cid].Value()), nil
+				return nil, mitumbase.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
 			}
 			sts = append(
 				sts,
 				common.NewBaseStateMergeValue(
-					feeReceiveBalSts[cid].Key(),
+					feeReceiverBalSts[cid].Key(),
 					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
 					func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-						return statecurrency.NewBalanceStateValueMerger(height, feeReceiveBalSts[cid].Key(), cid, st)
+						return statecurrency.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
 					},
 				),
 			)
