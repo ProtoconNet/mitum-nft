@@ -30,9 +30,6 @@ func (cmd *TransferCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -52,19 +49,19 @@ func (cmd *TransferCommand) parseFlags() error {
 		return err
 	}
 
-	if a, err := cmd.Sender.Encode(enc); err != nil {
+	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender.String())
 	} else {
 		cmd.sender = a
 	}
 
-	if a, err := cmd.Receiver.Encode(enc); err != nil {
+	if a, err := cmd.Receiver.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid receiver format, %q", cmd.Receiver.String())
 	} else {
 		cmd.receiver = a
 	}
 
-	if a, err := cmd.Contract.Encode(enc); err != nil {
+	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract.String())
 	} else {
 		cmd.contract = a

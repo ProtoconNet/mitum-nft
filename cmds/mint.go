@@ -34,9 +34,6 @@ func (cmd *MintCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -56,21 +53,21 @@ func (cmd *MintCommand) parseFlags() error {
 		return err
 	}
 
-	a, err := cmd.Sender.Encode(enc)
+	a, err := cmd.Sender.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	a, err = cmd.Contract.Encode(enc)
+	a, err = cmd.Contract.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract)
 	} else {
 		cmd.contract = a
 	}
 
-	a, err = cmd.Receiver.Encode(enc)
+	a, err = cmd.Receiver.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid receiver address format, %q", cmd.Receiver)
 	} else {
@@ -93,7 +90,7 @@ func (cmd *MintCommand) parseFlags() error {
 
 	var crts = []types.Signer{}
 	if len(cmd.Creator.address) > 0 {
-		a, err := cmd.Creator.Encode(enc)
+		a, err := cmd.Creator.Encode(cmd.Encoders.JSON())
 		if err != nil {
 			return errors.Wrapf(err, "invalid creator address format, %q", cmd.Creator)
 		}

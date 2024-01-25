@@ -35,9 +35,6 @@ func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -57,13 +54,13 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 		return err
 	}
 
-	if a, err := cmd.Sender.Encode(enc); err != nil {
+	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid sender address format; %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	if a, err := cmd.Contract.Encode(enc); err != nil {
+	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid contract address format; %q", cmd.Contract)
 	} else {
 		cmd.contract = a
@@ -71,7 +68,7 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 
 	var white mitumbase.Address = nil
 	if cmd.White.String() != "" {
-		if a, err := cmd.White.Encode(enc); err != nil {
+		if a, err := cmd.White.Encode(cmd.Encoders.JSON()); err != nil {
 			return errors.Wrapf(err, "invalid whitelist address format, %q", cmd.White)
 		} else {
 			white = a

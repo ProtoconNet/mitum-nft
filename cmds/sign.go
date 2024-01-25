@@ -26,9 +26,6 @@ func (cmd *SignCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -48,13 +45,13 @@ func (cmd *SignCommand) parseFlags() error {
 		return err
 	}
 
-	if a, err := cmd.Sender.Encode(enc); err != nil {
+	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
-	if a, err := cmd.Contract.Encode(enc); err != nil {
+	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
 		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract)
 	} else {
 		cmd.contract = a
