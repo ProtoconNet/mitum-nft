@@ -3,12 +3,11 @@ package nft
 import (
 	"encoding/json"
 
-	"github.com/ProtoconNet/mitum-nft/v2/types"
-
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/v2/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -44,7 +43,7 @@ type MintItemJSONUnmarshaler struct {
 	Currency string          `json:"currency"`
 }
 
-func (it *MintItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (it *MintItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of MintItem")
 
 	var u MintItemJSONUnmarshaler

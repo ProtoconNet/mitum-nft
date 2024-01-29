@@ -3,9 +3,8 @@ package state
 import (
 	"encoding/json"
 	"github.com/ProtoconNet/mitum-nft/v2/types"
-
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -26,7 +25,7 @@ type CollectionDesignStateValueJSONUnmarshaler struct {
 	Design json.RawMessage `json:"collectiondesign"`
 }
 
-func (s *CollectionStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *CollectionStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of CollectionDesignStateValue")
 
 	var u CollectionDesignStateValueJSONUnmarshaler
@@ -64,7 +63,7 @@ type LastNFTIndexStateValueJSONUnmarshaler struct {
 	Index uint64    `json:"index"`
 }
 
-func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *LastNFTIndexStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of CollectionLastNFTIndexStateValue")
 
 	var u LastNFTIndexStateValueJSONUnmarshaler
@@ -94,7 +93,7 @@ type NFTStateValueJSONUnmarshaler struct {
 	NFT  json.RawMessage `json:"nft"`
 }
 
-func (s *NFTStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *NFTStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of NFTStateValue")
 
 	var u NFTStateValueJSONUnmarshaler
@@ -129,7 +128,7 @@ type NFTBoxStateValueJSONUnmarshaler struct {
 	Box  json.RawMessage `json:"nftbox"`
 }
 
-func (s *NFTBoxStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *NFTBoxStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of NFTBoxStateValue")
 
 	var u NFTBoxStateValueJSONUnmarshaler
@@ -164,7 +163,7 @@ type OperatorsBookStateValueJSONUnmarshaler struct {
 	Operators json.RawMessage `json:"operatorsbook"`
 }
 
-func (s *OperatorsBookStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (s *OperatorsBookStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of OperatorsBookStateValue")
 
 	var u OperatorsBookStateValueJSONUnmarshaler

@@ -2,11 +2,10 @@ package nft
 
 import (
 	"encoding/json"
-
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TransferFactJSONMarshaler struct {
@@ -29,7 +28,7 @@ type TransferFactJSONUnmarshaler struct {
 	Items  json.RawMessage `json:"items"`
 }
 
-func (fact *TransferFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *TransferFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of TransferFact")
 
 	var u TransferFactJSONUnmarshaler
@@ -52,7 +51,7 @@ func (op Transfer) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (op *Transfer) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (op *Transfer) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of Transfer")
 
 	var ubo common.BaseOperation

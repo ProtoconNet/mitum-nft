@@ -6,7 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum-nft/v2/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type UpdateCollectionPolicyFactJSONMarshaler struct {
@@ -44,7 +44,7 @@ type UpdateCollectionPolicyFactJSONUnmarshaler struct {
 	Currency  string   `json:"currency"`
 }
 
-func (fact *UpdateCollectionPolicyFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *UpdateCollectionPolicyFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of UpdateCollectionPolicyFact")
 
 	var u UpdateCollectionPolicyFactJSONUnmarshaler
@@ -67,7 +67,7 @@ func (op UpdateCollectionPolicy) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (op *UpdateCollectionPolicy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (op *UpdateCollectionPolicy) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of UpdateCollectionPolicy")
 
 	var ubo common.BaseOperation
