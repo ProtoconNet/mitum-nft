@@ -10,7 +10,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-var MaxApproveItems = 10
+var MaxApproveItems = 100
 
 var (
 	ApproveFactHint = hint.MustNewHint("mitum-nft-approve-operation-fact-v0.0.1")

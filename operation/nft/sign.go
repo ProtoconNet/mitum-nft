@@ -15,7 +15,7 @@ var (
 	SignHint     = hint.MustNewHint("mitum-nft-sign-operation-v0.0.1")
 )
 
-var MaxSignItems = 10
+var MaxSignItems = 100
 
 type SignFact struct {
 	mitumbase.BaseFact

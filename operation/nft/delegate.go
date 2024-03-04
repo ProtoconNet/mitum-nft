@@ -13,7 +13,7 @@ var (
 	DelegateHint     = hint.MustNewHint("mitum-nft-delegate-operation-v0.0.1")
 )
 
-var MaxDelegateItems = 10
+var MaxDelegateItems = 100
 
 type DelegateFact struct {
 	mitumbase.BaseFact

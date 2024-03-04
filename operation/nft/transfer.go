@@ -15,7 +15,7 @@ var (
 	TransferHint     = hint.MustNewHint("mitum-nft-transfer-operation-v0.0.1")
 )
 
-var MaxTransferItems = 10
+var MaxTransferItems = 100
 
 type TransferFact struct {
 	mitumbase.BaseFact
