@@ -88,6 +88,39 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 	return nft, nil
 }
 
+func NFTsByFactHash(st *currencydigest.Database, contract, facthash string) ([]*types.NFT, error) {
+	filter := util.NewBSONFilter("contract", contract)
+	filter = filter.Add("facthash", facthash)
+
+	var nfts []*types.NFT
+	var sta mitumbase.State
+	var err error
+	if err = st.DatabaseClient().Find(
+		context.Background(),
+		defaultColNameNFT,
+		filter.D(),
+		func(cursor *mongo.Cursor) (bool, error) {
+			sta, err = currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
+			if err != nil {
+				return false, err
+			}
+			nft, err := state.StateNFTValue(sta)
+			if err != nil {
+				return false, err
+			}
+
+			nfts = append(nfts, nft)
+
+			return true, nil
+		},
+		options.Find().SetSort(util.NewBSONFilter("height", -1).D()),
+	); err != nil {
+		return nil, mitumutil.ErrNotFound.Errorf("nft token, contract %s, facthash %s", contract, facthash)
+	}
+
+	return nfts, nil
+}
+
 func NFTsByAddress(
 	st *currencydigest.Database,
 	address mitumbase.Address,

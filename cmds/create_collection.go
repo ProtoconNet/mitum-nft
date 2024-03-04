@@ -2,8 +2,6 @@ package cmds
 
 import (
 	"context"
-	"fmt"
-
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/v2/types"
@@ -43,7 +41,7 @@ func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(cmd.Out)
+
 	currencycmds.PrettyPrint(cmd.Out, op)
 
 	return nil

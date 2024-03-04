@@ -54,6 +54,49 @@ func (hd *Handlers) handleNFTInGroup(contract, id string) (interface{}, error) {
 	}
 }
 
+func (hd *Handlers) handleNFTsbyFactHash(w http.ResponseWriter, r *http.Request) {
+	cachekey := currencydigest.CacheKeyPath(r)
+	if err := currencydigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+		return
+	}
+
+	contract, err, status := parseRequest(w, r, "contract")
+	if err != nil {
+		currencydigest.HTTP2ProblemWithError(w, err, status)
+		return
+	}
+
+	facthash, err, status := parseRequest(w, r, "facthash")
+	if err != nil {
+		currencydigest.HTTP2ProblemWithError(w, err, status)
+		return
+	}
+
+	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
+		return hd.handleNFTsByFactHashInGroup(contract, facthash)
+	}); err != nil {
+		currencydigest.HTTP2HandleError(w, err)
+	} else {
+		currencydigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		if !shared {
+			currencydigest.HTTP2WriteCache(w, cachekey, time.Second*3)
+		}
+	}
+}
+
+func (hd *Handlers) handleNFTsByFactHashInGroup(contract, facthash string) (interface{}, error) {
+	switch nfts, err := NFTsByFactHash(hd.database, contract, facthash); {
+	case err != nil:
+		return nil, err
+	default:
+		hal, err := hd.buildNFTsIDHal(contract, nfts, facthash)
+		if err != nil {
+			return nil, err
+		}
+		return hd.encoder.Marshal(hal)
+	}
+}
+
 func (hd *Handlers) buildNFTHal(contract string, nft types.NFT) (currencydigest.Hal, error) {
 	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "id", strconv.FormatUint(nft.ID(), 10))
 	if err != nil {
@@ -61,6 +104,28 @@ func (hd *Handlers) buildNFTHal(contract string, nft types.NFT) (currencydigest.
 	}
 
 	hal := currencydigest.NewBaseHal(nft, currencydigest.NewHalLink(h, nil))
+
+	return hal, nil
+}
+
+func (hd *Handlers) buildNFTsIDHal(contract string, nfts []*types.NFT, facthash string) (currencydigest.Hal, error) {
+	var m struct {
+		NFTIDs []string `json:"nftids"`
+	}
+
+	var nftids []string
+	for _, v := range nfts {
+		nftids = append(nftids, strconv.FormatUint(v.ID(), 10))
+	}
+
+	m.NFTIDs = nftids
+
+	h, err := hd.combineURL(HandlerPathNFTsByFactHash, "contract", contract, "facthash", facthash)
+	if err != nil {
+		return nil, err
+	}
+
+	hal := currencydigest.NewBaseHal(m, currencydigest.NewHalLink(h, nil))
 
 	return hal, nil
 }
