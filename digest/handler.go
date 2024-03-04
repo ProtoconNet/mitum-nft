@@ -22,11 +22,10 @@ import (
 )
 
 var (
-	HandlerPathNFTOperators   = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection  = `/nft/{contract:.*}/collection`
-	HandlerPathNFT            = `/nft/{contract:.*}/id/{id:.*}`
-	HandlerPathNFTsByFactHash = `/nft/{contract:.*}/facthash/{facthash:.*}`
-	HandlerPathNFTs           = `/nft/{contract:.*}/nfts`
+	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection = `/nft/{contract:.*}/collection`
+	HandlerPathNFT           = `/nft/{contract:.*}/{id:.*}`
+	HandlerPathNFTs          = `/nft/{contract:.*}/nfts`
 )
 
 func init() {
@@ -124,8 +123,6 @@ func (hd *Handlers) setHandlers() {
 	_ = hd.setHandler(HandlerPathNFTOperators, hd.handleNFTOperators, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
-		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTsByFactHash, hd.handleNFTsbyFactHash, true).
 		Methods(http.MethodOptions, "GET")
 }
 

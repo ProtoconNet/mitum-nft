@@ -173,13 +173,12 @@ func NFTsByAddress(
 
 func NFTsByCollection(
 	st *currencydigest.Database,
-	contract string,
+	contract, offset, facthash string,
 	reverse bool,
-	offset string,
 	limit int64,
 	callback func(nft types.NFT, st mitumbase.State) (bool, error),
 ) error {
-	filter, err := buildNFTsFilterByContract(contract, offset, reverse)
+	filter, err := buildNFTsFilterByContract(contract, offset, facthash, reverse)
 	if err != nil {
 		return err
 	}
