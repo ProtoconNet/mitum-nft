@@ -216,6 +216,101 @@ func (hd *Handlers) handleNFTsInGroup(
 	return b, int64(len(vas)) == limit, err
 }
 
+func (hd *Handlers) handleNFTCount(w http.ResponseWriter, r *http.Request) {
+	cachekey := currencydigest.CacheKey(
+		r.URL.Path,
+	)
+
+	contract, err, status := parseRequest(w, r, "contract")
+	if err != nil {
+		currencydigest.HTTP2ProblemWithError(w, err, status)
+
+		return
+	}
+
+	// if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
+	// 	return hd.handleCollectionNFTsInGroup(contract, collection)
+	// }); err != nil {
+	// 	HTTP2HandleError(w, err)
+	// } else {
+	// 	HTTP2WriteHalBytes(hd.enc, w, v.([]byte), http.StatusOK)
+
+	// 	if !shared {
+	// 		HTTP2WriteCache(w, cachekey, time.Second*3)
+	// 	}
+	// }
+
+	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
+		i, err := hd.handleNFTCountInGroup(contract)
+
+		return i, err
+	})
+
+	if err != nil {
+		hd.Log().Err(err).Str("contract", contract).Msg("failed to count nft")
+		currencydigest.HTTP2HandleError(w, err)
+
+		return
+	}
+
+	currencydigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+
+	if !shared {
+		expire := hd.expireNotFilled
+		currencydigest.HTTP2WriteCache(w, cachekey, expire)
+	}
+}
+
+func (hd *Handlers) handleNFTCountInGroup(
+	contract string,
+) ([]byte, error) {
+	count, err := NFTCountByCollection(
+		hd.database, contract,
+	)
+	if err != nil {
+		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft count by contract, %s", contract)
+	}
+
+	i, err := hd.buildNFTCountHal(contract, count)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := hd.encoder.Marshal(i)
+	return b, err
+}
+
+func (hd *Handlers) buildNFTCountHal(
+	contract string,
+	count int64,
+) (currencydigest.Hal, error) {
+	baseSelf, err := hd.combineURL(HandlerPathNFTCount, "contract", contract)
+	if err != nil {
+		return nil, err
+	}
+
+	self := baseSelf
+
+	var m struct {
+		Contract string `json:"contract"`
+		NFTCount int64  `json:"nft_count"`
+	}
+
+	m.Contract = contract
+	m.NFTCount = count
+
+	var hal currencydigest.Hal
+	hal = currencydigest.NewBaseHal(m, currencydigest.NewHalLink(self, nil))
+
+	h, err := hd.combineURL(HandlerPathNFTCollection, "contract", contract)
+	if err != nil {
+		return nil, err
+	}
+	hal = hal.AddLink("collection", currencydigest.NewHalLink(h, nil))
+
+	return hal, nil
+}
+
 func (hd *Handlers) buildNFTsHal(
 	contract string,
 	vas []currencydigest.Hal,
