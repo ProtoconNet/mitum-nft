@@ -55,7 +55,7 @@ func (ipp *MintItemProcessor) PreProcess(
 		return errors.Errorf("receiver not found, %q; %q", ipp.item.receiver, err)
 	}
 
-	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.contract, ipp.idx), getStateFunc); err != nil {
+	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); err != nil {
 		return errors.Errorf("nft already exists, %q; %q", ipp.idx, err)
 	}
 
@@ -88,7 +88,7 @@ func (ipp *MintItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %q; %w", ipp.idx, err)
 	}
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, ipp.idx), statenft.NewNFTStateValue(n))
+	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), statenft.NewNFTStateValue(n))
 
 	if err := ipp.box.Append(n.ID()); err != nil {
 		return nil, errors.Errorf("failed to append nft id to nft box, %q; %w", n.ID(), err)
@@ -97,7 +97,7 @@ func (ipp *MintItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *MintItemProcessor) Close() error {
+func (ipp *MintItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
 	ipp.item = MintItem{}
@@ -106,7 +106,7 @@ func (ipp *MintItemProcessor) Close() error {
 
 	mintItemProcessorPool.Put(ipp)
 
-	return nil
+	return
 }
 
 type MintProcessor struct {
@@ -162,7 +162,7 @@ func (opp *MintProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError("contract account can not mint nft, %q", fact.Sender()), nil
 	}
 
-	if err := state.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
+	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
@@ -361,7 +361,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
-	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
+	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}

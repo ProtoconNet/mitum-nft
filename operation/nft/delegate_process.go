@@ -65,7 +65,7 @@ func (ipp *DelegateItemProcessor) Process(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	if ipp.box == nil {
-		return nil, errors.Errorf("nft box not found, %q", statenft.StateKeyOperators(ipp.item.contract, ipp.sender))
+		return nil, errors.Errorf("nft box not found, %q", statenft.StateKeyOperators(ipp.item.Contract(), ipp.sender))
 	}
 
 	switch ipp.item.Mode() {
@@ -86,7 +86,7 @@ func (ipp *DelegateItemProcessor) Process(
 	return nil, nil
 }
 
-func (ipp *DelegateItemProcessor) Close() error {
+func (ipp *DelegateItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
 	ipp.item = DelegateItem{}
@@ -94,7 +94,7 @@ func (ipp *DelegateItemProcessor) Close() error {
 
 	delegateItemProcessorPool.Put(ipp)
 
-	return nil
+	return
 }
 
 type DelegateProcessor struct {
@@ -150,11 +150,16 @@ func (opp *DelegateProcessor) PreProcess(
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("contract account cannot have operators, %q", fact.Sender()), nil
 	}
 
-	if err := state.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
+	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
 	for _, item := range fact.Items() {
+		err := state.CheckExistsState(stateextension.StateKeyContractAccount(item.Contract()), getStateFunc)
+		if err != nil {
+			return nil, mitumbase.NewBaseOperationProcessReasonError("contract account not found, %q; %w", item.Contract(), err), nil
+		}
+
 		st, err := state.ExistsState(statenft.NFTStateKey(item.contract, statenft.CollectionKey), "key of design", getStateFunc)
 		if err != nil {
 			return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", item.Contract(), err), nil
@@ -167,20 +172,6 @@ func (opp *DelegateProcessor) PreProcess(
 
 		if !design.Active() {
 			return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", item.Contract()), nil
-		}
-
-		st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
-		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("parent not found, %q; %w", design.Parent(), err), nil
-		}
-
-		ca, err := stateextension.StateContractAccountValue(st)
-		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("contract account value not found, %q; %w", design.Parent(), err), nil
-		}
-
-		if !ca.IsActive() {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated contract account, %q", design.Parent()), nil
 		}
 	}
 
@@ -280,7 +271,7 @@ func (opp *DelegateProcessor) Process(
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
-	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
+	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}

@@ -45,6 +45,10 @@ func (it ApproveItem) Bytes() []byte {
 	)
 }
 
+func (it ApproveItem) Contract() mitumbase.Address {
+	return it.contract
+}
+
 func (it ApproveItem) Approved() mitumbase.Address {
 	return it.approved
 }

@@ -100,8 +100,8 @@ func (opp *CreateCollectionProcessor) PreProcess(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
 	}
 
-	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
+	if !(ca.Owner().Equal(fact.Sender()) || ca.IsOperator(fact.Sender())) {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.Sender()), nil
 	}
 
 	if ca.IsActive() {

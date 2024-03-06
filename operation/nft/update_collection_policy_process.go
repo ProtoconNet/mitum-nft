@@ -85,7 +85,21 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
-	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), "key of collection design", getStateFunc)
+	st, err := state.ExistsState(stateextension.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	if err != nil {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("contract account not found, %q; %w", fact.Contract(), err), nil
+	}
+
+	ca, err := stateextension.StateContractAccountValue(st)
+	if err != nil {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("contract account value not found, %q; %w", fact.Contract(), err), nil
+	}
+
+	if !(ca.Owner().Equal(fact.Sender()) || ca.IsOperator(fact.Sender())) {
+		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.Sender()), nil
+	}
+
+	st, err = state.ExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), "key of collection design", getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %q; %w", fact.Contract(), err), nil
 	}
@@ -99,27 +113,10 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated collection, %q", fact.Contract()), nil
 	}
 
-	if !design.Creator().Equal(fact.Sender()) {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("not creator of collection design, %q", fact.Contract()), nil
-	}
-
-	st, err = state.ExistsState(stateextension.StateKeyContractAccount(design.Parent()), "key of contract account", getStateFunc)
-	if err != nil {
+	if !design.Parent().Equal(fact.Contract()) {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("parent not found, %q; %w", design.Parent(), err), nil
 	}
 
-	ca, err := stateextension.StateContractAccountValue(st)
-	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("contract account value not found, %q; %w", design.Parent(), err), nil
-	}
-
-	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
-	}
-
-	if !ca.IsActive() {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("deactivated contract account, %q", design.Parent()), nil
-	}
 	return ctx, nil, nil
 }
 

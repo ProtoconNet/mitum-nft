@@ -45,36 +45,28 @@ type SignItemProcessor struct {
 func (ipp *SignItemProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
+	err := state.CheckExistsState(stateextension.StateKeyContractAccount(ipp.item.Contract()), getStateFunc)
+	if err != nil {
+		return errors.Errorf("contract account not found, %q; %w", ipp.item.Contract(), err)
+	}
+
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.contract, statenft.CollectionKey), "key of design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "key of design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.contract, err)
+		return errors.Errorf("collection design not found, %q; %w", ipp.item.Contract(), err)
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design value not found, %q; %w", ipp.item.contract, err)
+		return errors.Errorf("collection design value not found, %q; %w", ipp.item.Contract(), err)
 	}
 
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", ipp.item.contract)
-	}
-	st, err = state.ExistsState(stateextension.StateKeyContractAccount(ipp.item.contract), "contract account", getStateFunc)
-	if err != nil {
-		return errors.Errorf("parent not found, %q; %w", design.Parent(), err)
+		return errors.Errorf("deactivated collection, %q", ipp.item.Contract())
 	}
 
-	ca, err := stateextension.StateContractAccountValue(st)
-	if err != nil {
-		return errors.Errorf("contract account value not found, %q; %w", ipp.item.contract, err)
-	}
-
-	if !ca.IsActive() {
-		return errors.Errorf("deactivated contract account, %q", ipp.item.contract)
-	}
-
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
 	if err != nil {
 		return errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -100,7 +92,7 @@ func (ipp *SignItemProcessor) Process(
 ) ([]mitumbase.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.contract, nid), "key of nft", getStateFunc)
+	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %q; %w", nid, err)
 	}
@@ -135,18 +127,18 @@ func (ipp *SignItemProcessor) Process(
 
 	sts := make([]mitumbase.StateMergeValue, 1)
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.contract, n.ID()), statenft.NewNFTStateValue(n))
+	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), n.ID()), statenft.NewNFTStateValue(n))
 
 	return sts, nil
 }
 
-func (ipp *SignItemProcessor) Close() error {
+func (ipp *SignItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
 	ipp.item = SignItem{}
 	signItemProcessorPool.Put(ipp)
 
-	return nil
+	return
 }
 
 type SignProcessor struct {
@@ -202,7 +194,7 @@ func (opp *SignProcessor) PreProcess(
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("contract account cannot sign nfts, %q", fact.Sender()), nil
 	}
 
-	if err := state.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
+	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
@@ -269,7 +261,7 @@ func (opp *SignProcessor) Process( // nolint:dupl
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
-	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
+	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}
