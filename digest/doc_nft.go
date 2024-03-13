@@ -8,7 +8,6 @@ import (
 	"github.com/ProtoconNet/mitum-nft/v2/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
-	"strconv"
 )
 
 type NFTCollectionDoc struct {
@@ -96,7 +95,7 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 	}
 
 	m["contract"] = parsedKey[1]
-	m["nftid"] = strconv.FormatUint(doc.nft.ID(), 10)
+	m["nftid"] = doc.nft.ID()
 	m["owner"] = doc.nft.Owner()
 	m["addresses"] = doc.addresses
 	m["istoken"] = true

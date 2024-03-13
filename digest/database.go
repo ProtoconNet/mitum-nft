@@ -60,12 +60,16 @@ func NFTCollection(st *currencydigest.Database, contract string) (*types.Design,
 }
 
 func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) {
+	i, err := strconv.ParseUint(idx, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("nftid", idx)
+	filter = filter.Add("nftid", i)
 
 	var nft *types.NFT
 	var sta mitumbase.State
-	var err error
 	if err = st.DatabaseClient().GetByFilter(
 		defaultColNameNFT,
 		filter.D(),
@@ -89,97 +93,14 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 	return nft, nil
 }
 
-func NFTsByFactHash(st *currencydigest.Database, contract, facthash string) ([]*types.NFT, error) {
-	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("facthash", facthash)
-
-	var nfts []*types.NFT
-	var sta mitumbase.State
-	var err error
-	if err = st.DatabaseClient().Find(
-		context.Background(),
-		defaultColNameNFT,
-		filter.D(),
-		func(cursor *mongo.Cursor) (bool, error) {
-			sta, err = currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
-			if err != nil {
-				return false, err
-			}
-			nft, err := state.StateNFTValue(sta)
-			if err != nil {
-				return false, err
-			}
-
-			nfts = append(nfts, nft)
-
-			return true, nil
-		},
-		options.Find().SetSort(util.NewBSONFilter("height", -1).D()),
-	); err != nil {
-		return nil, mitumutil.ErrNotFound.Errorf("nft token, contract %s, facthash %s", contract, facthash)
-	}
-
-	return nfts, nil
-}
-
-func NFTsByAddress(
-	st *currencydigest.Database,
-	address mitumbase.Address,
-	reverse bool,
-	offset string,
-	limit int64,
-	callback func(string /* nft id */, types.NFT) (bool, error),
-) error {
-	filter, err := buildNFTsFilterByAddress(address, offset, reverse)
-	if err != nil {
-		return err
-	}
-
-	sr := 1
-	if reverse {
-		sr = -1
-	}
-
-	opt := options.Find().SetSort(
-		util.NewBSONFilter("height", sr).D(),
-	)
-
-	switch {
-	case limit <= 0: // no limit
-	case limit > maxLimit:
-		opt = opt.SetLimit(maxLimit)
-	default:
-		opt = opt.SetLimit(limit)
-	}
-
-	return st.DatabaseClient().Find(
-		context.Background(),
-		defaultColNameNFT,
-		filter,
-		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
-			if err != nil {
-				return false, err
-			}
-			nft, err := state.StateNFTValue(st)
-			if err != nil {
-				return false, err
-			}
-
-			return callback(strconv.FormatUint(nft.ID(), 10), *nft)
-		},
-		opt,
-	)
-}
-
 func NFTsByCollection(
 	st *currencydigest.Database,
-	contract, offset, facthash string,
+	contract, factHash, offset string,
 	reverse bool,
 	limit int64,
 	callback func(nft types.NFT, st mitumbase.State) (bool, error),
 ) error {
-	filter, err := buildNFTsFilterByContract(contract, offset, facthash, reverse)
+	filter, err := buildNFTsFilterByContract(contract, factHash, offset, reverse)
 	if err != nil {
 		return err
 	}
@@ -190,7 +111,7 @@ func NFTsByCollection(
 	}
 
 	opt := options.Find().SetSort(
-		util.NewBSONFilter("height", sr).D(),
+		util.NewBSONFilter("nftid", sr).D(),
 	)
 
 	switch {

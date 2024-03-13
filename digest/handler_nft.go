@@ -132,20 +132,8 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-	// 	return hd.handleCollectionNFTsInGroup(contract, collection)
-	// }); err != nil {
-	// 	HTTP2HandleError(w, err)
-	// } else {
-	// 	HTTP2WriteHalBytes(hd.enc, w, v.([]byte), http.StatusOK)
-
-	// 	if !shared {
-	// 		HTTP2WriteCache(w, cachekey, time.Second*3)
-	// 	}
-	// }
-
 	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		i, filled, err := hd.handleNFTsInGroup(contract, offset, facthash, reverse, limit)
+		i, filled, err := hd.handleNFTsInGroup(contract, facthash, offset, reverse, limit)
 
 		return []interface{}{i, filled}, err
 	})
@@ -178,7 +166,7 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hd *Handlers) handleNFTsInGroup(
-	contract, offset, facthash string,
+	contract, facthash, offset string,
 	reverse bool,
 	l int64,
 ) ([]byte, bool, error) {
@@ -191,7 +179,7 @@ func (hd *Handlers) handleNFTsInGroup(
 
 	var vas []currencydigest.Hal
 	if err := NFTsByCollection(
-		hd.database, contract, offset, facthash, reverse, limit,
+		hd.database, contract, facthash, offset, reverse, limit,
 		func(nft types.NFT, st base.State) (bool, error) {
 			hal, err := hd.buildNFTHal(contract, nft)
 			if err != nil {

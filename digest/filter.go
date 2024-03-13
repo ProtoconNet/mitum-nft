@@ -2,9 +2,9 @@ package digest
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
-	"github.com/ProtoconNet/mitum2/base"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,40 +23,7 @@ func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, err
 	return s, nil, http.StatusOK
 }
 
-func buildNFTsFilterByAddress(address base.Address, offset string, reverse bool) (bson.D, error) {
-	filterA := bson.A{}
-
-	// filter fot matching address
-	filterAddress := bson.D{{"owner", bson.D{{"$in", []string{address.String()}}}}}
-	filterA = append(filterA, filterAddress)
-
-	// if offset exist, apply offset
-	if len(offset) > 0 {
-		if !reverse {
-			filterOffset := bson.D{
-				{"nftid", bson.D{{"$gt", offset}}},
-			}
-			filterA = append(filterA, filterOffset)
-			// if reverse true, lesser then offset height
-		} else {
-			filterHeight := bson.D{
-				{"nftid", bson.D{{"$lt", offset}}},
-			}
-			filterA = append(filterA, filterHeight)
-		}
-	}
-
-	filter := bson.D{}
-	if len(filterA) > 0 {
-		filter = bson.D{
-			{"$and", filterA},
-		}
-	}
-
-	return filter, nil
-}
-
-func buildNFTsFilterByContract(contract, offset, facthash string, reverse bool) (bson.D, error) {
+func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
 	// filter fot matching collection
@@ -67,17 +34,22 @@ func buildNFTsFilterByContract(contract, offset, facthash string, reverse bool) 
 
 	// if offset exist, apply offset
 	if len(offset) > 0 {
+		v, err := strconv.ParseUint(offset, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
 		if !reverse {
 			filterOffset := bson.D{
-				{"nftid", bson.D{{"$gt", offset}}},
+				{"nftid", bson.D{{"$gt", v}}},
 			}
 			filterA = append(filterA, filterOffset)
 			// if reverse true, lesser then offset height
 		} else {
-			filterHeight := bson.D{
-				{"nftid", bson.D{{"$lt", offset}}},
+			filterOffset := bson.D{
+				{"nftid", bson.D{{"$lt", v}}},
 			}
-			filterA = append(filterA, filterHeight)
+			filterA = append(filterA, filterOffset)
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	"go.mongodb.org/mongo-driver/bson"
 	"sync"
 	"time"
 
@@ -49,7 +50,7 @@ type BlockSession struct {
 	nftOperatorModels     []mongo.WriteModel
 	statesValue           *sync.Map
 	balanceAddressList    []string
-	nftMap                map[string]struct{}
+	nftMap                map[uint64]struct{}
 }
 
 func NewBlockSession(
@@ -77,7 +78,7 @@ func NewBlockSession(
 		sts:         sts,
 		proposal:    proposal,
 		statesValue: &sync.Map{},
-		nftMap:      map[string]struct{}{},
+		nftMap:      map[uint64]struct{}{},
 	}, nil
 }
 
@@ -154,8 +155,7 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 				ctx,
 				bs.block.Manifest().Height(),
 				defaultColNameNFT,
-				"nftid",
-				nft,
+				bson.D{{"nftid", nft}},
 			)
 			if err != nil {
 				return err
