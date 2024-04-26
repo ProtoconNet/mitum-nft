@@ -96,18 +96,18 @@ func (ipp *ApproveItemProcessor) PreProcess(
 			return util.ErrNotFound.Errorf("nft owner, %q; %v", nv.Owner(), err)
 		}
 
-		st, err = state.ExistsState(statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "key of operators", getStateFunc)
+		st, err = state.ExistsState(statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators state", getStateFunc)
 		if err != nil {
-			return errors.Errorf("unauthorized sender, %q; %v", ipp.sender, err)
+			return errors.Errorf("operators state, %v not found; %v", statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), err)
 		}
 
 		operators, err := statenft.StateOperatorsBookValue(st)
 		if err != nil {
-			return util.ErrNotFound.Errorf("operators book value, %q; %w", statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), err)
+			return util.ErrNotFound.Errorf("operators book value, %v; %v", statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), err)
 		}
 
 		if !operators.Exists(ipp.sender) {
-			return errors.Errorf("unauthorized sender, %q", ipp.sender)
+			return errors.Errorf("unauthorized sender, %v; neither sender nor operator", ipp.sender)
 		}
 	}
 

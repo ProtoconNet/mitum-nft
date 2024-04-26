@@ -42,6 +42,7 @@ type MintItemProcessor struct {
 	item   MintItem
 	idx    uint64
 	box    *types.NFTBox
+	ns     map[string]base.StateMergeValue
 }
 
 func (ipp *MintItemProcessor) PreProcess(
@@ -51,9 +52,9 @@ func (ipp *MintItemProcessor) PreProcess(
 		return errors.Errorf("contract not found, %q; %q", ipp.item.Contract(), err)
 	}
 
-	if err := state.CheckExistsState(statecurrency.StateKeyAccount(ipp.item.Receiver()), getStateFunc); err != nil {
-		return errors.Errorf("receiver not found, %q; %q", ipp.item.receiver, err)
-	}
+	//if err := state.CheckExistsState(statecurrency.StateKeyAccount(ipp.item.Receiver()), getStateFunc); err != nil {
+	//	return errors.Errorf("receiver not found, %q; %q", ipp.item.receiver, err)
+	//}
 
 	if err := state.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); err != nil {
 		return errors.Errorf("nft already exists, %q; %q", ipp.idx, err)
@@ -63,11 +64,10 @@ func (ipp *MintItemProcessor) PreProcess(
 		creators := ipp.item.Creators().Signers()
 		for _, creator := range creators {
 			acc := creator.Account()
-			if err := state.CheckExistsState(statecurrency.StateKeyAccount(acc), getStateFunc); err != nil {
-				return errors.Errorf("creator not found, %q; %w", acc, err)
-			}
-			if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(acc), getStateFunc); err != nil {
-				return errors.Errorf("contract account cannot be a creator, %q; %w", acc, err)
+			if err := state.CheckExistsState(statecurrency.StateKeyAccount(acc), getStateFunc); err == nil {
+				if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(acc), getStateFunc); err != nil {
+					return errors.Errorf("contract account cannot be a creator, %q; %v", acc, err)
+				}
 			}
 			if creator.Signed() {
 				return errors.Errorf("cannot sign at the same time as minting, %q", acc)
@@ -79,19 +79,65 @@ func (ipp *MintItemProcessor) PreProcess(
 }
 
 func (ipp *MintItemProcessor) Process(
-	_ context.Context, _ base.Operation, _ base.GetStateFunc,
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
+	e := util.StringError("process MintItemProcessor")
+
 	sts := make([]base.StateMergeValue, 1)
+	k := statecurrency.StateKeyAccount(ipp.item.Receiver())
+	switch _, found, err := getStateFunc(k); {
+	case err != nil:
+		return nil, e.Wrap(err)
+	case !found:
+		nilKys, err := currencytypes.NewNilAccountKeysFromAddress(ipp.item.Receiver())
+		if err != nil {
+			return nil, e.Wrap(err)
+		}
+		acc, err := currencytypes.NewAccount(ipp.item.Receiver(), nilKys)
+		if err != nil {
+			return nil, e.Wrap(err)
+		}
+		stv := state.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
+		_, found := ipp.ns[ipp.item.Receiver().String()]
+		if !found {
+			ipp.ns[ipp.item.Receiver().String()] = stv
+		}
+	default:
+	}
+
+	creators := ipp.item.Creators().Signers()
+	for _, creator := range creators {
+		k := statecurrency.StateKeyAccount(creator.Account())
+		switch _, found, err := getStateFunc(k); {
+		case err != nil:
+			return nil, e.Wrap(err)
+		case !found:
+			nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Account())
+			if err != nil {
+				return nil, e.Wrap(err)
+			}
+			acc, err := currencytypes.NewAccount(creator.Account(), nilKys)
+			if err != nil {
+				return nil, e.Wrap(err)
+			}
+			stv := state.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
+			_, found := ipp.ns[creator.Account().String()]
+			if !found {
+				ipp.ns[creator.Account().String()] = stv
+			}
+		default:
+		}
+	}
 
 	n := types.NewNFT(ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(), ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators())
 	if err := n.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid nft, %q; %w", ipp.idx, err)
+		return nil, errors.Errorf("invalid nft, %q; %v", ipp.idx, err)
 	}
 
 	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), statenft.NewNFTStateValue(n))
 
 	if err := ipp.box.Append(n.ID()); err != nil {
-		return nil, errors.Errorf("failed to append nft id to nft box, %q; %w", n.ID(), err)
+		return nil, errors.Errorf("failed to append nft id to nft box, %q; %v", n.ID(), err)
 	}
 
 	return sts, nil
@@ -103,6 +149,7 @@ func (ipp *MintItemProcessor) Close() {
 	ipp.item = MintItem{}
 	ipp.idx = 0
 	ipp.box = nil
+	ipp.ns = nil
 
 	mintItemProcessorPool.Put(ipp)
 
@@ -308,6 +355,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	var sts []base.StateMergeValue // nolint:prealloc
+	nsts := map[string]base.StateMergeValue{}
 
 	ipcs := make([]*MintItemProcessor, len(fact.Items()))
 	for i, item := range fact.Items() {
@@ -324,6 +372,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 		ipc.item = item
 		ipc.idx = idxes[idxKey]
 		ipc.box = boxes[nftsKey]
+		ipc.ns = nsts
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
@@ -343,6 +392,10 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	for key, box := range boxes {
 		bv := state.NewStateMergeValue(key, statenft.NewNFTBoxStateValue(*box))
 		sts = append(sts, bv)
+	}
+
+	for _, ns := range nsts {
+		sts = append(sts, ns)
 	}
 
 	for _, ipc := range ipcs {
