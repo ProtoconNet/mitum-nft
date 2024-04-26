@@ -3,22 +3,23 @@ package digest
 import (
 	"context"
 	"fmt"
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
-	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
+	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-currency/v3/digest/isaac"
+	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-
+	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	statenft "github.com/ProtoconNet/mitum-nft/v2/state"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/fixedtree"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var bulkWriteLimit = 500
@@ -50,7 +51,7 @@ type BlockSession struct {
 	nftOperatorModels     []mongo.WriteModel
 	statesValue           *sync.Map
 	balanceAddressList    []string
-	nftMap                map[uint64]struct{}
+	nftMap                map[string]struct{}
 }
 
 func NewBlockSession(
@@ -78,7 +79,7 @@ func NewBlockSession(
 		sts:         sts,
 		proposal:    proposal,
 		statesValue: &sync.Map{},
-		nftMap:      map[uint64]struct{}{},
+		nftMap:      map[string]struct{}{},
 	}, nil
 }
 
@@ -115,77 +116,87 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		_ = bs.close()
 	}()
 
-	if err := bs.writeModels(ctx, defaultColNameBlock, bs.blockModels); err != nil {
-		return err
-	}
-
-	if len(bs.operationModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameOperation, bs.operationModels); err != nil {
-			return err
+	_, err := bs.st.DatabaseClient().WithSession(func(txnCtx mongo.SessionContext, collection func(string) *mongo.Collection) (interface{}, error) {
+		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+			return nil, err
 		}
-	}
 
-	if len(bs.currencyModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameCurrency, bs.currencyModels); err != nil {
-			return err
-		}
-	}
-
-	if len(bs.accountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameAccount, bs.accountModels); err != nil {
-			return err
-		}
-	}
-
-	if len(bs.contractAccountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
-			return err
-		}
-	}
-
-	if len(bs.nftCollectionModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
-			return err
-		}
-	}
-
-	if len(bs.nftModels) > 0 {
-		for nft := range bs.nftMap {
-			err := bs.st.CleanByHeightColName(
-				ctx,
-				bs.block.Manifest().Height(),
-				defaultColNameNFT,
-				bson.D{{"nftid", nft}},
-			)
-			if err != nil {
-				return err
+		if len(bs.operationModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameOperation, bs.operationModels); err != nil {
+				return nil, err
 			}
 		}
 
-		if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftModels); err != nil {
-			return err
+		if len(bs.currencyModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameCurrency, bs.currencyModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.nftOperatorModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameNFTOperator, bs.nftOperatorModels); err != nil {
-			return err
+		if len(bs.accountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameAccount, bs.accountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.nftBoxModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameNFT, bs.nftBoxModels); err != nil {
-			return err
+		if len(bs.contractAccountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.balanceModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameBalance, bs.balanceModels); err != nil {
-			return err
+		if len(bs.balanceModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameBalance, bs.balanceModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	return nil
+		if len(bs.nftCollectionModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
+				return nil, err
+			}
+		}
+
+		if len(bs.nftModels) > 0 {
+			for key := range bs.nftMap {
+				parsedKey, err := crcystate.ParseStateKey(key, statenft.NFTPrefix, 4)
+				if err != nil {
+					return nil, err
+				}
+				i, _ := strconv.ParseInt(parsedKey[2], 10, 64)
+				err = bs.st.CleanByHeightColName(
+					ctx,
+					bs.block.Manifest().Height(),
+					defaultColNameNFT,
+					bson.D{{"contract", parsedKey[1]}},
+					bson.D{{"nftid", i}},
+				)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			if err := bs.writeModels(txnCtx, defaultColNameNFT, bs.nftModels); err != nil {
+				return nil, err
+			}
+		}
+
+		if len(bs.nftOperatorModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameNFTOperator, bs.nftOperatorModels); err != nil {
+				return nil, err
+			}
+		}
+
+		if len(bs.nftBoxModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameNFT, bs.nftBoxModels); err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, nil
+	})
+
+	return err
 }
 
 func (bs *BlockSession) Close() error {
