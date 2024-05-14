@@ -5,6 +5,7 @@ import (
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var TransferItemHint = hint.MustNewHint("mitum-nft-transfer-item-v0.0.1")
@@ -28,6 +29,10 @@ func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft
 }
 
 func (it TransferItem) IsValid([]byte) error {
+	if it.receiver.Equal(it.contract) {
+		return errors.Errorf("receiver is same with contract")
+	}
+
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,

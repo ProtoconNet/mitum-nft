@@ -8,6 +8,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var MaxApproveItems = 100
@@ -38,36 +39,40 @@ func NewApproveFact(token []byte, sender mitumbase.Address, items []ApproveItem)
 
 func (fact ApproveFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if n := len(fact.items); n < 1 {
-		return util.ErrInvalid.Errorf("empty items for ApproveFact")
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items")))
 	} else if n > int(MaxApproveItems) {
-		return util.ErrInvalid.Errorf("items over allowed, %d > %d", n, MaxApproveItems)
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxApproveItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	founds := map[string]struct{}{}
 	for _, item := range fact.items {
 		if err := item.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
+		}
+
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
 		}
 
 		n := strconv.FormatUint(item.NFT(), 10)
 
 		if _, found := founds[n]; found {
-			return util.ErrInvalid.Errorf("duplicate nft found, %q", n)
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft id, %v", n)))
 		}
 
 		founds[n] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 	return nil
 }

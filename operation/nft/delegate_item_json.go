@@ -1,6 +1,7 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -35,12 +36,14 @@ type DelegateItemJSONUnmarshaler struct {
 }
 
 func (it *DelegateItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of DelegateItem")
-
 	var u DelegateItemJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 
-	return it.unmarshal(enc, u.Hint, u.Contract, u.Delegatee, u.Mode, u.Currency)
+	if err := it.unmarshal(enc, u.Hint, u.Contract, u.Delegatee, u.Mode, u.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
+	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package nft
 
 import (
 	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -29,17 +30,19 @@ type SignFactJSONUnmarshaler struct {
 }
 
 func (fact *SignFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of SignFact")
-
 	var uf SignFactJSONUnmarshaler
 
 	if err := enc.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unmarshal(enc, uf.Sender, uf.Items)
+	if err := fact.unpack(enc, uf.Sender, uf.Items); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 type signMarshaler struct {
@@ -53,11 +56,9 @@ func (op Sign) MarshalJSON() ([]byte, error) {
 }
 
 func (op *Sign) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Sign")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo

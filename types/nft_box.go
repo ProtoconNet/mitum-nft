@@ -99,15 +99,15 @@ func (nbx NFTBox) Exists(id uint64) bool {
 //			return &n, nil
 //		}
 //	}
-//	return nil, errors.Errorf("nft not found in NFTBox, %q", id)
+//	return nil, errors.Errorf("nft not found in NFTBox, %v", id)
 //}
 
 func (nbx *NFTBox) Append(n uint64) error {
 	if nbx.Exists(n) {
-		return errors.Errorf("nft already exists in NFTBox, %q", n)
+		return errors.Errorf("nft already exists in NFTBox, %v", n)
 	}
 	if uint64(len(nbx.nfts)) >= MaxNFTIndex {
-		return errors.Errorf("max nfts in collection, %q", n)
+		return errors.Errorf("max nfts in collection, %v", n)
 	}
 	nbx.nfts = append(nbx.nfts, n)
 	return nil
@@ -115,7 +115,7 @@ func (nbx *NFTBox) Append(n uint64) error {
 
 func (nbx *NFTBox) Remove(n uint64) error {
 	if !nbx.Exists(n) {
-		return errors.Errorf("nft not found in NFTBox, %q", n)
+		return errors.Errorf("nft not found in NFTBox, %v", n)
 	}
 	for i := range nbx.nfts {
 		if n == nbx.nfts[i] {

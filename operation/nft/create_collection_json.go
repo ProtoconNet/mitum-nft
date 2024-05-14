@@ -45,16 +45,17 @@ type CreateCollectionFactJSONUnmarshaler struct {
 }
 
 func (fact *CreateCollectionFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of CreateCollectionFact")
-
 	var u CreateCollectionFactJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
+	if err := fact.unmarshal(enc, u.Sender, u.Contract, u.Name, u.Royalty, u.URI, u.Whitelist, u.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
 
-	return fact.unmarshal(enc, u.Sender, u.Contract, u.Name, u.Royalty, u.URI, u.Whitelist, u.Currency)
+	return nil
 }
 
 type createCollectionMarshaler struct {
@@ -68,11 +69,9 @@ func (op CreateCollection) MarshalJSON() ([]byte, error) {
 }
 
 func (op *CreateCollection) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of CreateCollection")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo

@@ -7,8 +7,8 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	"github.com/ProtoconNet/mitum-currency/v3/state"
+	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	statenft "github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
@@ -44,58 +44,75 @@ type TransferItemProcessor struct {
 func (ipp *TransferItemProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
-	err := state.CheckExistsState(stateextension.StateKeyContractAccount(ipp.item.Contract()), getStateFunc)
-	if err != nil {
-		return errors.Errorf("contract account not found, %q; %w", ipp.item.Contract(), err)
+	e := util.StringError("preprocess TransferItemProcessor")
+	it := ipp.item
+
+	if err := it.IsValid(nil); err != nil {
+		return e.Wrap(err)
 	}
 
-	receiver := ipp.item.Receiver()
-
-	if err := state.CheckExistsState(statecurrency.StateKeyAccount(receiver), getStateFunc); err != nil {
-		return errors.Errorf("receiver not found, %q; %w", receiver, err)
+	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
-	if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(receiver), getStateFunc); err != nil {
-		return errors.Errorf("contract account cannot receive nfts, %q; %w", receiver, err)
+	_, _, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(cErr)
+	}
+
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Receiver(), "receiver", true, false, getStateFunc); aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
 	}
 
 	nid := ipp.item.NFT()
 
 	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.Contract(), err)
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.Contract(), err)
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
 	}
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", ipp.item.Contract())
+		return e.Wrap(errors.Errorf("deactivated collection, %v", ipp.item.Contract()))
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return errors.Errorf("nft not found, %q; %w", nid, err)
+		return e.Wrap(common.ErrStateNF.Errorf("nft, %v: %v", nid, err))
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return errors.Errorf("nft value not found, %q; %w", nid, err)
+		return e.Wrap(common.ErrStateValInvalid.Errorf("nft, %v: %v", nid, err))
 	}
 
 	if !nv.Active() {
-		return errors.Errorf("burned nft, %q", nid)
+		return e.Wrap(errors.Errorf("burned nft, %v", nid))
 	}
 
 	if !(nv.Owner().Equal(ipp.sender) || nv.Approved().Equal(ipp.sender)) {
 		if st, err := state.ExistsState(statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators", getStateFunc); err != nil {
-			return errors.Errorf("unauthorized sender, %q; %w", ipp.sender, err)
+			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v: %v", ipp.sender, err)))
 		} else if box, err := statenft.StateOperatorsBookValue(st); err != nil {
-			return errors.Errorf("operator book value not found, %q; %w", ipp.sender, err)
+			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v: %v", ipp.sender, err)))
 		} else if !box.Exists(ipp.sender) {
-			return errors.Errorf("unauthorized sender, %q", ipp.sender)
+			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v", ipp.sender)))
 		}
+	}
+
+	if it.receiver.Equal(nv.Owner()) {
+		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver, %v is same with nft owner", it.receiver)))
+	}
+
+	if nv.Owner().Equal(ipp.sender) && ipp.sender.Equal(it.receiver) {
+		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver, %v is same with sender", ipp.sender)))
 	}
 
 	return nil
@@ -107,19 +124,19 @@ func (ipp *TransferItemProcessor) Process(
 	receiver := ipp.item.Receiver()
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
+	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return nil, errors.Errorf("nft not found, %q; %w", nid, err)
+		return nil, errors.Errorf("nft not found, %v: %w", nid, err)
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return nil, errors.Errorf("nft value not found, %q; %w", nid, err)
+		return nil, errors.Errorf("nft value not found, %v: %w", nid, err)
 	}
 
 	n := types.NewNFT(nid, nv.Active(), receiver, nv.NFTHash(), nv.URI(), receiver, nv.Creators())
 	if err := n.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid nft, %q; %w", nid, err)
+		return nil, errors.Errorf("invalid nft, %v: %w", nid, err)
 	}
 
 	sts := make([]mitumbase.StateMergeValue, 1)
@@ -173,34 +190,43 @@ func NewTransferProcessor() currencytypes.GetNewProcessor {
 func (opp *TransferProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) (context.Context, mitumbase.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess Transfer")
-
 	fact, ok := op.Fact().(TransferFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected TransferFact, not %T", op.Fact())
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", TransferFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
-	if err := state.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
-	}
-
-	if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("contract account cannot transfer nfts, %q", fact.Sender()), nil
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
 	}
 
 	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	for _, item := range fact.Items() {
 		ip := transferItemProcessorPool.Get()
 		ipc, ok := ip.(*TransferItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected TransferItemProcessor, not %T", ip)
+			return nil, mitumbase.NewBaseOperationProcessReasonError(
+				common.ErrMTypeMismatch.Errorf("expected TransferItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -208,7 +234,9 @@ func (opp *TransferProcessor) PreProcess(
 		ipc.item = item
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("fail to preprocess TransferItem; %w", err), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError(
+				common.ErrMPreProcess.Errorf("%v", err),
+			), nil
 		}
 
 		ipc.Close()

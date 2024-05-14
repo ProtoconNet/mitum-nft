@@ -3,7 +3,6 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -13,8 +12,6 @@ func (it *DelegateItem) unmarshal(
 	ht hint.Hint,
 	cAdr, dAdr, md, cid string,
 ) error {
-	e := util.StringError("failed to unmarshal DelegateItem")
-
 	it.BaseHinter = hint.NewBaseHinter(ht)
 
 	it.mode = DelegateMode(md)
@@ -22,14 +19,14 @@ func (it *DelegateItem) unmarshal(
 
 	switch a, err := mitumbase.DecodeAddress(cAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		it.contract = a
 	}
 
 	delegatee, err := mitumbase.DecodeAddress(dAdr, enc)
 	if err != nil {
-		return e.Wrap(err)
+		return err
 	}
 	it.delegatee = delegatee
 

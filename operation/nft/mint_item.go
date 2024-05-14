@@ -7,6 +7,7 @@ import (
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 type CollectionItem interface {
@@ -58,6 +59,17 @@ func (it MintItem) Bytes() []byte {
 }
 
 func (it MintItem) IsValid([]byte) error {
+	if it.receiver.Equal(it.contract) {
+		return errors.Errorf("receiver is same with contract")
+	}
+
+	signers := it.creators.Signers()
+	for _, signer := range signers {
+		if signer.Account().Equal(it.contract) {
+			return errors.Errorf("creator is same with contract")
+		}
+	}
+
 	return util.CheckIsValiders(
 		nil,
 		false,

@@ -1,10 +1,10 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"go.mongodb.org/mongo-driver/bson"
 
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -28,17 +28,19 @@ type ApproveItemBSONUnmarshaler struct {
 }
 
 func (it *ApproveItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of ApproveItem")
-
 	var u ApproveItemBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
 	ht, err := hint.ParseHint(u.Hint)
 	if err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
-	return it.unmarshal(enc, ht, u.Contract, u.Approved, u.NFTidx, u.Currency)
+	if err := it.unpack(enc, ht, u.Contract, u.Approved, u.NFTidx, u.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeBson, *it)
+	}
+
+	return nil
 }

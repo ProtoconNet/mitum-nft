@@ -2,8 +2,10 @@ package nft
 
 import (
 	"context"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
+
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	statenft "github.com/ProtoconNet/mitum-nft/state"
@@ -12,7 +14,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	"github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	"github.com/ProtoconNet/mitum2/base"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -45,43 +47,58 @@ type SignItemProcessor struct {
 func (ipp *SignItemProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
-	err := state.CheckExistsState(stateextension.StateKeyContractAccount(ipp.item.Contract()), getStateFunc)
-	if err != nil {
-		return errors.Errorf("contract account not found, %q; %w", ipp.item.Contract(), err)
+	e := util.StringError("preprocess SignItemProcessor")
+
+	it := ipp.item
+
+	if err := it.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
+	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
+	}
+
+	_, _, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(cErr)
 	}
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "key of design", getStateFunc)
+	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return errors.Errorf("collection design not found, %q; %w", ipp.item.Contract(), err)
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return errors.Errorf("collection design value not found, %q; %w", ipp.item.Contract(), err)
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
+
 	}
 
 	if !design.Active() {
-		return errors.Errorf("deactivated collection, %q", ipp.item.Contract())
+		return e.Wrap(errors.Errorf("deactivated collection, %v", ipp.item.Contract()))
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return errors.Errorf("nft not found, %q; %w", nid, err)
+		return e.Wrap(common.ErrStateNF.Errorf("nft, %v: %v", nid, err))
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return errors.Errorf("nft value not found, %q; %w", nid, err)
+		return e.Wrap(common.ErrStateValInvalid.Errorf("nft, %v: %v", nid, err))
 	}
 
 	if !nv.Active() {
-		return errors.Errorf("burned nft, %q", nid)
+		return e.Wrap(errors.Errorf("burned nft, %v", nid))
 	}
 
 	if nv.Creators().IsSignedByAddress(ipp.sender) {
-		return errors.Errorf("already signed nft, %q-%q", ipp.sender, nv.ID())
+		return e.Wrap(errors.Errorf("already signed nft, %v, %v", ipp.sender, nv.ID()))
 	}
 
 	return nil
@@ -92,37 +109,37 @@ func (ipp *SignItemProcessor) Process(
 ) ([]mitumbase.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "key of nft", getStateFunc)
+	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return nil, errors.Errorf("nft not found, %q; %w", nid, err)
+		return nil, errors.Errorf("nft not found, %v: %w", nid, err)
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return nil, errors.Errorf("nft value not found, %q; %w", nid, err)
+		return nil, errors.Errorf("nft value not found, %v: %w", nid, err)
 	}
 
 	signers := nv.Creators()
 
 	idx := signers.IndexByAddress(ipp.sender)
 	if idx < 0 {
-		return nil, errors.Errorf("not signer of nft, %q-%q", ipp.sender, nv.ID())
+		return nil, errors.Errorf("not signer of nft, %v-%v", ipp.sender, nv.ID())
 	}
 
 	signer := types.NewSigner(signers.Signers()[idx].Account(), signers.Signers()[idx].Share(), true)
 	if err := signer.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid signer, %q", signer.Account())
+		return nil, errors.Errorf("invalid signer, %v", signer.Account())
 	}
 
 	sns := &signers
 	if err := sns.SetSigner(signer); err != nil {
-		return nil, errors.Errorf("failed to set signer for signers, %q; %w", signer, err)
+		return nil, errors.Errorf("failed to set signer for signers, %v: %w", signer, err)
 	}
 
 	n := types.NewNFT(nv.ID(), nv.Active(), nv.Owner(), nv.NFTHash(), nv.URI(), nv.Approved(), *sns)
 
 	if err := n.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid nft, %q; %w", n.ID(), err)
+		return nil, errors.Errorf("invalid nft, %v: %w", n.ID(), err)
 	}
 
 	sts := make([]mitumbase.StateMergeValue, 1)
@@ -175,34 +192,43 @@ func NewSignProcessor() currencytypes.GetNewProcessor {
 func (opp *SignProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) (context.Context, mitumbase.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess Sign")
-
 	fact, ok := op.Fact().(SignFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected SignFact, not %T", op.Fact())
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", SignFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
-	if err := state.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
-	}
-
-	if err := state.CheckNotExistsState(stateextension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("contract account cannot sign nfts, %q", fact.Sender()), nil
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
 	}
 
 	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	for _, item := range fact.Items() {
 		ip := signItemProcessorPool.Get()
 		ipc, ok := ip.(*SignItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected SignItemProcessor, not %T", ip)
+			return nil, base.NewBaseOperationProcessReasonError(
+				common.ErrMTypeMismatch.Errorf("expected SignItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -210,7 +236,9 @@ func (opp *SignProcessor) PreProcess(
 		ipc.item = item
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("fail to preprocess SignItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError(
+				common.ErrMPreProcess.Errorf("%v", err),
+			), nil
 		}
 
 		ipc.Close()

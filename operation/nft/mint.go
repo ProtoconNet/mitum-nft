@@ -6,6 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var MaxMintItems = 100
@@ -37,23 +38,27 @@ func (fact MintFact) IsValid(b []byte) error {
 		fact.BaseHinter,
 		fact.sender,
 	); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if l := len(fact.items); l < 1 {
-		return util.ErrInvalid.Errorf("empty items for MintFact")
+		return common.ErrArrayLen.Wrap(errors.Errorf("empty items for MintFact"))
 	} else if l > int(MaxMintItems) {
-		return util.ErrInvalid.Errorf("items over allowed, %d > %d", l, MaxMintItems)
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxMintItems)))
 	}
 
 	for _, item := range fact.items {
 		if err := item.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
+		}
+
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
 		}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

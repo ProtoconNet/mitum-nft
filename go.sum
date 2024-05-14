@@ -1,12 +1,8 @@
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240514083335-53a45c56a146 h1:cRAN788WW8bWtd/GAlt77NYsKAHgg4q+bPxTbdycgXE=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240514083335-53a45c56a146/go.mod h1:o8l9bXgX7Pc31vhCacasD5HWYvCo5zPofNUNWimIHRs=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530033931-8a5dcd41d504 h1:ku/6VBSBDF/AuYd+bNWgKWki4n1KYnIgHDr/707cHBo=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530033931-8a5dcd41d504/go.mod h1:7PyjhCp1Me92KKa4t4e9avUrvskw0waoL682o5CI4iE=
-github.com/ProtoconNet/mitum2 v0.0.0-20240514051137-1a856cf657db h1:4JW4YDExvx19ilNF0PMolGsVgX80EZs999RC9qOpDoU=
-github.com/ProtoconNet/mitum2 v0.0.0-20240514051137-1a856cf657db/go.mod h1:XhqRo5FN8fY7NfuGp5B+ArTi5S67l2Lv585Gbxg8SZs=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530054233-ce02158e57bd h1:iFCO16JpvNLeUoPGE7g6B8Vt50wKixMFw8W7c1K5IDQ=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530054233-ce02158e57bd/go.mod h1:VrvEuKanJ6NQG1YDHgWW4oR73g82+Qnp+jAv+UHITdk=
 github.com/ProtoconNet/mitum2 v0.0.0-20240516232940-9c065b66904b h1:/qe9t02SrdqByUqN8BMNy+q0J4ET1PX2fzGsYfKqAuc=
 github.com/ProtoconNet/mitum2 v0.0.0-20240516232940-9c065b66904b/go.mod h1:XhqRo5FN8fY7NfuGp5B+ArTi5S67l2Lv585Gbxg8SZs=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
@@ -312,10 +308,8 @@ github.com/prometheus/common v0.9.1/go.mod h1:yhUN8i9wzaXS3w1O07YhxHEBxD+W35wd8b
 github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.2/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
 github.com/prometheus/procfs v0.0.8/go.mod h1:7Qr8sr6344vo1JqZ6HhLceV9o3AJ1Ff+GxbHq6oeK9A=
-github.com/quic-go/qtls-go1-20 v0.3.4 h1:MfFAPULvst4yoMgY9QmtpYmfij/em7O8UUi+bNVm7Cg=
-github.com/quic-go/qtls-go1-20 v0.3.4/go.mod h1:X9Nh97ZL80Z+bX/gUXMbipO6OxdiDi58b/fMC9mAL+k=
-github.com/quic-go/quic-go v0.39.1 h1:d/m3oaN/SD2c+f7/yEjZxe2zEVotXprnrCCJ2y/ZZFE=
-github.com/quic-go/quic-go v0.39.1/go.mod h1:T09QsDQWjLiQ74ZmacDfqZmhY/NLnw5BC40MANNNZ1Q=
+github.com/quic-go/quic-go v0.42.0 h1:uSfdap0eveIl8KXnipv9K7nlwZ5IqLlYOpJ58u5utpM=
+github.com/quic-go/quic-go v0.42.0/go.mod h1:132kz4kL3F9vxhW3CtQJLDVwcFe5wdWeJXXijhsO57M=
 github.com/rainycape/memcache v0.0.0-20150622160815-1031fa0ce2f2 h1:dq90+d51/hQRaHEqRAsQ1rE/pC1GUS4sc2rCbbFsAIY=
 github.com/rainycape/memcache v0.0.0-20150622160815-1031fa0ce2f2/go.mod h1:7tZKcyumwBO6qip7RNQ5r77yrssm9bfCowcLEBcU5IA=
 github.com/redis/go-redis/v9 v9.5.1 h1:H1X4D3yHPaYrkL5X06Wh6xNVM/pX0Ft4RV0vMGvLBh8=

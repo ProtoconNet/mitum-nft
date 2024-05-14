@@ -48,19 +48,19 @@ func (cmd *ApproveCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid sender format, %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender format, %v", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
 	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid contract format, %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid contract format, %v", cmd.Sender)
 	} else {
 		cmd.contract = a
 	}
 
 	if a, err := cmd.Approved.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid approved format, %q", cmd.Approved)
+		return errors.Wrapf(err, "invalid approved format, %v", cmd.Approved)
 	} else {
 		cmd.approved = a
 	}

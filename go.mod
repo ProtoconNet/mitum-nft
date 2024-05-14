@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530033931-8a5dcd41d504
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530054233-ce02158e57bd
 	github.com/ProtoconNet/mitum2 v0.0.0-20240516232940-9c065b66904b
 	github.com/alecthomas/kong v0.9.0
 	github.com/arl/statsviz v0.6.0
@@ -76,8 +76,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.17.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/quic-go/qtls-go1-20 v0.3.4 // indirect
-	github.com/quic-go/quic-go v0.39.1 // indirect
+	github.com/quic-go/quic-go v0.42.0 // indirect
 	github.com/rainycape/memcache v0.0.0-20150622160815-1031fa0ce2f2 // indirect
 	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/rs/xid v1.5.0 // indirect

@@ -7,16 +7,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (sgns *Signers) unmarshal(
+func (sgns *Signers) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	tt uint,
 	bsns []byte,
 ) error {
 	e := util.StringError("failed to unmarshal Signers")
 
 	sgns.BaseHinter = hint.NewBaseHinter(ht)
-	sgns.total = tt
 
 	hinters, err := enc.DecodeSlice(bsns)
 	if err != nil {

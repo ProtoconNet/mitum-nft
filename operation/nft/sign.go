@@ -8,6 +8,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -37,35 +38,39 @@ func NewSignFact(token []byte, sender mitumbase.Address, items []SignItem) SignF
 
 func (fact SignFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if l := len(fact.items); l < 1 {
-		return util.ErrInvalid.Errorf("empty items for SignFact")
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items for SignFact")))
 	} else if l > int(MaxSignItems) {
-		return util.ErrInvalid.Errorf("items over allowed, %d > %d", l, MaxSignItems)
+		return common.ErrArrayLen.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxSignItems))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	founds := map[string]struct{}{}
 	for _, item := range fact.items {
 		if err := item.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
+		}
+
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
 		}
 
 		nid := strconv.FormatUint(item.NFT(), 10)
 		if _, found := founds[nid]; found {
-			return util.ErrInvalid.Errorf("duplicate nft found, %q", item.NFT())
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft id, %v", item.NFT())))
 		}
 
 		founds[nid] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

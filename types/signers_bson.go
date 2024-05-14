@@ -11,14 +11,12 @@ func (sgns Signers) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":   sgns.Hint().String(),
-			"total":   sgns.total,
 			"signers": sgns.signers,
 		})
 }
 
 type SignersBSONUnmarshaler struct {
 	Hint    string   `bson:"_hint"`
-	Total   uint     `bson:"total"`
 	Signers bson.Raw `bson:"signers"`
 }
 
@@ -35,5 +33,5 @@ func (sgns *Signers) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return sgns.unmarshal(enc, ht, u.Total, u.Signers)
+	return sgns.unpack(enc, ht, u.Signers)
 }

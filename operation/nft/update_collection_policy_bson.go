@@ -3,7 +3,6 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,13 +36,11 @@ type UpdateCollectionPolicyFactBSONUnmarshaler struct {
 }
 
 func (fact *UpdateCollectionPolicyFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of UpdateCollectionPolicyFact")
-
 	var u common.BaseFactBSONUnmarshaler
 
 	err := enc.Unmarshal(b, &u)
 	if err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(u.Hash))
@@ -51,16 +48,20 @@ func (fact *UpdateCollectionPolicyFact) DecodeBSON(b []byte, enc *bsonenc.Encode
 
 	var uf UpdateCollectionPolicyFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	ht, err := hint.ParseHint(uf.Hint)
 	if err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unmarshal(enc, uf.Sender, uf.Contract, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency)
+	if err := fact.unpack(enc, uf.Sender, uf.Contract, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
+	}
+
+	return nil
 }
 
 func (op UpdateCollectionPolicy) MarshalBSON() ([]byte, error) {
@@ -74,11 +75,9 @@ func (op UpdateCollectionPolicy) MarshalBSON() ([]byte, error) {
 }
 
 func (op *UpdateCollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of UpdateCollectionPolicy")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *op)
 	}
 
 	op.BaseOperation = ubo

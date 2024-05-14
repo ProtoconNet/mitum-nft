@@ -89,7 +89,7 @@ func (de Design) IsValid([]byte) error {
 	}
 
 	if de.parent.Equal(de.creator) {
-		return util.ErrInvalid.Errorf("parent and creator are the same, %q == %q", de.parent, de.creator)
+		return util.ErrInvalid.Errorf("parent, %v is same with creator", de.parent)
 	}
 
 	return nil

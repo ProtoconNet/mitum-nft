@@ -50,19 +50,19 @@ func (cmd *TransferCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender.String())
+		return errors.Wrapf(err, "invalid sender address format, %v", cmd.Sender.String())
 	} else {
 		cmd.sender = a
 	}
 
 	if a, err := cmd.Receiver.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid receiver format, %q", cmd.Receiver.String())
+		return errors.Wrapf(err, "invalid receiver format, %v", cmd.Receiver.String())
 	} else {
 		cmd.receiver = a
 	}
 
 	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract.String())
+		return errors.Wrapf(err, "invalid contract address format, %v", cmd.Contract.String())
 	} else {
 		cmd.contract = a
 	}

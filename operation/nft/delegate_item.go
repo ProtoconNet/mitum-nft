@@ -5,6 +5,7 @@ import (
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -16,7 +17,7 @@ type DelegateMode string
 
 func (mode DelegateMode) IsValid([]byte) error {
 	if !(mode == DelegateAllow || mode == DelegateCancel) {
-		return util.ErrInvalid.Errorf("wrong delegate mode, %q", mode)
+		return util.ErrInvalid.Errorf("wrong delegate mode, %v", mode)
 	}
 
 	return nil
@@ -55,6 +56,10 @@ func NewDelegateItem(contract mitumbase.Address, operator mitumbase.Address, mod
 }
 
 func (it DelegateItem) IsValid([]byte) error {
+	if it.delegatee.Equal(it.contract) {
+		return errors.Errorf("delegatee is same with contract")
+	}
+
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,

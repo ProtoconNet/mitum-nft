@@ -2,6 +2,7 @@ package nft
 
 import (
 	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -29,16 +30,18 @@ type ApproveFactJSONUnmarshaler struct {
 }
 
 func (fact *ApproveFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of ApproveFact")
-
 	var uf ApproveFactJSONUnmarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unmarshal(enc, uf.Sender, uf.Items)
+	if err := fact.unmarshal(enc, uf.Sender, uf.Items); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 type approveMarshaler struct {
@@ -52,11 +55,9 @@ func (op Approve) MarshalJSON() ([]byte, error) {
 }
 
 func (op *Approve) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Approve")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo

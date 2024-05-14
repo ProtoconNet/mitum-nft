@@ -115,7 +115,7 @@ func (ob OperatorsBook) Get(ag mitumbase.Address) (mitumbase.Address, error) {
 		}
 	}
 
-	return currencytypes.Address{}, errors.Errorf("account not in operators book, %q", ag)
+	return currencytypes.Address{}, errors.Errorf("account not in operators book, %v", ag)
 }
 
 func (ob *OperatorsBook) Append(ag mitumbase.Address) error {
@@ -124,7 +124,7 @@ func (ob *OperatorsBook) Append(ag mitumbase.Address) error {
 	}
 
 	if ob.Exists(ag) {
-		return errors.Errorf("account already in operators book, %q", ag)
+		return errors.Errorf("account already in operators book, %v", ag)
 	}
 
 	if len(ob.operators) >= MaxOperators {
@@ -138,7 +138,7 @@ func (ob *OperatorsBook) Append(ag mitumbase.Address) error {
 
 func (ob *OperatorsBook) Remove(ag mitumbase.Address) error {
 	if !ob.Exists(ag) {
-		return errors.Errorf("account not in operators book, %q", ag)
+		return errors.Errorf("account not in operators book, %v", ag)
 	}
 
 	for i := range ob.operators {

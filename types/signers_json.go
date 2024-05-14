@@ -9,21 +9,18 @@ import (
 
 type SignersJSONMarshaler struct {
 	hint.BaseHinter
-	Total   uint     `json:"total"`
 	Signers []Signer `json:"signers"`
 }
 
 func (sgns Signers) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(SignersJSONMarshaler{
 		BaseHinter: sgns.BaseHinter,
-		Total:      sgns.total,
 		Signers:    sgns.signers,
 	})
 }
 
 type SignersJSONUnmarshaler struct {
 	Hint    hint.Hint       `json:"_hint"`
-	Total   uint            `json:"total"`
 	Signers json.RawMessage `json:"signers"`
 }
 
@@ -35,5 +32,5 @@ func (sgns *Signers) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return sgns.unmarshal(enc, u.Hint, u.Total, u.Signers)
+	return sgns.unpack(enc, u.Hint, u.Signers)
 }

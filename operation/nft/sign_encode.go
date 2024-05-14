@@ -1,22 +1,20 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
 )
 
-func (fact *SignFact) unmarshal(
+func (fact *SignFact) unpack(
 	enc encoder.Encoder,
 	sd string,
 	bits []byte,
 ) error {
-	e := util.StringError("failed to unmarshal SignFact")
-
 	sender, err := mitumbase.DecodeAddress(sd, enc)
 	if err != nil {
-		return e.Wrap(err)
+		return err
 	}
 	fact.sender = sender
 
@@ -29,7 +27,7 @@ func (fact *SignFact) unmarshal(
 	for i, hinter := range hits {
 		item, ok := hinter.(SignItem)
 		if !ok {
-			return e.Wrap(errors.Errorf("expected SignItem, not %T", hinter))
+			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected SignItem, not %T", hinter))
 		}
 
 		items[i] = item

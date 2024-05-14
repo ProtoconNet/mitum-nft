@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"context"
+
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/types"
@@ -13,20 +14,19 @@ import (
 type MintCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
-	Sender       currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract     currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Receiver     currencycmds.AddressFlag    `arg:"" name:"receiver" help:"receiver address" required:"true"`
-	Hash         string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
-	Uri          string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Currency     currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Creator      SignerFlag                  `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
-	CreatorTotal uint                        `name:"creator-total" help:"creators total share" optional:""`
-	sender       base.Address
-	contract     base.Address
-	receiver     base.Address
-	hash         types.NFTHash
-	uri          types.URI
-	creators     types.Signers
+	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Receiver currencycmds.AddressFlag    `arg:"" name:"receiver" help:"receiver address" required:"true"`
+	Hash     string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
+	Uri      string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
+	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Creator  SignerFlag                  `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
+	sender   base.Address
+	contract base.Address
+	receiver base.Address
+	hash     types.NFTHash
+	uri      types.URI
+	creators types.Signers
 }
 
 func (cmd *MintCommand) Run(pctx context.Context) error { // nolint:dupl
@@ -55,21 +55,21 @@ func (cmd *MintCommand) parseFlags() error {
 
 	a, err := cmd.Sender.Encode(cmd.Encoders.JSON())
 	if err != nil {
-		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender address format, %v", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
 	a, err = cmd.Contract.Encode(cmd.Encoders.JSON())
 	if err != nil {
-		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract)
+		return errors.Wrapf(err, "invalid contract address format, %v", cmd.Contract)
 	} else {
 		cmd.contract = a
 	}
 
 	a, err = cmd.Receiver.Encode(cmd.Encoders.JSON())
 	if err != nil {
-		return errors.Wrapf(err, "invalid receiver address format, %q", cmd.Receiver)
+		return errors.Wrapf(err, "invalid receiver address format, %v", cmd.Receiver)
 	} else {
 		cmd.receiver = a
 	}
@@ -88,11 +88,11 @@ func (cmd *MintCommand) parseFlags() error {
 		cmd.uri = uri
 	}
 
-	var crts = []types.Signer{}
+	var crts []types.Signer
 	if len(cmd.Creator.address) > 0 {
 		a, err := cmd.Creator.Encode(cmd.Encoders.JSON())
 		if err != nil {
-			return errors.Wrapf(err, "invalid creator address format, %q", cmd.Creator)
+			return errors.Wrapf(err, "invalid creator address format, %v", cmd.Creator)
 		}
 
 		signer := types.NewSigner(a, cmd.Creator.share, false)
@@ -103,7 +103,7 @@ func (cmd *MintCommand) parseFlags() error {
 		crts = append(crts, signer)
 	}
 
-	creators := types.NewSigners(cmd.CreatorTotal, crts)
+	creators := types.NewSigners(crts)
 	if err := creators.IsValid(nil); err != nil {
 		return err
 	} else {

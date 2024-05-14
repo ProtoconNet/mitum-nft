@@ -6,6 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -35,23 +36,27 @@ func NewDelegateFact(token []byte, sender mitumbase.Address, items []DelegateIte
 
 func (fact DelegateFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if l := len(fact.items); l < 1 {
-		return util.ErrInvalid.Errorf("empty items for DelegateFact")
+		return common.ErrFactInvalid.Wrap(errors.Errorf("empty items for DelegateFact"))
 	} else if l > int(MaxDelegateItems) {
-		return util.ErrInvalid.Errorf("items over allowed, %d > %d", l, MaxDelegateItems)
+		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxDelegateItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	founds := map[string]map[string]struct{}{}
 	for _, item := range fact.items {
 		if err := item.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
+		}
+
+		if fact.sender.Equal(item.contract) {
+			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
 		}
 
 		delegatee := item.Delegatee()
@@ -59,13 +64,13 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		if addressMap, collectionFound := founds[item.contract.String()]; !collectionFound {
 			founds[item.contract.String()] = make(map[string]struct{})
 		} else if _, addressFound := addressMap[delegatee.String()]; addressFound {
-			return util.ErrInvalid.Errorf("duplicate collection-operator found, %q-%q", item.contract, delegatee)
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("collection-operator, %v, %v", item.contract, delegatee)))
 		}
 
 		founds[item.contract.String()][delegatee.String()] = struct{}{}
 	}
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

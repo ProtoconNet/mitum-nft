@@ -1,47 +1,45 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/pkg/errors"
 
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *MintItem) unmarshal(
+func (it *MintItem) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	ca, ra, hs, uri string,
 	bcr []byte,
 	cid string,
 ) error {
-	e := util.StringError("failed to unmarshal MintItem")
-
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.hash = types.NFTHash(hs)
 	it.uri = types.URI(uri)
 
 	switch a, err := mitumbase.DecodeAddress(ca, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		it.contract = a
 	}
 
 	switch a, err := mitumbase.DecodeAddress(ra, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		it.receiver = a
 	}
 
 	if hinter, err := enc.Decode(bcr); err != nil {
-		return e.Wrap(err)
+		return err
 	} else if creators, ok := hinter.(types.Signers); !ok {
-		return e.Wrap(errors.Errorf("expected Signers, not %T", hinter))
+		return common.ErrTypeMismatch.Wrap(errors.Errorf("expected Signers, not %T", hinter))
 	} else {
 		it.creators = creators
 	}

@@ -54,21 +54,21 @@ func (cmd *UpdateCollectionPolicyCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Sender.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid sender address format, %q", cmd.Sender)
+		return errors.Wrapf(err, "invalid sender address format, %v", cmd.Sender)
 	} else {
 		cmd.sender = a
 	}
 
 	if cmd.White.String() != "" {
 		if a, err := cmd.White.Encode(cmd.Encoders.JSON()); err != nil {
-			return errors.Wrapf(err, "invalid whitelist address format, %q", cmd.White)
+			return errors.Wrapf(err, "invalid whitelist address format, %v", cmd.White)
 		} else {
 			cmd.white = []mitumbase.Address{a}
 		}
 	}
 
 	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid contract address format, %q", cmd.Contract)
+		return errors.Wrapf(err, "invalid contract address format, %v", cmd.Contract)
 	} else {
 		cmd.contract = a
 	}

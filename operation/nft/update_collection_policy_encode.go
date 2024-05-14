@@ -4,11 +4,10 @@ import (
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *UpdateCollectionPolicyFact) unmarshal(
+func (fact *UpdateCollectionPolicyFact) unpack(
 	enc encoder.Encoder,
 	sd string,
 	ct string,
@@ -18,19 +17,17 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 	bws []string,
 	cid string,
 ) error {
-	e := util.StringError("failed to unmarshal UpdateCollectionPolicyFact")
-
 	fact.currency = currencytypes.CurrencyID(cid)
 
 	sender, err := mitumbase.DecodeAddress(sd, enc)
 	if err != nil {
-		return e.Wrap(err)
+		return err
 	}
 	fact.sender = sender
 
 	contract, err := mitumbase.DecodeAddress(sd, enc)
 	if err != nil {
-		return e.Wrap(err)
+		return err
 	}
 	fact.contract = contract
 
@@ -40,7 +37,7 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 
 	switch a, err := mitumbase.DecodeAddress(ct, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		fact.contract = a
 	}
@@ -49,7 +46,7 @@ func (fact *UpdateCollectionPolicyFact) unmarshal(
 	for i, bw := range bws {
 		white, err := mitumbase.DecodeAddress(bw, enc)
 		if err != nil {
-			return e.Wrap(err)
+			return err
 		}
 		whitelist[i] = white
 	}

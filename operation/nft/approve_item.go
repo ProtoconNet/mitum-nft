@@ -5,6 +5,7 @@ import (
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var ApproveItemHint = hint.MustNewHint("mitum-nft-approve-item-v0.0.1")
@@ -28,6 +29,10 @@ func NewApproveItem(contract mitumbase.Address, approved mitumbase.Address, idx 
 }
 
 func (it ApproveItem) IsValid([]byte) error {
+	if it.approved.Equal(it.contract) {
+		return errors.Errorf("approved is same with contract")
+	}
+
 	return util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,

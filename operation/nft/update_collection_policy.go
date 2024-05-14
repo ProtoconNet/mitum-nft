@@ -8,6 +8,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -54,11 +55,15 @@ func NewUpdateCollectionPolicyFact(
 
 func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
+	}
+
+	if fact.sender.Equal(fact.contract) {
+		return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
 	}
 
 	if l := len(fact.whitelist); l > types.MaxWhitelist {
-		return util.ErrInvalid.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)))
 	}
 
 	if err := util.CheckIsValiders(
@@ -70,22 +75,27 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 		fact.uri,
 		fact.currency,
 	); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	founds := map[string]struct{}{}
 	for _, white := range fact.whitelist {
 		if err := white.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
 		}
+
+		if white.Equal(fact.contract) {
+			return common.ErrFactInvalid.Wrap(errors.Errorf("whitelist account is same with contract"))
+		}
+
 		if _, found := founds[white.String()]; found {
-			return util.ErrInvalid.Errorf("duplicate whitelist account found, %q", white)
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("whitelist account, %v", white)))
 		}
 		founds[white.String()] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

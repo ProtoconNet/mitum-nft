@@ -2,12 +2,14 @@ package types
 
 import (
 	"bytes"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"regexp"
 	"sort"
 
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var MaxWhitelist = 10
@@ -34,7 +36,7 @@ func (cn CollectionName) IsValid([]byte) error {
 	}
 
 	if !ReValidCollectionName.Match([]byte(cn)) {
-		return util.ErrInvalid.Errorf("wrong collection name, %q", cn)
+		return util.ErrInvalid.Errorf("wrong collection name, %v", cn)
 	}
 
 	return nil
@@ -79,7 +81,7 @@ func (policy CollectionPolicy) IsValid([]byte) error {
 	}
 
 	if l := len(policy.whitelist); l > MaxWhitelist {
-		return util.ErrInvalid.Errorf("whitelist over allowed, %d > %d", l, MaxWhitelist)
+		return common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, MaxWhitelist))
 	}
 
 	founds := map[string]struct{}{}
@@ -88,7 +90,7 @@ func (policy CollectionPolicy) IsValid([]byte) error {
 			return err
 		}
 		if _, found := founds[white.String()]; found {
-			return util.ErrInvalid.Errorf("duplicate white found, %q", white)
+			return common.ErrDupVal.Wrap(errors.Errorf("duplicate white found, %v", white))
 		}
 		founds[white.String()] = struct{}{}
 	}

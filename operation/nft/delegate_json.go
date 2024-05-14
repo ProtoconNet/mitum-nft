@@ -29,16 +29,18 @@ type DelegateFactJSONUnmarshaler struct {
 }
 
 func (fact *DelegateFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of DelegateFact")
-
 	var u DelegateFactJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
 
-	return fact.unmarshal(enc, u.Sender, u.Items)
+	if err := fact.unmarshal(enc, u.Sender, u.Items); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 type delegateMarshaler struct {
@@ -52,11 +54,9 @@ func (op Delegate) MarshalJSON() ([]byte, error) {
 }
 
 func (op *Delegate) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Delegate")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo
