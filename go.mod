@@ -5,8 +5,8 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240426061733-e5a6d4988b0b
-	github.com/ProtoconNet/mitum2 v0.0.0-20240415083536-4ac73fa8ba0b
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240514083335-53a45c56a146
+	github.com/ProtoconNet/mitum2 v0.0.0-20240514051137-1a856cf657db
 	github.com/alecthomas/kong v0.9.0
 	github.com/arl/statsviz v0.6.0
 	github.com/gorilla/mux v1.8.1

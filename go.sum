@@ -1,10 +1,10 @@
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240426061733-e5a6d4988b0b h1:Iblf+1m0gDwC0SnblDX6E5Y/+5UDM7Ha118Agj/gO58=
-github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240426061733-e5a6d4988b0b/go.mod h1:jdkOXxE9yBGMtNj26OPLbxWr19wtHPFH4b8O8MT1cxU=
-github.com/ProtoconNet/mitum2 v0.0.0-20240415083536-4ac73fa8ba0b h1:tsKDrRPNIiEqVAPqj0Hc65ylY1CqO4Zx/kMdi/mS9Uc=
-github.com/ProtoconNet/mitum2 v0.0.0-20240415083536-4ac73fa8ba0b/go.mod h1:XhqRo5FN8fY7NfuGp5B+ArTi5S67l2Lv585Gbxg8SZs=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240514083335-53a45c56a146 h1:cRAN788WW8bWtd/GAlt77NYsKAHgg4q+bPxTbdycgXE=
+github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240514083335-53a45c56a146/go.mod h1:o8l9bXgX7Pc31vhCacasD5HWYvCo5zPofNUNWimIHRs=
+github.com/ProtoconNet/mitum2 v0.0.0-20240514051137-1a856cf657db h1:4JW4YDExvx19ilNF0PMolGsVgX80EZs999RC9qOpDoU=
+github.com/ProtoconNet/mitum2 v0.0.0-20240514051137-1a856cf657db/go.mod h1:XhqRo5FN8fY7NfuGp5B+ArTi5S67l2Lv585Gbxg8SZs=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/alecthomas/assert/v2 v2.6.0 h1:o3WJwILtexrEUk3cUVal3oiQY2tfgr/FHWiz/v2n4FU=
 github.com/alecthomas/assert/v2 v2.6.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
@@ -495,8 +495,9 @@ google.golang.org/protobuf v1.29.1 h1:7QBf+IK2gx70Ap/hDsOmam3GE0v9HicjfEdAxE62Uo
 google.golang.org/protobuf v1.29.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
-gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
+gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkepLTh2hOroT7a+7czfdQ=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
