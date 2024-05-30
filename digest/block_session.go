@@ -12,7 +12,7 @@ import (
 	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	statenft "github.com/ProtoconNet/mitum-nft/v2/state"
+	statenft "github.com/ProtoconNet/mitum-nft/state"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/fixedtree"

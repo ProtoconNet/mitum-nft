@@ -4,8 +4,8 @@ import (
 	mongodbstorage "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	"github.com/ProtoconNet/mitum-nft/v2/state"
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )

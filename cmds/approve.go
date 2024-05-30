@@ -4,7 +4,7 @@ import (
 	"context"
 
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"

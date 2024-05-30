@@ -5,8 +5,8 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
-	statenft "github.com/ProtoconNet/mitum-nft/v2/state"
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	statenft "github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	"github.com/ProtoconNet/mitum-currency/v3/state"

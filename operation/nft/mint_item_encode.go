@@ -1,7 +1,7 @@
 package nft
 
 import (
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/pkg/errors"
 
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"

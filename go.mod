@@ -1,4 +1,4 @@
-module github.com/ProtoconNet/mitum-nft/v2
+module github.com/ProtoconNet/mitum-nft
 
 go 1.22
 

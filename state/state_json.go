@@ -2,7 +2,7 @@ package state
 
 import (
 	"encoding/json"
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"

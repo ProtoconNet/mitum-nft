@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extension"
 	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"github.com/ProtoconNet/mitum-nft/v2/operation/nft"
+	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )

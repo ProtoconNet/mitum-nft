@@ -3,8 +3,8 @@ package digest
 import (
 	"context"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
-	"github.com/ProtoconNet/mitum-nft/v2/state"
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"

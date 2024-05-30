@@ -2,7 +2,7 @@ package state
 
 import (
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
-	"github.com/ProtoconNet/mitum-nft/v2/types"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"go.mongodb.org/mongo-driver/bson"
