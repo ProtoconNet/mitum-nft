@@ -9,7 +9,6 @@ import (
 	nfttypes "github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestApproveProcessor struct {
@@ -19,8 +18,8 @@ type TestApproveProcessor struct {
 	uri     nfttypes.URI
 }
 
-func NewTestApproveProcessor(encs *encoder.Encoders) TestApproveProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Approve, ApproveItem](encs)
+func NewTestApproveProcessor(tp *test.TestProcessor) TestApproveProcessor {
+	t := test.NewBaseTestOperationProcessorWithItem[Approve, ApproveItem](tp)
 	return TestApproveProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 

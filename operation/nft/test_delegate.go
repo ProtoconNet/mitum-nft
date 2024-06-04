@@ -9,7 +9,6 @@ import (
 	nfttypes "github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestDelegateProcessor struct {
@@ -19,8 +18,8 @@ type TestDelegateProcessor struct {
 	uri     nfttypes.URI
 }
 
-func NewTestDelegateProcessor(encs *encoder.Encoders) TestDelegateProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Delegate, DelegateItem](encs)
+func NewTestDelegateProcessor(tp *test.TestProcessor) TestDelegateProcessor {
+	t := test.NewBaseTestOperationProcessorWithItem[Delegate, DelegateItem](tp)
 	return TestDelegateProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 

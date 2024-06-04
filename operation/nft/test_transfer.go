@@ -9,7 +9,6 @@ import (
 	nfttypes "github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestTransferProcessor struct {
@@ -19,8 +18,8 @@ type TestTransferProcessor struct {
 	uri     nfttypes.URI
 }
 
-func NewTestTransferProcessor(encs *encoder.Encoders) TestTransferProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Transfer, TransferItem](encs)
+func NewTestTransferProcessor(tp *test.TestProcessor) TestTransferProcessor {
+	t := test.NewBaseTestOperationProcessorWithItem[Transfer, TransferItem](tp)
 	return TestTransferProcessor{
 		BaseTestOperationProcessorWithItem: &t,
 	}
