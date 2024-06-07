@@ -50,18 +50,16 @@ func (ipp *DelegateItemProcessor) PreProcess(
 
 	if err := currencystate.CheckExistsState(
 		statecurrency.StateKeyCurrencyDesign(ipp.item.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", ipp.item.Currency())))
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(
 		ipp.item.Delegatee(), "delegatee", true, false, getStateFunc); aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
-		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("%v: contract account, %v cannot be delegated", cErr, ipp.item.Delegatee())))
-	}
-
-	if ipp.sender.Equal(ipp.item.Delegatee()) {
-		return common.ErrSelfTarget.Wrap(errors.Errorf("sender account delegates to itself, %v", ipp.item.Delegatee()))
+		return e.Wrap(
+			common.ErrSelfTarget.Wrap(
+				errors.Errorf("%v: delegatee %v is contract account", cErr, ipp.item.Delegatee())))
 	}
 
 	return nil
@@ -71,7 +69,8 @@ func (ipp *DelegateItemProcessor) Process(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	if ipp.box == nil {
-		return nil, errors.Errorf("nft box not found, %v", statenft.StateKeyOperators(ipp.item.Contract(), ipp.sender))
+		return nil, errors.Errorf(
+			"nft box not found, %v", statenft.StateKeyOperators(ipp.item.Contract(), ipp.sender))
 	}
 
 	switch ipp.item.Mode() {
@@ -158,7 +157,7 @@ func (opp *DelegateProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+				Errorf("%v: sender %v is contract", fact.Sender(), cErr)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -199,7 +198,8 @@ func (opp *DelegateProcessor) PreProcess(
 		if !design.Active() {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-					Errorf("deactivated collection, %v", item.Contract())), nil
+					Errorf("collection in contract account %v has already been deactivated",
+						item.Contract())), nil
 		}
 	}
 

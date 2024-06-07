@@ -42,7 +42,8 @@ func (fact DelegateFact) IsValid(b []byte) error {
 	if l := len(fact.items); l < 1 {
 		return common.ErrFactInvalid.Wrap(errors.Errorf("empty items for DelegateFact"))
 	} else if l > int(MaxDelegateItems) {
-		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxDelegateItems)))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrValOOR.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxDelegateItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
@@ -56,18 +57,24 @@ func (fact DelegateFact) IsValid(b []byte) error {
 		}
 
 		if fact.sender.Equal(item.contract) {
-			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(
+				errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
-		delegatee := item.Delegatee()
+		if fact.sender.Equal(item.delegatee) {
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(
+				errors.Errorf("sender %v delegates to itself", fact.sender)))
+		}
 
 		if addressMap, collectionFound := founds[item.contract.String()]; !collectionFound {
 			founds[item.contract.String()] = make(map[string]struct{})
-		} else if _, addressFound := addressMap[delegatee.String()]; addressFound {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("collection-operator, %v, %v", item.contract, delegatee)))
+		} else if _, addressFound := addressMap[item.Delegatee().String()]; addressFound {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrDupVal.Wrap(
+					errors.Errorf("delegatee %v in contract account %v", item.Delegatee(), item.contract)))
 		}
 
-		founds[item.contract.String()][delegatee.String()] = struct{}{}
+		founds[item.contract.String()][item.Delegatee().String()] = struct{}{}
 	}
 	if err := common.IsValidOperationFact(fact, b); err != nil {
 		return common.ErrFactInvalid.Wrap(err)

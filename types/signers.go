@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sort"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -35,7 +36,7 @@ func (sgns Signers) IsValid([]byte) error {
 	}
 
 	if l := len(sgns.signers); l > MaxSigners {
-		return util.ErrInvalid.Errorf("signers over allowed, %d > %d", l, MaxSigners)
+		return common.ErrValOOR.Wrap(errors.Errorf("signers over allowed, %d > %d", l, MaxSigners))
 	}
 
 	var total uint = 0
@@ -45,9 +46,9 @@ func (sgns Signers) IsValid([]byte) error {
 			return err
 		}
 
-		acc := signer.Account()
+		acc := signer.Address()
 		if _, found := founds[acc.String()]; found {
-			return util.ErrInvalid.Errorf("duplicate signer found, %v", acc)
+			return common.ErrDupVal.Wrap(errors.Errorf("signer account %v", acc))
 		}
 		founds[acc.String()] = struct{}{}
 
@@ -55,7 +56,7 @@ func (sgns Signers) IsValid([]byte) error {
 	}
 
 	if total > MaxTotalShare {
-		return util.ErrInvalid.Errorf("total share over max, %d > %d", total, MaxTotalShare)
+		return common.ErrValOOR.Wrap(errors.Errorf("signers total share over max, %d > %d", total, MaxTotalShare))
 	}
 
 	return nil
@@ -80,18 +81,18 @@ func (sgns Signers) Signers() []Signer {
 func (sgns Signers) Addresses() []base.Address {
 	as := make([]base.Address, len(sgns.signers))
 	for i, signer := range sgns.signers {
-		as[i] = signer.Account()
+		as[i] = signer.Address()
 	}
 	return as
 }
 
 func (sgns Signers) Index(signer Signer) int {
-	return sgns.IndexByAddress(signer.Account())
+	return sgns.IndexByAddress(signer.Address())
 }
 
 func (sgns Signers) IndexByAddress(address base.Address) int {
 	for i := range sgns.signers {
-		if address.Equal(sgns.signers[i].Account()) {
+		if address.Equal(sgns.signers[i].Address()) {
 			return i
 		}
 	}
@@ -130,7 +131,7 @@ func (sgns Signers) Equal(ys Signers) bool {
 }
 
 func (sgns Signers) IsSigned(sgn Signer) bool {
-	return sgns.IsSignedByAddress(sgn.Account())
+	return sgns.IsSignedByAddress(sgn.Address())
 }
 
 func (sgns Signers) IsSignedByAddress(address base.Address) bool {
@@ -144,7 +145,7 @@ func (sgns Signers) IsSignedByAddress(address base.Address) bool {
 func (sgns *Signers) SetSigner(sgn Signer) error {
 	idx := sgns.Index(sgn)
 	if idx < 0 {
-		return errors.Errorf("signer not in signers, %v", sgn.Account())
+		return errors.Errorf("signer not in signers, %v", sgn.Address())
 	}
 	sgns.signers[idx] = sgn
 	return nil

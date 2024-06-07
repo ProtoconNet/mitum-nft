@@ -52,31 +52,37 @@ func (ipp *MintItemProcessor) PreProcess(
 
 	if err := currencystate.CheckExistsState(
 		statecurrency.StateKeyCurrencyDesign(ipp.item.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", ipp.item.Currency())))
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(
 		ipp.item.receiver, "receiver", true, false, getStateFunc); aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
-		return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: contract account, %v cannot be receiver", cErr, ipp.item.receiver)))
+		return e.Wrap(
+			common.ErrCAccountNA.Wrap(
+				errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.receiver)))
 	}
 
-	if found, _ := currencystate.CheckNotExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); found {
-		return e.Wrap(common.ErrStateE.Wrap(errors.Errorf("nft already exists, %v", ipp.idx)))
+	if found, _ := currencystate.CheckNotExistsState(
+		statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); found {
+		return e.Wrap(
+			common.ErrStateE.Wrap(
+				errors.Errorf("nft idx %v already exists in contract account %v", ipp.idx, ipp.item.Contract())))
 	}
 
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
-		acc := creator.Account()
+		acc := creator.Address()
 		if _, _, aErr, cErr := currencystate.ExistsCAccount(
 			acc, "creator", true, false, getStateFunc); aErr != nil {
 			return e.Wrap(aErr)
 		} else if cErr != nil {
-			return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: contract account, %v cannot be creator", cErr, acc)))
+			return e.Wrap(
+				common.ErrCAccountNA.Wrap(errors.Errorf("%v: creator %v is contract account", cErr, acc)))
 		}
 		if creator.Signed() {
-			return errors.Errorf("creator should not be signed at the time of minting, %v", acc)
+			return e.Wrap(errors.Errorf("creator %v must be unsigned at the time of minting", acc))
 		}
 	}
 
@@ -112,23 +118,23 @@ func (ipp *MintItemProcessor) Process(
 
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
-		k := statecurrency.StateKeyAccount(creator.Account())
+		k := statecurrency.StateKeyAccount(creator.Address())
 		switch _, found, err := getStateFunc(k); {
 		case err != nil:
 			return nil, e.Wrap(err)
 		case !found:
-			nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Account())
+			nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Address())
 			if err != nil {
 				return nil, e.Wrap(err)
 			}
-			acc, err := currencytypes.NewAccount(creator.Account(), nilKys)
+			acc, err := currencytypes.NewAccount(creator.Address(), nilKys)
 			if err != nil {
 				return nil, e.Wrap(err)
 			}
 			stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
-			_, found := ipp.ns[creator.Account().String()]
+			_, found := ipp.ns[creator.Address().String()]
 			if !found {
-				ipp.ns[creator.Account().String()] = stv
+				ipp.ns[creator.Address().String()] = stv
 			}
 		default:
 		}
@@ -216,7 +222,7 @@ func (opp *MintProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+				Errorf("%v: sender %v is contract account", fact.Sender(), cErr)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -229,7 +235,20 @@ func (opp *MintProcessor) PreProcess(
 	idxes := map[string]uint64{}
 	for _, item := range fact.Items() {
 		if _, found := idxes[item.contract.String()]; !found {
-			st, err := currencystate.ExistsState(statenft.NFTStateKey(item.contract, statenft.CollectionKey), "design", getStateFunc)
+			_, _, aErr, cErr := currencystate.ExistsCAccount(
+				item.Contract(), "contract", true, true, getStateFunc)
+			if aErr != nil {
+				return ctx, base.NewBaseOperationProcessReasonError(
+					common.ErrMPreProcess.
+						Errorf("%v", aErr)), nil
+			} else if cErr != nil {
+				return ctx, base.NewBaseOperationProcessReasonError(
+					common.ErrMPreProcess.
+						Errorf("%v", cErr)), nil
+			}
+
+			st, err := currencystate.ExistsState(
+				statenft.NFTStateKey(item.contract, statenft.CollectionKey), "design", getStateFunc)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError(
 					common.ErrMPreProcess.
@@ -246,7 +265,9 @@ func (opp *MintProcessor) PreProcess(
 			if !design.Active() {
 				return nil, base.NewBaseOperationProcessReasonError(
 					common.ErrMPreProcess.
-						Wrap(common.ErrMServiceNF).Errorf("deactivated collection, %v: %v", item.Contract(), err)), nil
+						Wrap(common.ErrMServiceNF).Errorf(
+						"collection in contract account %v has already been deactivated", item.Contract())), nil
+
 			}
 
 			policy, ok := design.Policy().(types.CollectionPolicy)

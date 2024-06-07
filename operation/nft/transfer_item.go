@@ -1,6 +1,7 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -30,7 +31,7 @@ func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft
 
 func (it TransferItem) IsValid([]byte) error {
 	if it.receiver.Equal(it.contract) {
-		return errors.Errorf("receiver is same with contract")
+		return common.ErrSelfTarget.Wrap(errors.Errorf("receiver %v is same with contract account", it.receiver))
 	}
 
 	return util.CheckIsValiders(nil, false,

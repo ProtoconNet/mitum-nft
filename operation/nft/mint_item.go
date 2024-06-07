@@ -1,6 +1,7 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
 
@@ -60,13 +61,17 @@ func (it MintItem) Bytes() []byte {
 
 func (it MintItem) IsValid([]byte) error {
 	if it.receiver.Equal(it.contract) {
-		return errors.Errorf("receiver is same with contract")
+		return common.ErrSelfTarget.Wrap(errors.Errorf("receiver %v is same with contract account", it.receiver))
 	}
 
 	signers := it.creators.Signers()
 	for _, signer := range signers {
-		if signer.Account().Equal(it.contract) {
-			return errors.Errorf("creator is same with contract")
+		if signer.Address().Equal(it.contract) {
+			return common.ErrSelfTarget.Wrap(errors.Errorf("creator %v is same with contract account", signer.Address()))
+		}
+
+		if signer.Signed() {
+			return common.ErrValueInvalid.Wrap(errors.Errorf("creator %v should not be signed at the time of minting", signer.Address()))
 		}
 	}
 

@@ -54,7 +54,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 	}
 
 	if a, err := cmd.Contract.Encode(cmd.Encoders.JSON()); err != nil {
-		return errors.Wrapf(err, "invalid contract format, %v", cmd.Sender)
+		return errors.Wrapf(err, "invalid contract format, %v", cmd.Contract)
 	} else {
 		cmd.contract = a
 	}

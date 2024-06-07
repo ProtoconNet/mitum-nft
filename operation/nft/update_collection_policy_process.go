@@ -110,7 +110,7 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 		} else if cErr != nil {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-					Errorf("%v: whitelist account is contract account, %v", white, cErr)), nil
+					Errorf("%v: whitelist %v is contract account", cErr, white)), nil
 		}
 	}
 
@@ -136,7 +136,7 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-				Errorf("nft collection, %s: %v", fact.Contract(), err)), nil
+				Errorf("nft collection state for contract account %v", fact.Contract())), nil
 
 	}
 
@@ -144,13 +144,13 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-				Errorf("nft collection, %s: %v", fact.Contract(), err)), nil
+				Errorf("nft collection state value for contract account %v", fact.Contract())), nil
 	}
 
 	if !design.Active() {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Errorf("deactivated collection, %v", fact.Contract())), nil
+				Errorf("collection in contract account %v has already been deactivated ", fact.Contract())), nil
 	}
 
 	return ctx, nil, nil

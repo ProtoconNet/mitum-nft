@@ -1,6 +1,7 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -18,7 +19,8 @@ type ApproveItem struct {
 	currency types.CurrencyID
 }
 
-func NewApproveItem(contract mitumbase.Address, approved mitumbase.Address, idx uint64, currency types.CurrencyID) ApproveItem {
+func NewApproveItem(
+	contract mitumbase.Address, approved mitumbase.Address, idx uint64, currency types.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		contract:   contract,
@@ -30,7 +32,7 @@ func NewApproveItem(contract mitumbase.Address, approved mitumbase.Address, idx 
 
 func (it ApproveItem) IsValid([]byte) error {
 	if it.approved.Equal(it.contract) {
-		return errors.Errorf("approved is same with contract")
+		return common.ErrSelfTarget.Wrap(errors.Errorf("approved %v is same with contract contract", it.approved))
 	}
 
 	return util.CheckIsValiders(nil, false,

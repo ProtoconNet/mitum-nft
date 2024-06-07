@@ -45,7 +45,8 @@ func (fact ApproveFact) IsValid(b []byte) error {
 	if n := len(fact.items); n < 1 {
 		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items")))
 	} else if n > int(MaxApproveItems) {
-		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxApproveItems)))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxApproveItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
@@ -59,13 +60,14 @@ func (fact ApproveFact) IsValid(b []byte) error {
 		}
 
 		if fact.sender.Equal(item.contract) {
-			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
 		n := strconv.FormatUint(item.NFT(), 10)
 
 		if _, found := founds[n]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft id, %v", n)))
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft idx %v", n)))
 		}
 
 		founds[n] = struct{}{}

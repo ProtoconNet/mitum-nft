@@ -58,12 +58,15 @@ func (fact SignFact) IsValid(b []byte) error {
 		}
 
 		if fact.sender.Equal(item.contract) {
-			return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
 		nid := strconv.FormatUint(item.NFT(), 10)
 		if _, found := founds[nid]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft id, %v", item.NFT())))
+			return common.ErrFactInvalid.Wrap(
+				common.ErrDupVal.Wrap(
+					errors.Errorf("nft idx %v in contract account %v", item.NFT(), item.contract)))
 		}
 
 		founds[nid] = struct{}{}

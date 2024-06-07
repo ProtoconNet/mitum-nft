@@ -17,7 +17,7 @@ type SignerJSONMarshaler struct {
 func (sgn Signer) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(SignerJSONMarshaler{
 		BaseHinter: sgn.BaseHinter,
-		Account:    sgn.account,
+		Account:    sgn.address,
 		Share:      sgn.share,
 		Signed:     sgn.signed,
 	})

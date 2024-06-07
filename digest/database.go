@@ -53,7 +53,7 @@ func NFTCollection(st *currencydigest.Database, contract string) (*types.Design,
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft collection, contract %s", contract)
+		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft collection for contract account %v", contract)
 	}
 
 	return design, nil
@@ -87,7 +87,7 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.Errorf("nft token, contract %s, nftid %s", contract, idx)
+		return nil, mitumutil.ErrNotFound.Errorf("nft token for contract account %v, nftid %v", contract, idx)
 	}
 
 	return nft, nil

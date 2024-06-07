@@ -24,7 +24,7 @@ func (sgn *Signer) unmarshal(
 	if err != nil {
 		return e.Wrap(err)
 	}
-	sgn.account = account
+	sgn.address = account
 
 	return nil
 }

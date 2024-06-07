@@ -70,8 +70,32 @@ func (fact CreateCollectionFact) IsValid(b []byte) error {
 	}
 
 	if fact.sender.Equal(fact.contract) {
-		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender, %v is same with contract", fact.sender)))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 	}
+
+	if l := len(fact.whitelist); l > types.MaxWhitelist {
+		return common.ErrFactInvalid.Wrap(
+			common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)))
+	}
+
+	founds := map[string]struct{}{}
+	for _, white := range fact.whitelist {
+		if err := white.IsValid(nil); err != nil {
+			return common.ErrFactInvalid.Wrap(err)
+		}
+
+		if white.Equal(fact.contract) {
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("whitelist %v is same with contract account", white)))
+		}
+
+		if _, found := founds[white.String()]; found {
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("whitelist %v", white)))
+		}
+		founds[white.String()] = struct{}{}
+	}
+
 	if err := common.IsValidOperationFact(fact, b); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}

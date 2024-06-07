@@ -1,6 +1,7 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -17,7 +18,7 @@ type DelegateMode string
 
 func (mode DelegateMode) IsValid([]byte) error {
 	if !(mode == DelegateAllow || mode == DelegateCancel) {
-		return util.ErrInvalid.Errorf("wrong delegate mode, %v", mode)
+		return common.ErrValueInvalid.Wrap(errors.Errorf("wrong delegate mode, %v", mode))
 	}
 
 	return nil
@@ -45,7 +46,8 @@ type DelegateItem struct {
 	currency  types.CurrencyID
 }
 
-func NewDelegateItem(contract mitumbase.Address, operator mitumbase.Address, mode DelegateMode, currency types.CurrencyID) DelegateItem {
+func NewDelegateItem(
+	contract mitumbase.Address, operator mitumbase.Address, mode DelegateMode, currency types.CurrencyID) DelegateItem {
 	return DelegateItem{
 		BaseHinter: hint.NewBaseHinter(DelegateItemHint),
 		contract:   contract,
@@ -57,7 +59,7 @@ func NewDelegateItem(contract mitumbase.Address, operator mitumbase.Address, mod
 
 func (it DelegateItem) IsValid([]byte) error {
 	if it.delegatee.Equal(it.contract) {
-		return errors.Errorf("delegatee is same with contract")
+		return common.ErrSelfTarget.Wrap(errors.Errorf("delegatee %v is same with contract account", it.delegatee))
 	}
 
 	return util.CheckIsValiders(nil, false,

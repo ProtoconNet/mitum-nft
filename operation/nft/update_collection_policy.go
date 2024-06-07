@@ -59,11 +59,13 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 	}
 
 	if fact.sender.Equal(fact.contract) {
-		return common.ErrFactInvalid.Wrap(errors.Errorf("sender is same with contract"))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract", fact.sender)))
 	}
 
 	if l := len(fact.whitelist); l > types.MaxWhitelist {
-		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)))
+		return common.ErrFactInvalid.Wrap(
+			common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)))
 	}
 
 	if err := util.CheckIsValiders(
@@ -85,7 +87,8 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 		}
 
 		if white.Equal(fact.contract) {
-			return common.ErrFactInvalid.Wrap(errors.Errorf("whitelist account is same with contract"))
+			return common.ErrFactInvalid.Wrap(
+				common.ErrSelfTarget.Wrap(errors.Errorf("whitelist account is same with contract")))
 		}
 
 		if _, found := founds[white.String()]; found {

@@ -115,7 +115,7 @@ func (ob OperatorsBook) Get(ag mitumbase.Address) (mitumbase.Address, error) {
 		}
 	}
 
-	return currencytypes.Address{}, errors.Errorf("account not in operators book, %v", ag)
+	return currencytypes.Address{}, errors.Errorf("account %v not in operators book", ag)
 }
 
 func (ob *OperatorsBook) Append(ag mitumbase.Address) error {
@@ -138,7 +138,7 @@ func (ob *OperatorsBook) Append(ag mitumbase.Address) error {
 
 func (ob *OperatorsBook) Remove(ag mitumbase.Address) error {
 	if !ob.Exists(ag) {
-		return errors.Errorf("account not in operators book, %v", ag)
+		return errors.Errorf("account %v not in operators book", ag)
 	}
 
 	for i := range ob.operators {

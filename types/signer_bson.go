@@ -10,7 +10,7 @@ import (
 func (sgn Signer) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
 		"_hint":   sgn.Hint().String(),
-		"account": sgn.account,
+		"account": sgn.address,
 		"share":   sgn.share,
 		"signed":  sgn.signed,
 	})

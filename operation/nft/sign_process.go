@@ -70,35 +70,39 @@ func (ipp *SignItemProcessor) PreProcess(
 
 	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection state for contract account %v: %v", it.Contract(), err))
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
+		return e.Wrap(common.ErrServiceNF.Errorf("nft collection state value for contract account %v: %v", it.Contract(), err))
 
 	}
 
 	if !design.Active() {
-		return e.Wrap(errors.Errorf("deactivated collection, %v", ipp.item.Contract()))
+		return e.Wrap(
+			errors.Errorf("nft collection in contract account %v has already been deactivated", ipp.item.Contract()))
 	}
 
 	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return e.Wrap(common.ErrStateNF.Errorf("nft, %v: %v", nid, err))
+		return e.Wrap(common.ErrStateNF.Errorf("nft idx %v in contract account %v", nid, ipp.item.Contract()))
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return e.Wrap(common.ErrStateValInvalid.Errorf("nft, %v: %v", nid, err))
+		return e.Wrap(
+			common.ErrStateValInvalid.Errorf("nft idx %v in contract account %v", nid, ipp.item.Contract()))
 	}
 
 	if !nv.Active() {
-		return e.Wrap(errors.Errorf("burned nft, %v", nid))
+		return e.Wrap(
+			common.ErrValueInvalid.Wrap(
+				errors.Errorf("burned nft idx %v in contract account %v", nid, ipp.item.Contract())))
 	}
 
 	if nv.Creators().IsSignedByAddress(ipp.sender) {
-		return e.Wrap(errors.Errorf("already signed nft, %v, %v", ipp.sender, nv.ID()))
+		return e.Wrap(errors.Errorf("already signed nft idx %v by creator %v", nv.ID(), ipp.sender))
 	}
 
 	return nil
@@ -126,9 +130,9 @@ func (ipp *SignItemProcessor) Process(
 		return nil, errors.Errorf("not signer of nft, %v-%v", ipp.sender, nv.ID())
 	}
 
-	signer := types.NewSigner(signers.Signers()[idx].Account(), signers.Signers()[idx].Share(), true)
+	signer := types.NewSigner(signers.Signers()[idx].Address(), signers.Signers()[idx].Share(), true)
 	if err := signer.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid signer, %v", signer.Account())
+		return nil, errors.Errorf("invalid signer, %v", signer.Address())
 	}
 
 	sns := &signers
@@ -213,7 +217,7 @@ func (opp *SignProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+				Errorf("%v: sender %v is contract account", fact.Sender(), cErr)), nil
 	}
 
 	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {

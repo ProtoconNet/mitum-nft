@@ -83,16 +83,18 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", cErr, fact.Sender())), nil
+				Errorf("%v: sender %v is contract account", cErr, fact.Sender())), nil
 	}
 
 	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError(common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("%v: %v", fact.Currency(), err)), nil
+		return nil, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("%v: %v", fact.Currency(), err)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(common.ErrMPreProcess.Wrap(common.ErrMSignInvalid).Errorf("invalid signing: %v", err)), nil
+		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMSignInvalid).Errorf("%v", err)), nil
 	}
 
 	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
@@ -116,19 +118,20 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	if ca.IsActive() {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("nft collection, %v", fact.Contract())), nil
+				Wrap(common.ErrMValueInvalid).Errorf(
+				"contract account %v has already been activated", fact.Contract())), nil
 	}
 
 	if found, _ := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), getStateFunc); found {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("nft collection, %v", fact.Contract())), nil
+				Wrap(common.ErrMServiceE).Errorf("nft collection for contract account %v", fact.Contract())), nil
 	}
 
 	if found, _ := currencystate.CheckNotExistsState(statenft.NFTStateKey(fact.contract, statenft.LastIDXKey), getStateFunc); found {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("nft collection, %v: last index already exists", fact.Contract())), nil
+				Wrap(common.ErrMServiceE).Errorf("nft collection for contract account %v: last index already exists", fact.Contract())), nil
 	}
 
 	whitelist := fact.WhiteList()
@@ -140,7 +143,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 		} else if cErr != nil {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-					Errorf("%v: whitelist account is contract account, %v", white, cErr)), nil
+					Errorf("%v: whitelist %v is contract account", cErr, white)), nil
 		}
 	}
 

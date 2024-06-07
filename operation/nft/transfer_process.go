@@ -52,7 +52,7 @@ func (ipp *TransferItemProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
 	_, _, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
@@ -62,7 +62,8 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return e.Wrap(cErr)
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Receiver(), "receiver", true, false, getStateFunc); aErr != nil {
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(
+		it.Receiver(), "receiver", true, false, getStateFunc); aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
@@ -70,49 +71,68 @@ func (ipp *TransferItemProcessor) PreProcess(
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
+	st, err := state.ExistsState(
+		statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
+		return e.Wrap(
+			common.ErrStateNF.Wrap(
+				common.ErrServiceNF.Errorf("nft collection state for contract account %v", it.Contract())))
 	}
 
 	design, err := statenft.StateCollectionValue(st)
 	if err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("nft collection, %s: %v", it.Contract(), err))
+		return e.Wrap(
+			common.ErrStateValInvalid.Wrap(
+				common.ErrServiceNF.Errorf("nft collection state value for contract account %v", it.Contract())))
 	}
 	if !design.Active() {
-		return e.Wrap(errors.Errorf("deactivated collection, %v", ipp.item.Contract()))
+		return e.Wrap(
+			errors.Errorf(
+				"nft collection in contract account %v has already been deactivated ", ipp.item.Contract()))
 	}
 
 	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return e.Wrap(common.ErrStateNF.Errorf("nft, %v: %v", nid, err))
+		return e.Wrap(common.ErrStateNF.Errorf("nft idx %v in contract account %v", nid, it.Contract()))
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return e.Wrap(common.ErrStateValInvalid.Errorf("nft, %v: %v", nid, err))
+		return e.Wrap(common.ErrStateValInvalid.Errorf("nft idx %v in contract account %v", nid, it.Contract()))
 	}
 
 	if !nv.Active() {
-		return e.Wrap(errors.Errorf("burned nft, %v", nid))
+		return e.Wrap(errors.Errorf("burned nft idx %v in contract account %v", nid, ipp.item.Contract()))
 	}
 
 	if !(nv.Owner().Equal(ipp.sender) || nv.Approved().Equal(ipp.sender)) {
-		if st, err := state.ExistsState(statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators", getStateFunc); err != nil {
-			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v: %v", ipp.sender, err)))
+		if st, err := state.ExistsState(
+			statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators", getStateFunc); err != nil {
+			return e.Wrap(
+				common.ErrAccountNAth.Wrap(
+					errors.Errorf(
+						"sender %v neither nft owner nor operator for nft idx %v in contract account %v: operators state not found",
+						ipp.sender, nid, ipp.item.Contract())))
+
 		} else if box, err := statenft.StateOperatorsBookValue(st); err != nil {
-			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v: %v", ipp.sender, err)))
+			return e.Wrap(
+				common.ErrAccountNAth.Wrap(
+					errors.Errorf("sender %v neither nft owner nor operator for nft idx %v in contract account %v: operators state value not found",
+						ipp.sender, nid, ipp.item.Contract())))
 		} else if !box.Exists(ipp.sender) {
-			return e.Wrap(common.ErrAccountNAth.Wrap(errors.Errorf("sender, %v", ipp.sender)))
+			return e.Wrap(common.ErrValueInvalid.Wrap(
+				common.ErrAccountNAth.Wrap(
+					errors.Errorf("sender %v neither nft owner nor operator for nft idx %v in contract account %v: sender is not in operators ",
+						ipp.sender, nid, ipp.item.Contract()))))
 		}
 	}
 
 	if it.receiver.Equal(nv.Owner()) {
-		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver, %v is same with nft owner", it.receiver)))
+		return e.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("receiver %v is same with nft owner", it.receiver)))
 	}
 
 	if nv.Owner().Equal(ipp.sender) && ipp.sender.Equal(it.receiver) {
-		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver, %v is same with sender", ipp.sender)))
+		return e.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("receiver %v is same with sender", it.receiver)))
 	}
 
 	return nil
@@ -211,7 +231,7 @@ func (opp *TransferProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %v", fact.Sender(), cErr)), nil
+				Errorf("%v: sender %v is contract account", fact.Sender(), cErr)), nil
 	}
 
 	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {

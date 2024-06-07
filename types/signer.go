@@ -12,7 +12,7 @@ var MaxSignerShare uint = 100
 
 type Signer struct {
 	hint.BaseHinter
-	account base.Address
+	address base.Address
 	share   uint
 	signed  bool
 }
@@ -20,7 +20,7 @@ type Signer struct {
 func NewSigner(account base.Address, share uint, signed bool) Signer {
 	return Signer{
 		BaseHinter: hint.NewBaseHinter(SignerHint),
-		account:    account,
+		address:    account,
 		share:      share,
 		signed:     signed,
 	}
@@ -29,7 +29,7 @@ func NewSigner(account base.Address, share uint, signed bool) Signer {
 func (sgn Signer) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		sgn.BaseHinter,
-		sgn.account,
+		sgn.address,
 	); err != nil {
 		return err
 	}
@@ -50,14 +50,14 @@ func (sgn Signer) Bytes() []byte {
 	}
 
 	return util.ConcatBytesSlice(
-		sgn.account.Bytes(),
+		sgn.address.Bytes(),
 		util.UintToBytes(sgn.share),
 		bs,
 	)
 }
 
-func (sgn Signer) Account() base.Address {
-	return sgn.account
+func (sgn Signer) Address() base.Address {
+	return sgn.address
 }
 
 func (sgn Signer) Share() uint {
@@ -73,7 +73,7 @@ func (sgn Signer) Equal(csigner Signer) bool {
 		return false
 	}
 
-	if !sgn.Account().Equal(csigner.Account()) {
+	if !sgn.Address().Equal(csigner.Address()) {
 		return false
 	}
 
