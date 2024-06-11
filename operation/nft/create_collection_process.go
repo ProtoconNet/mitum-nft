@@ -89,7 +89,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	_, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
 	if err != nil {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("%v: %v", fact.Currency(), err)), nil
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -118,7 +118,7 @@ func (opp *CreateCollectionProcessor) PreProcess(
 	if ca.IsActive() {
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMValueInvalid).Errorf(
+				Wrap(common.ErrMServiceE).Errorf(
 				"contract account %v has already been activated", fact.Contract())), nil
 	}
 
