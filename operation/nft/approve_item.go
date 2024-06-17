@@ -15,17 +15,17 @@ type ApproveItem struct {
 	hint.BaseHinter
 	contract mitumbase.Address
 	approved mitumbase.Address
-	idx      uint64
+	nftIdx   uint64
 	currency types.CurrencyID
 }
 
 func NewApproveItem(
-	contract mitumbase.Address, approved mitumbase.Address, idx uint64, currency types.CurrencyID) ApproveItem {
+	contract mitumbase.Address, approved mitumbase.Address, nftIdx uint64, currency types.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		contract:   contract,
 		approved:   approved,
-		idx:        idx,
+		nftIdx:     nftIdx,
 		currency:   currency,
 	}
 }
@@ -47,7 +47,7 @@ func (it ApproveItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
 		it.approved.Bytes(),
-		util.Uint64ToBytes(it.idx),
+		util.Uint64ToBytes(it.nftIdx),
 		it.currency.Bytes(),
 	)
 }
@@ -66,8 +66,8 @@ func (it ApproveItem) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
-func (it ApproveItem) NFT() uint64 {
-	return it.idx
+func (it ApproveItem) NFTIdx() uint64 {
+	return it.nftIdx
 }
 
 func (it ApproveItem) Currency() types.CurrencyID {

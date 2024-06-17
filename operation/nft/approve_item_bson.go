@@ -14,7 +14,7 @@ func (it ApproveItem) MarshalBSON() ([]byte, error) {
 			"_hint":    it.Hint().String(),
 			"contract": it.contract,
 			"approved": it.approved,
-			"nftidx":   it.idx,
+			"nft_idx":  it.nftIdx,
 			"currency": it.currency,
 		})
 }
@@ -23,7 +23,7 @@ type ApproveItemBSONUnmarshaler struct {
 	Hint     string `bson:"_hint"`
 	Contract string `bson:"contract"`
 	Approved string `bson:"approved"`
-	NFTidx   uint64 `bson:"nftidx"`
+	NFTIdx   uint64 `bson:"nft_idx"`
 	Currency string `bson:"currency"`
 }
 
@@ -38,7 +38,7 @@ func (it *ApproveItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
-	if err := it.unpack(enc, ht, u.Contract, u.Approved, u.NFTidx, u.Currency); err != nil {
+	if err := it.unpack(enc, ht, u.Contract, u.Approved, u.NFTIdx, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 

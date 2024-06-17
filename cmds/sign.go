@@ -64,12 +64,12 @@ func (cmd *SignCommand) parseFlags() error {
 func (cmd *SignCommand) createOperation() (base.Operation, error) {
 	e := util.StringError("failed to create sign operation")
 
-	item := nft.NewSignItem(cmd.contract, cmd.NFT, cmd.Currency.CID)
+	item := nft.NewAddSignatureItem(cmd.contract, cmd.NFT, cmd.Currency.CID)
 
-	fact := nft.NewSignFact(
+	fact := nft.NewAddSignatureFact(
 		[]byte(cmd.Token),
 		cmd.sender,
-		[]nft.SignItem{item},
+		[]nft.AddSignatureItem{item},
 	)
 
 	op, err := nft.NewSign(fact)

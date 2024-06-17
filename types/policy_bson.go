@@ -10,11 +10,11 @@ import (
 
 func (policy CollectionPolicy) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
-		"_hint":     policy.Hint().String(),
-		"name":      policy.name,
-		"royalty":   policy.royalty,
-		"uri":       policy.uri,
-		"whitelist": policy.whitelist,
+		"_hint":            policy.Hint().String(),
+		"name":             policy.name,
+		"royalty":          policy.royalty,
+		"uri":              policy.uri,
+		"minter_whitelist": policy.whitelist,
 	})
 }
 
@@ -23,7 +23,7 @@ type PolicyBSONUnmarshaler struct {
 	Name    string   `bson:"name"`
 	Royalty uint     `bson:"royalty"`
 	URI     string   `bson:"uri"`
-	Whites  []string `bson:"whitelist"`
+	Whites  []string `bson:"minter_whitelist"`
 }
 
 func (policy *CollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {

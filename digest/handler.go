@@ -23,8 +23,8 @@ import (
 
 var (
 	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection = `/nft/{contract:.*}/collection`
-	HandlerPathNFT           = `/nft/{contract:.*}/{id:.*}`
+	HandlerPathNFTCollection = `/nft/{contract:.*}`
+	HandlerPathNFT           = `/nft/{contract:.*}/{nft_idx:.*}`
 	HandlerPathNFTs          = `/nft/{contract:.*}/nfts`
 	HandlerPathNFTCount      = `/nft/{contract:.*}/count`
 )

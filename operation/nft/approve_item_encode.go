@@ -28,7 +28,7 @@ func (it *ApproveItem) unpack(
 		return err
 	}
 	it.approved = approved
-	it.idx = idx
+	it.nftIdx = idx
 
 	return nil
 }

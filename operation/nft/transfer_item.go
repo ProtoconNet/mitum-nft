@@ -15,7 +15,7 @@ type TransferItem struct {
 	hint.BaseHinter
 	contract mitumbase.Address
 	receiver mitumbase.Address
-	nft      uint64
+	nftIdx   uint64
 	currency types.CurrencyID
 }
 
@@ -24,7 +24,7 @@ func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft
 		BaseHinter: hint.NewBaseHinter(TransferItemHint),
 		contract:   contract,
 		receiver:   receiver,
-		nft:        nft,
+		nftIdx:     nft,
 		currency:   currency,
 	}
 }
@@ -46,7 +46,7 @@ func (it TransferItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
 		it.receiver.Bytes(),
-		util.Uint64ToBytes(it.nft),
+		util.Uint64ToBytes(it.nftIdx),
 		it.currency.Bytes(),
 	)
 }
@@ -66,7 +66,7 @@ func (it TransferItem) Addresses() ([]mitumbase.Address, error) {
 }
 
 func (it TransferItem) NFT() uint64 {
-	return it.nft
+	return it.nftIdx
 }
 
 func (it TransferItem) Currency() types.CurrencyID {

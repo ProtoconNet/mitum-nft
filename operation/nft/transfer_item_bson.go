@@ -14,7 +14,7 @@ func (it TransferItem) MarshalBSON() ([]byte, error) {
 			"_hint":    it.Hint().String(),
 			"contract": it.contract,
 			"receiver": it.receiver,
-			"nft":      it.nft,
+			"nft_idx":  it.nftIdx,
 			"currency": it.currency,
 		},
 	)
@@ -24,7 +24,7 @@ type TransferItemBSONUnmarshaler struct {
 	Hint     string `bson:"_hint"`
 	Contract string `bson:"contract"`
 	Receiver string `bson:"receiver"`
-	NFTidx   uint64 `bson:"nft"`
+	NFTIdx   uint64 `bson:"nft_idx"`
 	Currency string `bson:"currency"`
 }
 
@@ -39,7 +39,7 @@ func (it *TransferItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
-	if err := it.unpack(enc, ht, u.Contract, u.Receiver, u.NFTidx, u.Currency); err != nil {
+	if err := it.unpack(enc, ht, u.Contract, u.Receiver, u.NFTIdx, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 	return nil

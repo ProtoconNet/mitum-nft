@@ -7,7 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *CreateCollectionFact) unmarshal(
+func (fact *RegisterModelFact) unmarshal(
 	enc encoder.Encoder,
 	sd string,
 	ca string,
@@ -44,7 +44,7 @@ func (fact *CreateCollectionFact) unmarshal(
 		whitelist[i] = white
 
 	}
-	fact.whitelist = whitelist
+	fact.minterWhitelist = whitelist
 
 	return nil
 }

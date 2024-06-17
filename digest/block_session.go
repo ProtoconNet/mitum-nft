@@ -172,7 +172,7 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 					bs.block.Manifest().Height(),
 					defaultColNameNFT,
 					bson.D{{"contract", parsedKey[1]}},
-					bson.D{{"nftid", i}},
+					bson.D{{"nft_idx", i}},
 				)
 				if err != nil {
 					return nil, err

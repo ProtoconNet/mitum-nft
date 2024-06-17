@@ -32,7 +32,7 @@ var signProcessorPool = sync.Pool{
 	},
 }
 
-func (Sign) Process(
+func (AddSignature) Process(
 	ctx context.Context, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
@@ -41,7 +41,7 @@ func (Sign) Process(
 type SignItemProcessor struct {
 	h      util.Hash
 	sender mitumbase.Address
-	item   SignItem
+	item   AddSignatureItem
 }
 
 func (ipp *SignItemProcessor) PreProcess(
@@ -156,7 +156,7 @@ func (ipp *SignItemProcessor) Process(
 func (ipp *SignItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
-	ipp.item = SignItem{}
+	ipp.item = AddSignatureItem{}
 	signItemProcessorPool.Put(ipp)
 
 	return
@@ -196,12 +196,12 @@ func NewSignProcessor() currencytypes.GetNewProcessor {
 func (opp *SignProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) (context.Context, mitumbase.OperationProcessReasonError, error) {
-	fact, ok := op.Fact().(SignFact)
+	fact, ok := op.Fact().(AddSignatureFact)
 	if !ok {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
-				Errorf("expected %T, not %T", SignFact{}, op.Fact())), nil
+				Errorf("expected %T, not %T", AddSignatureFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -257,7 +257,7 @@ func (opp *SignProcessor) Process( // nolint:dupl
 ) {
 	e := util.StringError("failed to process Sign")
 
-	fact, ok := op.Fact().(SignFact)
+	fact, ok := op.Fact().(AddSignatureFact)
 	if !ok {
 		return nil, nil, e.Errorf("expected SignFact, not %T", op.Fact())
 	}

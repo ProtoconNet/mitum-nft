@@ -41,13 +41,13 @@ func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) 
 
 		if !reverse {
 			filterOffset := bson.D{
-				{"nftid", bson.D{{"$gt", v}}},
+				{"nft_idx", bson.D{{"$gt", v}}},
 			}
 			filterA = append(filterA, filterOffset)
 			// if reverse true, lesser then offset height
 		} else {
 			filterOffset := bson.D{
-				{"nftid", bson.D{{"$lt", v}}},
+				{"nft_idx", bson.D{{"$lt", v}}},
 			}
 			filterA = append(filterA, filterOffset)
 		}

@@ -4,7 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -12,48 +12,48 @@ import (
 )
 
 var (
-	CreateCollectionFactHint = hint.MustNewHint("mitum-nft-create-collection-operation-fact-v0.0.1")
-	CreateCollectionHint     = hint.MustNewHint("mitum-nft-create-collection-operation-v0.0.1")
+	RegisterModelFactHint = hint.MustNewHint("mitum-nft-register-model-operation-fact-v0.0.1")
+	RegisterModelHint     = hint.MustNewHint("mitum-nft-register-model-operation-v0.0.1")
 )
 
-type CreateCollectionFact struct {
-	mitumbase.BaseFact
-	sender    mitumbase.Address
-	contract  mitumbase.Address
-	name      types.CollectionName
-	royalty   types.PaymentParameter
-	uri       types.URI
-	whitelist []mitumbase.Address
-	currency  currencytypes.CurrencyID
+type RegisterModelFact struct {
+	base.BaseFact
+	sender          base.Address
+	contract        base.Address
+	name            types.CollectionName
+	royalty         types.PaymentParameter
+	uri             types.URI
+	minterWhitelist []base.Address
+	currency        currencytypes.CurrencyID
 }
 
-func NewCreateCollectionFact(
+func NewRegisterModelFact(
 	token []byte,
-	sender mitumbase.Address,
-	contract mitumbase.Address,
+	sender base.Address,
+	contract base.Address,
 	name types.CollectionName,
 	royalty types.PaymentParameter,
 	uri types.URI,
-	whitelist []mitumbase.Address,
+	whitelist []base.Address,
 	currency currencytypes.CurrencyID,
-) CreateCollectionFact {
-	bf := mitumbase.NewBaseFact(CreateCollectionFactHint, token)
-	fact := CreateCollectionFact{
-		BaseFact:  bf,
-		sender:    sender,
-		contract:  contract,
-		name:      name,
-		royalty:   royalty,
-		uri:       uri,
-		whitelist: whitelist,
-		currency:  currency,
+) RegisterModelFact {
+	bf := base.NewBaseFact(RegisterModelFactHint, token)
+	fact := RegisterModelFact{
+		BaseFact:        bf,
+		sender:          sender,
+		contract:        contract,
+		name:            name,
+		royalty:         royalty,
+		uri:             uri,
+		minterWhitelist: whitelist,
+		currency:        currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
 	return fact
 }
 
-func (fact CreateCollectionFact) IsValid(b []byte) error {
+func (fact RegisterModelFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
@@ -74,13 +74,13 @@ func (fact CreateCollectionFact) IsValid(b []byte) error {
 			common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 	}
 
-	if l := len(fact.whitelist); l > types.MaxWhitelist {
+	if l := len(fact.minterWhitelist); l > types.MaxWhitelist {
 		return common.ErrFactInvalid.Wrap(
 			common.ErrArrayLen.Wrap(errors.Errorf("whitelist over allowed, %d > %d", l, types.MaxWhitelist)))
 	}
 
 	founds := map[string]struct{}{}
-	for _, white := range fact.whitelist {
+	for _, white := range fact.minterWhitelist {
 		if err := white.IsValid(nil); err != nil {
 			return common.ErrFactInvalid.Wrap(err)
 		}
@@ -103,17 +103,17 @@ func (fact CreateCollectionFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact CreateCollectionFact) Hash() util.Hash {
+func (fact RegisterModelFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact CreateCollectionFact) GenerateHash() util.Hash {
+func (fact RegisterModelFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact CreateCollectionFact) Bytes() []byte {
-	as := make([][]byte, len(fact.whitelist))
-	for i, white := range fact.whitelist {
+func (fact RegisterModelFact) Bytes() []byte {
+	as := make([][]byte, len(fact.minterWhitelist))
+	for i, white := range fact.minterWhitelist {
 		as[i] = white.Bytes()
 	}
 
@@ -129,39 +129,39 @@ func (fact CreateCollectionFact) Bytes() []byte {
 	)
 }
 
-func (fact CreateCollectionFact) Token() mitumbase.Token {
+func (fact RegisterModelFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact CreateCollectionFact) Sender() mitumbase.Address {
+func (fact RegisterModelFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact CreateCollectionFact) Contract() mitumbase.Address {
+func (fact RegisterModelFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CreateCollectionFact) Name() types.CollectionName {
+func (fact RegisterModelFact) Name() types.CollectionName {
 	return fact.name
 }
 
-func (fact CreateCollectionFact) Royalty() types.PaymentParameter {
+func (fact RegisterModelFact) Royalty() types.PaymentParameter {
 	return fact.royalty
 }
 
-func (fact CreateCollectionFact) URI() types.URI {
+func (fact RegisterModelFact) URI() types.URI {
 	return fact.uri
 }
 
-func (fact CreateCollectionFact) WhiteList() []mitumbase.Address {
-	return fact.whitelist
+func (fact RegisterModelFact) WhiteList() []base.Address {
+	return fact.minterWhitelist
 }
 
-func (fact CreateCollectionFact) Addresses() ([]mitumbase.Address, error) {
-	l := 2 + len(fact.whitelist)
+func (fact RegisterModelFact) Addresses() ([]base.Address, error) {
+	l := 2 + len(fact.minterWhitelist)
 
-	as := make([]mitumbase.Address, l)
-	copy(as, fact.whitelist)
+	as := make([]base.Address, l)
+	copy(as, fact.minterWhitelist)
 
 	as[l-2] = fact.sender
 	as[l-1] = fact.contract
@@ -169,14 +169,14 @@ func (fact CreateCollectionFact) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
-func (fact CreateCollectionFact) Currency() currencytypes.CurrencyID {
+func (fact RegisterModelFact) Currency() currencytypes.CurrencyID {
 	return fact.currency
 }
 
-type CreateCollection struct {
+type RegisterModel struct {
 	common.BaseOperation
 }
 
-func NewCreateCollection(fact CreateCollectionFact) (CreateCollection, error) {
-	return CreateCollection{BaseOperation: common.NewBaseOperation(CreateCollectionHint, fact)}, nil
+func NewRegisterModel(fact RegisterModelFact) (RegisterModel, error) {
+	return RegisterModel{BaseOperation: common.NewBaseOperation(RegisterModelHint, fact)}, nil
 }

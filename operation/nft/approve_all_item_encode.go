@@ -7,14 +7,14 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *DelegateItem) unmarshal(
+func (it *ApproveAllItem) unmarshal(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	cAdr, dAdr, md, cid string,
 ) error {
 	it.BaseHinter = hint.NewBaseHinter(ht)
 
-	it.mode = DelegateMode(md)
+	it.mode = ApproveAllMode(md)
 	it.currency = types.CurrencyID(cid)
 
 	switch a, err := mitumbase.DecodeAddress(cAdr, enc); {
@@ -28,7 +28,7 @@ func (it *DelegateItem) unmarshal(
 	if err != nil {
 		return err
 	}
-	it.delegatee = delegatee
+	it.approved = delegatee
 
 	return nil
 }

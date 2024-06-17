@@ -23,7 +23,7 @@ func (hd *Handlers) handleNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err, status := parseRequest(w, r, "id")
+	id, err, status := parseRequest(w, r, "nft_idx")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -281,7 +281,7 @@ func (hd *Handlers) buildNFTCountHal(
 
 	var m struct {
 		Contract string `json:"contract"`
-		NFTCount int64  `json:"nft_count"`
+		NFTCount int64  `json:"nft_total_supply"`
 	}
 
 	m.Contract = contract

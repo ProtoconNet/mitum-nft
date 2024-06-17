@@ -100,7 +100,7 @@ func (cmd *UpdateCollectionPolicyCommand) parseFlags() error {
 func (cmd *UpdateCollectionPolicyCommand) createOperation() (mitumbase.Operation, error) {
 	e := util.StringError("failed to create update-collection-policy operation")
 
-	fact := nft.NewUpdateCollectionPolicyFact(
+	fact := nft.NewUpdateModelConfigFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
@@ -111,7 +111,7 @@ func (cmd *UpdateCollectionPolicyCommand) createOperation() (mitumbase.Operation
 		cmd.Currency.CID,
 	)
 
-	op, err := nft.NewUpdateCollectionPolicy(fact)
+	op, err := nft.NewUpdateModelConfig(fact)
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

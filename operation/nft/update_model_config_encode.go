@@ -7,7 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *UpdateCollectionPolicyFact) unpack(
+func (fact *UpdateModelConfigFact) unpack(
 	enc encoder.Encoder,
 	sd string,
 	ct string,

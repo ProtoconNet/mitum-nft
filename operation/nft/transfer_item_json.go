@@ -13,7 +13,7 @@ type TransferItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract mitumbase.Address `json:"contract"`
 	Receiver mitumbase.Address `json:"receiver"`
-	NFTidx   uint64            `json:"nft"`
+	NFTIdx   uint64            `json:"nft_idx"`
 	Currency types.CurrencyID  `json:"currency"`
 }
 
@@ -22,7 +22,7 @@ func (it TransferItem) MarshalJSON() ([]byte, error) {
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
 		Receiver:   it.receiver,
-		NFTidx:     it.nft,
+		NFTIdx:     it.nftIdx,
 		Currency:   it.currency,
 	})
 }
@@ -31,7 +31,7 @@ type TransferItemJSONUnmarshaler struct {
 	Hint     hint.Hint `json:"_hint"`
 	Contract string    `json:"contract"`
 	Receiver string    `json:"receiver"`
-	NFTidx   uint64    `json:"nft"`
+	NFTIdx   uint64    `json:"nft_idx"`
 	Currency string    `json:"currency"`
 }
 
@@ -41,7 +41,7 @@ func (it *TransferItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 
-	if err := it.unpack(enc, u.Hint, u.Contract, u.Receiver, u.NFTidx, u.Currency); err != nil {
+	if err := it.unpack(enc, u.Hint, u.Contract, u.Receiver, u.NFTIdx, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 

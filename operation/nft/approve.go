@@ -64,7 +64,7 @@ func (fact ApproveFact) IsValid(b []byte) error {
 				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
-		n := strconv.FormatUint(item.NFT(), 10)
+		n := strconv.FormatUint(item.NFTIdx(), 10)
 
 		if _, found := founds[n]; found {
 			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft idx %v", n)))

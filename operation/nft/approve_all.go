@@ -10,21 +10,21 @@ import (
 )
 
 var (
-	DelegateFactHint = hint.MustNewHint("mitum-nft-delegate-operation-fact-v0.0.1")
-	DelegateHint     = hint.MustNewHint("mitum-nft-delegate-operation-v0.0.1")
+	ApproveAllFactHint = hint.MustNewHint("mitum-nft-approve-all-operation-fact-v0.0.1")
+	ApproveAllHint     = hint.MustNewHint("mitum-nft-approve-all-operation-v0.0.1")
 )
 
-var MaxDelegateItems = 100
+var MaxApproveAllItems = 100
 
-type DelegateFact struct {
+type ApproveAllFact struct {
 	mitumbase.BaseFact
 	sender mitumbase.Address
-	items  []DelegateItem
+	items  []ApproveAllItem
 }
 
-func NewDelegateFact(token []byte, sender mitumbase.Address, items []DelegateItem) DelegateFact {
-	bf := mitumbase.NewBaseFact(DelegateFactHint, token)
-	fact := DelegateFact{
+func NewApproveAllFact(token []byte, sender mitumbase.Address, items []ApproveAllItem) ApproveAllFact {
+	bf := mitumbase.NewBaseFact(ApproveAllFactHint, token)
+	fact := ApproveAllFact{
 		BaseFact: bf,
 		sender:   sender,
 		items:    items,
@@ -34,16 +34,16 @@ func NewDelegateFact(token []byte, sender mitumbase.Address, items []DelegateIte
 	return fact
 }
 
-func (fact DelegateFact) IsValid(b []byte) error {
+func (fact ApproveAllFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if l := len(fact.items); l < 1 {
 		return common.ErrFactInvalid.Wrap(errors.Errorf("empty items for DelegateFact"))
-	} else if l > int(MaxDelegateItems) {
+	} else if l > int(MaxApproveAllItems) {
 		return common.ErrFactInvalid.Wrap(
-			common.ErrValOOR.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxDelegateItems)))
+			common.ErrValOOR.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxApproveAllItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
@@ -61,20 +61,20 @@ func (fact DelegateFact) IsValid(b []byte) error {
 				errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
-		if fact.sender.Equal(item.delegatee) {
+		if fact.sender.Equal(item.approved) {
 			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(
 				errors.Errorf("sender %v delegates to itself", fact.sender)))
 		}
 
 		if addressMap, collectionFound := founds[item.contract.String()]; !collectionFound {
 			founds[item.contract.String()] = make(map[string]struct{})
-		} else if _, addressFound := addressMap[item.Delegatee().String()]; addressFound {
+		} else if _, addressFound := addressMap[item.Approved().String()]; addressFound {
 			return common.ErrFactInvalid.Wrap(
 				common.ErrDupVal.Wrap(
-					errors.Errorf("delegatee %v in contract account %v", item.Delegatee(), item.contract)))
+					errors.Errorf("approved %v in contract account %v", item.Approved(), item.contract)))
 		}
 
-		founds[item.contract.String()][item.Delegatee().String()] = struct{}{}
+		founds[item.contract.String()][item.Approved().String()] = struct{}{}
 	}
 	if err := common.IsValidOperationFact(fact, b); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
@@ -83,15 +83,15 @@ func (fact DelegateFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact DelegateFact) Hash() util.Hash {
+func (fact ApproveAllFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact DelegateFact) GenerateHash() util.Hash {
+func (fact ApproveAllFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact DelegateFact) Bytes() []byte {
+func (fact ApproveAllFact) Bytes() []byte {
 	is := make([][]byte, len(fact.items))
 	for i, item := range fact.items {
 		is[i] = item.Bytes()
@@ -104,21 +104,21 @@ func (fact DelegateFact) Bytes() []byte {
 	)
 }
 
-func (fact DelegateFact) Token() mitumbase.Token {
+func (fact ApproveAllFact) Token() mitumbase.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact DelegateFact) Sender() mitumbase.Address {
+func (fact ApproveAllFact) Sender() mitumbase.Address {
 	return fact.sender
 }
 
-func (fact DelegateFact) Addresses() ([]mitumbase.Address, error) {
+func (fact ApproveAllFact) Addresses() ([]mitumbase.Address, error) {
 	l := len(fact.items)
 
 	as := make([]mitumbase.Address, l+1)
 
 	for i, item := range fact.items {
-		as[i] = item.Delegatee()
+		as[i] = item.Approved()
 	}
 
 	as[l] = fact.sender
@@ -126,14 +126,14 @@ func (fact DelegateFact) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
-func (fact DelegateFact) Items() []DelegateItem {
+func (fact ApproveAllFact) Items() []ApproveAllItem {
 	return fact.items
 }
 
-type Delegate struct {
+type ApproveAll struct {
 	common.BaseOperation
 }
 
-func NewDelegate(fact DelegateFact) (Delegate, error) {
-	return Delegate{BaseOperation: common.NewBaseOperation(DelegateHint, fact)}, nil
+func NewDelegate(fact ApproveAllFact) (ApproveAll, error) {
+	return ApproveAll{BaseOperation: common.NewBaseOperation(ApproveAllHint, fact)}, nil
 }

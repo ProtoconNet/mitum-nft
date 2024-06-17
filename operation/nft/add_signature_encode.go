@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (fact *DelegateFact) unmarshal(
+func (fact *AddSignatureFact) unpack(
 	enc encoder.Encoder,
 	sd string,
 	bits []byte,
@@ -23,11 +23,11 @@ func (fact *DelegateFact) unmarshal(
 		return err
 	}
 
-	items := make([]DelegateItem, len(hits))
+	items := make([]AddSignatureItem, len(hits))
 	for i, hinter := range hits {
-		item, ok := hinter.(DelegateItem)
+		item, ok := hinter.(AddSignatureItem)
 		if !ok {
-			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected DelegateItem, not %T", hinter))
+			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected SignItem, not %T", hinter))
 		}
 
 		items[i] = item

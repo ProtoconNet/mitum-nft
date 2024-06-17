@@ -24,18 +24,18 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: types.CollectionDesignHint, Instance: types.CollectionDesign{}},
 	{Hint: types.NFTBoxHint, Instance: types.NFTBox{}},
 
-	{Hint: nft.CreateCollectionHint, Instance: nft.CreateCollection{}},
-	{Hint: nft.UpdateCollectionPolicyHint, Instance: nft.UpdateCollectionPolicy{}},
+	{Hint: nft.RegisterModelHint, Instance: nft.RegisterModel{}},
+	{Hint: nft.UpdateModelConfigHint, Instance: nft.UpdateModelConfig{}},
 	{Hint: nft.MintItemHint, Instance: nft.MintItem{}},
 	{Hint: nft.MintHint, Instance: nft.Mint{}},
 	{Hint: nft.TransferItemHint, Instance: nft.TransferItem{}},
 	{Hint: nft.TransferHint, Instance: nft.Transfer{}},
-	{Hint: nft.DelegateItemHint, Instance: nft.DelegateItem{}},
-	{Hint: nft.DelegateHint, Instance: nft.Delegate{}},
+	{Hint: nft.ApproveAllItemHint, Instance: nft.ApproveAllItem{}},
+	{Hint: nft.ApproveAllHint, Instance: nft.ApproveAll{}},
 	{Hint: nft.ApproveItemHint, Instance: nft.ApproveItem{}},
 	{Hint: nft.ApproveHint, Instance: nft.Approve{}},
-	{Hint: nft.SignItemHint, Instance: nft.SignItem{}},
-	{Hint: nft.SignHint, Instance: nft.Sign{}},
+	{Hint: nft.AddSignatureItemHint, Instance: nft.AddSignatureItem{}},
+	{Hint: nft.AddSignatureHint, Instance: nft.AddSignature{}},
 
 	{Hint: state.LastNFTIndexStateValueHint, Instance: state.LastNFTIndexStateValue{}},
 	{Hint: state.NFTStateValueHint, Instance: state.NFTStateValue{}},
@@ -45,13 +45,13 @@ var AddedHinters = []encoder.DecodeDetail{
 }
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
-	{Hint: nft.CreateCollectionFactHint, Instance: nft.CreateCollectionFact{}},
-	{Hint: nft.UpdateCollectionPolicyFactHint, Instance: nft.UpdateCollectionPolicyFact{}},
+	{Hint: nft.RegisterModelFactHint, Instance: nft.RegisterModelFact{}},
+	{Hint: nft.UpdateModelConfigFactHint, Instance: nft.UpdateModelConfigFact{}},
 	{Hint: nft.MintFactHint, Instance: nft.MintFact{}},
 	{Hint: nft.TransferFactHint, Instance: nft.TransferFact{}},
-	{Hint: nft.DelegateFactHint, Instance: nft.DelegateFact{}},
+	{Hint: nft.ApproveAllFactHint, Instance: nft.ApproveAllFact{}},
 	{Hint: nft.ApproveFactHint, Instance: nft.ApproveFact{}},
-	{Hint: nft.SignFactHint, Instance: nft.SignFact{}},
+	{Hint: nft.AddSignatureFactHint, Instance: nft.AddSignatureFact{}},
 }
 
 func init() {

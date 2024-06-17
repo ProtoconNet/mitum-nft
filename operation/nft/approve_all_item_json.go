@@ -9,36 +9,39 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-type SignItemJSONMarshaler struct {
+type ApproveAllItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract mitumbase.Address `json:"contract"`
-	NFT      uint64            `json:"nft"`
+	Approved mitumbase.Address `json:"approved"`
+	Mode     ApproveAllMode    `json:"mode"`
 	Currency types.CurrencyID  `json:"currency"`
 }
 
-func (it SignItem) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(SignItemJSONMarshaler{
+func (it ApproveAllItem) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(ApproveAllItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
-		NFT:        it.nft,
+		Approved:   it.approved,
+		Mode:       it.mode,
 		Currency:   it.currency,
 	})
 }
 
-type SignItemJSONUnmarshaler struct {
+type ApproveAllItemJSONUnmarshaler struct {
 	Hint     hint.Hint `json:"_hint"`
 	Contract string    `json:"contract"`
-	NFT      uint64    `json:"nft"`
+	Approved string    `json:"approved"`
+	Mode     string    `json:"mode"`
 	Currency string    `json:"currency"`
 }
 
-func (it *SignItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	var u SignItemJSONUnmarshaler
+func (it *ApproveAllItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
+	var u ApproveAllItemJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 
-	if err := it.unpack(enc, u.Hint, u.Contract, u.NFT, u.Currency); err != nil {
+	if err := it.unmarshal(enc, u.Hint, u.Contract, u.Approved, u.Mode, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 

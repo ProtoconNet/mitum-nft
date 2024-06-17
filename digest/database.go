@@ -66,7 +66,7 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 	}
 
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("nftid", i)
+	filter = filter.Add("nft_idx", i)
 
 	var nft *types.NFT
 	var sta mitumbase.State
@@ -87,7 +87,7 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.Errorf("nft token for contract account %v, nftid %v", contract, idx)
+		return nil, mitumutil.ErrNotFound.Errorf("nft token for contract account %v, nft idx %v", contract, idx)
 	}
 
 	return nft, nil
@@ -111,7 +111,7 @@ func NFTsByCollection(
 	}
 
 	opt := options.Find().SetSort(
-		util.NewBSONFilter("nftid", sr).D(),
+		util.NewBSONFilter("nft_idx", sr).D(),
 	)
 
 	switch {

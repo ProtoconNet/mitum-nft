@@ -7,7 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *SignItem) unpack(
+func (it *AddSignatureItem) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	ca string,
@@ -23,7 +23,7 @@ func (it *SignItem) unpack(
 		it.contract = a
 	}
 
-	it.nft = nft
+	it.nftIdx = nft
 
 	return nil
 }

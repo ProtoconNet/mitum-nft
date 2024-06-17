@@ -12,7 +12,7 @@ type CollectionPolicyJSONMarshaler struct {
 	Name      CollectionName   `json:"name"`
 	Royalty   PaymentParameter `json:"royalty"`
 	URI       URI              `json:"uri"`
-	Whitelist []base.Address   `json:"whitelist"`
+	Whitelist []base.Address   `json:"minter_whitelist"`
 }
 
 func (policy CollectionPolicy) MarshalJSON() ([]byte, error) {
@@ -30,7 +30,7 @@ type CollectionPolicyJSONUnmarshaler struct {
 	Name      string    `json:"name"`
 	Royalty   uint      `json:"royalty"`
 	URI       string    `json:"uri"`
-	Whitelist []string  `json:"whitelist"`
+	Whitelist []string  `json:"minter_whitelist"`
 }
 
 func (policy *CollectionPolicy) DecodeJSON(b []byte, enc encoder.Encoder) error {

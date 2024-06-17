@@ -12,19 +12,19 @@ import (
 )
 
 type TestUpdateCollectionPolicyProcessor struct {
-	*test.BaseTestOperationProcessorNoItem[UpdateCollectionPolicy]
+	*test.BaseTestOperationProcessorNoItem[UpdateModelConfig]
 	name    nfttypes.CollectionName
 	royalty nfttypes.PaymentParameter
 	uri     nfttypes.URI
 }
 
 func NewTestUpdateCollectionPolicyProcessor(tp *test.TestProcessor) TestUpdateCollectionPolicyProcessor {
-	t := test.NewBaseTestOperationProcessorNoItem[UpdateCollectionPolicy](tp)
+	t := test.NewBaseTestOperationProcessorNoItem[UpdateModelConfig](tp)
 	return TestUpdateCollectionPolicyProcessor{BaseTestOperationProcessorNoItem: &t}
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) Create() *TestUpdateCollectionPolicyProcessor {
-	t.Opr, _ = NewUpdateCollectionPolicyProcessor()(
+	t.Opr, _ = NewUpdateModelConfigProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
 		nil, nil,
@@ -101,9 +101,9 @@ func (t *TestUpdateCollectionPolicyProcessor) SetService(
 	policy := nfttypes.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
 	design := nfttypes.NewDesign(contract, sender, true, policy)
 
-	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Parent(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
+	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
-	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Parent(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
+	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
 	t.SetState(st, true)
 
 	cst, found, _ := t.MockGetter.Get(extension.StateKeyContractAccount(contract))
@@ -130,8 +130,8 @@ func (t *TestUpdateCollectionPolicyProcessor) MakeOperation(
 		whs = append(whs, wh.Address())
 	}
 
-	op, _ := NewUpdateCollectionPolicy(
-		NewUpdateCollectionPolicyFact(
+	op, _ := NewUpdateModelConfig(
+		NewUpdateModelConfigFact(
 			[]byte("token"),
 			sender,
 			contract,

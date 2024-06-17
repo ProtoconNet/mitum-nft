@@ -41,13 +41,13 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 	if err := opr.SetProcessor(
-		nft.CreateCollectionHint,
-		nft.NewCreateCollectionProcessor(),
+		nft.RegisterModelHint,
+		nft.NewRegisterModelProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.UpdateCollectionPolicyHint,
-		nft.NewUpdateCollectionPolicyProcessor(),
+		nft.UpdateModelConfigHint,
+		nft.NewUpdateModelConfigProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
@@ -61,7 +61,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.DelegateHint,
+		nft.ApproveAllHint,
 		nft.NewDelegateProcessor(),
 	); err != nil {
 		return pctx, err
@@ -71,13 +71,13 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		nft.SignHint,
+		nft.AddSignatureHint,
 		nft.NewSignProcessor(),
 	); err != nil {
 		return pctx, err
 	}
 
-	_ = set.Add(nft.CreateCollectionHint,
+	_ = set.Add(nft.RegisterModelHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,
@@ -87,7 +87,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 			)
 		})
 
-	_ = set.Add(nft.UpdateCollectionPolicyHint,
+	_ = set.Add(nft.UpdateModelConfigHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,
@@ -117,7 +117,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 			)
 		})
 
-	_ = set.Add(nft.DelegateHint,
+	_ = set.Add(nft.ApproveAllHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,
@@ -137,7 +137,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 			)
 		})
 
-	_ = set.Add(nft.SignHint,
+	_ = set.Add(nft.AddSignatureHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,

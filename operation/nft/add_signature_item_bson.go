@@ -8,26 +8,26 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it SignItem) MarshalBSON() ([]byte, error) {
+func (it AddSignatureItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":    it.Hint().String(),
 			"contract": it.contract,
-			"nft":      it.nft,
+			"nft_idx":  it.nftIdx,
 			"currency": it.currency,
 		},
 	)
 }
 
-type SignItemBSONUnmarshaler struct {
+type AddSignatureItemBSONUnmarshaler struct {
 	Hint     string `bson:"_hint"`
 	Contract string `bson:"contract"`
-	NFT      uint64 `bson:"nft"`
+	NFTIdx   uint64 `bson:"nft_idx"`
 	Currency string `bson:"currency"`
 }
 
-func (it *SignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	var u SignItemBSONUnmarshaler
+func (it *AddSignatureItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	var u AddSignatureItemBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
@@ -37,7 +37,7 @@ func (it *SignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
-	if err := it.unpack(enc, ht, u.Contract, u.NFT, u.Currency); err != nil {
+	if err := it.unpack(enc, ht, u.Contract, u.NFTIdx, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 	return nil

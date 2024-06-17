@@ -30,7 +30,7 @@ var delegateProcessorPool = sync.Pool{
 	},
 }
 
-func (Delegate) Process(
+func (ApproveAll) Process(
 	ctx context.Context, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
@@ -40,7 +40,7 @@ type DelegateItemProcessor struct {
 	h      util.Hash
 	sender mitumbase.Address
 	box    *types.OperatorsBook
-	item   DelegateItem
+	item   ApproveAllItem
 }
 
 func (ipp *DelegateItemProcessor) PreProcess(
@@ -54,12 +54,12 @@ func (ipp *DelegateItemProcessor) PreProcess(
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		ipp.item.Delegatee(), "delegatee", true, false, getStateFunc); aErr != nil {
+		ipp.item.Approved(), "delegatee", true, false, getStateFunc); aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
 		return e.Wrap(
 			common.ErrSelfTarget.Wrap(
-				errors.Errorf("%v: delegatee %v is contract account", cErr, ipp.item.Delegatee())))
+				errors.Errorf("%v: delegatee %v is contract account", cErr, ipp.item.Approved())))
 	}
 
 	return nil
@@ -74,12 +74,12 @@ func (ipp *DelegateItemProcessor) Process(
 	}
 
 	switch ipp.item.Mode() {
-	case DelegateAllow:
-		if err := ipp.box.Append(ipp.item.Delegatee()); err != nil {
+	case ApproveAllAllow:
+		if err := ipp.box.Append(ipp.item.Approved()); err != nil {
 			return nil, err
 		}
-	case DelegateCancel:
-		if err := ipp.box.Remove(ipp.item.Delegatee()); err != nil {
+	case ApproveAllCancel:
+		if err := ipp.box.Remove(ipp.item.Approved()); err != nil {
 			return nil, err
 		}
 	default:
@@ -94,7 +94,7 @@ func (ipp *DelegateItemProcessor) Process(
 func (ipp *DelegateItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
-	ipp.item = DelegateItem{}
+	ipp.item = ApproveAllItem{}
 	ipp.box = nil
 
 	delegateItemProcessorPool.Put(ipp)
@@ -136,12 +136,12 @@ func NewDelegateProcessor() currencytypes.GetNewProcessor {
 func (opp *DelegateProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) (context.Context, mitumbase.OperationProcessReasonError, error) {
-	fact, ok := op.Fact().(DelegateFact)
+	fact, ok := op.Fact().(ApproveAllFact)
 	if !ok {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
-				Errorf("expected %T, not %T", DelegateFact{}, op.Fact())), nil
+				Errorf("expected %T, not %T", ApproveAllFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -234,7 +234,7 @@ func (opp *DelegateProcessor) Process(
 ) {
 	e := util.StringError("failed to process Delegate")
 
-	fact, ok := op.Fact().(DelegateFact)
+	fact, ok := op.Fact().(ApproveAllFact)
 	if !ok {
 		return nil, nil, e.Errorf("expected DelgateFact, not %T", op.Fact())
 	}

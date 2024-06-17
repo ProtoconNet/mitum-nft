@@ -108,7 +108,7 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 func (cmd *CreateCollectionCommand) createOperation() (mitumbase.Operation, error) {
 	e := util.StringError("failed to create create-collection operation")
 
-	fact := nft.NewCreateCollectionFact(
+	fact := nft.NewRegisterModelFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
@@ -119,7 +119,7 @@ func (cmd *CreateCollectionCommand) createOperation() (mitumbase.Operation, erro
 		cmd.Currency.CID,
 	)
 
-	op, err := nft.NewCreateCollection(fact)
+	op, err := nft.NewRegisterModel(fact)
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

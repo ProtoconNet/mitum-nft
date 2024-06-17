@@ -90,21 +90,21 @@ func (ipp *ApproveItemProcessor) PreProcess(
 				errors.Errorf("%v: approved %v is contract account", cErr, ipp.item.Approved())))
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.idx), "nft", getStateFunc)
+	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.nftIdx), "nft", getStateFunc)
 	if err != nil {
 		return e.Wrap(common.ErrStateNF.Wrap(
-			errors.Errorf("nft idx %v in contract account %v", ipp.item.idx, ipp.item.Contract())))
+			errors.Errorf("nft idx %v in contract account %v", ipp.item.nftIdx, ipp.item.Contract())))
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
 		return e.Wrap(common.ErrStateValInvalid.Wrap(
-			errors.Errorf("nft idx %v in contract account %v", ipp.item.idx, ipp.item.Contract())))
+			errors.Errorf("nft idx %v in contract account %v", ipp.item.nftIdx, ipp.item.Contract())))
 	}
 
 	if !nv.Active() {
 		return e.Wrap(common.ErrStateValInvalid.Wrap(
-			errors.Errorf("burned nft idx %v in contract account %v", ipp.item.idx, ipp.item.Contract())))
+			errors.Errorf("burned nft idx %v in contract account %v", ipp.item.nftIdx, ipp.item.Contract())))
 	}
 
 	if ipp.item.Approved().Equal(nv.Approved()) {
@@ -114,7 +114,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	if !nv.Owner().Equal(ipp.sender) {
 		if err := state.CheckExistsState(statecurrency.StateKeyAccount(nv.Owner()), getStateFunc); err != nil {
 			return e.Wrap(
-				common.ErrAccountNF.Wrap(errors.Errorf("nft owner %v for nft idx %v", nv.Owner(), ipp.item.idx)))
+				common.ErrAccountNF.Wrap(errors.Errorf("nft owner %v for nft idx %v", nv.Owner(), ipp.item.nftIdx)))
 		}
 
 		st, err = state.ExistsState(
@@ -125,7 +125,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 					common.ErrAccountNAth.Wrap(
 						errors.Errorf(
 							"sender %v neither nft owner nor operator for nft idx %v",
-							ipp.sender, ipp.item.idx))))
+							ipp.sender, ipp.item.nftIdx))))
 		}
 
 		operators, err := statenft.StateOperatorsBookValue(st)
@@ -135,7 +135,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 					common.ErrAccountNAth.Wrap(
 						errors.Errorf(
 							"sender %v neither nft owner nor operator for nft idx %v",
-							ipp.sender, ipp.item.idx))))
+							ipp.sender, ipp.item.nftIdx))))
 		}
 
 		if !operators.Exists(ipp.sender) {
@@ -143,7 +143,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 				common.ErrAccountNAth.Wrap(
 					errors.Errorf(
 						"sender %v neither nft owner nor operator for nft idx %v: sender is not in operators",
-						ipp.sender, ipp.item.idx)))
+						ipp.sender, ipp.item.nftIdx)))
 		}
 	}
 
@@ -153,7 +153,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 func (ipp *ApproveItemProcessor) Process(
 	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
-	nid := ipp.item.NFT()
+	nid := ipp.item.NFTIdx()
 
 	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {

@@ -21,7 +21,7 @@ type DelegateCommand struct {
 	sender   base.Address
 	contract base.Address
 	operator base.Address
-	mode     nft.DelegateMode
+	mode     nft.ApproveAllMode
 }
 
 func (cmd *DelegateCommand) Run(pctx context.Context) error {
@@ -67,9 +67,9 @@ func (cmd *DelegateCommand) parseFlags() error {
 	}
 
 	if len(cmd.Mode) < 1 {
-		cmd.mode = nft.DelegateAllow
+		cmd.mode = nft.ApproveAllAllow
 	} else {
-		mode := nft.DelegateMode(cmd.Mode)
+		mode := nft.ApproveAllMode(cmd.Mode)
 		if err := mode.IsValid(nil); err != nil {
 			return err
 		}
@@ -83,9 +83,9 @@ func (cmd *DelegateCommand) parseFlags() error {
 func (cmd *DelegateCommand) createOperation() (base.Operation, error) {
 	e := util.StringError("failed to create delegate operation")
 
-	items := []nft.DelegateItem{nft.NewDelegateItem(cmd.contract, cmd.operator, cmd.mode, cmd.Currency.CID)}
+	items := []nft.ApproveAllItem{nft.NewApproveAllItem(cmd.contract, cmd.operator, cmd.mode, cmd.Currency.CID)}
 
-	fact := nft.NewDelegateFact([]byte(cmd.Token), cmd.sender, items)
+	fact := nft.NewApproveAllFact([]byte(cmd.Token), cmd.sender, items)
 
 	op, err := nft.NewDelegate(fact)
 	if err != nil {

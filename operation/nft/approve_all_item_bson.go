@@ -8,27 +8,27 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it DelegateItem) MarshalBSON() ([]byte, error) {
+func (it ApproveAllItem) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":     it.Hint().String(),
-			"contract":  it.contract,
-			"delegatee": it.delegatee,
-			"mode":      it.mode,
-			"currency":  it.currency,
+			"_hint":    it.Hint().String(),
+			"contract": it.contract,
+			"approved": it.approved,
+			"mode":     it.mode,
+			"currency": it.currency,
 		},
 	)
 }
 
 type DelegateItemBSONUnmarshaler struct {
-	Hint      string `bson:"_hint"`
-	Contract  string `bson:"contract"`
-	Delegatee string `bson:"delegatee"`
-	Mode      string `bson:"mode"`
-	Currency  string `bson:"currency"`
+	Hint     string `bson:"_hint"`
+	Contract string `bson:"contract"`
+	Approved string `bson:"approved"`
+	Mode     string `bson:"mode"`
+	Currency string `bson:"currency"`
 }
 
-func (it *DelegateItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (it *ApproveAllItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var u DelegateItemBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
@@ -39,7 +39,7 @@ func (it *DelegateItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 
-	if err := it.unmarshal(enc, ht, u.Contract, u.Delegatee, u.Mode, u.Currency); err != nil {
+	if err := it.unmarshal(enc, ht, u.Contract, u.Approved, u.Mode, u.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *it)
 	}
 	return nil

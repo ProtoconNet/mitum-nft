@@ -19,35 +19,35 @@ import (
 	"github.com/pkg/errors"
 )
 
-var updateCollectionPolicyProcessorPool = sync.Pool{
+var updateModelConfigProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(UpdateCollectionPolicyProcessor)
+		return new(UpdateModelConfigProcessor)
 	},
 }
 
-func (UpdateCollectionPolicy) Process(
+func (UpdateModelConfig) Process(
 	_ context.Context, _ mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type UpdateCollectionPolicyProcessor struct {
+type UpdateModelConfigProcessor struct {
 	*mitumbase.BaseOperationProcessor
 }
 
-func NewUpdateCollectionPolicyProcessor() currencytypes.GetNewProcessor {
+func NewUpdateModelConfigProcessor() currencytypes.GetNewProcessor {
 	return func(
 		height mitumbase.Height,
 		getStateFunc mitumbase.GetStateFunc,
 		newPreProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
 	) (mitumbase.OperationProcessor, error) {
-		e := util.StringError("failed to create new UpdateCollectionPolicyProcessor")
+		e := util.StringError("failed to create new UpdateModelConfigProcessor")
 
-		nopp := updateCollectionPolicyProcessorPool.Get()
-		opp, ok := nopp.(*UpdateCollectionPolicyProcessor)
+		nopp := updateModelConfigProcessorPool.Get()
+		opp, ok := nopp.(*UpdateModelConfigProcessor)
 		if !ok {
-			return nil, errors.Errorf("expected UpdateCollectionPolicyProcessor, not %T", nopp)
+			return nil, errors.Errorf("expected UpdateModelConfigProcessor, not %T", nopp)
 		}
 
 		b, err := mitumbase.NewBaseOperationProcessor(
@@ -62,15 +62,15 @@ func NewUpdateCollectionPolicyProcessor() currencytypes.GetNewProcessor {
 	}
 }
 
-func (opp *UpdateCollectionPolicyProcessor) PreProcess(
+func (opp *UpdateModelConfigProcessor) PreProcess(
 	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) (context.Context, mitumbase.OperationProcessReasonError, error) {
-	fact, ok := op.Fact().(UpdateCollectionPolicyFact)
+	fact, ok := op.Fact().(UpdateModelConfigFact)
 	if !ok {
 		return ctx, mitumbase.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
-				Errorf("expected %T, not %T", UpdateCollectionPolicyFact{}, op.Fact())), nil
+				Errorf("expected %T, not %T", UpdateModelConfigFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -156,12 +156,12 @@ func (opp *UpdateCollectionPolicyProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *UpdateCollectionPolicyProcessor) Process(
+func (opp *UpdateModelConfigProcessor) Process(
 	_ context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc) (
 	[]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error,
 ) {
 	e := util.StringError("failed to process UpdateCollectionPolicy")
-	fact, ok := op.Fact().(UpdateCollectionPolicyFact)
+	fact, ok := op.Fact().(UpdateModelConfigFact)
 	if !ok {
 		return nil, nil, e.Errorf("expected UpdateCollectionPolicyFact, not %T", op.Fact())
 	}
@@ -179,7 +179,7 @@ func (opp *UpdateCollectionPolicyProcessor) Process(
 	var sts []mitumbase.StateMergeValue
 
 	de := types.NewDesign(
-		design.Parent(),
+		design.Contract(),
 		design.Creator(),
 		design.Active(),
 		types.NewCollectionPolicy(fact.name, fact.royalty, fact.uri, fact.whitelist),
@@ -267,8 +267,8 @@ func (opp *UpdateCollectionPolicyProcessor) Process(
 	return sts, nil, nil
 }
 
-func (opp *UpdateCollectionPolicyProcessor) Close() error {
-	updateCollectionPolicyProcessorPool.Put(opp)
+func (opp *UpdateModelConfigProcessor) Close() error {
+	updateModelConfigProcessorPool.Put(opp)
 
 	return nil
 }

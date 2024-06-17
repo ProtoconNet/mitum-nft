@@ -81,15 +81,15 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 			return errors.Errorf("expected WithdrawFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
-	case nft.CreateCollection:
-		fact, ok := t.Fact().(nft.CreateCollectionFact)
+	case nft.RegisterModel:
+		fact, ok := t.Fact().(nft.RegisterModelFact)
 		if !ok {
 			return errors.Errorf("expected CreateCollectionFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 		duplicationTypeContractID = currencyprocessor.DuplicationKey(fact.Contract().String(), DuplicationTypeContract)
-	case nft.UpdateCollectionPolicy:
-		fact, ok := t.Fact().(nft.UpdateCollectionPolicyFact)
+	case nft.UpdateModelConfig:
+		fact, ok := t.Fact().(nft.UpdateModelConfigFact)
 		if !ok {
 			return errors.Errorf("expected UpdateCollectionPolicyFact, not %T", t.Fact())
 		}
@@ -106,8 +106,8 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 			return errors.Errorf("expected TransferFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
-	case nft.Delegate:
-		fact, ok := t.Fact().(nft.DelegateFact)
+	case nft.ApproveAll:
+		fact, ok := t.Fact().(nft.ApproveAllFact)
 		if !ok {
 			return errors.Errorf("expected DelegateFact, not %T", t.Fact())
 		}
@@ -118,8 +118,8 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op mitumbase.Op
 			return errors.Errorf("expected ApproveFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
-	case nft.Sign:
-		fact, ok := t.Fact().(nft.SignFact)
+	case nft.AddSignature:
+		fact, ok := t.Fact().(nft.AddSignatureFact)
 		if !ok {
 			return errors.Errorf("expected SignFact, not %T", t.Fact())
 		}
@@ -194,13 +194,13 @@ func GetNewProcessor(opr *currencyprocessor.OperationProcessor, op mitumbase.Ope
 		currency.RegisterCurrency,
 		currency.UpdateCurrency,
 		currency.Mint,
-		nft.CreateCollection,
-		nft.UpdateCollectionPolicy,
+		nft.RegisterModel,
+		nft.UpdateModelConfig,
 		nft.Mint,
 		nft.Transfer,
-		nft.Delegate,
+		nft.ApproveAll,
 		nft.Approve,
-		nft.Sign:
+		nft.AddSignature:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil

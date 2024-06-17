@@ -300,7 +300,7 @@ func (opp *MintProcessor) PreProcess(
 					if i == len(whitelist)-1 {
 						return ctx, base.NewBaseOperationProcessReasonError(
 							common.ErrMPreProcess.
-								Errorf("%v: sender is not in whitelist", err)), nil
+								Errorf("%v: sender is not in minter whitelist", err)), nil
 					}
 				}
 

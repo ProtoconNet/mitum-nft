@@ -1,41 +1,41 @@
 package nft
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (fact CreateCollectionFact) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(bson.M{
-		"_hint":     fact.Hint().String(),
-		"hash":      fact.BaseFact.Hash().String(),
-		"token":     fact.BaseFact.Token(),
-		"sender":    fact.sender,
-		"contract":  fact.contract,
-		"name":      fact.name,
-		"royalty":   fact.royalty,
-		"uri":       fact.uri,
-		"whitelist": fact.whitelist,
-		"currency":  fact.currency,
-	})
+func (fact UpdateModelConfigFact) MarshalBSON() ([]byte, error) {
+	return bsonenc.Marshal(
+		bson.M{
+			"_hint":            fact.Hint().String(),
+			"hash":             fact.BaseFact.Hash().String(),
+			"token":            fact.BaseFact.Token(),
+			"sender":           fact.sender,
+			"contract":         fact.contract,
+			"name":             fact.name,
+			"royalty":          fact.royalty,
+			"uri":              fact.uri,
+			"minter_whitelist": fact.whitelist,
+			"currency":         fact.currency,
+		})
 }
 
-type CreateCollectionFactBSONUnmarshaler struct {
+type UpdateModelConfigFactBSONUnmarshaler struct {
 	Hint      string   `bson:"_hint"`
 	Sender    string   `bson:"sender"`
 	Contract  string   `bson:"contract"`
 	Name      string   `bson:"name"`
 	Royalty   uint     `bson:"royalty"`
 	URI       string   `bson:"uri"`
-	Whitelist []string `bson:"whitelist"`
+	Whitelist []string `bson:"minter_whitelist"`
 	Currency  string   `bson:"currency"`
 }
 
-func (fact *CreateCollectionFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (fact *UpdateModelConfigFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var u common.BaseFactBSONUnmarshaler
 
 	err := enc.Unmarshal(b, &u)
@@ -46,7 +46,7 @@ func (fact *CreateCollectionFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) err
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(u.Hash))
 	fact.BaseFact.SetToken(u.Token)
 
-	var uf CreateCollectionFactBSONUnmarshaler
+	var uf UpdateModelConfigFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
@@ -57,14 +57,14 @@ func (fact *CreateCollectionFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) err
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	if err := fact.unmarshal(enc, uf.Sender, uf.Contract, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency); err != nil {
+	if err := fact.unpack(enc, uf.Sender, uf.Contract, uf.Name, uf.Royalty, uf.URI, uf.Whitelist, uf.Currency); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	return nil
 }
 
-func (op CreateCollection) MarshalBSON() ([]byte, error) {
+func (op UpdateModelConfig) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": op.Hint().String(),
@@ -74,7 +74,7 @@ func (op CreateCollection) MarshalBSON() ([]byte, error) {
 		})
 }
 
-func (op *CreateCollection) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (op *UpdateModelConfig) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *op)

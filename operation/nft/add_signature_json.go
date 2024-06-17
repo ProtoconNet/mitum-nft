@@ -2,58 +2,60 @@ package nft
 
 import (
 	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-type DelegateFactJSONMarshaler struct {
+type AddSignatureFactJSONMarshaler struct {
 	mitumbase.BaseFactJSONMarshaler
-	Sender mitumbase.Address `json:"sender"`
-	Items  []DelegateItem    `json:"items"`
+	Sender mitumbase.Address  `json:"sender"`
+	Items  []AddSignatureItem `json:"items"`
 }
 
-func (fact DelegateFact) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(DelegateFactJSONMarshaler{
+func (fact AddSignatureFact) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(AddSignatureFactJSONMarshaler{
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Sender:                fact.sender,
 		Items:                 fact.items,
 	})
 }
 
-type DelegateFactJSONUnmarshaler struct {
+type AddSignatureFactJSONUnmarshaler struct {
 	mitumbase.BaseFactJSONUnmarshaler
 	Sender string          `json:"sender"`
 	Items  json.RawMessage `json:"items"`
 }
 
-func (fact *DelegateFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	var u DelegateFactJSONUnmarshaler
-	if err := enc.Unmarshal(b, &u); err != nil {
+func (fact *AddSignatureFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
+	var uf AddSignatureFactJSONUnmarshaler
+
+	if err := enc.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
-	fact.BaseFact.SetJSONUnmarshaler(u.BaseFactJSONUnmarshaler)
+	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	if err := fact.unmarshal(enc, u.Sender, u.Items); err != nil {
+	if err := fact.unpack(enc, uf.Sender, uf.Items); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	return nil
 }
 
-type delegateMarshaler struct {
+type AddSignatureMarshaler struct {
 	common.BaseOperationJSONMarshaler
 }
 
-func (op Delegate) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(delegateMarshaler{
+func (op AddSignature) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(AddSignatureMarshaler{
 		BaseOperationJSONMarshaler: op.BaseOperation.JSONMarshaler(),
 	})
 }
 
-func (op *Delegate) DecodeJSON(b []byte, enc encoder.Encoder) error {
+func (op *AddSignature) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *op)

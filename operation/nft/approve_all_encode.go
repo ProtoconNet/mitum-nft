@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (fact *SignFact) unpack(
+func (fact *ApproveAllFact) unmarshal(
 	enc encoder.Encoder,
 	sd string,
 	bits []byte,
@@ -23,11 +23,11 @@ func (fact *SignFact) unpack(
 		return err
 	}
 
-	items := make([]SignItem, len(hits))
+	items := make([]ApproveAllItem, len(hits))
 	for i, hinter := range hits {
-		item, ok := hinter.(SignItem)
+		item, ok := hinter.(ApproveAllItem)
 		if !ok {
-			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected SignItem, not %T", hinter))
+			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected DelegateItem, not %T", hinter))
 		}
 
 		items[i] = item

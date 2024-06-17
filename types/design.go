@@ -62,16 +62,16 @@ var DesignHint = hint.MustNewHint("mitum-nft-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	parent  mitumbase.Address
-	creator mitumbase.Address
-	active  bool
-	policy  BasePolicy
+	contract mitumbase.Address
+	creator  mitumbase.Address
+	active   bool
+	policy   BasePolicy
 }
 
-func NewDesign(parent mitumbase.Address, creator mitumbase.Address, active bool, policy BasePolicy) Design {
+func NewDesign(contract mitumbase.Address, creator mitumbase.Address, active bool, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
-		parent:     parent,
+		contract:   contract,
 		creator:    creator,
 		active:     active,
 		policy:     policy,
@@ -81,15 +81,15 @@ func NewDesign(parent mitumbase.Address, creator mitumbase.Address, active bool,
 func (de Design) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		de.BaseHinter,
-		de.parent,
+		de.contract,
 		de.creator,
 		de.policy,
 	); err != nil {
 		return err
 	}
 
-	if de.parent.Equal(de.creator) {
-		return util.ErrInvalid.Errorf("parent, %v is same with creator", de.parent)
+	if de.contract.Equal(de.creator) {
+		return util.ErrInvalid.Errorf("contract account %v is same with creator", de.contract)
 	}
 
 	return nil
@@ -104,7 +104,7 @@ func (de Design) Bytes() []byte {
 	}
 
 	return util.ConcatBytesSlice(
-		de.parent.Bytes(),
+		de.contract.Bytes(),
 		de.creator.Bytes(),
 		ab,
 		de.policy.Bytes(),
@@ -119,8 +119,8 @@ func (de Design) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(de.Bytes())
 }
 
-func (de Design) Parent() mitumbase.Address {
-	return de.parent
+func (de Design) Contract() mitumbase.Address {
+	return de.contract
 }
 
 func (de Design) Creator() mitumbase.Address {
@@ -138,7 +138,7 @@ func (de Design) Policy() BasePolicy {
 func (de Design) Addresses() ([]mitumbase.Address, error) {
 	as := make([]mitumbase.Address, 2)
 
-	as[0] = de.parent
+	as[0] = de.contract
 	as[1] = de.creator
 
 	if ads, err := de.Policy().Addresses(); err != nil {
@@ -151,7 +151,7 @@ func (de Design) Addresses() ([]mitumbase.Address, error) {
 }
 
 func (de Design) Equal(cd Design) bool {
-	if !de.parent.Equal(cd.parent) {
+	if !de.contract.Equal(cd.contract) {
 		return false
 	}
 

@@ -27,7 +27,7 @@ func (it *TransferItem) unpack(
 		return err
 	}
 	it.receiver = receiver
-	it.nft = nid
+	it.nftIdx = nid
 	it.currency = types.CurrencyID(cid)
 
 	return nil

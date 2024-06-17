@@ -178,8 +178,8 @@ type CollectionDesign struct {
 	Design
 }
 
-func NewCollectionDesign(parent mitumbase.Address, creator mitumbase.Address, active bool, policy CollectionPolicy) CollectionDesign {
-	design := NewDesign(parent, creator, active, policy)
+func NewCollectionDesign(contract mitumbase.Address, creator mitumbase.Address, active bool, policy CollectionPolicy) CollectionDesign {
+	design := NewDesign(contract, creator, active, policy)
 
 	return CollectionDesign{
 		Design: design,

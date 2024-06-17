@@ -10,16 +10,16 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Parent  mitumbase.Address `json:"parent"`
-	Creator mitumbase.Address `json:"creator"`
-	Active  bool              `json:"active"`
-	Policy  BasePolicy        `json:"policy"`
+	Contract mitumbase.Address `json:"contract"`
+	Creator  mitumbase.Address `json:"creator"`
+	Active   bool              `json:"active"`
+	Policy   BasePolicy        `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DesignJSONMarshaler{
 		BaseHinter: de.BaseHinter,
-		Parent:     de.parent,
+		Contract:   de.contract,
 		Creator:    de.creator,
 		Active:     de.active,
 		Policy:     de.policy,
@@ -27,11 +27,11 @@ func (de Design) MarshalJSON() ([]byte, error) {
 }
 
 type DesignJSONUnmarshaler struct {
-	Hint    hint.Hint       `json:"_hint"`
-	Parent  string          `json:"parent"`
-	Creator string          `json:"creator"`
-	Active  bool            `json:"active"`
-	Policy  json.RawMessage `json:"policy"`
+	Hint     hint.Hint       `json:"_hint"`
+	Contract string          `json:"contract"`
+	Creator  string          `json:"creator"`
+	Active   bool            `json:"active"`
+	Policy   json.RawMessage `json:"policy"`
 }
 
 func (de *Design) DecodeJSON(b []byte, enc encoder.Encoder) error {
@@ -42,5 +42,5 @@ func (de *Design) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unmarshal(enc, u.Hint, u.Parent, u.Creator, u.Active, u.Policy)
+	return de.unmarshal(enc, u.Hint, u.Contract, u.Creator, u.Active, u.Policy)
 }

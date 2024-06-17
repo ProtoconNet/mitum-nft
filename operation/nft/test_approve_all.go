@@ -12,14 +12,14 @@ import (
 )
 
 type TestDelegateProcessor struct {
-	*test.BaseTestOperationProcessorWithItem[Delegate, DelegateItem]
+	*test.BaseTestOperationProcessorWithItem[ApproveAll, ApproveAllItem]
 	name    nfttypes.CollectionName
 	royalty nfttypes.PaymentParameter
 	uri     nfttypes.URI
 }
 
 func NewTestDelegateProcessor(tp *test.TestProcessor) TestDelegateProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Delegate, DelegateItem](tp)
+	t := test.NewBaseTestOperationProcessorWithItem[ApproveAll, ApproveAllItem](tp)
 	return TestDelegateProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 
@@ -122,9 +122,9 @@ func (t *TestDelegateProcessor) SetService(
 	policy := nfttypes.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
 	design := nfttypes.NewDesign(contract, sender, true, policy)
 
-	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Parent(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
+	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
-	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Parent(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
+	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
 	t.SetState(st, true)
 
 	cst, found, _ := t.MockGetter.Get(extension.StateKeyContractAccount(contract))
@@ -158,19 +158,19 @@ func (t *TestDelegateProcessor) Print(fileName string,
 }
 
 func (t *TestDelegateProcessor) MakeItem(
-	target test.Account, operator test.Account, mode DelegateMode, currency types.CurrencyID, targetItems []DelegateItem,
+	target test.Account, operator test.Account, mode ApproveAllMode, currency types.CurrencyID, targetItems []ApproveAllItem,
 ) *TestDelegateProcessor {
-	item := NewDelegateItem(target.Address(), operator.Address(), mode, currency)
-	test.UpdateSlice[DelegateItem](item, targetItems)
+	item := NewApproveAllItem(target.Address(), operator.Address(), mode, currency)
+	test.UpdateSlice[ApproveAllItem](item, targetItems)
 
 	return t
 }
 
 func (t *TestDelegateProcessor) MakeOperation(
-	sender base.Address, privatekey base.Privatekey, items []DelegateItem,
+	sender base.Address, privatekey base.Privatekey, items []ApproveAllItem,
 ) *TestDelegateProcessor {
 	op, _ := NewDelegate(
-		NewDelegateFact(
+		NewApproveAllFact(
 			[]byte("token"),
 			sender,
 			items,

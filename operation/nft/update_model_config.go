@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	UpdateCollectionPolicyFactHint = hint.MustNewHint("mitum-nft-update-collection-policy-operation-fact-v0.0.1")
-	UpdateCollectionPolicyHint     = hint.MustNewHint("mitum-nft-update-collection-policy-operation-v0.0.1")
+	UpdateModelConfigFactHint = hint.MustNewHint("mitum-nft-update-model-config-operation-fact-v0.0.1")
+	UpdateModelConfigHint     = hint.MustNewHint("mitum-nft-update-model-config-operation-v0.0.1")
 )
 
-type UpdateCollectionPolicyFact struct {
+type UpdateModelConfigFact struct {
 	mitumbase.BaseFact
 	sender    mitumbase.Address
 	contract  mitumbase.Address
@@ -27,7 +27,7 @@ type UpdateCollectionPolicyFact struct {
 	currency  currencytypes.CurrencyID
 }
 
-func NewUpdateCollectionPolicyFact(
+func NewUpdateModelConfigFact(
 	token []byte,
 	sender, contract mitumbase.Address,
 	name types.CollectionName,
@@ -35,10 +35,10 @@ func NewUpdateCollectionPolicyFact(
 	uri types.URI,
 	whitelist []mitumbase.Address,
 	currency currencytypes.CurrencyID,
-) UpdateCollectionPolicyFact {
-	bf := mitumbase.NewBaseFact(UpdateCollectionPolicyFactHint, token)
+) UpdateModelConfigFact {
+	bf := mitumbase.NewBaseFact(UpdateModelConfigFactHint, token)
 
-	fact := UpdateCollectionPolicyFact{
+	fact := UpdateModelConfigFact{
 		BaseFact:  bf,
 		sender:    sender,
 		contract:  contract,
@@ -53,7 +53,7 @@ func NewUpdateCollectionPolicyFact(
 	return fact
 }
 
-func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
+func (fact UpdateModelConfigFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
@@ -104,15 +104,15 @@ func (fact UpdateCollectionPolicyFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact UpdateCollectionPolicyFact) Hash() util.Hash {
+func (fact UpdateModelConfigFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact UpdateCollectionPolicyFact) GenerateHash() util.Hash {
+func (fact UpdateModelConfigFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact UpdateCollectionPolicyFact) Bytes() []byte {
+func (fact UpdateModelConfigFact) Bytes() []byte {
 	as := make([][]byte, len(fact.whitelist))
 	for i, white := range fact.whitelist {
 		as[i] = white.Bytes()
@@ -130,48 +130,48 @@ func (fact UpdateCollectionPolicyFact) Bytes() []byte {
 	)
 }
 
-func (fact UpdateCollectionPolicyFact) Token() mitumbase.Token {
+func (fact UpdateModelConfigFact) Token() mitumbase.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact UpdateCollectionPolicyFact) Sender() mitumbase.Address {
+func (fact UpdateModelConfigFact) Sender() mitumbase.Address {
 	return fact.sender
 }
 
-func (fact UpdateCollectionPolicyFact) Contract() mitumbase.Address {
+func (fact UpdateModelConfigFact) Contract() mitumbase.Address {
 	return fact.contract
 }
 
-func (fact UpdateCollectionPolicyFact) Name() types.CollectionName {
+func (fact UpdateModelConfigFact) Name() types.CollectionName {
 	return fact.name
 }
 
-func (fact UpdateCollectionPolicyFact) Royalty() types.PaymentParameter {
+func (fact UpdateModelConfigFact) Royalty() types.PaymentParameter {
 	return fact.royalty
 }
 
-func (fact UpdateCollectionPolicyFact) URI() types.URI {
+func (fact UpdateModelConfigFact) URI() types.URI {
 	return fact.uri
 }
 
-func (fact UpdateCollectionPolicyFact) Whitelist() []mitumbase.Address {
+func (fact UpdateModelConfigFact) Whitelist() []mitumbase.Address {
 	return fact.whitelist
 }
 
-func (fact UpdateCollectionPolicyFact) Currency() currencytypes.CurrencyID {
+func (fact UpdateModelConfigFact) Currency() currencytypes.CurrencyID {
 	return fact.currency
 }
 
-func (fact UpdateCollectionPolicyFact) Addresses() ([]mitumbase.Address, error) {
+func (fact UpdateModelConfigFact) Addresses() ([]mitumbase.Address, error) {
 	as := make([]mitumbase.Address, 1)
 	as[0] = fact.sender
 	return as, nil
 }
 
-type UpdateCollectionPolicy struct {
+type UpdateModelConfig struct {
 	common.BaseOperation
 }
 
-func NewUpdateCollectionPolicy(fact UpdateCollectionPolicyFact) (UpdateCollectionPolicy, error) {
-	return UpdateCollectionPolicy{BaseOperation: common.NewBaseOperation(UpdateCollectionPolicyHint, fact)}, nil
+func NewUpdateModelConfig(fact UpdateModelConfigFact) (UpdateModelConfig, error) {
+	return UpdateModelConfig{BaseOperation: common.NewBaseOperation(UpdateModelConfigHint, fact)}, nil
 }

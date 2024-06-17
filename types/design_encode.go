@@ -21,11 +21,11 @@ func (de *Design) unmarshal(
 	de.BaseHinter = hint.NewBaseHinter(ht)
 	de.active = active
 
-	parent, err := mitumbase.DecodeAddress(pAdr, enc)
+	contract, err := mitumbase.DecodeAddress(pAdr, enc)
 	if err != nil {
 		return e.Wrap(err)
 	}
-	de.parent = parent
+	de.contract = contract
 
 	creator, err := mitumbase.DecodeAddress(crAdr, enc)
 	if err != nil {
