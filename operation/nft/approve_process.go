@@ -48,7 +48,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	e := util.StringError("preprocess ApproveItemProcessor")
 
 	if err := currencystate.CheckExistsState(
-		statecurrency.StateKeyCurrencyDesign(ipp.item.Currency()), getStateFunc); err != nil {
+		statecurrency.DesignStateKey(ipp.item.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", ipp.item.Currency())))
 	}
 
@@ -112,7 +112,7 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	}
 
 	if !nv.Owner().Equal(ipp.sender) {
-		if err := state.CheckExistsState(statecurrency.StateKeyAccount(nv.Owner()), getStateFunc); err != nil {
+		if err := state.CheckExistsState(statecurrency.AccountStateKey(nv.Owner()), getStateFunc); err != nil {
 			return e.Wrap(
 				common.ErrAccountNF.Wrap(errors.Errorf("nft owner %v for nft idx %v", nv.Owner(), ipp.item.nftIdx)))
 		}
@@ -392,9 +392,9 @@ func CalculateCollectionItemsFee(getStateFunc mitumbase.GetStateFunc, items []Co
 			continue
 		}
 
-		if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(policy.Feeer().Receiver()), getStateFunc); err != nil {
+		if err := currencystate.CheckExistsState(statecurrency.AccountStateKey(policy.Feeer().Receiver()), getStateFunc); err != nil {
 			return nil, nil, err
-		} else if st, found, err := getStateFunc(statecurrency.StateKeyBalance(policy.Feeer().Receiver(), item.Currency())); err != nil {
+		} else if st, found, err := getStateFunc(statecurrency.BalanceStateKey(policy.Feeer().Receiver(), item.Currency())); err != nil {
 			return nil, nil, err
 		} else if !found {
 			return nil, nil, errors.Errorf("feeer receiver account not found, %s", policy.Feeer().Receiver())

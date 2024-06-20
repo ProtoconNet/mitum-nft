@@ -22,11 +22,11 @@ import (
 )
 
 var (
-	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/operators` // revive:disable-line:line-length-limit
+	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
 	HandlerPathNFTCollection = `/nft/{contract:.*}`
-	HandlerPathNFT           = `/nft/{contract:.*}/{nft_idx:.*}`
+	HandlerPathNFT           = `/nft/{contract:.*}/nftidx/{nft_idx:.*}`
 	HandlerPathNFTs          = `/nft/{contract:.*}/nfts`
-	HandlerPathNFTCount      = `/nft/{contract:.*}/count`
+	HandlerPathNFTCount      = `/nft/{contract:.*}/totalsupply`
 )
 
 func init() {

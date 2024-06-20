@@ -33,7 +33,7 @@ var signProcessorPool = sync.Pool{
 }
 
 func (AddSignature) Process(
-	ctx context.Context, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
@@ -45,7 +45,7 @@ type SignItemProcessor struct {
 }
 
 func (ipp *SignItemProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess SignItemProcessor")
 
@@ -55,7 +55,7 @@ func (ipp *SignItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
@@ -109,7 +109,7 @@ func (ipp *SignItemProcessor) PreProcess(
 }
 
 func (ipp *SignItemProcessor) Process(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 

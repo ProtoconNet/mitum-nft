@@ -30,7 +30,7 @@ var transferProcessorPool = sync.Pool{
 }
 
 func (Transfer) Process(
-	ctx context.Context, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
@@ -42,7 +42,7 @@ type TransferItemProcessor struct {
 }
 
 func (ipp *TransferItemProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess TransferItemProcessor")
 	it := ipp.item
@@ -51,7 +51,7 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
@@ -139,24 +139,24 @@ func (ipp *TransferItemProcessor) PreProcess(
 }
 
 func (ipp *TransferItemProcessor) Process(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	receiver := ipp.item.Receiver()
 	nid := ipp.item.NFT()
 
 	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
-		return nil, errors.Errorf("nft not found, %v: %w", nid, err)
+		return nil, errors.Errorf("nft not found, %v: %v", nid, err)
 	}
 
 	nv, err := statenft.StateNFTValue(st)
 	if err != nil {
-		return nil, errors.Errorf("nft value not found, %v: %w", nid, err)
+		return nil, errors.Errorf("nft value not found, %v: %v", nid, err)
 	}
 
 	n := types.NewNFT(nid, nv.Active(), receiver, nv.NFTHash(), nv.URI(), receiver, nv.Creators())
 	if err := n.IsValid(nil); err != nil {
-		return nil, errors.Errorf("invalid nft, %v: %w", nid, err)
+		return nil, errors.Errorf("invalid nft, %v: %v", nid, err)
 	}
 
 	sts := make([]mitumbase.StateMergeValue, 1)

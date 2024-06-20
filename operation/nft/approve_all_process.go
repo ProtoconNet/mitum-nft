@@ -31,7 +31,7 @@ var delegateProcessorPool = sync.Pool{
 }
 
 func (ApproveAll) Process(
-	ctx context.Context, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
@@ -44,12 +44,12 @@ type DelegateItemProcessor struct {
 }
 
 func (ipp *DelegateItemProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess DelegateItemProcessor")
 
 	if err := currencystate.CheckExistsState(
-		statecurrency.StateKeyCurrencyDesign(ipp.item.Currency()), getStateFunc); err != nil {
+		statecurrency.DesignStateKey(ipp.item.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
@@ -66,7 +66,7 @@ func (ipp *DelegateItemProcessor) PreProcess(
 }
 
 func (ipp *DelegateItemProcessor) Process(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, _ mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	if ipp.box == nil {
 		return nil, errors.Errorf(

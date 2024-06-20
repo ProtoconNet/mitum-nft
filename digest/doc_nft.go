@@ -140,7 +140,7 @@ func (doc NFTOperatorDoc) MarshalBSON() ([]byte, error) {
 
 	m["contract"] = parsedKey[1]
 	m["address"] = parsedKey[2]
-	m["operators"] = doc.operators
+	m["approved"] = doc.operators
 	m["height"] = doc.st.Height()
 
 	return bsonenc.Marshal(m)

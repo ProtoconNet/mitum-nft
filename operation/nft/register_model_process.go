@@ -213,7 +213,7 @@ func (opp *RegisterModelProcessor) Process(
 	}
 
 	senderBalSt, err := cstate.ExistsState(
-		statec.StateKeyBalance(fact.Sender(), fact.Currency()),
+		statec.BalanceStateKey(fact.Sender(), fact.Currency()),
 		"sender balance",
 		getStateFunc,
 	)
@@ -229,7 +229,7 @@ func (opp *RegisterModelProcessor) Process(
 	case err != nil:
 		return nil, mitumbase.NewBaseOperationProcessReasonError(
 			"failed to get balance value, %v: %w",
-			statec.StateKeyBalance(fact.Sender(), fact.Currency()),
+			statec.BalanceStateKey(fact.Sender(), fact.Currency()),
 			err,
 		), nil
 	case senderBal.Big().Compare(fee) < 0:
@@ -244,9 +244,9 @@ func (opp *RegisterModelProcessor) Process(
 		return nil, mitumbase.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", senderBalSt.Value()), nil
 	}
 
-	if err := cstate.CheckExistsState(statec.StateKeyAccount(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(statec.AccountStateKey(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
 		return nil, nil, err
-	} else if feeRcvrSt, found, err := getStateFunc(statec.StateKeyBalance(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
+	} else if feeRcvrSt, found, err := getStateFunc(statec.BalanceStateKey(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
 		return nil, nil, err
 	} else if !found {
 		return nil, nil, errors.Errorf("feeer receiver %s not found", currencyPolicy.Feeer().Receiver())

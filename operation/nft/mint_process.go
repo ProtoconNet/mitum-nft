@@ -51,7 +51,7 @@ func (ipp *MintItemProcessor) PreProcess(
 	e := util.StringError("preprocess MintItemProcessor")
 
 	if err := currencystate.CheckExistsState(
-		statecurrency.StateKeyCurrencyDesign(ipp.item.Currency()), getStateFunc); err != nil {
+		statecurrency.DesignStateKey(ipp.item.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
@@ -95,7 +95,7 @@ func (ipp *MintItemProcessor) Process(
 	e := util.StringError("process MintItemProcessor")
 
 	sts := make([]base.StateMergeValue, 1)
-	k := statecurrency.StateKeyAccount(ipp.item.Receiver())
+	k := statecurrency.AccountStateKey(ipp.item.Receiver())
 	switch _, found, err := getStateFunc(k); {
 	case err != nil:
 		return nil, e.Wrap(err)
@@ -118,7 +118,7 @@ func (ipp *MintItemProcessor) Process(
 
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
-		k := statecurrency.StateKeyAccount(creator.Address())
+		k := statecurrency.AccountStateKey(creator.Address())
 		switch _, found, err := getStateFunc(k); {
 		case err != nil:
 			return nil, e.Wrap(err)
@@ -326,7 +326,7 @@ func (opp *MintProcessor) PreProcess(
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError(
 					common.ErrMPreProcess.
-						Wrap(common.ErrMStateInvalid).Errorf("collection last index, %v: %w", item.contract, err)), nil
+						Wrap(common.ErrMStateInvalid).Errorf("collection last index, %v: %v", item.contract, err)), nil
 			}
 
 			idxes[item.contract.String()] = nftID

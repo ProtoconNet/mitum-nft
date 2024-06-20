@@ -9,7 +9,7 @@ import (
 func (bs *BlockSession) handleAccountState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if rs, err := currencydigest.NewAccountValue(st); err != nil {
 		return nil, err
-	} else if doc, err := currencydigest.NewAccountDoc(rs, bs.st.DatabaseEncoder()); err != nil {
+	} else if doc, err := currencydigest.NewAccountDoc(rs, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
@@ -17,7 +17,7 @@ func (bs *BlockSession) handleAccountState(st mitumbase.State) ([]mongo.WriteMod
 }
 
 func (bs *BlockSession) handleBalanceState(st mitumbase.State) ([]mongo.WriteModel, string, error) {
-	doc, address, err := currencydigest.NewBalanceDoc(st, bs.st.DatabaseEncoder())
+	doc, address, err := currencydigest.NewBalanceDoc(st, bs.st.Encoder())
 	if err != nil {
 		return nil, "", err
 	}
@@ -25,7 +25,7 @@ func (bs *BlockSession) handleBalanceState(st mitumbase.State) ([]mongo.WriteMod
 }
 
 func (bs *BlockSession) handleContractAccountState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	doc, err := currencydigest.NewContractAccountStatusDoc(st, bs.st.DatabaseEncoder())
+	doc, err := currencydigest.NewContractAccountStatusDoc(st, bs.st.Encoder())
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (bs *BlockSession) handleContractAccountState(st mitumbase.State) ([]mongo.
 }
 
 func (bs *BlockSession) handleCurrencyState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	doc, err := currencydigest.NewCurrencyDoc(st, bs.st.DatabaseEncoder())
+	doc, err := currencydigest.NewCurrencyDoc(st, bs.st.Encoder())
 	if err != nil {
 		return nil, err
 	}

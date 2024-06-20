@@ -35,11 +35,11 @@ func NFTCollection(st *currencydigest.Database, contract string) (*types.Design,
 	var design *types.Design
 	var sta mitumbase.State
 	var err error
-	if err := st.DatabaseClient().GetByFilter(
+	if err := st.MongoClient().GetByFilter(
 		defaultColNameNFTCollection,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -70,11 +70,11 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 
 	var nft *types.NFT
 	var sta mitumbase.State
-	if err = st.DatabaseClient().GetByFilter(
+	if err = st.MongoClient().GetByFilter(
 		defaultColNameNFT,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -122,12 +122,12 @@ func NFTsByCollection(
 		opt = opt.SetLimit(limit)
 	}
 
-	return st.DatabaseClient().Find(
+	return st.MongoClient().Find(
 		context.Background(),
 		defaultColNameNFT,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
+			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}
@@ -162,7 +162,7 @@ func NFTCountByCollection(
 
 	opt := options.Count()
 
-	return st.DatabaseClient().Count(
+	return st.MongoClient().Count(
 		context.Background(),
 		defaultColNameNFT,
 		filter,
@@ -180,11 +180,11 @@ func NFTOperators(
 	var operators *types.OperatorsBook
 	var sta mitumbase.State
 	var err error
-	if err := st.DatabaseClient().GetByFilter(
+	if err := st.MongoClient().GetByFilter(
 		defaultColNameNFTOperator,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}

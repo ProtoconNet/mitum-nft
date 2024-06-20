@@ -62,7 +62,7 @@ func (bs *BlockSession) prepareNFTs() error {
 }
 
 func (bs *BlockSession) handleNFTCollectionState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftCollectionDoc, err := NewNFTCollectionDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if nftCollectionDoc, err := NewNFTCollectionDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -72,7 +72,7 @@ func (bs *BlockSession) handleNFTCollectionState(st mitumbase.State) ([]mongo.Wr
 }
 
 func (bs *BlockSession) handleNFTOperatorsState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftCollectionDoc, err := NewNFTOperatorDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if nftCollectionDoc, err := NewNFTOperatorDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -82,7 +82,7 @@ func (bs *BlockSession) handleNFTOperatorsState(st mitumbase.State) ([]mongo.Wri
 }
 
 func (bs *BlockSession) handleNFTState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftDoc, err := NewNFTDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if nftDoc, err := NewNFTDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -92,7 +92,7 @@ func (bs *BlockSession) handleNFTState(st mitumbase.State) ([]mongo.WriteModel, 
 }
 
 func (bs *BlockSession) handleNFTBoxState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftBoxDoc, err := NewNFTBoxDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if nftBoxDoc, err := NewNFTBoxDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
@@ -102,7 +102,7 @@ func (bs *BlockSession) handleNFTBoxState(st mitumbase.State) ([]mongo.WriteMode
 }
 
 func (bs *BlockSession) handleNFTLastIndexState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftLastIndexDoc, err := NewNFTLastIndexDoc(st, bs.st.DatabaseEncoder()); err != nil {
+	if nftLastIndexDoc, err := NewNFTLastIndexDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
