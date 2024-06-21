@@ -3,6 +3,7 @@ package digest
 import (
 	"context"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
 	"github.com/ProtoconNet/mitum2/network/quicmemberlist"
 	"github.com/ProtoconNet/mitum2/network/quicstream"
@@ -22,11 +23,11 @@ import (
 )
 
 var (
-	HandlerPathNFTOperators  = `/nft/{contract:.*}/account/{address:(?i)` + base.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection = `/nft/{contract:.*}`
-	HandlerPathNFT           = `/nft/{contract:.*}/nftidx/{nft_idx:.*}`
-	HandlerPathNFTs          = `/nft/{contract:.*}/nfts`
-	HandlerPathNFTCount      = `/nft/{contract:.*}/totalsupply`
+	HandlerPathNFTOperators  = `/nft/{contract:(?i)` + base.REStringAddressString + `}/account/{address:(?i)` + types.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection = `/nft/{contract:(?i)` + base.REStringAddressString + `}`
+	HandlerPathNFT           = `/nft/{contract:(?i)` + base.REStringAddressString + `}/nftidx/{nft_idx:.*}`
+	HandlerPathNFTs          = `/nft/{contract:(?i)` + base.REStringAddressString + `}/nfts`
+	HandlerPathNFTCount      = `/nft/{contract:(?i)` + base.REStringAddressString + `}/totalsupply`
 )
 
 func init() {
