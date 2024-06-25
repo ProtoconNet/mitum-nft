@@ -173,11 +173,11 @@ func NFTCountByCollection(
 func NFTOperators(
 	st *currencydigest.Database,
 	contract, account string,
-) (*types.OperatorsBook, error) {
+) (*types.AllApprovedBook, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("address", account)
 
-	var operators *types.OperatorsBook
+	var operators *types.AllApprovedBook
 	var sta mitumbase.State
 	var err error
 	if err := st.MongoClient().GetByFilter(

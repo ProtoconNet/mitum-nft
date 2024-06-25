@@ -39,5 +39,5 @@ func (policy *CollectionPolicy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error
 		return e.Wrap(err)
 	}
 
-	return policy.unmarshal(enc, ht, u.Name, u.Royalty, u.URI, u.Whites)
+	return policy.unpack(enc, ht, u.Name, u.Royalty, u.URI, u.Whites)
 }

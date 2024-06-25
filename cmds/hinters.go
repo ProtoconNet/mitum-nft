@@ -19,7 +19,7 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: types.SignersHint, Instance: types.Signers{}},
 	{Hint: types.NFTHint, Instance: types.NFT{}},
 	{Hint: types.DesignHint, Instance: types.Design{}},
-	{Hint: types.OperatorsBookHint, Instance: types.OperatorsBook{}},
+	{Hint: types.AllApprovedBookHint, Instance: types.AllApprovedBook{}},
 	{Hint: types.CollectionPolicyHint, Instance: types.CollectionPolicy{}},
 	{Hint: types.CollectionDesignHint, Instance: types.CollectionDesign{}},
 	{Hint: types.NFTBoxHint, Instance: types.NFTBox{}},

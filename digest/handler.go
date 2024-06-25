@@ -23,11 +23,11 @@ import (
 )
 
 var (
-	HandlerPathNFTOperators  = `/nft/{contract:(?i)` + types.REStringAddressString + `}/account/{address:(?i)` + types.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
-	HandlerPathNFTCollection = `/nft/{contract:(?i)` + types.REStringAddressString + `}`
-	HandlerPathNFT           = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nftidx/{nft_idx:.*}`
-	HandlerPathNFTs          = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nfts`
-	HandlerPathNFTCount      = `/nft/{contract:(?i)` + types.REStringAddressString + `}/totalsupply`
+	HandlerPathNFTAllApproved = `/nft/{contract:(?i)` + types.REStringAddressString + `}/account/{address:(?i)` + types.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection  = `/nft/{contract:(?i)` + types.REStringAddressString + `}`
+	HandlerPathNFT            = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nftidx/{nft_idx:.*}`
+	HandlerPathNFTs           = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nfts`
+	HandlerPathNFTCount       = `/nft/{contract:(?i)` + types.REStringAddressString + `}/totalsupply`
 )
 
 func init() {
@@ -124,7 +124,7 @@ func (hd *Handlers) setHandlers() {
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFTCount, hd.handleNFTCount, true).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTOperators, hd.handleNFTOperators, true).
+	_ = hd.setHandler(HandlerPathNFTAllApproved, hd.handleNFTOperators, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
 		Methods(http.MethodOptions, "GET")

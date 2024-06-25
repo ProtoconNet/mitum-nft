@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (nbx *NFTBox) unmarshal(
+func (nbx *NFTBox) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	ns []uint64,

@@ -45,5 +45,5 @@ func (n *NFT) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return n.unmarshal(enc, ht, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators)
+	return n.unpack(enc, ht, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators)
 }

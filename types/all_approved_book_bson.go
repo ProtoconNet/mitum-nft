@@ -7,20 +7,20 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (ob OperatorsBook) MarshalBSON() ([]byte, error) {
+func (ob AllApprovedBook) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
-		"_hint":     ob.Hint().String(),
-		"operators": ob.operators,
+		"_hint":        ob.Hint().String(),
+		"all_approved": ob.allApproved,
 	})
 }
 
 type OperatorsBookBSONUnmarshaler struct {
 	Hint      string   `bson:"_hint"`
-	Operators []string `bson:"operators"`
+	Operators []string `bson:"all_approved"`
 }
 
-func (ob *OperatorsBook) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of operators book")
+func (ob *AllApprovedBook) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("decode bson of all-approved book")
 
 	var u OperatorsBookBSONUnmarshaler
 	if err := bsonenc.Unmarshal(b, &u); err != nil {
@@ -32,5 +32,5 @@ func (ob *OperatorsBook) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return ob.unmarshal(enc, ht, u.Operators)
+	return ob.unpack(enc, ht, u.Operators)
 }

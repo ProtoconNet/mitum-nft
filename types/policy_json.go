@@ -41,5 +41,5 @@ func (policy *CollectionPolicy) DecodeJSON(b []byte, enc encoder.Encoder) error 
 		return e.Wrap(err)
 	}
 
-	return policy.unmarshal(enc, u.Hint, u.Name, u.Royalty, u.URI, u.Whitelist)
+	return policy.unpack(enc, u.Hint, u.Name, u.Royalty, u.URI, u.Whitelist)
 }

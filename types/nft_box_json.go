@@ -32,5 +32,5 @@ func (nbx *NFTBox) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return nbx.unmarshal(enc, u.Hint, u.NFTs)
+	return nbx.unpack(enc, u.Hint, u.NFTs)
 }

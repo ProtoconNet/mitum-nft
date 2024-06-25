@@ -180,7 +180,7 @@ func (s *OperatorsBookStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) err
 	}
 	s.BaseHinter = hint.NewBaseHinter(ht)
 
-	var operators types.OperatorsBook
+	var operators types.AllApprovedBook
 	if err := operators.DecodeBSON(u.Operators, enc); err != nil {
 		return e.Wrap(err)
 	}

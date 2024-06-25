@@ -34,5 +34,5 @@ func (nbx *NFTBox) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return nbx.unmarshal(enc, ht, u.NFTs)
+	return nbx.unpack(enc, ht, u.NFTs)
 }

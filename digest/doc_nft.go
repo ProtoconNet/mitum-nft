@@ -105,13 +105,13 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(m)
 }
 
-type NFTOperatorDoc struct {
+type NFTAllApprovedDoc struct {
 	mongodbstorage.BaseDoc
 	st        base.State
-	operators types.OperatorsBook
+	operators types.AllApprovedBook
 }
 
-func NewNFTOperatorDoc(st base.State, enc encoder.Encoder) (*NFTOperatorDoc, error) {
+func NewNFTOperatorDoc(st base.State, enc encoder.Encoder) (*NFTAllApprovedDoc, error) {
 	operators, err := state.StateOperatorsBookValue(st)
 	if err != nil {
 		return nil, err
@@ -121,14 +121,14 @@ func NewNFTOperatorDoc(st base.State, enc encoder.Encoder) (*NFTOperatorDoc, err
 		return nil, err
 	}
 
-	return &NFTOperatorDoc{
+	return &NFTAllApprovedDoc{
 		BaseDoc:   b,
 		st:        st,
 		operators: *operators,
 	}, nil
 }
 
-func (doc NFTOperatorDoc) MarshalBSON() ([]byte, error) {
+func (doc NFTAllApprovedDoc) MarshalBSON() ([]byte, error) {
 	m, err := doc.BaseDoc.M()
 	if err != nil {
 		return nil, err

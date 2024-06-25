@@ -149,7 +149,7 @@ func (s *NFTBoxStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 
 type OperatorsBookStateValueJSONMarshaler struct {
 	hint.BaseHinter
-	Operators types.OperatorsBook `json:"operatorsbook"`
+	Operators types.AllApprovedBook `json:"operatorsbook"`
 }
 
 func (s OperatorsBookStateValue) MarshalJSON() ([]byte, error) {
@@ -173,7 +173,7 @@ func (s *OperatorsBookStateValue) DecodeJSON(b []byte, enc encoder.Encoder) erro
 
 	s.BaseHinter = hint.NewBaseHinter(u.Hint)
 
-	var operators types.OperatorsBook
+	var operators types.AllApprovedBook
 	if err := operators.DecodeJSON(u.Operators, enc); err != nil {
 		return e.Wrap(err)
 	}

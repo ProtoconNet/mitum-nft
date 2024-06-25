@@ -401,8 +401,8 @@ func (hd *Handlers) handleNFTOperatorsInGroup(contract, account string) (interfa
 	}
 }
 
-func (hd *Handlers) buildNFTOperatorsHal(contract, account string, operators types.OperatorsBook) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFTOperators, "contract", contract, "address", account)
+func (hd *Handlers) buildNFTOperatorsHal(contract, account string, operators types.AllApprovedBook) (currencydigest.Hal, error) {
+	h, err := hd.combineURL(HandlerPathNFTAllApproved, "contract", contract, "address", account)
 	if err != nil {
 		return nil, err
 	}

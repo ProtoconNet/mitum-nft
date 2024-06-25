@@ -51,5 +51,5 @@ func (n *NFT) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return n.unmarshal(enc, u.Hint, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators)
+	return n.unpack(enc, u.Hint, u.ID, u.Active, u.Owner, u.Hash, u.URI, u.Approved, u.Creators)
 }

@@ -40,5 +40,5 @@ func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unmarshal(enc, ht, u.Contract, u.Creator, u.Active, u.Policy)
+	return de.unpack(enc, ht, u.Contract, u.Creator, u.Active, u.Policy)
 }

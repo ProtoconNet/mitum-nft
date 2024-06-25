@@ -38,5 +38,5 @@ func (sgn *Signer) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return sgn.unmarshal(enc, u.Hint, u.Account, u.Share, u.Signed)
+	return sgn.unpack(enc, u.Hint, u.Account, u.Share, u.Signed)
 }

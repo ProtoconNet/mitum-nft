@@ -211,10 +211,10 @@ var OperatorsBookStateValueHint = hint.MustNewHint("operators-book-state-value-v
 
 type OperatorsBookStateValue struct {
 	hint.BaseHinter
-	Operators types.OperatorsBook
+	Operators types.AllApprovedBook
 }
 
-func NewOperatorsBookStateValue(operators types.OperatorsBook) OperatorsBookStateValue {
+func NewOperatorsBookStateValue(operators types.AllApprovedBook) OperatorsBookStateValue {
 	return OperatorsBookStateValue{
 		BaseHinter: hint.NewBaseHinter(OperatorsBookStateValueHint),
 		Operators:  operators,
@@ -243,7 +243,7 @@ func (ob OperatorsBookStateValue) HashBytes() []byte {
 	return ob.Operators.Bytes()
 }
 
-func StateOperatorsBookValue(st mitumbase.State) (*types.OperatorsBook, error) {
+func StateOperatorsBookValue(st mitumbase.State) (*types.AllApprovedBook, error) {
 	v := st.Value()
 	if v == nil {
 		return nil, util.ErrNotFound.Errorf("operators book not found in State")

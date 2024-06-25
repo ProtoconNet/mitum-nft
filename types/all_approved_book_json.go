@@ -9,28 +9,28 @@ import (
 
 type OperatorsBookJSONMarshaler struct {
 	hint.BaseHinter
-	Operators []base.Address `json:"operators"`
+	AllApproved []base.Address `json:"all_approved"`
 }
 
-func (ob OperatorsBook) MarshalJSON() ([]byte, error) {
+func (ob AllApprovedBook) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(OperatorsBookJSONMarshaler{
-		BaseHinter: ob.BaseHinter,
-		Operators:  ob.operators,
+		BaseHinter:  ob.BaseHinter,
+		AllApproved: ob.allApproved,
 	})
 }
 
 type OperatorsBookJSONUnmarshaler struct {
-	Hint      hint.Hint `json:"_hint"`
-	Operators []string  `json:"operators"`
+	Hint        hint.Hint `json:"_hint"`
+	AllApproved []string  `json:"all_approved"`
 }
 
-func (ob *OperatorsBook) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of operators book")
+func (ob *AllApprovedBook) DecodeJSON(b []byte, enc encoder.Encoder) error {
+	e := util.StringError("decode json of all-approved book")
 
 	var u OperatorsBookJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
 		return e.Wrap(err)
 	}
 
-	return ob.unmarshal(enc, u.Hint, u.Operators)
+	return ob.unpack(enc, u.Hint, u.AllApproved)
 }

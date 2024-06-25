@@ -36,5 +36,5 @@ func (sgn *Signer) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return sgn.unmarshal(enc, ht, u.Account, u.Share, u.Signed)
+	return sgn.unpack(enc, ht, u.Account, u.Share, u.Signed)
 }

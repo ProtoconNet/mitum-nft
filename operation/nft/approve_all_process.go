@@ -39,7 +39,7 @@ func (ApproveAll) Process(
 type DelegateItemProcessor struct {
 	h      util.Hash
 	sender mitumbase.Address
-	box    *types.OperatorsBook
+	box    *types.AllApprovedBook
 	item   ApproveAllItem
 }
 
@@ -239,16 +239,16 @@ func (opp *DelegateProcessor) Process(
 		return nil, nil, e.Errorf("expected DelgateFact, not %T", op.Fact())
 	}
 
-	boxes := map[string]*types.OperatorsBook{}
+	boxes := map[string]*types.AllApprovedBook{}
 	for _, item := range fact.Items() {
 		ak := statenft.StateKeyOperators(item.contract, fact.Sender())
 
-		var operators types.OperatorsBook
+		var operators types.AllApprovedBook
 		switch st, found, err := getStateFunc(ak); {
 		case err != nil:
 			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state of operators book, %v: %w", ak, err), nil
 		case !found:
-			operators = types.NewOperatorsBook(nil)
+			operators = types.NewAllApprovedBook(nil)
 		default:
 			o, err := statenft.StateOperatorsBookValue(st)
 			if err != nil {

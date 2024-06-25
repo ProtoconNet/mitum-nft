@@ -2,12 +2,11 @@ package types
 
 import (
 	"github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (policy *CollectionPolicy) unmarshal(
+func (policy *CollectionPolicy) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
 	nm string,
@@ -15,8 +14,6 @@ func (policy *CollectionPolicy) unmarshal(
 	uri string,
 	bws []string,
 ) error {
-	e := util.StringError("failed to unmarshal CollectionPoicy")
-
 	policy.BaseHinter = hint.NewBaseHinter(ht)
 	policy.name = CollectionName(nm)
 	policy.royalty = PaymentParameter(ry)
@@ -26,7 +23,7 @@ func (policy *CollectionPolicy) unmarshal(
 	for i, bw := range bws {
 		white, err := base.DecodeAddress(bw, enc)
 		if err != nil {
-			return e.Wrap(err)
+			return err
 		}
 		whitelist[i] = white
 	}
