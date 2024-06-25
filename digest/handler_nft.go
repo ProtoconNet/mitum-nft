@@ -55,7 +55,7 @@ func (hd *Handlers) handleNFTInGroup(contract, id string) (interface{}, error) {
 }
 
 func (hd *Handlers) buildNFTHal(contract string, nft types.NFT) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "id", strconv.FormatUint(nft.ID(), 10))
+	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "nft_idx", strconv.FormatUint(nft.ID(), 10))
 	if err != nil {
 		return nil, err
 	}
