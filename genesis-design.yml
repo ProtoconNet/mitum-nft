@@ -2,9 +2,8 @@ facts:
   - _hint: currency-suffrage-genesis-join-fact-v0.0.1
     nodes:
       - _hint: currency-node-v0.0.1
-        address: no0sas
-        publickey: bXTT1hoetSKYPUmfu3bMRcs8aU342MTTzhgeCQ1bTavBmpu
-
+        address: node0sas
+        publickey: 02b61050d2e795ce08121572acfc12fe53c5644f8d9a74999f3936a23ba6f0c1e3fpu
   - _hint: currency-genesis-network-policy-fact-v0.0.1
     policy:
       _hint: currency-network-policy-v0.0.1
@@ -13,29 +12,29 @@ facts:
       suffrage_candidate_limiter:
         _hint: currency-fixed-suffrage-candidate-limiter-rule-v0.0.1
         limit: 1
-      max_suffrage_size: 3
+      max_suffrage_size: 99
+      suffrage_expel_lifespan: 99
   - _hint: mitum-currency-register-genesis-currency-operation-fact-v0.0.1
-    genesis_node_key: bXTT1hoetSKYPUmfu3bMRcs8aU342MTTzhgeCQ1bTavBmpu
+    genesis_node_key: 02b61050d2e795ce08121572acfc12fe53c5644f8d9a74999f3936a23ba6f0c1e3fpu
     keys:
-      _hint: mitum-currency-keys-v0.0.1  
-      keys: 
+      _hint: mitum-currency-keys-v0.0.1
+      keys:
         - _hint: mitum-currency-key-v0.0.1
-          key: kYJADZP1XKNvUNn7XHY39yisp9QCfU1LtyxGw2HRjQwXmpu
-          # D4QPRNSTgYmgRymYVS1mLgyGtCbzeAPYhd5r4jNQahwampr
+          key: 02bb41168240ca6a2b74f130ba3760204b494fba7381d25bcde601d7c39185df25fpu
+          # 41f08256757d96a522e6d36a097bd2f761109059b72eb6589ff827f7ac877d30fpr
           weight: 100
       threshold: 100
     currencies:
       - _hint: mitum-currency-currency-design-v0.0.1
-        amount: 
-          _hint: mitum-currency-amount-v0.0.1
-          amount: "1000000000000000000000000000"
-          currency: MCC
+        initial_supply: "100000000000000000000000000000000000000000"
+        currency_id: MCC
+        decimal: "9"
         genesis_account:
         policy:
           _hint: mitum-currency-currency-policy-v0.0.1
-          new_account_min_balance: "1"
+          min_balance: "1"
           feeer:
             _hint: mitum-currency-fixed-feeer-v0.0.1
-            receiver: FQacpLf7kQQQQGhHv43pehSZn4mCjz1qViky5DG36ZPAmca
+            receiver: 0x4526f3D0EdC63D9EaeCD94D56551e0f061CFCa47fca
             amount: "1"
-        aggregate: "1000000000000000000000000000"
+        total_supply: "100000000000000000000000000000000000000000"
