@@ -291,22 +291,25 @@ func (opp *MintProcessor) PreProcess(
 						Errorf("%v", cErr)), nil
 			}
 
-			ca, err := stateextension.CheckCAAuthFromState(cSt, fact.Sender())
+			ca, err := stateextension.LoadCAStateValue(cSt)
 			if err != nil {
+				return ctx, base.NewBaseOperationProcessReasonError(
+					common.ErrMPreProcess.
+						Errorf("%v", err)), nil
+			}
+			if !ca.Owner().Equal(fact.Sender()) {
 				for i := range whitelist {
 					if whitelist[i].Equal(fact.Sender()) {
 						break
 					}
 					if i == len(whitelist)-1 {
 						return ctx, base.NewBaseOperationProcessReasonError(
-							common.ErrMPreProcess.
-								Errorf("%v: sender is not in minter whitelist", err)), nil
+							common.ErrMPreProcess.Wrap(common.ErrMAccountNAth).
+								Errorf(
+									"sender %v is neither the owner nor in the minter whitelist of contract account %v",
+									fact.Sender(), item.Contract())), nil
 					}
 				}
-
-				return ctx, base.NewBaseOperationProcessReasonError(
-					common.ErrMPreProcess.
-						Errorf("%v", err)), nil
 			}
 
 			if !ca.IsActive() {
