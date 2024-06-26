@@ -11,7 +11,7 @@ import (
 func (n NFT) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(bson.M{
 		"_hint":    n.Hint().String(),
-		"id":       n.id,
+		"nft_idx":  n.id,
 		"active":   n.active,
 		"owner":    n.owner,
 		"hash":     n.hash,
@@ -23,7 +23,7 @@ func (n NFT) MarshalBSON() ([]byte, error) {
 
 type NFTBSONUnmarshaler struct {
 	Hint     string   `bson:"_hint"`
-	ID       uint64   `bson:"id"`
+	ID       uint64   `bson:"nft_idx"`
 	Active   bool     `bson:"active"`
 	Owner    string   `bson:"owner"`
 	Hash     string   `bson:"hash"`

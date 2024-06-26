@@ -10,7 +10,7 @@ import (
 
 type NFTJSONMarshaler struct {
 	hint.BaseHinter
-	ID       uint64       `json:"id"`
+	ID       uint64       `json:"nft_idx"`
 	Active   bool         `json:"active"`
 	Owner    base.Address `json:"owner"`
 	Hash     NFTHash      `json:"hash"`
@@ -34,7 +34,7 @@ func (n NFT) MarshalJSON() ([]byte, error) {
 
 type NFTJSONUnmarshaler struct {
 	Hint     hint.Hint       `json:"_hint"`
-	ID       uint64          `json:"id"`
+	ID       uint64          `json:"nft_idx"`
 	Active   bool            `json:"active"`
 	Owner    string          `json:"owner"`
 	Hash     string          `json:"hash"`
