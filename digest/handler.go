@@ -25,7 +25,7 @@ import (
 var (
 	HandlerPathNFTAllApproved = `/nft/{contract:(?i)` + types.REStringAddressString + `}/account/{address:(?i)` + types.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
 	HandlerPathNFTCollection  = `/nft/{contract:(?i)` + types.REStringAddressString + `}`
-	HandlerPathNFT            = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nftidx/{nft_idx:.*}`
+	HandlerPathNFT            = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nftidx/{nft_idx:[0-9]+}`
 	HandlerPathNFTs           = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nfts`
 	HandlerPathNFTCount       = `/nft/{contract:(?i)` + types.REStringAddressString + `}/totalsupply`
 )
