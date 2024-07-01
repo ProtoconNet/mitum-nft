@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"context"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-nft/digest"
 	"github.com/ProtoconNet/mitum2/base"
@@ -26,7 +25,7 @@ func ProcessDigester(ctx context.Context) (context.Context, error) {
 	}
 
 	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
 		return ctx, err
 	}
 
@@ -62,12 +61,12 @@ func ProcessDigester(ctx context.Context) (context.Context, error) {
 	di := digest.NewDigester(st, root, sourceReaders, fromRemotes, design.NetworkID, vs.String(), nil)
 	_ = di.SetLogging(log)
 
-	return context.WithValue(ctx, currencycmds.ContextValueDigester, di), nil
+	return context.WithValue(ctx, currencydigest.ContextValueDigester, di), nil
 }
 
 func ProcessStartDigester(ctx context.Context) (context.Context, error) {
 	var di *digest.Digester
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigester, &di); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigester, &di); err != nil {
 		return ctx, err
 	}
 	if di == nil {
@@ -91,7 +90,7 @@ func PDigesterFollowUp(ctx context.Context) (context.Context, error) {
 	}
 
 	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
 		return ctx, err
 	}
 	if st == nil {
@@ -129,7 +128,7 @@ func digestFollowup(ctx context.Context, height base.Height) error {
 	}
 
 	var st *currencydigest.Database
-	if err := util.LoadFromContextOK(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
+	if err := util.LoadFromContextOK(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
 		return err
 	}
 

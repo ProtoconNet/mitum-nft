@@ -197,7 +197,7 @@ func (cmd *RunCommand) pWhenNewBlockSavedInSyncingStateFunc(pctx context.Context
 		return pctx, err
 	}
 
-	if err := util.LoadFromContext(pctx, currencycmds.ContextValueDigester, &di); err != nil {
+	if err := util.LoadFromContext(pctx, currencydigest.ContextValueDigester, &di); err != nil {
 		return pctx, err
 	}
 
@@ -273,7 +273,7 @@ func (cmd *RunCommand) pWhenNewBlockConfirmed(pctx context.Context) (context.Con
 		return pctx, err
 	}
 
-	if err := util.LoadFromContext(pctx, currencycmds.ContextValueDigester, &di); err != nil {
+	if err := util.LoadFromContext(pctx, currencydigest.ContextValueDigester, &di); err != nil {
 		return pctx, err
 	}
 
@@ -389,8 +389,8 @@ func (cmd *RunCommand) pDigestAPIHandlers(ctx context.Context) (context.Context,
 		return nil, err
 	}
 
-	var design currencycmds.DigestDesign
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDesign, &design); err != nil {
+	var design currencydigest.YamlDigestDesign
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDesign, &design); err != nil {
 		if errors.Is(err, util.ErrNotFound) {
 			return ctx, nil
 		}
@@ -398,7 +398,7 @@ func (cmd *RunCommand) pDigestAPIHandlers(ctx context.Context) (context.Context,
 		return nil, err
 	}
 
-	if design.Equal(currencycmds.DigestDesign{}) {
+	if design.Equal(currencydigest.YamlDigestDesign{}) {
 		return ctx, nil
 	}
 
@@ -408,7 +408,7 @@ func (cmd *RunCommand) pDigestAPIHandlers(ctx context.Context) (context.Context,
 	}
 
 	var dnt *currencydigest.HTTP2Server
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestNetwork, &dnt); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestNetwork, &dnt); err != nil {
 		return ctx, err
 	}
 	router := dnt.Router()
@@ -436,7 +436,7 @@ func (cmd *RunCommand) pDigestAPIHandlers(ctx context.Context) (context.Context,
 	return ctx, nil
 }
 
-func (cmd *RunCommand) loadCache(_ context.Context, design currencycmds.DigestDesign) (currencydigest.Cache, error) {
+func (cmd *RunCommand) loadCache(_ context.Context, design currencydigest.YamlDigestDesign) (currencydigest.Cache, error) {
 	c, err := currencydigest.NewCacheFromURI(design.Cache().String())
 	if err != nil {
 		cmd.log.Err(err).Str("cache", design.Cache().String()).Msg("failed to connect cache server")
@@ -455,7 +455,7 @@ func (cmd *RunCommand) setDigestDefaultHandlers(
 	queue chan currencydigest.RequestWrapper,
 ) (*currencydigest.Handlers, error) {
 	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
 		return nil, err
 	}
 
@@ -478,7 +478,7 @@ func (cmd *RunCommand) setDigestHandlers(
 	routes map[string]*mux.Route,
 ) (*digest.Handlers, error) {
 	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
 		return nil, err
 	}
 
@@ -492,8 +492,8 @@ func (cmd *RunCommand) setDigestNetworkClient(
 	params *launch.LocalParams,
 	handlers *currencydigest.Handlers,
 ) (*currencydigest.Handlers, error) {
-	var design currencycmds.DigestDesign
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDesign, &design); err != nil {
+	var design currencydigest.YamlDigestDesign
+	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDesign, &design); err != nil {
 		if errors.Is(err, util.ErrNotFound) {
 			return handlers, nil
 		}
@@ -501,7 +501,7 @@ func (cmd *RunCommand) setDigestNetworkClient(
 		return nil, err
 	}
 
-	if design.Equal(currencycmds.DigestDesign{}) {
+	if design.Equal(currencydigest.YamlDigestDesign{}) {
 		return handlers, nil
 	}
 
