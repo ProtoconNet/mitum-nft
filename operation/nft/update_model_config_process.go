@@ -103,11 +103,7 @@ func (opp *UpdateModelConfigProcessor) PreProcess(
 
 	whitelist := fact.Whitelist()
 	for _, white := range whitelist {
-		if _, _, aErr, cErr := state.ExistsCAccount(white, "whitelist", true, false, getStateFunc); aErr != nil {
-			return ctx, mitumbase.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Errorf("%v", aErr)), nil
-		} else if cErr != nil {
+		if _, _, _, cErr := state.ExistsCAccount(white, "whitelist", true, false, getStateFunc); cErr != nil {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
 					Errorf("%v: whitelist %v is contract account", cErr, white)), nil
@@ -177,6 +173,15 @@ func (opp *UpdateModelConfigProcessor) Process(
 	}
 
 	var sts []mitumbase.StateMergeValue
+	whitelist := fact.Whitelist()
+	for _, white := range whitelist {
+		smv, err := state.CreateNotExistAccount(white, getStateFunc)
+		if err != nil {
+			return nil, mitumbase.NewBaseOperationProcessReasonError("%w", err), nil
+		} else if smv != nil {
+			sts = append(sts, smv)
+		}
+	}
 
 	de := types.NewDesign(
 		design.Contract(),

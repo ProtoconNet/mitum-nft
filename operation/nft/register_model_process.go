@@ -136,15 +136,21 @@ func (opp *RegisterModelProcessor) PreProcess(
 
 	whitelist := fact.WhiteList()
 	for _, white := range whitelist {
-		if _, _, aErr, cErr := cstate.ExistsCAccount(white, "whitelist", true, false, getStateFunc); aErr != nil {
-			return ctx, mitumbase.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Errorf("%v", aErr)), nil
-		} else if cErr != nil {
+		if _, _, _, cErr := cstate.ExistsCAccount(white, "whitelist", true, false, getStateFunc); cErr != nil {
 			return ctx, mitumbase.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
 					Errorf("%v: whitelist %v is contract account", cErr, white)), nil
 		}
+
+		//if _, _, aErr, cErr := cstate.ExistsCAccount(white, "whitelist", true, false, getStateFunc); aErr != nil {
+		//	return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		//		common.ErrMPreProcess.
+		//			Errorf("%v", aErr)), nil
+		//} else if cErr != nil {
+		//	return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		//		common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+		//			Errorf("%v: whitelist %v is contract account", cErr, white)), nil
+		//}
 	}
 
 	return ctx, nil, nil
@@ -162,6 +168,15 @@ func (opp *RegisterModelProcessor) Process(
 	}
 
 	var sts []mitumbase.StateMergeValue
+	whitelist := fact.WhiteList()
+	for _, white := range whitelist {
+		smv, err := cstate.CreateNotExistAccount(white, getStateFunc)
+		if err != nil {
+			return nil, mitumbase.NewBaseOperationProcessReasonError("%w", err), nil
+		} else if smv != nil {
+			sts = append(sts, smv)
+		}
+	}
 
 	policy := types.NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.WhiteList())
 	design := types.NewDesign(fact.Contract(), fact.Sender(), true, policy)
