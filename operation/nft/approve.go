@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var MaxApproveItems = 100
+var MaxApproveItems = 1000
 
 var (
 	ApproveFactHint = hint.MustNewHint("mitum-nft-approve-operation-fact-v0.0.1")

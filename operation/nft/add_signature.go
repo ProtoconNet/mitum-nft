@@ -16,7 +16,7 @@ var (
 	AddSignatureHint     = hint.MustNewHint("mitum-nft-add-signature-operation-v0.0.1")
 )
 
-var MaxAddSignatureItems = 100
+var MaxAddSignatureItems = 1000
 
 type AddSignatureFact struct {
 	mitumbase.BaseFact

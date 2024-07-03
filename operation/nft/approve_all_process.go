@@ -53,21 +53,27 @@ func (ipp *DelegateItemProcessor) PreProcess(
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		ipp.item.Approved(), "delegatee", true, false, getStateFunc); aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(
-			common.ErrSelfTarget.Wrap(
-				errors.Errorf("%v: delegatee %v is contract account", cErr, ipp.item.Approved())))
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		ipp.item.Approved(), "approved", true, false, getStateFunc); cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(
+			errors.Errorf("%v: approved %v is contract account", cErr, ipp.item.Approved())))
 	}
 
 	return nil
 }
 
 func (ipp *DelegateItemProcessor) Process(
-	_ context.Context, _ mitumbase.Operation, _ mitumbase.GetStateFunc,
+	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
+	var sts []mitumbase.StateMergeValue
+
+	smv, err := currencystate.CreateNotExistAccount(ipp.item.Approved(), getStateFunc)
+	if err != nil {
+		return nil, err
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
+
 	if ipp.box == nil {
 		return nil, errors.Errorf(
 			"nft box not found, %v", statenft.StateKeyOperators(ipp.item.Contract(), ipp.sender))
@@ -88,7 +94,7 @@ func (ipp *DelegateItemProcessor) Process(
 
 	ipp.box.Sort(true)
 
-	return nil, nil
+	return sts, nil
 }
 
 func (ipp *DelegateItemProcessor) Close() {
@@ -246,13 +252,15 @@ func (opp *DelegateProcessor) Process(
 		var operators types.AllApprovedBook
 		switch st, found, err := getStateFunc(ak); {
 		case err != nil:
-			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to get state of operators book, %v: %w", ak, err), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError(
+				"failed to get state of operators book, %v: %w", ak, err), nil
 		case !found:
 			operators = types.NewAllApprovedBook(nil)
 		default:
 			o, err := statenft.StateOperatorsBookValue(st)
 			if err != nil {
-				return nil, mitumbase.NewBaseOperationProcessReasonError("operators book value not found, %v: %w", ak, err), nil
+				return nil, mitumbase.NewBaseOperationProcessReasonError(
+					"operators book value not found, %v: %w", ak, err), nil
 			} else {
 				operators = *o
 			}

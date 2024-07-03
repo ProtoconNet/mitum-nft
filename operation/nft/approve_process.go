@@ -81,13 +81,10 @@ func (ipp *ApproveItemProcessor) PreProcess(
 				errors.Errorf("collection in the contract account %v has been deactived", ipp.item.Contract())))
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		ipp.item.Approved(), "approved", true, false, getStateFunc); aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(
-			common.ErrCAccountNA.Wrap(
-				errors.Errorf("%v: approved %v is contract account", cErr, ipp.item.Approved())))
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		ipp.item.Approved(), "approved", true, false, getStateFunc); cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(
+			errors.Errorf("%v: approved %v is contract account", cErr, ipp.item.Approved())))
 	}
 
 	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.nftIdx), "nft", getStateFunc)
@@ -153,6 +150,15 @@ func (ipp *ApproveItemProcessor) PreProcess(
 func (ipp *ApproveItemProcessor) Process(
 	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
+	var sts []mitumbase.StateMergeValue
+
+	smv, err := currencystate.CreateNotExistAccount(ipp.item.Approved(), getStateFunc)
+	if err != nil {
+		return nil, err
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
+
 	nid := ipp.item.NFTIdx()
 
 	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
@@ -170,7 +176,7 @@ func (ipp *ApproveItemProcessor) Process(
 		return nil, err
 	}
 
-	sts := []mitumbase.StateMergeValue{state.NewStateMergeValue(st.Key(), statenft.NewNFTStateValue(n))}
+	sts = append(sts, state.NewStateMergeValue(st.Key(), statenft.NewNFTStateValue(n)))
 
 	return sts, nil
 }

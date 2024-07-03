@@ -62,11 +62,10 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return e.Wrap(cErr)
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		it.Receiver(), "receiver", true, false, getStateFunc); aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		it.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(
+			errors.Errorf("%v: receiver %v is contract account", cErr, it.Receiver())))
 	}
 
 	nid := ipp.item.NFT()
@@ -142,6 +141,15 @@ func (ipp *TransferItemProcessor) Process(
 	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
 ) ([]mitumbase.StateMergeValue, error) {
 	receiver := ipp.item.Receiver()
+	var sts []mitumbase.StateMergeValue
+
+	smv, err := currencystate.CreateNotExistAccount(receiver, getStateFunc)
+	if err != nil {
+		return nil, err
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
+
 	nid := ipp.item.NFT()
 
 	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
@@ -159,9 +167,11 @@ func (ipp *TransferItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %v: %v", nid, err)
 	}
 
-	sts := make([]mitumbase.StateMergeValue, 1)
-
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.NFT()), statenft.NewNFTStateValue(n))
+	sts = append(
+		sts,
+		state.NewStateMergeValue(
+			statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.NFT()), statenft.NewNFTStateValue(n)),
+	)
 
 	return sts, nil
 }

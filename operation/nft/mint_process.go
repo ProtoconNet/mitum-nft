@@ -55,14 +55,20 @@ func (ipp *MintItemProcessor) PreProcess(
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		ipp.item.receiver, "receiver", true, false, getStateFunc); aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(
-			common.ErrCAccountNA.Wrap(
-				errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.receiver)))
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		ipp.item.receiver, "receiver", true, false, getStateFunc); cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(
+			errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.Receiver())))
 	}
+
+	//if _, _, aErr, cErr := currencystate.ExistsCAccount(
+	//	ipp.item.receiver, "receiver", true, false, getStateFunc); aErr != nil {
+	//	return e.Wrap(aErr)
+	//} else if cErr != nil {
+	//	return e.Wrap(
+	//		common.ErrCAccountNA.Wrap(
+	//			errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.receiver)))
+	//}
 
 	if found, _ := currencystate.CheckNotExistsState(
 		statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); found {
@@ -74,13 +80,18 @@ func (ipp *MintItemProcessor) PreProcess(
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
 		acc := creator.Address()
-		if _, _, aErr, cErr := currencystate.ExistsCAccount(
-			acc, "creator", true, false, getStateFunc); aErr != nil {
-			return e.Wrap(aErr)
-		} else if cErr != nil {
-			return e.Wrap(
-				common.ErrCAccountNA.Wrap(errors.Errorf("%v: creator %v is contract account", cErr, acc)))
+		if _, _, _, cErr := currencystate.ExistsCAccount(
+			acc, "creator", true, false, getStateFunc); cErr != nil {
+			return e.Wrap(common.ErrCAccountNA.Wrap(
+				errors.Errorf("%v: creator %v is contract account", cErr, acc)))
 		}
+		//if _, _, aErr, cErr := currencystate.ExistsCAccount(
+		//	acc, "creator", true, false, getStateFunc); aErr != nil {
+		//	return e.Wrap(aErr)
+		//} else if cErr != nil {
+		//	return e.Wrap(
+		//		common.ErrCAccountNA.Wrap(errors.Errorf("%v: creator %v is contract account", cErr, acc)))
+		//}
 		if creator.Signed() {
 			return e.Wrap(errors.Errorf("creator %v must be unsigned at the time of minting", acc))
 		}
@@ -92,52 +103,64 @@ func (ipp *MintItemProcessor) PreProcess(
 func (ipp *MintItemProcessor) Process(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
-	e := util.StringError("process MintItemProcessor")
+	var sts []base.StateMergeValue
 
-	sts := make([]base.StateMergeValue, 1)
-	k := statecurrency.AccountStateKey(ipp.item.Receiver())
-	switch _, found, err := getStateFunc(k); {
-	case err != nil:
-		return nil, e.Wrap(err)
-	case !found:
-		nilKys, err := currencytypes.NewNilAccountKeysFromAddress(ipp.item.Receiver())
-		if err != nil {
-			return nil, e.Wrap(err)
-		}
-		acc, err := currencytypes.NewAccount(ipp.item.Receiver(), nilKys)
-		if err != nil {
-			return nil, e.Wrap(err)
-		}
-		stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
-		_, found := ipp.ns[ipp.item.Receiver().String()]
-		if !found {
-			ipp.ns[ipp.item.Receiver().String()] = stv
-		}
-	default:
+	smv, err := currencystate.CreateNotExistAccount(ipp.item.Receiver(), getStateFunc)
+	if err != nil {
+		return nil, err
+	} else if smv != nil {
+		sts = append(sts, smv)
 	}
+
+	//k := statecurrency.AccountStateKey(ipp.item.Receiver())
+	//switch _, found, err := getStateFunc(k); {
+	//case err != nil:
+	//	return nil, e.Wrap(err)
+	//case !found:
+	//	nilKys, err := currencytypes.NewNilAccountKeysFromAddress(ipp.item.Receiver())
+	//	if err != nil {
+	//		return nil, e.Wrap(err)
+	//	}
+	//	acc, err := currencytypes.NewAccount(ipp.item.Receiver(), nilKys)
+	//	if err != nil {
+	//		return nil, e.Wrap(err)
+	//	}
+	//	stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
+	//	_, found := ipp.ns[ipp.item.Receiver().String()]
+	//	if !found {
+	//		ipp.ns[ipp.item.Receiver().String()] = stv
+	//	}
+	//default:
+	//}
 
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
-		k := statecurrency.AccountStateKey(creator.Address())
-		switch _, found, err := getStateFunc(k); {
-		case err != nil:
-			return nil, e.Wrap(err)
-		case !found:
-			nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Address())
-			if err != nil {
-				return nil, e.Wrap(err)
-			}
-			acc, err := currencytypes.NewAccount(creator.Address(), nilKys)
-			if err != nil {
-				return nil, e.Wrap(err)
-			}
-			stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
-			_, found := ipp.ns[creator.Address().String()]
-			if !found {
-				ipp.ns[creator.Address().String()] = stv
-			}
-		default:
+		smv, err := currencystate.CreateNotExistAccount(creator.Address(), getStateFunc)
+		if err != nil {
+			return nil, err
+		} else if smv != nil {
+			sts = append(sts, smv)
 		}
+		//k := statecurrency.AccountStateKey(creator.Address())
+		//switch _, found, err := getStateFunc(k); {
+		//case err != nil:
+		//	return nil, e.Wrap(err)
+		//case !found:
+		//	nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Address())
+		//	if err != nil {
+		//		return nil, e.Wrap(err)
+		//	}
+		//	acc, err := currencytypes.NewAccount(creator.Address(), nilKys)
+		//	if err != nil {
+		//		return nil, e.Wrap(err)
+		//	}
+		//	stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
+		//	_, found := ipp.ns[creator.Address().String()]
+		//	if !found {
+		//		ipp.ns[creator.Address().String()] = stv
+		//	}
+		//default:
+		//}
 	}
 
 	n := types.NewNFT(ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(), ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators())
