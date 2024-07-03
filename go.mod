@@ -8,7 +8,7 @@ replace github.com/ProtoconNet/mitum-currency/v3 => ../mitum-currency-2
 
 require (
 	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240605080414-2052cf0ea262
-	github.com/ProtoconNet/mitum2 v0.0.0-20240516232940-9c065b66904b
+	github.com/ProtoconNet/mitum2 v0.0.0-20240627085931-1728815e7b09
 	github.com/alecthomas/kong v0.9.0
 	github.com/arl/statsviz v0.6.0
 	github.com/gorilla/mux v1.8.1
