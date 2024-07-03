@@ -168,7 +168,7 @@ func (ipp *MintItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %v: %v", ipp.idx, err)
 	}
 
-	sts[0] = currencystate.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), statenft.NewNFTStateValue(n))
+	sts = append(sts, currencystate.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), statenft.NewNFTStateValue(n)))
 
 	if err := ipp.box.Append(n.ID()); err != nil {
 		return nil, errors.Errorf("failed to append nft id to nft box, %v: %v", n.ID(), err)
