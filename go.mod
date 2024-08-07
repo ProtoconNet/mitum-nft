@@ -4,18 +4,16 @@ go 1.22
 
 toolchain go1.22.1
 
-replace github.com/ProtoconNet/mitum-currency/v3 => ../mitum-currency-2
-
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240605080414-2052cf0ea262
-	github.com/ProtoconNet/mitum2 v0.0.0-20240627085931-1728815e7b09
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240807071927-73731a65ac76
+	github.com/ProtoconNet/mitum2 v0.0.0-20240805062025-57b0a3c5b436
 	github.com/alecthomas/kong v0.9.0
 	github.com/arl/statsviz v0.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.32.0
 	go.mongodb.org/mongo-driver v1.15.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/sync v0.7.0
 )
 
 require (
@@ -78,7 +76,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.17.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/quic-go/quic-go v0.42.0 // indirect
+	github.com/quic-go/qtls-go1-20 v0.3.4 // indirect
+	github.com/quic-go/quic-go v0.39.1 // indirect
 	github.com/rainycape/memcache v0.0.0-20150622160815-1031fa0ce2f2 // indirect
 	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/rs/xid v1.5.0 // indirect
@@ -94,14 +93,14 @@ require (
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
-	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
+	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	golang.org/x/tools v0.19.0 // indirect
+	golang.org/x/tools v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
