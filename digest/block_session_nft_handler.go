@@ -35,12 +35,6 @@ func (bs *BlockSession) prepareNFTs() error {
 				return err
 			}
 			nftOperatorModels = append(nftOperatorModels, j...)
-		case state.NFTBoxKey:
-			j, err := bs.handleNFTBoxState(st)
-			if err != nil {
-				return err
-			}
-			nftBoxModels = append(nftBoxModels, j...)
 		case state.NFTKey:
 			j, err := bs.handleNFTState(st)
 			if err != nil {
@@ -87,16 +81,6 @@ func (bs *BlockSession) handleNFTState(st mitumbase.State) ([]mongo.WriteModel, 
 	} else {
 		return []mongo.WriteModel{
 			mongo.NewInsertOneModel().SetDocument(nftDoc),
-		}, nil
-	}
-}
-
-func (bs *BlockSession) handleNFTBoxState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if nftBoxDoc, err := NewNFTBoxDoc(st, bs.st.Encoder()); err != nil {
-		return nil, err
-	} else {
-		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(nftBoxDoc),
 		}, nil
 	}
 }

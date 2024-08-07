@@ -146,47 +146,6 @@ func (doc NFTAllApprovedDoc) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(m)
 }
 
-type NFTBoxDoc struct {
-	mongodbstorage.BaseDoc
-	st     base.State
-	nftbox types.NFTBox
-}
-
-func NewNFTBoxDoc(st base.State, enc encoder.Encoder) (*NFTBoxDoc, error) {
-	nftbox, err := state.StateNFTBoxValue(st)
-	if err != nil {
-		return nil, err
-	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
-	if err != nil {
-		return nil, err
-	}
-
-	return &NFTBoxDoc{
-		BaseDoc: b,
-		st:      st,
-		nftbox:  nftbox,
-	}, nil
-}
-
-func (doc NFTBoxDoc) MarshalBSON() ([]byte, error) {
-	m, err := doc.BaseDoc.M()
-	if err != nil {
-		return nil, err
-	}
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 3)
-	if err != nil {
-		return nil, err
-	}
-
-	m["contract"] = parsedKey[1]
-	m["nfts"] = doc.nftbox.NFTs()
-	m["istoken"] = false
-	m["height"] = doc.st.Height()
-
-	return bsonenc.Marshal(m)
-}
-
 type NFTLastIndexDoc struct {
 	mongodbstorage.BaseDoc
 	st    base.State

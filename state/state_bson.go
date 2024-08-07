@@ -115,43 +115,6 @@ func (s *NFTStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	return nil
 }
 
-func (s NFTBoxStateValue) MarshalBSON() ([]byte, error) {
-	return bsonenc.Marshal(
-		bson.M{
-			"_hint":  s.Hint().String(),
-			"nftbox": s.Box,
-		},
-	)
-}
-
-type NFTBoxStateValueBSONUnmarshaler struct {
-	Hint string   `bson:"_hint"`
-	Box  bson.Raw `bson:"nftbox"`
-}
-
-func (s *NFTBoxStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of NFTBoxStateValue")
-
-	var u NFTBoxStateValueBSONUnmarshaler
-	if err := enc.Unmarshal(b, &u); err != nil {
-		return e.Wrap(err)
-	}
-
-	ht, err := hint.ParseHint(u.Hint)
-	if err != nil {
-		return e.Wrap(err)
-	}
-	s.BaseHinter = hint.NewBaseHinter(ht)
-
-	var box types.NFTBox
-	if err := box.DecodeBSON(u.Box, enc); err != nil {
-		return e.Wrap(err)
-	}
-	s.Box = box
-
-	return nil
-}
-
 func (s OperatorsBookStateValue) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{

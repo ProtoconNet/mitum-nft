@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, error, int) {
+func parseRequest(_ http.ResponseWriter, r *http.Request, v string) (string, error, int) {
 	s, found := mux.Vars(r)[v]
 	if !found {
 		return "", errors.Errorf("empty %s", v), http.StatusNotFound
@@ -44,7 +44,6 @@ func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) 
 				{"nft_idx", bson.D{{"$gt", v}}},
 			}
 			filterA = append(filterA, filterOffset)
-			// if reverse true, lesser then offset height
 		} else {
 			filterOffset := bson.D{
 				{"nft_idx", bson.D{{"$lt", v}}},
