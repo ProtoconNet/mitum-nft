@@ -118,19 +118,20 @@ func (hd *Handlers) Handler() http.Handler {
 }
 
 func (hd *Handlers) setHandlers() {
-	_ = hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true).
+	get := 1000
+	_ = hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true, get, get).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTs, hd.handleNFTs, true).
+	_ = hd.setHandler(HandlerPathNFTs, hd.handleNFTs, true, get, get).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTCount, hd.handleNFTCount, true).
+	_ = hd.setHandler(HandlerPathNFTCount, hd.handleNFTCount, true, get, get).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTAllApproved, hd.handleNFTOperators, true).
+	_ = hd.setHandler(HandlerPathNFTAllApproved, hd.handleNFTOperators, true, get, get).
 		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFT, hd.handleNFT, true).
+	_ = hd.setHandler(HandlerPathNFT, hd.handleNFT, true, get, get).
 		Methods(http.MethodOptions, "GET")
 }
 
-func (hd *Handlers) setHandler(prefix string, h network.HTTPHandlerFunc, useCache bool) *mux.Route {
+func (hd *Handlers) setHandler(prefix string, h network.HTTPHandlerFunc, useCache bool, rps, burst int) *mux.Route {
 	var handler http.Handler
 	if !useCache {
 		handler = http.HandlerFunc(h)
@@ -153,6 +154,8 @@ func (hd *Handlers) setHandler(prefix string, h network.HTTPHandlerFunc, useCach
 	} else {
 		route = hd.router.Name(name)
 	}
+
+	handler = currencydigest.RateLimiter(rps, burst)(handler)
 
 	/*
 		if rules, found := hd.rateLimit[prefix]; found {
