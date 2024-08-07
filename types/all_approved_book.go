@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var MaxOperators = 10
+var MaxAllApproved = 10
 
 var AllApprovedBookHint = hint.MustNewHint("mitum-nft-all-approved-book-v0.0.1")
 
@@ -127,7 +127,7 @@ func (ob *AllApprovedBook) Append(ag mitumbase.Address) error {
 		return errors.Errorf("account already in operators book, %v", ag)
 	}
 
-	if len(ob.allApproved) >= MaxOperators {
+	if len(ob.allApproved) >= MaxAllApproved {
 		return errors.Errorf("max operators, %v", ag)
 	}
 
