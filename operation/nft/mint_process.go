@@ -41,7 +41,6 @@ type MintItemProcessor struct {
 	sender base.Address
 	item   MintItem
 	idx    uint64
-	box    *types.NFTBox
 	ns     map[string]base.StateMergeValue
 }
 
@@ -61,15 +60,6 @@ func (ipp *MintItemProcessor) PreProcess(
 			errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.Receiver())))
 	}
 
-	//if _, _, aErr, cErr := currencystate.ExistsCAccount(
-	//	ipp.item.receiver, "receiver", true, false, getStateFunc); aErr != nil {
-	//	return e.Wrap(aErr)
-	//} else if cErr != nil {
-	//	return e.Wrap(
-	//		common.ErrCAccountNA.Wrap(
-	//			errors.Errorf("%v: receiver %v is contract account", cErr, ipp.item.receiver)))
-	//}
-
 	if found, _ := currencystate.CheckNotExistsState(
 		statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), getStateFunc); found {
 		return e.Wrap(
@@ -85,13 +75,6 @@ func (ipp *MintItemProcessor) PreProcess(
 			return e.Wrap(common.ErrCAccountNA.Wrap(
 				errors.Errorf("%v: creator %v is contract account", cErr, acc)))
 		}
-		//if _, _, aErr, cErr := currencystate.ExistsCAccount(
-		//	acc, "creator", true, false, getStateFunc); aErr != nil {
-		//	return e.Wrap(aErr)
-		//} else if cErr != nil {
-		//	return e.Wrap(
-		//		common.ErrCAccountNA.Wrap(errors.Errorf("%v: creator %v is contract account", cErr, acc)))
-		//}
 		if creator.Signed() {
 			return e.Wrap(errors.Errorf("creator %v must be unsigned at the time of minting", acc))
 		}
@@ -112,27 +95,6 @@ func (ipp *MintItemProcessor) Process(
 		sts = append(sts, smv)
 	}
 
-	//k := statecurrency.AccountStateKey(ipp.item.Receiver())
-	//switch _, found, err := getStateFunc(k); {
-	//case err != nil:
-	//	return nil, e.Wrap(err)
-	//case !found:
-	//	nilKys, err := currencytypes.NewNilAccountKeysFromAddress(ipp.item.Receiver())
-	//	if err != nil {
-	//		return nil, e.Wrap(err)
-	//	}
-	//	acc, err := currencytypes.NewAccount(ipp.item.Receiver(), nilKys)
-	//	if err != nil {
-	//		return nil, e.Wrap(err)
-	//	}
-	//	stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
-	//	_, found := ipp.ns[ipp.item.Receiver().String()]
-	//	if !found {
-	//		ipp.ns[ipp.item.Receiver().String()] = stv
-	//	}
-	//default:
-	//}
-
 	creators := ipp.item.Creators().Signers()
 	for _, creator := range creators {
 		smv, err := currencystate.CreateNotExistAccount(creator.Address(), getStateFunc)
@@ -141,26 +103,6 @@ func (ipp *MintItemProcessor) Process(
 		} else if smv != nil {
 			sts = append(sts, smv)
 		}
-		//k := statecurrency.AccountStateKey(creator.Address())
-		//switch _, found, err := getStateFunc(k); {
-		//case err != nil:
-		//	return nil, e.Wrap(err)
-		//case !found:
-		//	nilKys, err := currencytypes.NewNilAccountKeysFromAddress(creator.Address())
-		//	if err != nil {
-		//		return nil, e.Wrap(err)
-		//	}
-		//	acc, err := currencytypes.NewAccount(creator.Address(), nilKys)
-		//	if err != nil {
-		//		return nil, e.Wrap(err)
-		//	}
-		//	stv := currencystate.NewStateMergeValue(k, statecurrency.NewAccountStateValue(acc))
-		//	_, found := ipp.ns[creator.Address().String()]
-		//	if !found {
-		//		ipp.ns[creator.Address().String()] = stv
-		//	}
-		//default:
-		//}
 	}
 
 	n := types.NewNFT(ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(), ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators())
@@ -170,10 +112,6 @@ func (ipp *MintItemProcessor) Process(
 
 	sts = append(sts, currencystate.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), ipp.idx), statenft.NewNFTStateValue(n)))
 
-	if err := ipp.box.Append(n.ID()); err != nil {
-		return nil, errors.Errorf("failed to append nft id to nft box, %v: %v", n.ID(), err)
-	}
-
 	return sts, nil
 }
 
@@ -182,7 +120,7 @@ func (ipp *MintItemProcessor) Close() {
 	ipp.sender = nil
 	ipp.item = MintItem{}
 	ipp.idx = 0
-	ipp.box = nil
+	//ipp.box = nil
 	ipp.ns = nil
 
 	mintItemProcessorPool.Put(ipp)
@@ -371,7 +309,7 @@ func (opp *MintProcessor) PreProcess(
 		ipc.sender = fact.Sender()
 		ipc.item = item
 		ipc.idx = idxes[item.contract.String()]
-		ipc.box = nil
+		//ipc.box = nil
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
@@ -398,7 +336,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	idxes := map[string]uint64{}
-	boxes := map[string]*types.NFTBox{}
+	//boxes := map[string]*types.NFTBox{}
 
 	for _, item := range fact.items {
 		idxKey := statenft.NFTStateKey(item.contract, statenft.LastIDXKey)
@@ -415,26 +353,6 @@ func (opp *MintProcessor) Process( // nolint:dupl
 
 			idxes[idxKey] = nftID
 		}
-
-		nftsKey := statenft.NFTStateKey(item.contract, statenft.NFTBoxKey)
-		if _, found := boxes[nftsKey]; !found {
-			var box types.NFTBox
-
-			switch st, found, err := getStateFunc(nftsKey); {
-			case err != nil:
-				return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state, %v: %w", item.contract, err), nil
-			case !found:
-				box = types.NewNFTBox(nil)
-			default:
-				b, err := statenft.StateNFTBoxValue(st)
-				if err != nil {
-					return nil, base.NewBaseOperationProcessReasonError("failed to get nft box state value, %v: %w", item.contract, err), nil
-				}
-				box = b
-			}
-
-			boxes[nftsKey] = &box
-		}
 	}
 
 	var sts []base.StateMergeValue // nolint:prealloc
@@ -443,7 +361,6 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	ipcs := make([]*MintItemProcessor, len(fact.Items()))
 	for i, item := range fact.Items() {
 		idxKey := statenft.NFTStateKey(item.contract, statenft.LastIDXKey)
-		nftsKey := statenft.NFTStateKey(item.contract, statenft.NFTBoxKey)
 		ip := mintItemProcessorPool.Get()
 		ipc, ok := ip.(*MintItemProcessor)
 		if !ok {
@@ -454,7 +371,6 @@ func (opp *MintProcessor) Process( // nolint:dupl
 		ipc.sender = fact.Sender()
 		ipc.item = item
 		ipc.idx = idxes[idxKey]
-		ipc.box = boxes[nftsKey]
 		ipc.ns = nsts
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
@@ -472,11 +388,6 @@ func (opp *MintProcessor) Process( // nolint:dupl
 		sts = append(sts, iv)
 	}
 
-	for key, box := range boxes {
-		bv := currencystate.NewStateMergeValue(key, statenft.NewNFTBoxStateValue(*box))
-		sts = append(sts, bv)
-	}
-
 	for _, ns := range nsts {
 		sts = append(sts, ns)
 	}
@@ -486,7 +397,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	idxes = nil
-	boxes = nil
+	//boxes = nil
 
 	items := make([]CollectionItem, len(fact.Items()))
 	for i := range fact.Items() {

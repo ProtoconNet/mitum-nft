@@ -14,7 +14,7 @@ var (
 	ApproveAllHint     = hint.MustNewHint("mitum-nft-approve-all-operation-v0.0.1")
 )
 
-var MaxApproveAllItems = 1000
+var MaxApproveAllItems = 100
 
 type ApproveAllFact struct {
 	mitumbase.BaseFact

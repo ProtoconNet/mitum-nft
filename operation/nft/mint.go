@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var MaxMintItems = 1000
+var MaxMintItems = 100
 
 var (
 	MintFactHint = hint.MustNewHint("mitum-nft-mint-operation-fact-v0.0.1")
