@@ -1,15 +1,11 @@
 package digest
 
 import (
-	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
 )
 
+<<<<<<< HEAD
 func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, error, int) {
 	s, found := mux.Vars(r)[v]
 	if !found {
@@ -23,6 +19,8 @@ func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, err
 	return s, nil, http.StatusOK
 }
 
+=======
+>>>>>>> c468190 (feat: use currency ParseRequest)
 func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
