@@ -1,8 +1,9 @@
 package digest
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {
