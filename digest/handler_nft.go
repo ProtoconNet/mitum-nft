@@ -17,13 +17,13 @@ func (hd *Handlers) handleNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
 	}
 
-	id, err, status := parseRequest(w, r, "nft_idx")
+	id, err, status := currencydigest.ParseRequest(w, r, "nft_idx")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -71,7 +71,7 @@ func (hd *Handlers) handleNFTCollection(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
@@ -125,7 +125,7 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 		currencydigest.StringBoolQuery("reverse", reverse),
 	)
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
@@ -209,7 +209,7 @@ func (hd *Handlers) handleNFTCount(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path,
 	)
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
@@ -350,14 +350,14 @@ func (hd *Handlers) handleNFTOperators(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
 		return
 	}
 
-	account, err, status := parseRequest(w, r, "address")
+	account, err, status := currencydigest.ParseRequest(w, r, "address")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 

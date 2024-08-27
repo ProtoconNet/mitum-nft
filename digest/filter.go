@@ -1,27 +1,9 @@
 package digest
 
 import (
-	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
 )
-
-func parseRequest(_ http.ResponseWriter, r *http.Request, v string) (string, error, int) {
-	s, found := mux.Vars(r)[v]
-	if !found {
-		return "", errors.Errorf("empty %s", v), http.StatusNotFound
-	}
-
-	s = strings.TrimSpace(s)
-	if len(s) < 1 {
-		return "", errors.Errorf("empty %s", v), http.StatusBadRequest
-	}
-	return s, nil, http.StatusOK
-}
 
 func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
