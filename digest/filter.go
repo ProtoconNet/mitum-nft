@@ -1,26 +1,11 @@
 package digest
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-<<<<<<< HEAD
-func parseRequest(w http.ResponseWriter, r *http.Request, v string) (string, error, int) {
-	s, found := mux.Vars(r)[v]
-	if !found {
-		return "", errors.Errorf("empty %s", v), http.StatusNotFound
-	}
-
-	s = strings.TrimSpace(s)
-	if len(s) < 1 {
-		return "", errors.Errorf("empty %s", v), http.StatusBadRequest
-	}
-	return s, nil, http.StatusOK
-}
-
-=======
->>>>>>> c468190 (feat: use currency ParseRequest)
 func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
