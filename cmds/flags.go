@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/ProtoconNet/mitum-nft/types"
-
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"

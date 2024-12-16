@@ -3,24 +3,24 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
 )
 
 type ApproveCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Approved currencycmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
-	NFTidx   uint64                      `arg:"" name:"nft" help:"target nft idx to approve"`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	sender   mitumbase.Address
-	contract mitumbase.Address
-	approved mitumbase.Address
+	ccmds.OperationFlags
+	Sender   ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract ccmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Approved ccmds.AddressFlag    `arg:"" name:"approved" help:"approved account address" required:"true"`
+	NFTidx   uint64               `arg:"" name:"nft" help:"target nft idx to approve"`
+	Currency ccmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	sender   base.Address
+	contract base.Address
+	approved base.Address
 }
 
 func (cmd *ApproveCommand) Run(pctx context.Context) error { // nolint:dupl
@@ -37,7 +37,7 @@ func (cmd *ApproveCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }
@@ -69,7 +69,7 @@ func (cmd *ApproveCommand) parseFlags() error {
 
 }
 
-func (cmd *ApproveCommand) createOperation() (mitumbase.Operation, error) {
+func (cmd *ApproveCommand) createOperation() (base.Operation, error) {
 	e := util.StringError("failed to create approve operation")
 
 	item := nft.NewApproveItem(cmd.contract, cmd.approved, cmd.NFTidx, cmd.Currency.CID)

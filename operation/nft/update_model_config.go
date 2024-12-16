@@ -2,6 +2,7 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
@@ -168,10 +169,31 @@ func (fact UpdateModelConfigFact) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
+func (fact UpdateModelConfigFact) FeeBase() map[currencytypes.CurrencyID][]common.Big {
+	required := make(map[currencytypes.CurrencyID][]common.Big)
+	required[fact.Currency()] = []common.Big{common.ZeroBig}
+
+	return required
+}
+
+func (fact UpdateModelConfigFact) FeePayer() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact UpdateModelConfigFact) FactUser() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact UpdateModelConfigFact) ActiveContractOwnerHandlerOnly() [][2]mitumbase.Address {
+	return [][2]mitumbase.Address{{fact.contract, fact.sender}}
+}
+
 type UpdateModelConfig struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewUpdateModelConfig(fact UpdateModelConfigFact) (UpdateModelConfig, error) {
-	return UpdateModelConfig{BaseOperation: common.NewBaseOperation(UpdateModelConfigHint, fact)}, nil
+	return UpdateModelConfig{
+		ExtendedOperation: extras.NewExtendedOperation(UpdateModelConfigHint, fact),
+	}, nil
 }

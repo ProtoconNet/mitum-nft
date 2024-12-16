@@ -8,7 +8,6 @@ import (
 	statenft "github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
 
-	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
@@ -176,38 +175,9 @@ func (opp *MintProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender %v is contract account", fact.Sender(), cErr)), nil
-	}
-
-	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMSignInvalid).
-				Errorf("%v", err)), nil
-	}
-
 	idxes := map[string]uint64{}
 	for _, item := range fact.Items() {
 		if _, found := idxes[item.contract.String()]; !found {
-			_, _, aErr, cErr := currencystate.ExistsCAccount(
-				item.Contract(), "contract", true, true, getStateFunc)
-			if aErr != nil {
-				return ctx, base.NewBaseOperationProcessReasonError(
-					common.ErrMPreProcess.
-						Errorf("%v", aErr)), nil
-			} else if cErr != nil {
-				return ctx, base.NewBaseOperationProcessReasonError(
-					common.ErrMPreProcess.
-						Errorf("%v", cErr)), nil
-			}
-
 			st, err := currencystate.ExistsState(
 				statenft.NFTStateKey(item.contract, statenft.CollectionKey), "design", getStateFunc)
 			if err != nil {
@@ -273,12 +243,6 @@ func (opp *MintProcessor) PreProcess(
 				}
 			}
 
-			if !ca.IsActive() {
-				return nil, base.NewBaseOperationProcessReasonError(
-					common.ErrMPreProcess.
-						Wrap(common.ErrMServiceNF).Errorf("nft collection, %v", item.Contract())), nil
-			}
-
 			st, err = currencystate.ExistsState(statenft.NFTStateKey(item.contract, statenft.LastIDXKey), "collection index", getStateFunc)
 			if err != nil {
 				return nil, base.NewBaseOperationProcessReasonError(
@@ -330,13 +294,8 @@ func (opp *MintProcessor) Process( // nolint:dupl
 ) {
 	e := util.StringError("failed to process Mint")
 
-	fact, ok := op.Fact().(MintFact)
-	if !ok {
-		return nil, nil, e.Errorf("expected MintFact, not %T", op.Fact())
-	}
-
+	fact, _ := op.Fact().(MintFact)
 	idxes := map[string]uint64{}
-	//boxes := map[string]*types.NFTBox{}
 
 	for _, item := range fact.items {
 		idxKey := statenft.NFTStateKey(item.contract, statenft.LastIDXKey)
@@ -397,57 +356,6 @@ func (opp *MintProcessor) Process( // nolint:dupl
 	}
 
 	idxes = nil
-	//boxes = nil
-
-	items := make([]CollectionItem, len(fact.Items()))
-	for i := range fact.Items() {
-		items[i] = fact.Items()[i]
-	}
-
-	feeReceiverBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
-	}
-	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
-	}
-
-	for cid := range sb {
-		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
-		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
-		}
-
-		_, feeReceiverFound := feeReceiverBalSts[cid]
-
-		if feeReceiverFound && (sb[cid].Key() != feeReceiverBalSts[cid].Key()) {
-			stmv := common.NewBaseStateMergeValue(
-				sb[cid].Key(),
-				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
-				func(height base.Height, st base.State) base.StateValueMerger {
-					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
-				},
-			)
-
-			r, ok := feeReceiverBalSts[cid].Value().(statecurrency.BalanceStateValue)
-			if !ok {
-				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
-			}
-			sts = append(
-				sts,
-				common.NewBaseStateMergeValue(
-					feeReceiverBalSts[cid].Key(),
-					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
-					func(height base.Height, st base.State) base.StateValueMerger {
-						return statecurrency.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
-					},
-				),
-			)
-
-			sts = append(sts, stmv)
-		}
-	}
 
 	return sts, nil, nil
 }

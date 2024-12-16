@@ -3,7 +3,7 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -13,14 +13,14 @@ import (
 
 type MintCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Receiver currencycmds.AddressFlag    `arg:"" name:"receiver" help:"receiver address" required:"true"`
-	Hash     string                      `arg:"" name:"hash" help:"nft hash" required:"true"`
-	Uri      string                      `arg:"" name:"uri" help:"nft uri" required:"true"`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Creator  SignerFlag                  `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
+	ccmds.OperationFlags
+	Sender   ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract ccmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Receiver ccmds.AddressFlag    `arg:"" name:"receiver" help:"receiver address" required:"true"`
+	Hash     string               `arg:"" name:"hash" help:"nft hash" required:"true"`
+	Uri      string               `arg:"" name:"uri" help:"nft uri" required:"true"`
+	Currency ccmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Creator  SignerFlag           `name:"creator" help:"nft contents creator \"<address>,<share>\"" optional:""`
 	sender   base.Address
 	contract base.Address
 	receiver base.Address
@@ -43,7 +43,7 @@ func (cmd *MintCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }

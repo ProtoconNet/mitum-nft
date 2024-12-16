@@ -2,15 +2,15 @@ package digest
 
 import (
 	"context"
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
-	"github.com/ProtoconNet/mitum-nft/state"
-	"github.com/ProtoconNet/mitum-nft/types"
-	mitumutil "github.com/ProtoconNet/mitum2/util"
-	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 
-	"github.com/ProtoconNet/mitum-currency/v3/digest/util"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cutil "github.com/ProtoconNet/mitum-currency/v3/digest/util"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
+	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/util"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,17 +29,17 @@ var (
 	defaultColNameNFTOperator     = "digest_nftoperator"
 )
 
-func NFTCollection(st *currencydigest.Database, contract string) (*types.Design, error) {
-	filter := util.NewBSONFilter("contract", contract)
+func NFTCollection(st *cdigest.Database, contract string) (*types.Design, error) {
+	filter := cutil.NewBSONFilter("contract", contract)
 
 	var design *types.Design
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
 		defaultColNameNFTCollection,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -51,30 +51,30 @@ func NFTCollection(st *currencydigest.Database, contract string) (*types.Design,
 
 			return nil
 		},
-		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
+		options.FindOne().SetSort(cutil.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft collection for contract account %v", contract)
+		return nil, util.ErrNotFound.WithMessage(err, "nft collection for contract account %v", contract)
 	}
 
 	return design, nil
 }
 
-func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) {
+func NFT(st *cdigest.Database, contract, idx string) (*types.NFT, error) {
 	i, err := strconv.ParseUint(idx, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	filter := util.NewBSONFilter("contract", contract)
+	filter := cutil.NewBSONFilter("contract", contract)
 	filter = filter.Add("nft_idx", i)
 
 	var nft *types.NFT
-	var sta mitumbase.State
+	var sta base.State
 	if err = st.MongoClient().GetByFilter(
 		defaultColNameNFT,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -85,20 +85,20 @@ func NFT(st *currencydigest.Database, contract, idx string) (*types.NFT, error) 
 
 			return nil
 		},
-		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
+		options.FindOne().SetSort(cutil.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.Errorf("nft token for contract account %v, nft idx %v", contract, idx)
+		return nil, util.ErrNotFound.Errorf("nft token for contract account %v, nft idx %v", contract, idx)
 	}
 
 	return nft, nil
 }
 
 func NFTsByCollection(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	contract, factHash, offset string,
 	reverse bool,
 	limit int64,
-	callback func(nft types.NFT, st mitumbase.State) (bool, error),
+	callback func(nft types.NFT, st base.State) (bool, error),
 ) error {
 	filter, err := buildNFTsFilterByContract(contract, factHash, offset, reverse)
 	if err != nil {
@@ -111,7 +111,7 @@ func NFTsByCollection(
 	}
 
 	opt := options.Find().SetSort(
-		util.NewBSONFilter("nft_idx", sr).D(),
+		cutil.NewBSONFilter("nft_idx", sr).D(),
 	)
 
 	switch {
@@ -127,7 +127,7 @@ func NFTsByCollection(
 		defaultColNameNFT,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
+			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}
@@ -142,7 +142,7 @@ func NFTsByCollection(
 }
 
 func NFTCountByCollection(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	contract string,
 ) (int64, error) {
 	filterA := bson.A{}
@@ -171,20 +171,20 @@ func NFTCountByCollection(
 }
 
 func NFTOperators(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	contract, account string,
 ) (*types.AllApprovedBook, error) {
-	filter := util.NewBSONFilter("contract", contract)
+	filter := cutil.NewBSONFilter("contract", contract)
 	filter = filter.Add("address", account)
 
 	var operators *types.AllApprovedBook
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
 		defaultColNameNFTOperator,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -196,9 +196,9 @@ func NFTOperators(
 
 			return nil
 		},
-		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
+		options.FindOne().SetSort(cutil.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return nil, mitumutil.ErrNotFound.WithMessage(err, "nft operators by contract %s and account %s", contract, account)
+		return nil, util.ErrNotFound.WithMessage(err, "nft operators by contract %s and account %s", contract, account)
 	}
 
 	return operators, nil

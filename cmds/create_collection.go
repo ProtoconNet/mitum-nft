@@ -3,30 +3,30 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
 )
 
 type CreateCollectionCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender    currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract  currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account to register policy" required:"true"`
-	Name      string                      `arg:"" name:"name" help:"collection name" required:"true"`
-	Royalty   uint                        `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
-	Currency  currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	URI       string                      `name:"uri" help:"collection uri" optional:""`
-	White     currencycmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
-	sender    mitumbase.Address
-	contract  mitumbase.Address
+	ccmds.OperationFlags
+	Sender    ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract  ccmds.AddressFlag    `arg:"" name:"contract" help:"contract account to register policy" required:"true"`
+	Name      string               `arg:"" name:"name" help:"collection name" required:"true"`
+	Royalty   uint                 `arg:"" name:"royalty" help:"royalty parameter; 0 <= royalty param < 100" required:"true"`
+	Currency  ccmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	URI       string               `name:"uri" help:"collection uri" optional:""`
+	White     ccmds.AddressFlag    `name:"white" help:"whitelisted address" optional:""`
+	sender    base.Address
+	contract  base.Address
 	name      types.CollectionName
 	royalty   types.PaymentParameter
 	uri       types.URI
-	whitelist []mitumbase.Address
+	whitelist []base.Address
 }
 
 func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
@@ -43,7 +43,7 @@ func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }
@@ -65,7 +65,7 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 		cmd.contract = a
 	}
 
-	var white mitumbase.Address = nil
+	var white base.Address = nil
 	if cmd.White.String() != "" {
 		if a, err := cmd.White.Encode(cmd.Encoders.JSON()); err != nil {
 			return errors.Wrapf(err, "invalid whitelist address format, %v", cmd.White)
@@ -95,7 +95,7 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 		cmd.uri = uri
 	}
 
-	whitelist := []mitumbase.Address{}
+	whitelist := []base.Address{}
 	if white != nil {
 		whitelist = append(whitelist, white)
 	} else {
@@ -105,7 +105,7 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *CreateCollectionCommand) createOperation() (mitumbase.Operation, error) {
+func (cmd *CreateCollectionCommand) createOperation() (base.Operation, error) {
 	e := util.StringError("failed to create create-collection operation")
 
 	fact := nft.NewRegisterModelFact(

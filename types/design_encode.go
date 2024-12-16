@@ -1,7 +1,7 @@
 package types
 
 import (
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -18,13 +18,13 @@ func (de *Design) unpack(
 	de.BaseHinter = hint.NewBaseHinter(ht)
 	de.active = active
 
-	contract, err := mitumbase.DecodeAddress(pAdr, enc)
+	contract, err := base.DecodeAddress(pAdr, enc)
 	if err != nil {
 		return err
 	}
 	de.contract = contract
 
-	creator, err := mitumbase.DecodeAddress(crAdr, enc)
+	creator, err := base.DecodeAddress(crAdr, enc)
 	if err != nil {
 		return err
 	}

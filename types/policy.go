@@ -6,8 +6,7 @@ import (
 	"sort"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -58,10 +57,10 @@ type CollectionPolicy struct {
 	name      CollectionName
 	royalty   PaymentParameter
 	uri       URI
-	whitelist []mitumbase.Address
+	whitelist []base.Address
 }
 
-func NewCollectionPolicy(name CollectionName, royalty PaymentParameter, uri URI, whitelist []mitumbase.Address) CollectionPolicy {
+func NewCollectionPolicy(name CollectionName, royalty PaymentParameter, uri URI, whitelist []base.Address) CollectionPolicy {
 	return CollectionPolicy{
 		BaseHinter: hint.NewBaseHinter(CollectionPolicyHint),
 		name:       name,
@@ -125,11 +124,11 @@ func (policy CollectionPolicy) URI() URI {
 	return policy.uri
 }
 
-func (policy CollectionPolicy) Whitelist() []mitumbase.Address {
+func (policy CollectionPolicy) Whitelist() []base.Address {
 	return policy.whitelist
 }
 
-func (policy CollectionPolicy) Addresses() ([]mitumbase.Address, error) {
+func (policy CollectionPolicy) Addresses() ([]base.Address, error) {
 	return policy.whitelist, nil
 }
 
@@ -179,7 +178,7 @@ type CollectionDesign struct {
 	Design
 }
 
-func NewCollectionDesign(contract mitumbase.Address, creator mitumbase.Address, active bool, policy CollectionPolicy) CollectionDesign {
+func NewCollectionDesign(contract base.Address, creator base.Address, active bool, policy CollectionPolicy) CollectionDesign {
 	design := NewDesign(contract, creator, active, policy)
 
 	return CollectionDesign{

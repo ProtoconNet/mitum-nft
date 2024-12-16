@@ -1,6 +1,8 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"strconv"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
@@ -130,10 +132,47 @@ func (fact TransferFact) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
+func (fact TransferFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact TransferFact) FeePayer() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) FactUser() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) ActiveContract() []mitumbase.Address {
+	var arr []mitumbase.Address
+	for i := range fact.items {
+		arr = append(arr, fact.items[i].contract)
+	}
+	return arr
+}
+
 type Transfer struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewTransfer(fact TransferFact) (Transfer, error) {
-	return Transfer{BaseOperation: common.NewBaseOperation(TransferHint, fact)}, nil
+	return Transfer{
+		ExtendedOperation: extras.NewExtendedOperation(TransferHint, fact),
+	}, nil
 }

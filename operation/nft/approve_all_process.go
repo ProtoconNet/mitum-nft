@@ -8,7 +8,6 @@ import (
 	"github.com/ProtoconNet/mitum-nft/types"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	"github.com/ProtoconNet/mitum-currency/v3/state"
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
@@ -156,36 +155,7 @@ func (opp *DelegateProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender %v is contract", fact.Sender(), cErr)), nil
-	}
-
-	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMSignInvalid).
-				Errorf("%v", err)), nil
-	}
-
 	for _, item := range fact.Items() {
-		_, _, aErr, cErr := currencystate.ExistsCAccount(
-			item.Contract(), "contract", true, true, getStateFunc)
-		if aErr != nil {
-			return ctx, mitumbase.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Errorf("%v", aErr)), nil
-		} else if cErr != nil {
-			return ctx, mitumbase.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.
-					Errorf("%v", cErr)), nil
-		}
-
 		st, err := currencystate.ExistsState(
 			statenft.NFTStateKey(item.Contract(), statenft.CollectionKey), "design", getStateFunc)
 		if err != nil {
@@ -240,11 +210,7 @@ func (opp *DelegateProcessor) Process(
 ) {
 	e := util.StringError("failed to process Delegate")
 
-	fact, ok := op.Fact().(ApproveAllFact)
-	if !ok {
-		return nil, nil, e.Errorf("expected DelgateFact, not %T", op.Fact())
-	}
-
+	fact, _ := op.Fact().(ApproveAllFact)
 	boxes := map[string]*types.AllApprovedBook{}
 	for _, item := range fact.Items() {
 		ak := statenft.StateKeyOperators(item.contract, fact.Sender())
@@ -299,56 +265,6 @@ func (opp *DelegateProcessor) Process(
 
 	for _, ipc := range ipcs {
 		ipc.Close()
-	}
-
-	items := make([]CollectionItem, len(fact.items))
-	for i := range fact.items {
-		items[i] = fact.items[i]
-	}
-
-	feeReceiverBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
-	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
-	}
-	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
-	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
-	}
-
-	for cid := range sb {
-		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
-		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
-		}
-
-		_, feeReceiverFound := feeReceiverBalSts[cid]
-
-		if feeReceiverFound && (sb[cid].Key() != feeReceiverBalSts[cid].Key()) {
-			stmv := common.NewBaseStateMergeValue(
-				sb[cid].Key(),
-				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
-				func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
-				},
-			)
-
-			r, ok := feeReceiverBalSts[cid].Value().(statecurrency.BalanceStateValue)
-			if !ok {
-				return nil, mitumbase.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
-			}
-			sts = append(
-				sts,
-				common.NewBaseStateMergeValue(
-					feeReceiverBalSts[cid].Key(),
-					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
-					func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-						return statecurrency.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
-					},
-				),
-			)
-
-			sts = append(sts, stmv)
-		}
 	}
 
 	return sts, nil, nil

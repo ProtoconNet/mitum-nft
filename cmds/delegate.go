@@ -3,7 +3,7 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -12,12 +12,12 @@ import (
 
 type DelegateCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	Operator currencycmds.AddressFlag    `arg:"" name:"operator" help:"operator account address"`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
-	Mode     string                      `name:"mode" help:"delegate mode" optional:""`
+	ccmds.OperationFlags
+	Sender   ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract ccmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	Operator ccmds.AddressFlag    `arg:"" name:"operator" help:"operator account address"`
+	Currency ccmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	Mode     string               `name:"mode" help:"delegate mode" optional:""`
 	sender   base.Address
 	contract base.Address
 	operator base.Address
@@ -38,7 +38,7 @@ func (cmd *DelegateCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }

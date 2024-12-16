@@ -2,8 +2,7 @@ package state
 
 import (
 	"github.com/ProtoconNet/mitum-nft/types"
-
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -45,7 +44,7 @@ func (cs CollectionStateValue) HashBytes() []byte {
 	return cs.Design.Bytes()
 }
 
-func StateCollectionValue(st mitumbase.State) (*types.Design, error) {
+func StateCollectionValue(st base.State) (*types.Design, error) {
 	v := st.Value()
 	if v == nil {
 		return nil, util.ErrNotFound.Errorf("collection design not found in State")
@@ -91,7 +90,7 @@ func (is LastNFTIndexStateValue) HashBytes() []byte {
 	return util.Uint64ToBytes(is.id)
 }
 
-func StateLastNFTIndexValue(st mitumbase.State) (uint64, error) {
+func StateLastNFTIndexValue(st base.State) (uint64, error) {
 	v := st.Value()
 	if v == nil {
 		return 0, util.ErrNotFound.Errorf("collection last nft index not found in State")
@@ -143,7 +142,7 @@ func (ns NFTStateValue) HashBytes() []byte {
 	return ns.NFT.Bytes()
 }
 
-func StateNFTValue(st mitumbase.State) (*types.NFT, error) {
+func StateNFTValue(st base.State) (*types.NFT, error) {
 	v := st.Value()
 	if v == nil {
 		return nil, util.ErrNotFound.Errorf("nft not found in State")
@@ -193,7 +192,7 @@ func (nb NFTBoxStateValue) HashBytes() []byte {
 	return nb.Box.Bytes()
 }
 
-func StateNFTBoxValue(st mitumbase.State) (types.NFTBox, error) {
+func StateNFTBoxValue(st base.State) (types.NFTBox, error) {
 	v := st.Value()
 	if v == nil {
 		return types.NFTBox{}, util.ErrNotFound.Errorf("nft box not found in State")
@@ -243,7 +242,7 @@ func (ob OperatorsBookStateValue) HashBytes() []byte {
 	return ob.Operators.Bytes()
 }
 
-func StateOperatorsBookValue(st mitumbase.State) (*types.AllApprovedBook, error) {
+func StateOperatorsBookValue(st base.State) (*types.AllApprovedBook, error) {
 	v := st.Value()
 	if v == nil {
 		return nil, util.ErrNotFound.Errorf("operators book not found in State")

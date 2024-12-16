@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	isaacblock "github.com/ProtoconNet/mitum2/isaac/block"
@@ -21,7 +21,7 @@ type Digester struct {
 	sync.RWMutex
 	*util.ContextDaemon
 	*logging.Logging
-	database      *currencydigest.Database
+	database      *cdigest.Database
 	localfsRoot   string
 	blockChan     chan base.BlockMap
 	errChan       chan error
@@ -32,7 +32,7 @@ type Digester struct {
 }
 
 func NewDigester(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	root string,
 	sourceReaders *isaac.BlockItemReaders,
 	fromRemotes isaac.RemotesBlockItemReadFunc,
@@ -62,7 +62,7 @@ func NewDigester(
 func (di *Digester) start(ctx context.Context) error {
 	e := util.StringError("start Digester")
 
-	errch := func(err currencydigest.DigestError) {
+	errch := func(err cdigest.DigestError) {
 		if di.errChan == nil {
 			return
 		}
@@ -80,7 +80,7 @@ end:
 		case blk := <-di.blockChan:
 			err := util.Retry(ctx, func() (bool, error) {
 				if err := di.digest(ctx, blk); err != nil {
-					go errch(currencydigest.NewDigestError(err, blk.Manifest().Height()))
+					go errch(cdigest.NewDigestError(err, blk.Manifest().Height()))
 
 					if errors.Is(err, context.Canceled) {
 						return false, e.Wrap(err)
@@ -97,7 +97,7 @@ end:
 				di.Log().Info().Int64("block", blk.Manifest().Height().Int64()).Msg("block digested")
 			}
 
-			go errch(currencydigest.NewDigestError(err, blk.Manifest().Height()))
+			go errch(cdigest.NewDigestError(err, blk.Manifest().Height()))
 		}
 	}
 
@@ -152,7 +152,7 @@ func (di *Digester) digest(ctx context.Context, blk base.BlockMap) error {
 
 func DigestBlock(
 	ctx context.Context,
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	blk base.BlockMap,
 	ops []base.Operation,
 	opstree fixedtree.Tree,

@@ -2,6 +2,8 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -126,14 +128,51 @@ func (fact ApproveAllFact) Addresses() ([]mitumbase.Address, error) {
 	return as, nil
 }
 
+func (fact ApproveAllFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact ApproveAllFact) FeePayer() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact ApproveAllFact) FactUser() mitumbase.Address {
+	return fact.sender
+}
+
+func (fact ApproveAllFact) ActiveContract() []mitumbase.Address {
+	var arr []mitumbase.Address
+	for i := range fact.items {
+		arr = append(arr, fact.items[i].contract)
+	}
+	return arr
+}
+
 func (fact ApproveAllFact) Items() []ApproveAllItem {
 	return fact.items
 }
 
 type ApproveAll struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewDelegate(fact ApproveAllFact) (ApproveAll, error) {
-	return ApproveAll{BaseOperation: common.NewBaseOperation(ApproveAllHint, fact)}, nil
+	return ApproveAll{
+		ExtendedOperation: extras.NewExtendedOperation(ApproveAllHint, fact),
+	}, nil
 }

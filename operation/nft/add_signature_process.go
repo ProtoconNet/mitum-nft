@@ -11,7 +11,6 @@ import (
 	statenft "github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
 
-	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	"github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	"github.com/ProtoconNet/mitum2/base"
@@ -57,13 +56,6 @@ func (ipp *SignItemProcessor) PreProcess(
 
 	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
-	}
-
-	_, _, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
-	if aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(cErr)
 	}
 
 	nid := ipp.item.NFT()
@@ -210,23 +202,6 @@ func (opp *SignProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender %v is contract account", fact.Sender(), cErr)), nil
-	}
-
-	if err := state.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMSignInvalid).
-				Errorf("%v", err)), nil
-	}
-
 	for _, item := range fact.Items() {
 		ip := signItemProcessorPool.Get()
 		ipc, ok := ip.(*SignItemProcessor)
@@ -257,11 +232,7 @@ func (opp *SignProcessor) Process( // nolint:dupl
 ) {
 	e := util.StringError("failed to process Sign")
 
-	fact, ok := op.Fact().(AddSignatureFact)
-	if !ok {
-		return nil, nil, e.Errorf("expected SignFact, not %T", op.Fact())
-	}
-
+	fact, _ := op.Fact().(AddSignatureFact)
 	var sts []mitumbase.StateMergeValue
 
 	for _, item := range fact.Items() {
@@ -277,61 +248,11 @@ func (opp *SignProcessor) Process( // nolint:dupl
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to process MintItem; %w", err), nil
+			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to process SignItem; %w", err), nil
 		}
 		sts = append(sts, s...)
 
 		ipc.Close()
-	}
-
-	items := make([]CollectionItem, len(fact.Items()))
-	for i := range fact.Items() {
-		items[i] = fact.Items()[i]
-	}
-
-	feeReceiverBalSts, required, err := CalculateCollectionItemsFee(getStateFunc, items)
-	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
-	}
-	sb, err := currency.CheckEnoughBalance(fact.Sender(), required, getStateFunc)
-	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
-	}
-
-	for cid := range sb {
-		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
-		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
-		}
-
-		_, feeReceiverFound := feeReceiverBalSts[cid]
-
-		if feeReceiverFound && (sb[cid].Key() != feeReceiverBalSts[cid].Key()) {
-			stmv := common.NewBaseStateMergeValue(
-				sb[cid].Key(),
-				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
-				func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
-				},
-			)
-
-			r, ok := feeReceiverBalSts[cid].Value().(statecurrency.BalanceStateValue)
-			if !ok {
-				return nil, mitumbase.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
-			}
-			sts = append(
-				sts,
-				common.NewBaseStateMergeValue(
-					feeReceiverBalSts[cid].Key(),
-					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
-					func(height mitumbase.Height, st mitumbase.State) mitumbase.StateValueMerger {
-						return statecurrency.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
-					},
-				),
-			)
-
-			sts = append(sts, stmv)
-		}
 	}
 
 	return sts, nil, nil

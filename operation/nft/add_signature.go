@@ -1,10 +1,12 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"strconv"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -19,13 +21,13 @@ var (
 var MaxAddSignatureItems = 100
 
 type AddSignatureFact struct {
-	mitumbase.BaseFact
-	sender mitumbase.Address
+	base.BaseFact
+	sender base.Address
 	items  []AddSignatureItem
 }
 
-func NewAddSignatureFact(token []byte, sender mitumbase.Address, items []AddSignatureItem) AddSignatureFact {
-	bf := mitumbase.NewBaseFact(AddSignatureFactHint, token)
+func NewAddSignatureFact(token []byte, sender base.Address, items []AddSignatureItem) AddSignatureFact {
+	bf := base.NewBaseFact(AddSignatureFactHint, token)
 	fact := AddSignatureFact{
 		BaseFact: bf,
 		sender:   sender,
@@ -100,11 +102,11 @@ func (fact AddSignatureFact) Bytes() []byte {
 	)
 }
 
-func (fact AddSignatureFact) Token() mitumbase.Token {
+func (fact AddSignatureFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact AddSignatureFact) Sender() mitumbase.Address {
+func (fact AddSignatureFact) Sender() base.Address {
 	return fact.sender
 }
 
@@ -112,16 +114,53 @@ func (fact AddSignatureFact) Items() []AddSignatureItem {
 	return fact.items
 }
 
-func (fact AddSignatureFact) Addresses() ([]mitumbase.Address, error) {
-	as := make([]mitumbase.Address, 1)
+func (fact AddSignatureFact) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
 	as[0] = fact.sender
 	return as, nil
 }
 
-type AddSignature struct {
-	common.BaseOperation
+func (fact AddSignatureFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
 }
 
-func NewSign(fact AddSignatureFact) (AddSignature, error) {
-	return AddSignature{BaseOperation: common.NewBaseOperation(AddSignatureHint, fact)}, nil
+func (fact AddSignatureFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact AddSignatureFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact AddSignatureFact) ActiveContract() []base.Address {
+	var arr []base.Address
+	for i := range fact.items {
+		arr = append(arr, fact.items[i].contract)
+	}
+	return arr
+}
+
+type AddSignature struct {
+	extras.ExtendedOperation
+}
+
+func NewAddSignature(fact AddSignatureFact) (AddSignature, error) {
+	return AddSignature{
+		ExtendedOperation: extras.NewExtendedOperation(AddSignatureHint, fact),
+	}, nil
 }

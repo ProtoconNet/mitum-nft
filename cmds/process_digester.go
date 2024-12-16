@@ -2,7 +2,7 @@ package cmds
 
 import (
 	"context"
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-nft/digest"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
@@ -24,8 +24,8 @@ func ProcessDigester(ctx context.Context) (context.Context, error) {
 		return ctx, err
 	}
 
-	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
+	var st *cdigest.Database
+	if err := util.LoadFromContext(ctx, cdigest.ContextValueDigestDatabase, &st); err != nil {
 		return ctx, err
 	}
 
@@ -61,12 +61,12 @@ func ProcessDigester(ctx context.Context) (context.Context, error) {
 	di := digest.NewDigester(st, root, sourceReaders, fromRemotes, design.NetworkID, vs.String(), nil)
 	_ = di.SetLogging(log)
 
-	return context.WithValue(ctx, currencydigest.ContextValueDigester, di), nil
+	return context.WithValue(ctx, cdigest.ContextValueDigester, di), nil
 }
 
 func ProcessStartDigester(ctx context.Context) (context.Context, error) {
 	var di *digest.Digester
-	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigester, &di); err != nil {
+	if err := util.LoadFromContext(ctx, cdigest.ContextValueDigester, &di); err != nil {
 		return ctx, err
 	}
 	if di == nil {
@@ -89,8 +89,8 @@ func PDigesterFollowUp(ctx context.Context) (context.Context, error) {
 		return ctx, err
 	}
 
-	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
+	var st *cdigest.Database
+	if err := util.LoadFromContext(ctx, cdigest.ContextValueDigestDatabase, &st); err != nil {
 		return ctx, err
 	}
 	if st == nil {
@@ -127,8 +127,8 @@ func digestFollowup(ctx context.Context, height base.Height) error {
 		return err
 	}
 
-	var st *currencydigest.Database
-	if err := util.LoadFromContextOK(ctx, currencydigest.ContextValueDigestDatabase, &st); err != nil {
+	var st *cdigest.Database
+	if err := util.LoadFromContextOK(ctx, cdigest.ContextValueDigestDatabase, &st); err != nil {
 		return err
 	}
 
