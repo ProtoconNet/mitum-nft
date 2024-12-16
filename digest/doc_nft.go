@@ -1,9 +1,9 @@
 package digest
 
 import (
-	mongodbstorage "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
+	mongodbst "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
-	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -11,7 +11,7 @@ import (
 )
 
 type NFTCollectionDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st base.State
 	de types.Design
 }
@@ -21,7 +21,7 @@ func NewNFTCollectionDoc(st base.State, enc encoder.Encoder) (NFTCollectionDoc, 
 	if err != nil {
 		return NFTCollectionDoc{}, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return NFTCollectionDoc{}, err
 	}
@@ -47,7 +47,7 @@ func (doc NFTCollectionDoc) MarshalBSON() ([]byte, error) {
 }
 
 type NFTDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st        base.State
 	nft       types.NFT
 	addresses []base.Address
@@ -64,7 +64,7 @@ func NewNFTDoc(st base.State, enc encoder.Encoder) (*NFTDoc, error) {
 	for i := range nft.Creators().Addresses() {
 		addresses[i+1] = nft.Creators().Addresses()[i].String()
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 4)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 4)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (doc NFTDoc) MarshalBSON() ([]byte, error) {
 }
 
 type NFTAllApprovedDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st        base.State
 	operators types.AllApprovedBook
 }
@@ -116,7 +116,7 @@ func NewNFTOperatorDoc(st base.State, enc encoder.Encoder) (*NFTAllApprovedDoc, 
 	if err != nil {
 		return nil, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (doc NFTAllApprovedDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 4)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 4)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (doc NFTAllApprovedDoc) MarshalBSON() ([]byte, error) {
 }
 
 type NFTBoxDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st     base.State
 	nftbox types.NFTBox
 }
@@ -157,7 +157,7 @@ func NewNFTBoxDoc(st base.State, enc encoder.Encoder) (*NFTBoxDoc, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (doc NFTBoxDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 3)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 3)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (doc NFTBoxDoc) MarshalBSON() ([]byte, error) {
 }
 
 type NFTLastIndexDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st    base.State
 	nftID uint64
 }
@@ -198,7 +198,7 @@ func NewNFTLastIndexDoc(st base.State, enc encoder.Encoder) (*NFTLastIndexDoc, e
 	if err != nil {
 		return nil, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func (doc NFTLastIndexDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 3)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.NFTPrefix, 3)
 	if err != nil {
 		return nil, err
 	}

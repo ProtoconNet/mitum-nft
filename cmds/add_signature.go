@@ -3,7 +3,7 @@ package cmds
 import (
 	"context"
 
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -12,11 +12,11 @@ import (
 
 type SignCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
-	NFT      uint64                      `arg:"" name:"nft" help:"target nft; \"<collection>,<idx>\""`
-	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
+	ccmds.OperationFlags
+	Sender   ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract ccmds.AddressFlag    `arg:"" name:"contract" help:"contract address" required:"true"`
+	NFT      uint64               `arg:"" name:"nft" help:"target nft; \"<collection>,<idx>\""`
+	Currency ccmds.CurrencyIDFlag `arg:"" name:"currency" help:"currency id" required:"true"`
 	sender   base.Address
 	contract base.Address
 }
@@ -35,7 +35,7 @@ func (cmd *SignCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	ccmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }
@@ -72,7 +72,7 @@ func (cmd *SignCommand) createOperation() (base.Operation, error) {
 		[]nft.AddSignatureItem{item},
 	)
 
-	op, err := nft.NewSign(fact)
+	op, err := nft.NewAddSignature(fact)
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

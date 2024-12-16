@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"sort"
 
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -18,14 +18,14 @@ var AllApprovedBookHint = hint.MustNewHint("mitum-nft-all-approved-book-v0.0.1")
 
 type AllApprovedBook struct {
 	hint.BaseHinter
-	allApproved []mitumbase.Address
+	allApproved []base.Address
 }
 
-func NewAllApprovedBook(allApproved []mitumbase.Address) AllApprovedBook {
+func NewAllApprovedBook(allApproved []base.Address) AllApprovedBook {
 	if allApproved == nil {
 		return AllApprovedBook{
 			BaseHinter:  hint.NewBaseHinter(AllApprovedBookHint),
-			allApproved: []mitumbase.Address{},
+			allApproved: []base.Address{},
 		}
 	}
 	return AllApprovedBook{
@@ -94,7 +94,7 @@ func (ob *AllApprovedBook) Sort(ascending bool) {
 	})
 }
 
-func (ob AllApprovedBook) Exists(ag mitumbase.Address) bool {
+func (ob AllApprovedBook) Exists(ag base.Address) bool {
 	if ob.IsEmpty() {
 		return false
 	}
@@ -108,17 +108,17 @@ func (ob AllApprovedBook) Exists(ag mitumbase.Address) bool {
 	return false
 }
 
-func (ob AllApprovedBook) Get(ag mitumbase.Address) (mitumbase.Address, error) {
+func (ob AllApprovedBook) Get(ag base.Address) (base.Address, error) {
 	for _, operator := range ob.allApproved {
 		if ag.Equal(operator) {
 			return operator, nil
 		}
 	}
 
-	return currencytypes.Address{}, errors.Errorf("account %v not in operators book", ag)
+	return ctypes.Address{}, errors.Errorf("account %v not in operators book", ag)
 }
 
-func (ob *AllApprovedBook) Append(ag mitumbase.Address) error {
+func (ob *AllApprovedBook) Append(ag base.Address) error {
 	if err := ag.IsValid(nil); err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (ob *AllApprovedBook) Append(ag mitumbase.Address) error {
 	return nil
 }
 
-func (ob *AllApprovedBook) Remove(ag mitumbase.Address) error {
+func (ob *AllApprovedBook) Remove(ag base.Address) error {
 	if !ob.Exists(ag) {
 		return errors.Errorf("account %v not in operators book", ag)
 	}
@@ -144,7 +144,7 @@ func (ob *AllApprovedBook) Remove(ag mitumbase.Address) error {
 	for i := range ob.allApproved {
 		if ag.String() == ob.allApproved[i].String() {
 			ob.allApproved[i] = ob.allApproved[len(ob.allApproved)-1]
-			ob.allApproved[len(ob.allApproved)-1] = currencytypes.Address{}
+			ob.allApproved[len(ob.allApproved)-1] = ctypes.Address{}
 			ob.allApproved = ob.allApproved[:len(ob.allApproved)-1]
 
 			return nil
@@ -153,6 +153,6 @@ func (ob *AllApprovedBook) Remove(ag mitumbase.Address) error {
 	return nil
 }
 
-func (ob AllApprovedBook) AllApproved() []mitumbase.Address {
+func (ob AllApprovedBook) AllApproved() []base.Address {
 	return ob.allApproved
 }

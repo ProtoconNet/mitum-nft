@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -62,13 +62,13 @@ var DesignHint = hint.MustNewHint("mitum-nft-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	contract mitumbase.Address
-	creator  mitumbase.Address
+	contract base.Address
+	creator  base.Address
 	active   bool
 	policy   BasePolicy
 }
 
-func NewDesign(contract mitumbase.Address, creator mitumbase.Address, active bool, policy BasePolicy) Design {
+func NewDesign(contract base.Address, creator base.Address, active bool, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		contract:   contract,
@@ -119,11 +119,11 @@ func (de Design) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(de.Bytes())
 }
 
-func (de Design) Contract() mitumbase.Address {
+func (de Design) Contract() base.Address {
 	return de.contract
 }
 
-func (de Design) Creator() mitumbase.Address {
+func (de Design) Creator() base.Address {
 	return de.creator
 }
 
@@ -135,8 +135,8 @@ func (de Design) Policy() BasePolicy {
 	return de.policy
 }
 
-func (de Design) Addresses() ([]mitumbase.Address, error) {
-	as := make([]mitumbase.Address, 2)
+func (de Design) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 2)
 
 	as[0] = de.contract
 	as[1] = de.creator
@@ -177,6 +177,6 @@ func (de Design) Equal(cd Design) bool {
 type BasePolicy interface {
 	util.IsValider
 	Bytes() []byte
-	Addresses() ([]mitumbase.Address, error)
+	Addresses() ([]base.Address, error)
 	Equal(c BasePolicy) bool
 }

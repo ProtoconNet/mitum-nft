@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
 
@@ -29,12 +29,12 @@ var (
 	StateKeyNFTSuffix        = "nft"
 )
 
-func StateKeyNFTPrefix(addr mitumbase.Address) string {
+func StateKeyNFTPrefix(addr base.Address) string {
 	return fmt.Sprintf("%s:%s", NFTPrefix, addr.String())
 }
 
 func NFTStateKey(
-	contract mitumbase.Address,
+	contract base.Address,
 	keyType StateKey,
 ) string {
 	prefix := StateKeyNFTPrefix(contract)
@@ -51,11 +51,11 @@ func NFTStateKey(
 	return stateKey
 }
 
-func StateKeyOperators(contract mitumbase.Address, addr mitumbase.Address) string {
+func StateKeyOperators(contract base.Address, addr base.Address) string {
 	return fmt.Sprintf("%s:%s:%s", StateKeyNFTPrefix(contract), addr.String(), StateKeyOperatorsSuffix)
 }
 
-func StateKeyNFT(contract mitumbase.Address, id uint64) string {
+func StateKeyNFT(contract base.Address, id uint64) string {
 	return fmt.Sprintf("%s:%s:%s", StateKeyNFTPrefix(contract), strconv.FormatUint(id, 10), StateKeyNFTSuffix)
 }
 

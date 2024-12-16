@@ -2,7 +2,8 @@ package types
 
 import (
 	"encoding/json"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -10,10 +11,10 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Contract mitumbase.Address `json:"contract"`
-	Creator  mitumbase.Address `json:"creator"`
-	Active   bool              `json:"active"`
-	Policy   BasePolicy        `json:"policy"`
+	Contract base.Address `json:"contract"`
+	Creator  base.Address `json:"creator"`
+	Active   bool         `json:"active"`
+	Policy   BasePolicy   `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {

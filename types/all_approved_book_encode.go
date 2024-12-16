@@ -1,7 +1,7 @@
 package types
 
 import (
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -13,9 +13,9 @@ func (ob *AllApprovedBook) unpack(
 ) error {
 	ob.BaseHinter = hint.NewBaseHinter(ht)
 
-	operators := make([]mitumbase.Address, len(oprs))
+	operators := make([]base.Address, len(oprs))
 	for i, bag := range oprs {
-		operator, err := mitumbase.DecodeAddress(bag, enc)
+		operator, err := base.DecodeAddress(bag, enc)
 		if err != nil {
 			return err
 		}
