@@ -1,9 +1,9 @@
 package nft
 
 import (
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
@@ -17,15 +17,15 @@ func (fact *UpdateModelConfigFact) unpack(
 	bws []string,
 	cid string,
 ) error {
-	fact.currency = currencytypes.CurrencyID(cid)
+	fact.currency = ctypes.CurrencyID(cid)
 
-	sender, err := mitumbase.DecodeAddress(sd, enc)
+	sender, err := base.DecodeAddress(sd, enc)
 	if err != nil {
 		return err
 	}
 	fact.sender = sender
 
-	contract, err := mitumbase.DecodeAddress(sd, enc)
+	contract, err := base.DecodeAddress(sd, enc)
 	if err != nil {
 		return err
 	}
@@ -35,16 +35,16 @@ func (fact *UpdateModelConfigFact) unpack(
 	fact.royalty = types.PaymentParameter(ry)
 	fact.uri = types.URI(uri)
 
-	switch a, err := mitumbase.DecodeAddress(ct, enc); {
+	switch a, err := base.DecodeAddress(ct, enc); {
 	case err != nil:
 		return err
 	default:
 		fact.contract = a
 	}
 
-	whitelist := make([]mitumbase.Address, len(bws))
+	whitelist := make([]base.Address, len(bws))
 	for i, bw := range bws {
-		white, err := mitumbase.DecodeAddress(bw, enc)
+		white, err := base.DecodeAddress(bw, enc)
 		if err != nil {
 			return err
 		}

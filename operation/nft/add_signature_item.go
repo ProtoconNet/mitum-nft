@@ -2,7 +2,7 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -11,12 +11,12 @@ var AddSignatureItemHint = hint.MustNewHint("mitum-nft-add-signature-item-v0.0.1
 
 type AddSignatureItem struct {
 	hint.BaseHinter
-	contract mitumbase.Address
+	contract base.Address
 	nftIdx   uint64
 	currency types.CurrencyID
 }
 
-func NewAddSignatureItem(contract mitumbase.Address, nfxIdx uint64, currency types.CurrencyID) AddSignatureItem {
+func NewAddSignatureItem(contract base.Address, nfxIdx uint64, currency types.CurrencyID) AddSignatureItem {
 	return AddSignatureItem{
 		BaseHinter: hint.NewBaseHinter(AddSignatureItemHint),
 		contract:   contract,
@@ -45,7 +45,7 @@ func (it AddSignatureItem) NFT() uint64 {
 	return it.nftIdx
 }
 
-func (it AddSignatureItem) Contract() mitumbase.Address {
+func (it AddSignatureItem) Contract() base.Address {
 	return it.contract
 }
 

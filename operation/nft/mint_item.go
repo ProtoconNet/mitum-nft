@@ -2,10 +2,9 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -14,28 +13,28 @@ import (
 type CollectionItem interface {
 	util.Byter
 	util.IsValider
-	Currency() currencytypes.CurrencyID
+	Currency() ctypes.CurrencyID
 }
 
 var MintItemHint = hint.MustNewHint("mitum-nft-mint-item-v0.0.1")
 
 type MintItem struct {
 	hint.BaseHinter
-	contract mitumbase.Address
-	receiver mitumbase.Address
+	contract base.Address
+	receiver base.Address
 	hash     types.NFTHash
 	uri      types.URI
 	creators types.Signers
-	currency currencytypes.CurrencyID
+	currency ctypes.CurrencyID
 }
 
 func NewMintItem(
-	contract mitumbase.Address,
-	receiver mitumbase.Address,
+	contract base.Address,
+	receiver base.Address,
 	hash types.NFTHash,
 	uri types.URI,
 	creators types.Signers,
-	currency currencytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 ) MintItem {
 	return MintItem{
 		BaseHinter: hint.NewBaseHinter(MintItemHint),
@@ -88,11 +87,11 @@ func (it MintItem) IsValid([]byte) error {
 	)
 }
 
-func (it MintItem) Contract() mitumbase.Address {
+func (it MintItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it MintItem) Receiver() mitumbase.Address {
+func (it MintItem) Receiver() base.Address {
 	return it.receiver
 }
 
@@ -108,14 +107,14 @@ func (it MintItem) Creators() types.Signers {
 	return it.creators
 }
 
-func (it MintItem) Addresses() ([]mitumbase.Address, error) {
-	as := []mitumbase.Address{}
+func (it MintItem) Addresses() ([]base.Address, error) {
+	as := []base.Address{}
 	as = append(as, it.receiver)
 	as = append(as, it.creators.Addresses()...)
 
 	return as, nil
 }
 
-func (it MintItem) Currency() currencytypes.CurrencyID {
+func (it MintItem) Currency() ctypes.CurrencyID {
 	return it.currency
 }

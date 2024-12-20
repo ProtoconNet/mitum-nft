@@ -5,13 +5,12 @@ import (
 	"sync"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/ProtoconNet/mitum-currency/v3/state"
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	statenft "github.com/ProtoconNet/mitum-nft/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ccstate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
 )
@@ -29,19 +28,19 @@ var transferProcessorPool = sync.Pool{
 }
 
 func (Transfer) Process(
-	_ context.Context, _ mitumbase.GetStateFunc,
-) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
+	_ context.Context, _ base.GetStateFunc,
+) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
 type TransferItemProcessor struct {
 	h      util.Hash
-	sender mitumbase.Address
+	sender base.Address
 	item   TransferItem
 }
 
 func (ipp *TransferItemProcessor) PreProcess(
-	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess TransferItemProcessor")
 	it := ipp.item
@@ -50,11 +49,11 @@ func (ipp *TransferItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(ccstate.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
-	if _, _, _, cErr := currencystate.ExistsCAccount(
+	if _, _, _, cErr := cstate.ExistsCAccount(
 		it.Receiver(), "receiver", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(
 			errors.Errorf("%v: receiver %v is contract account", cErr, it.Receiver())))
@@ -62,15 +61,15 @@ func (ipp *TransferItemProcessor) PreProcess(
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(
-		statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
+	st, err := cstate.ExistsState(
+		state.NFTStateKey(ipp.item.Contract(), state.CollectionKey), "design", getStateFunc)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateNF.Wrap(
 				common.ErrServiceNF.Errorf("nft collection state for contract account %v", it.Contract())))
 	}
 
-	design, err := statenft.StateCollectionValue(st)
+	design, err := state.StateCollectionValue(st)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateValInvalid.Wrap(
@@ -82,12 +81,12 @@ func (ipp *TransferItemProcessor) PreProcess(
 				"nft collection in contract account %v has already been deactivated ", ipp.item.Contract()))
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
+	st, err = cstate.ExistsState(state.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
 		return e.Wrap(common.ErrStateNF.Errorf("nft idx %v in contract account %v", nid, it.Contract()))
 	}
 
-	nv, err := statenft.StateNFTValue(st)
+	nv, err := state.StateNFTValue(st)
 	if err != nil {
 		return e.Wrap(common.ErrStateValInvalid.Errorf("nft idx %v in contract account %v", nid, it.Contract()))
 	}
@@ -97,15 +96,15 @@ func (ipp *TransferItemProcessor) PreProcess(
 	}
 
 	if !(nv.Owner().Equal(ipp.sender) || nv.Approved().Equal(ipp.sender)) {
-		if st, err := state.ExistsState(
-			statenft.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators", getStateFunc); err != nil {
+		if st, err := cstate.ExistsState(
+			state.StateKeyOperators(ipp.item.Contract(), nv.Owner()), "operators", getStateFunc); err != nil {
 			return e.Wrap(
 				common.ErrAccountNAth.Wrap(
 					errors.Errorf(
 						"sender %v neither nft owner nor operator for nft idx %v in contract account %v: operators state not found",
 						ipp.sender, nid, ipp.item.Contract())))
 
-		} else if box, err := statenft.StateOperatorsBookValue(st); err != nil {
+		} else if box, err := state.StateOperatorsBookValue(st); err != nil {
 			return e.Wrap(
 				common.ErrAccountNAth.Wrap(
 					errors.Errorf("sender %v neither nft owner nor operator for nft idx %v in contract account %v: operators state value not found",
@@ -130,12 +129,12 @@ func (ipp *TransferItemProcessor) PreProcess(
 }
 
 func (ipp *TransferItemProcessor) Process(
-	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
-) ([]mitumbase.StateMergeValue, error) {
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
+) ([]base.StateMergeValue, error) {
 	receiver := ipp.item.Receiver()
-	var sts []mitumbase.StateMergeValue
+	var sts []base.StateMergeValue
 
-	smv, err := currencystate.CreateNotExistAccount(receiver, getStateFunc)
+	smv, err := cstate.CreateNotExistAccount(receiver, getStateFunc)
 	if err != nil {
 		return nil, err
 	} else if smv != nil {
@@ -144,12 +143,12 @@ func (ipp *TransferItemProcessor) Process(
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
+	st, err := cstate.ExistsState(state.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %v: %v", nid, err)
 	}
 
-	nv, err := statenft.StateNFTValue(st)
+	nv, err := state.StateNFTValue(st)
 	if err != nil {
 		return nil, errors.Errorf("nft value not found, %v: %v", nid, err)
 	}
@@ -161,8 +160,8 @@ func (ipp *TransferItemProcessor) Process(
 
 	sts = append(
 		sts,
-		state.NewStateMergeValue(
-			statenft.StateKeyNFT(ipp.item.Contract(), ipp.item.NFT()), statenft.NewNFTStateValue(n)),
+		cstate.NewStateMergeValue(
+			state.StateKeyNFT(ipp.item.Contract(), ipp.item.NFT()), state.NewNFTStateValue(n)),
 	)
 
 	return sts, nil
@@ -179,16 +178,16 @@ func (ipp *TransferItemProcessor) Close() {
 }
 
 type TransferProcessor struct {
-	*mitumbase.BaseOperationProcessor
+	*base.BaseOperationProcessor
 }
 
-func NewTransferProcessor() currencytypes.GetNewProcessor {
+func NewTransferProcessor() ctypes.GetNewProcessor {
 	return func(
-		height mitumbase.Height,
-		getStateFunc mitumbase.GetStateFunc,
-		newPreProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-		newProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-	) (mitumbase.OperationProcessor, error) {
+		height base.Height,
+		getStateFunc base.GetStateFunc,
+		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+	) (base.OperationProcessor, error) {
 		e := util.StringError("failed to create new TransferProcessor")
 
 		nopp := transferProcessorPool.Get()
@@ -197,7 +196,7 @@ func NewTransferProcessor() currencytypes.GetNewProcessor {
 			return nil, e.Errorf("expected TransferProcessor, not %T", nopp)
 		}
 
-		b, err := mitumbase.NewBaseOperationProcessor(
+		b, err := base.NewBaseOperationProcessor(
 			height, getStateFunc, newPreProcessConstraintFunc, newProcessConstraintFunc)
 		if err != nil {
 			return nil, e.Wrap(err)
@@ -210,18 +209,18 @@ func NewTransferProcessor() currencytypes.GetNewProcessor {
 }
 
 func (opp *TransferProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
-) (context.Context, mitumbase.OperationProcessReasonError, error) {
+	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
+) (context.Context, base.OperationProcessReasonError, error) {
 	fact, ok := op.Fact().(TransferFact)
 	if !ok {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
 				Errorf("expected %T, not %T", TransferFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Errorf("%v", err)), nil
 	}
@@ -230,7 +229,7 @@ func (opp *TransferProcessor) PreProcess(
 		ip := transferItemProcessorPool.Get()
 		ipc, ok := ip.(*TransferItemProcessor)
 		if !ok {
-			return nil, mitumbase.NewBaseOperationProcessReasonError(
+			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMTypeMismatch.Errorf("expected TransferItemProcessor, not %T", ip)), nil
 		}
 
@@ -239,7 +238,7 @@ func (opp *TransferProcessor) PreProcess(
 		ipc.item = item
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError(
+			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Errorf("%v", err),
 			), nil
 		}
@@ -251,13 +250,13 @@ func (opp *TransferProcessor) PreProcess(
 }
 
 func (opp *TransferProcessor) Process( // nolint:dupl
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc) (
-	[]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error,
+	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
+	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	e := util.StringError("failed to process Transfer")
 
 	fact, _ := op.Fact().(TransferFact)
-	var sts []mitumbase.StateMergeValue // nolint:prealloc
+	var sts []base.StateMergeValue // nolint:prealloc
 	for _, item := range fact.Items() {
 		ip := transferItemProcessorPool.Get()
 		ipc, ok := ip.(*TransferItemProcessor)
@@ -271,7 +270,7 @@ func (opp *TransferProcessor) Process( // nolint:dupl
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to process TransferItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process TransferItem; %w", err), nil
 		}
 		sts = append(sts, s...)
 

@@ -2,22 +2,22 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type UpdateModelConfigFactJSONMarshaler struct {
-	mitumbase.BaseFactJSONMarshaler
-	Sender    mitumbase.Address        `json:"sender"`
-	Contract  mitumbase.Address        `json:"contract"`
-	Name      types.CollectionName     `json:"name"`
-	Royalty   types.PaymentParameter   `json:"royalty"`
-	URI       types.URI                `json:"uri"`
-	Whitelist []mitumbase.Address      `json:"minter_whitelist"`
-	Currency  currencytypes.CurrencyID `json:"currency"`
+	base.BaseFactJSONMarshaler
+	Sender    base.Address           `json:"sender"`
+	Contract  base.Address           `json:"contract"`
+	Name      types.CollectionName   `json:"name"`
+	Royalty   types.PaymentParameter `json:"royalty"`
+	URI       types.URI              `json:"uri"`
+	Whitelist []base.Address         `json:"minter_whitelist"`
+	Currency  ctypes.CurrencyID      `json:"currency"`
 }
 
 func (fact UpdateModelConfigFact) MarshalJSON() ([]byte, error) {
@@ -34,7 +34,7 @@ func (fact UpdateModelConfigFact) MarshalJSON() ([]byte, error) {
 }
 
 type UpdateModelConfigFactJSONUnmarshaler struct {
-	mitumbase.BaseFactJSONUnmarshaler
+	base.BaseFactJSONUnmarshaler
 	Sender    string   `json:"sender"`
 	Contract  string   `json:"contract"`
 	Name      string   `json:"name"`

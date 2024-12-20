@@ -2,13 +2,12 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	"github.com/pkg/errors"
-
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 func (it *MintItem) unpack(
@@ -22,14 +21,14 @@ func (it *MintItem) unpack(
 	it.hash = types.NFTHash(hs)
 	it.uri = types.URI(uri)
 
-	switch a, err := mitumbase.DecodeAddress(ca, enc); {
+	switch a, err := base.DecodeAddress(ca, enc); {
 	case err != nil:
 		return err
 	default:
 		it.contract = a
 	}
 
-	switch a, err := mitumbase.DecodeAddress(ra, enc); {
+	switch a, err := base.DecodeAddress(ra, enc); {
 	case err != nil:
 		return err
 	default:
@@ -44,7 +43,7 @@ func (it *MintItem) unpack(
 		it.creators = creators
 	}
 
-	it.currency = currencytypes.CurrencyID(cid)
+	it.currency = ctypes.CurrencyID(cid)
 
 	return nil
 }
