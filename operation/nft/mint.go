@@ -4,7 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -19,13 +19,13 @@ var (
 )
 
 type MintFact struct {
-	mitumbase.BaseFact
-	sender mitumbase.Address
+	base.BaseFact
+	sender base.Address
 	items  []MintItem
 }
 
-func NewMintFact(token []byte, sender mitumbase.Address, items []MintItem) MintFact {
-	bf := mitumbase.NewBaseFact(MintFactHint, token)
+func NewMintFact(token []byte, sender base.Address, items []MintItem) MintFact {
+	bf := base.NewBaseFact(MintFactHint, token)
 	fact := MintFact{
 		BaseFact: bf,
 		sender:   sender,
@@ -89,16 +89,16 @@ func (fact MintFact) Bytes() []byte {
 	)
 }
 
-func (fact MintFact) Token() mitumbase.Token {
+func (fact MintFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact MintFact) Sender() mitumbase.Address {
+func (fact MintFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) Addresses() ([]mitumbase.Address, error) {
-	as := []mitumbase.Address{}
+func (fact MintFact) Addresses() ([]base.Address, error) {
+	as := []base.Address{}
 
 	for _, item := range fact.items {
 		if ads, err := item.Addresses(); err != nil {
@@ -132,16 +132,16 @@ func (fact MintFact) FeeBase() map[types.CurrencyID][]common.Big {
 	return required
 }
 
-func (fact MintFact) FeePayer() mitumbase.Address {
+func (fact MintFact) FeePayer() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) FactUser() mitumbase.Address {
+func (fact MintFact) FactUser() base.Address {
 	return fact.sender
 }
 
-func (fact MintFact) ActiveContract() []mitumbase.Address {
-	var arr []mitumbase.Address
+func (fact MintFact) ActiveContract() []base.Address {
+	var arr []base.Address
 	for i := range fact.items {
 		arr = append(arr, fact.items[i].contract)
 	}

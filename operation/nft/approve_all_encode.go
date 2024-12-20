@@ -2,7 +2,7 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
 )
@@ -12,7 +12,7 @@ func (fact *ApproveAllFact) unmarshal(
 	sd string,
 	bits []byte,
 ) error {
-	sender, err := mitumbase.DecodeAddress(sd, enc)
+	sender, err := base.DecodeAddress(sd, enc)
 	if err != nil {
 		return err
 	}

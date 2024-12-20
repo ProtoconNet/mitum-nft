@@ -4,18 +4,18 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
-	statenft "github.com/ProtoconNet/mitum-nft/state"
-	nfttypes "github.com/ProtoconNet/mitum-nft/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
 type TestTransferProcessor struct {
 	*test.BaseTestOperationProcessorWithItem[Transfer, TransferItem]
-	name    nfttypes.CollectionName
-	royalty nfttypes.PaymentParameter
-	uri     nfttypes.URI
+	name    types.CollectionName
+	royalty types.PaymentParameter
+	uri     types.URI
 }
 
 func NewTestTransferProcessor(tp *test.TestProcessor) TestTransferProcessor {
@@ -35,7 +35,7 @@ func (t *TestTransferProcessor) Create() *TestTransferProcessor {
 }
 
 func (t *TestTransferProcessor) SetCurrency(
-	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
+	cid string, am int64, addr base.Address, target []ctypes.CurrencyID, instate bool,
 ) *TestTransferProcessor {
 	t.BaseTestOperationProcessorWithItem.SetCurrency(cid, am, addr, target, instate)
 
@@ -43,7 +43,7 @@ func (t *TestTransferProcessor) SetCurrency(
 }
 
 func (t *TestTransferProcessor) SetAmount(
-	am int64, cid types.CurrencyID, target []types.Amount,
+	am int64, cid ctypes.CurrencyID, target []ctypes.Amount,
 ) *TestTransferProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAmount(am, cid, target)
 
@@ -51,7 +51,7 @@ func (t *TestTransferProcessor) SetAmount(
 }
 
 func (t *TestTransferProcessor) SetContractAccount(
-	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	owner base.Address, priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestTransferProcessor {
 	t.BaseTestOperationProcessorWithItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
@@ -59,7 +59,7 @@ func (t *TestTransferProcessor) SetContractAccount(
 }
 
 func (t *TestTransferProcessor) SetAccount(
-	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestTransferProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAccount(priv, amount, cid, target, inState)
 
@@ -67,38 +67,38 @@ func (t *TestTransferProcessor) SetAccount(
 }
 
 func (t *TestTransferProcessor) SetNFT(
-	contract, owner base.Address, nfthash, uri string, creators nfttypes.Signers,
+	contract, owner base.Address, nfthash, uri string, creators types.Signers,
 ) *TestTransferProcessor {
-	cst, found, _ := t.MockGetter.Get(statenft.NFTStateKey(contract, statenft.LastIDXKey))
+	cst, found, _ := t.MockGetter.Get(state.NFTStateKey(contract, state.LastIDXKey))
 	if !found {
 		panic("service not set")
 	}
 
-	nftID, _ := statenft.StateLastNFTIndexValue(cst)
-	n := nfttypes.NewNFT(nftID, true, owner, nfttypes.NFTHash(nfthash), nfttypes.URI(uri), owner, creators)
+	nftID, _ := state.StateLastNFTIndexValue(cst)
+	n := types.NewNFT(nftID, true, owner, types.NFTHash(nfthash), types.URI(uri), owner, creators)
 
-	st := common.NewBaseState(base.Height(1), statenft.StateKeyNFT(contract, nftID), statenft.NewNFTStateValue(n), nil, []util.Hash{})
+	st := common.NewBaseState(base.Height(1), state.StateKeyNFT(contract, nftID), state.NewNFTStateValue(n), nil, []util.Hash{})
 	t.SetState(st, true)
-	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(contract, statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(nftID+1), nil, []util.Hash{})
+	st = common.NewBaseState(base.Height(1), state.NFTStateKey(contract, state.LastIDXKey), state.NewLastNFTIndexStateValue(nftID+1), nil, []util.Hash{})
 	t.SetState(st, true)
 
 	return t
 }
 
 func (t *TestTransferProcessor) SetSigner(
-	signer test.Account, share uint, signed bool, target []nfttypes.Signer,
+	signer test.Account, share uint, signed bool, target []types.Signer,
 ) *TestTransferProcessor {
-	sg := nfttypes.NewSigner(signer.Address(), share, signed)
-	test.UpdateSlice[nfttypes.Signer](sg, target)
+	sg := types.NewSigner(signer.Address(), share, signed)
+	test.UpdateSlice[types.Signer](sg, target)
 
 	return t
 }
 
 func (t *TestTransferProcessor) SetSigners(
-	signers []nfttypes.Signer, target []nfttypes.Signers,
+	signers []types.Signer, target []types.Signers,
 ) *TestTransferProcessor {
-	sg := nfttypes.NewSigners(signers)
-	test.UpdateSlice[nfttypes.Signers](sg, target)
+	sg := types.NewSigners(signers)
+	test.UpdateSlice[types.Signers](sg, target)
 
 	return t
 }
@@ -108,9 +108,9 @@ func (t *TestTransferProcessor) SetDesign(
 	royalty uint,
 	uri string,
 ) *TestTransferProcessor {
-	t.name = nfttypes.CollectionName(name)
-	t.royalty = nfttypes.PaymentParameter(royalty)
-	t.uri = nfttypes.URI(uri)
+	t.name = types.CollectionName(name)
+	t.royalty = types.PaymentParameter(royalty)
+	t.uri = types.URI(uri)
 
 	return t
 }
@@ -123,12 +123,12 @@ func (t *TestTransferProcessor) SetService(
 		whs = append(whs, wh.Address())
 	}
 
-	policy := nfttypes.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
-	design := nfttypes.NewDesign(contract, sender, true, policy)
+	policy := types.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
+	design := types.NewDesign(contract, sender, true, policy)
 
-	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
+	st := common.NewBaseState(base.Height(1), state.NFTStateKey(design.Contract(), state.CollectionKey), state.NewCollectionStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
-	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
+	st = common.NewBaseState(base.Height(1), state.NFTStateKey(design.Contract(), state.LastIDXKey), state.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
 	t.SetState(st, true)
 
 	cst, found, _ := t.MockGetter.Get(extension.StateKeyContractAccount(contract))
@@ -162,7 +162,7 @@ func (t *TestTransferProcessor) Print(fileName string,
 }
 
 func (t *TestTransferProcessor) MakeItem(
-	target test.Account, receiver test.Account, nftID uint64, currency types.CurrencyID,
+	target test.Account, receiver test.Account, nftID uint64, currency ctypes.CurrencyID,
 	targetItems []TransferItem,
 ) *TestTransferProcessor {
 	item := NewTransferItem(target.Address(), receiver.Address(), nftID, currency)

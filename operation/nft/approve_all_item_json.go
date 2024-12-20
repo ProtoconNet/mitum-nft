@@ -3,7 +3,7 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -11,10 +11,10 @@ import (
 
 type ApproveAllItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract mitumbase.Address `json:"contract"`
-	Approved mitumbase.Address `json:"approved"`
-	Mode     ApproveAllMode    `json:"mode"`
-	Currency types.CurrencyID  `json:"currency"`
+	Contract base.Address     `json:"contract"`
+	Approved base.Address     `json:"approved"`
+	Mode     ApproveAllMode   `json:"mode"`
+	Currency types.CurrencyID `json:"currency"`
 }
 
 func (it ApproveAllItem) MarshalJSON() ([]byte, error) {

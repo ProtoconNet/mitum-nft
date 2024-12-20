@@ -1,16 +1,15 @@
 package nft
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	"strconv"
-
-	"github.com/ProtoconNet/mitum-currency/v3/common"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 var (
@@ -21,13 +20,13 @@ var (
 var MaxTransferItems = 100
 
 type TransferFact struct {
-	mitumbase.BaseFact
-	sender mitumbase.Address
+	base.BaseFact
+	sender base.Address
 	items  []TransferItem
 }
 
-func NewTransferFact(token []byte, sender mitumbase.Address, items []TransferItem) TransferFact {
-	bf := mitumbase.NewBaseFact(TransferFactHint, token)
+func NewTransferFact(token []byte, sender base.Address, items []TransferItem) TransferFact {
+	bf := base.NewBaseFact(TransferFactHint, token)
 
 	fact := TransferFact{
 		BaseFact: bf,
@@ -104,11 +103,11 @@ func (fact TransferFact) Bytes() []byte {
 	)
 }
 
-func (fact TransferFact) Token() mitumbase.Token {
+func (fact TransferFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact TransferFact) Sender() mitumbase.Address {
+func (fact TransferFact) Sender() base.Address {
 	return fact.sender
 }
 
@@ -116,8 +115,8 @@ func (fact TransferFact) Items() []TransferItem {
 	return fact.items
 }
 
-func (fact TransferFact) Addresses() ([]mitumbase.Address, error) {
-	as := []mitumbase.Address{}
+func (fact TransferFact) Addresses() ([]base.Address, error) {
+	as := []base.Address{}
 
 	for i := range fact.items {
 		if ads, err := fact.items[i].Addresses(); err != nil {
@@ -151,16 +150,16 @@ func (fact TransferFact) FeeBase() map[types.CurrencyID][]common.Big {
 	return required
 }
 
-func (fact TransferFact) FeePayer() mitumbase.Address {
+func (fact TransferFact) FeePayer() base.Address {
 	return fact.sender
 }
 
-func (fact TransferFact) FactUser() mitumbase.Address {
+func (fact TransferFact) FactUser() base.Address {
 	return fact.sender
 }
 
-func (fact TransferFact) ActiveContract() []mitumbase.Address {
-	var arr []mitumbase.Address
+func (fact TransferFact) ActiveContract() []base.Address {
+	var arr []base.Address
 	for i := range fact.items {
 		arr = append(arr, fact.items[i].contract)
 	}

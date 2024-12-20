@@ -4,7 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -19,13 +19,13 @@ var (
 var MaxApproveAllItems = 100
 
 type ApproveAllFact struct {
-	mitumbase.BaseFact
-	sender mitumbase.Address
+	base.BaseFact
+	sender base.Address
 	items  []ApproveAllItem
 }
 
-func NewApproveAllFact(token []byte, sender mitumbase.Address, items []ApproveAllItem) ApproveAllFact {
-	bf := mitumbase.NewBaseFact(ApproveAllFactHint, token)
+func NewApproveAllFact(token []byte, sender base.Address, items []ApproveAllItem) ApproveAllFact {
+	bf := base.NewBaseFact(ApproveAllFactHint, token)
 	fact := ApproveAllFact{
 		BaseFact: bf,
 		sender:   sender,
@@ -106,18 +106,18 @@ func (fact ApproveAllFact) Bytes() []byte {
 	)
 }
 
-func (fact ApproveAllFact) Token() mitumbase.Token {
+func (fact ApproveAllFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact ApproveAllFact) Sender() mitumbase.Address {
+func (fact ApproveAllFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact ApproveAllFact) Addresses() ([]mitumbase.Address, error) {
+func (fact ApproveAllFact) Addresses() ([]base.Address, error) {
 	l := len(fact.items)
 
-	as := make([]mitumbase.Address, l+1)
+	as := make([]base.Address, l+1)
 
 	for i, item := range fact.items {
 		as[i] = item.Approved()
@@ -147,16 +147,16 @@ func (fact ApproveAllFact) FeeBase() map[types.CurrencyID][]common.Big {
 	return required
 }
 
-func (fact ApproveAllFact) FeePayer() mitumbase.Address {
+func (fact ApproveAllFact) FeePayer() base.Address {
 	return fact.sender
 }
 
-func (fact ApproveAllFact) FactUser() mitumbase.Address {
+func (fact ApproveAllFact) FactUser() base.Address {
 	return fact.sender
 }
 
-func (fact ApproveAllFact) ActiveContract() []mitumbase.Address {
-	var arr []mitumbase.Address
+func (fact ApproveAllFact) ActiveContract() []base.Address {
+	var arr []base.Address
 	for i := range fact.items {
 		arr = append(arr, fact.items[i].contract)
 	}

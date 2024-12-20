@@ -3,10 +3,9 @@ package nft
 import (
 	"encoding/json"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -14,12 +13,12 @@ import (
 
 type MintItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract mitumbase.Address        `json:"contract"`
-	Receiver mitumbase.Address        `json:"receiver"`
-	Hash     types.NFTHash            `json:"hash"`
-	Uri      types.URI                `json:"uri"`
-	Creators types.Signers            `json:"creators"`
-	Currency currencytypes.CurrencyID `json:"currency"`
+	Contract base.Address      `json:"contract"`
+	Receiver base.Address      `json:"receiver"`
+	Hash     types.NFTHash     `json:"hash"`
+	Uri      types.URI         `json:"uri"`
+	Creators types.Signers     `json:"creators"`
+	Currency ctypes.CurrencyID `json:"currency"`
 }
 
 func (it MintItem) MarshalJSON() ([]byte, error) {

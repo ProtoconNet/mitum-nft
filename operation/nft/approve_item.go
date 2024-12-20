@@ -3,7 +3,7 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -13,14 +13,14 @@ var ApproveItemHint = hint.MustNewHint("mitum-nft-approve-item-v0.0.1")
 
 type ApproveItem struct {
 	hint.BaseHinter
-	contract mitumbase.Address
-	approved mitumbase.Address
+	contract base.Address
+	approved base.Address
 	nftIdx   uint64
 	currency types.CurrencyID
 }
 
 func NewApproveItem(
-	contract mitumbase.Address, approved mitumbase.Address, nftIdx uint64, currency types.CurrencyID) ApproveItem {
+	contract base.Address, approved base.Address, nftIdx uint64, currency types.CurrencyID) ApproveItem {
 	return ApproveItem{
 		BaseHinter: hint.NewBaseHinter(ApproveItemHint),
 		contract:   contract,
@@ -52,16 +52,16 @@ func (it ApproveItem) Bytes() []byte {
 	)
 }
 
-func (it ApproveItem) Contract() mitumbase.Address {
+func (it ApproveItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it ApproveItem) Approved() mitumbase.Address {
+func (it ApproveItem) Approved() base.Address {
 	return it.approved
 }
 
-func (it ApproveItem) Addresses() ([]mitumbase.Address, error) {
-	as := make([]mitumbase.Address, 1)
+func (it ApproveItem) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
 	as[0] = it.approved
 	return as, nil
 }

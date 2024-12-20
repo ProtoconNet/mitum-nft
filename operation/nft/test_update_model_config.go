@@ -4,18 +4,18 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
-	statenft "github.com/ProtoconNet/mitum-nft/state"
-	nfttypes "github.com/ProtoconNet/mitum-nft/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
 
 type TestUpdateCollectionPolicyProcessor struct {
 	*test.BaseTestOperationProcessorNoItem[UpdateModelConfig]
-	name    nfttypes.CollectionName
-	royalty nfttypes.PaymentParameter
-	uri     nfttypes.URI
+	name    types.CollectionName
+	royalty types.PaymentParameter
+	uri     types.URI
 }
 
 func NewTestUpdateCollectionPolicyProcessor(tp *test.TestProcessor) TestUpdateCollectionPolicyProcessor {
@@ -33,7 +33,7 @@ func (t *TestUpdateCollectionPolicyProcessor) Create() *TestUpdateCollectionPoli
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) SetCurrency(
-	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
+	cid string, am int64, addr base.Address, target []ctypes.CurrencyID, instate bool,
 ) *TestUpdateCollectionPolicyProcessor {
 	t.BaseTestOperationProcessorNoItem.SetCurrency(cid, am, addr, target, instate)
 
@@ -41,7 +41,7 @@ func (t *TestUpdateCollectionPolicyProcessor) SetCurrency(
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) SetAmount(
-	am int64, cid types.CurrencyID, target []types.Amount,
+	am int64, cid ctypes.CurrencyID, target []ctypes.Amount,
 ) *TestUpdateCollectionPolicyProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAmount(am, cid, target)
 
@@ -49,7 +49,7 @@ func (t *TestUpdateCollectionPolicyProcessor) SetAmount(
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) SetContractAccount(
-	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	owner base.Address, priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestUpdateCollectionPolicyProcessor {
 	t.BaseTestOperationProcessorNoItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
@@ -57,7 +57,7 @@ func (t *TestUpdateCollectionPolicyProcessor) SetContractAccount(
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) SetAccount(
-	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestUpdateCollectionPolicyProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAccount(priv, amount, cid, target, inState)
 
@@ -83,9 +83,9 @@ func (t *TestUpdateCollectionPolicyProcessor) SetDesign(
 	royalty uint,
 	uri string,
 ) *TestUpdateCollectionPolicyProcessor {
-	t.name = nfttypes.CollectionName(name)
-	t.royalty = nfttypes.PaymentParameter(royalty)
-	t.uri = nfttypes.URI(uri)
+	t.name = types.CollectionName(name)
+	t.royalty = types.PaymentParameter(royalty)
+	t.uri = types.URI(uri)
 
 	return t
 }
@@ -98,12 +98,12 @@ func (t *TestUpdateCollectionPolicyProcessor) SetService(
 		whs = append(whs, wh.Address())
 	}
 
-	policy := nfttypes.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
-	design := nfttypes.NewDesign(contract, sender, true, policy)
+	policy := types.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
+	design := types.NewDesign(contract, sender, true, policy)
 
-	st := common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.CollectionKey), statenft.NewCollectionStateValue(design), nil, []util.Hash{})
+	st := common.NewBaseState(base.Height(1), state.NFTStateKey(design.Contract(), state.CollectionKey), state.NewCollectionStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
-	st = common.NewBaseState(base.Height(1), statenft.NFTStateKey(design.Contract(), statenft.LastIDXKey), statenft.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
+	st = common.NewBaseState(base.Height(1), state.NFTStateKey(design.Contract(), state.LastIDXKey), state.NewLastNFTIndexStateValue(0), nil, []util.Hash{})
 	t.SetState(st, true)
 
 	cst, found, _ := t.MockGetter.Get(extension.StateKeyContractAccount(contract))
@@ -123,7 +123,7 @@ func (t *TestUpdateCollectionPolicyProcessor) SetService(
 }
 
 func (t *TestUpdateCollectionPolicyProcessor) MakeOperation(
-	sender base.Address, privatekey base.Privatekey, contract base.Address, whitelist []test.Account, currency types.CurrencyID,
+	sender base.Address, privatekey base.Privatekey, contract base.Address, whitelist []test.Account, currency ctypes.CurrencyID,
 ) *TestUpdateCollectionPolicyProcessor {
 	var whs []base.Address
 	for _, wh := range whitelist {

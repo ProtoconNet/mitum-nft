@@ -3,7 +3,7 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
@@ -13,13 +13,13 @@ var TransferItemHint = hint.MustNewHint("mitum-nft-transfer-item-v0.0.1")
 
 type TransferItem struct {
 	hint.BaseHinter
-	contract mitumbase.Address
-	receiver mitumbase.Address
+	contract base.Address
+	receiver base.Address
 	nftIdx   uint64
 	currency types.CurrencyID
 }
 
-func NewTransferItem(contract mitumbase.Address, receiver mitumbase.Address, nft uint64, currency types.CurrencyID) TransferItem {
+func NewTransferItem(contract base.Address, receiver base.Address, nft uint64, currency types.CurrencyID) TransferItem {
 	return TransferItem{
 		BaseHinter: hint.NewBaseHinter(TransferItemHint),
 		contract:   contract,
@@ -51,16 +51,16 @@ func (it TransferItem) Bytes() []byte {
 	)
 }
 
-func (it TransferItem) Contract() mitumbase.Address {
+func (it TransferItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it TransferItem) Receiver() mitumbase.Address {
+func (it TransferItem) Receiver() base.Address {
 	return it.receiver
 }
 
-func (it TransferItem) Addresses() ([]mitumbase.Address, error) {
-	as := make([]mitumbase.Address, 1)
+func (it TransferItem) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
 	as[0] = it.receiver
 	return as, nil
 }

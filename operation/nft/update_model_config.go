@@ -3,9 +3,9 @@ package nft
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -18,26 +18,26 @@ var (
 )
 
 type UpdateModelConfigFact struct {
-	mitumbase.BaseFact
-	sender    mitumbase.Address
-	contract  mitumbase.Address
+	base.BaseFact
+	sender    base.Address
+	contract  base.Address
 	name      types.CollectionName
 	royalty   types.PaymentParameter
 	uri       types.URI
-	whitelist []mitumbase.Address
-	currency  currencytypes.CurrencyID
+	whitelist []base.Address
+	currency  ctypes.CurrencyID
 }
 
 func NewUpdateModelConfigFact(
 	token []byte,
-	sender, contract mitumbase.Address,
+	sender, contract base.Address,
 	name types.CollectionName,
 	royalty types.PaymentParameter,
 	uri types.URI,
-	whitelist []mitumbase.Address,
-	currency currencytypes.CurrencyID,
+	whitelist []base.Address,
+	currency ctypes.CurrencyID,
 ) UpdateModelConfigFact {
-	bf := mitumbase.NewBaseFact(UpdateModelConfigFactHint, token)
+	bf := base.NewBaseFact(UpdateModelConfigFactHint, token)
 
 	fact := UpdateModelConfigFact{
 		BaseFact:  bf,
@@ -131,15 +131,15 @@ func (fact UpdateModelConfigFact) Bytes() []byte {
 	)
 }
 
-func (fact UpdateModelConfigFact) Token() mitumbase.Token {
+func (fact UpdateModelConfigFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact UpdateModelConfigFact) Sender() mitumbase.Address {
+func (fact UpdateModelConfigFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact UpdateModelConfigFact) Contract() mitumbase.Address {
+func (fact UpdateModelConfigFact) Contract() base.Address {
 	return fact.contract
 }
 
@@ -155,37 +155,37 @@ func (fact UpdateModelConfigFact) URI() types.URI {
 	return fact.uri
 }
 
-func (fact UpdateModelConfigFact) Whitelist() []mitumbase.Address {
+func (fact UpdateModelConfigFact) Whitelist() []base.Address {
 	return fact.whitelist
 }
 
-func (fact UpdateModelConfigFact) Currency() currencytypes.CurrencyID {
+func (fact UpdateModelConfigFact) Currency() ctypes.CurrencyID {
 	return fact.currency
 }
 
-func (fact UpdateModelConfigFact) Addresses() ([]mitumbase.Address, error) {
-	as := make([]mitumbase.Address, 1)
+func (fact UpdateModelConfigFact) Addresses() ([]base.Address, error) {
+	as := make([]base.Address, 1)
 	as[0] = fact.sender
 	return as, nil
 }
 
-func (fact UpdateModelConfigFact) FeeBase() map[currencytypes.CurrencyID][]common.Big {
-	required := make(map[currencytypes.CurrencyID][]common.Big)
+func (fact UpdateModelConfigFact) FeeBase() map[ctypes.CurrencyID][]common.Big {
+	required := make(map[ctypes.CurrencyID][]common.Big)
 	required[fact.Currency()] = []common.Big{common.ZeroBig}
 
 	return required
 }
 
-func (fact UpdateModelConfigFact) FeePayer() mitumbase.Address {
+func (fact UpdateModelConfigFact) FeePayer() base.Address {
 	return fact.sender
 }
 
-func (fact UpdateModelConfigFact) FactUser() mitumbase.Address {
+func (fact UpdateModelConfigFact) FactUser() base.Address {
 	return fact.sender
 }
 
-func (fact UpdateModelConfigFact) ActiveContractOwnerHandlerOnly() [][2]mitumbase.Address {
-	return [][2]mitumbase.Address{{fact.contract, fact.sender}}
+func (fact UpdateModelConfigFact) ActiveContractOwnerHandlerOnly() [][2]base.Address {
+	return [][2]base.Address{{fact.contract, fact.sender}}
 }
 
 type UpdateModelConfig struct {

@@ -3,15 +3,15 @@ package nft
 import (
 	"encoding/json"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type ApproveAllFactJSONMarshaler struct {
-	mitumbase.BaseFactJSONMarshaler
-	Sender mitumbase.Address `json:"sender"`
-	Items  []ApproveAllItem  `json:"items"`
+	base.BaseFactJSONMarshaler
+	Sender base.Address     `json:"sender"`
+	Items  []ApproveAllItem `json:"items"`
 }
 
 func (fact ApproveAllFact) MarshalJSON() ([]byte, error) {
@@ -23,7 +23,7 @@ func (fact ApproveAllFact) MarshalJSON() ([]byte, error) {
 }
 
 type ApproveAllFactJSONUnmarshaler struct {
-	mitumbase.BaseFactJSONUnmarshaler
+	base.BaseFactJSONUnmarshaler
 	Sender string          `json:"sender"`
 	Items  json.RawMessage `json:"items"`
 }

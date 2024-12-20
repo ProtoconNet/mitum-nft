@@ -2,7 +2,7 @@ package nft
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -15,14 +15,14 @@ func (it *TransferItem) unpack(
 	cid string,
 ) error {
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	switch a, err := mitumbase.DecodeAddress(ca, enc); {
+	switch a, err := base.DecodeAddress(ca, enc); {
 	case err != nil:
 		return err
 	default:
 		it.contract = a
 	}
 
-	receiver, err := mitumbase.DecodeAddress(rc, enc)
+	receiver, err := base.DecodeAddress(rc, enc)
 	if err != nil {
 		return err
 	}

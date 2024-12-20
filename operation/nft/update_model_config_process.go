@@ -5,14 +5,12 @@ import (
 	"sync"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	statenft "github.com/ProtoconNet/mitum-nft/state"
-	"github.com/ProtoconNet/mitum-nft/types"
-
-	"github.com/ProtoconNet/mitum-currency/v3/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/state"
+	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
 )
@@ -24,22 +22,22 @@ var updateModelConfigProcessorPool = sync.Pool{
 }
 
 func (UpdateModelConfig) Process(
-	_ context.Context, _ mitumbase.GetStateFunc,
-) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
+	_ context.Context, _ base.GetStateFunc,
+) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
 type UpdateModelConfigProcessor struct {
-	*mitumbase.BaseOperationProcessor
+	*base.BaseOperationProcessor
 }
 
-func NewUpdateModelConfigProcessor() currencytypes.GetNewProcessor {
+func NewUpdateModelConfigProcessor() ctypes.GetNewProcessor {
 	return func(
-		height mitumbase.Height,
-		getStateFunc mitumbase.GetStateFunc,
-		newPreProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-		newProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-	) (mitumbase.OperationProcessor, error) {
+		height base.Height,
+		getStateFunc base.GetStateFunc,
+		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+	) (base.OperationProcessor, error) {
 		e := util.StringError("failed to create new UpdateModelConfigProcessor")
 
 		nopp := updateModelConfigProcessorPool.Get()
@@ -48,7 +46,7 @@ func NewUpdateModelConfigProcessor() currencytypes.GetNewProcessor {
 			return nil, errors.Errorf("expected UpdateModelConfigProcessor, not %T", nopp)
 		}
 
-		b, err := mitumbase.NewBaseOperationProcessor(
+		b, err := base.NewBaseOperationProcessor(
 			height, getStateFunc, newPreProcessConstraintFunc, newProcessConstraintFunc)
 		if err != nil {
 			return nil, e.Wrap(err)
@@ -61,53 +59,53 @@ func NewUpdateModelConfigProcessor() currencytypes.GetNewProcessor {
 }
 
 func (opp *UpdateModelConfigProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
-) (context.Context, mitumbase.OperationProcessReasonError, error) {
+	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
+) (context.Context, base.OperationProcessReasonError, error) {
 	fact, ok := op.Fact().(UpdateModelConfigFact)
 	if !ok {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
 				Errorf("expected %T, not %T", UpdateModelConfigFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Errorf("%v", err)), nil
 	}
 
-	if err := state.CheckExistsState(currency.DesignStateKey(fact.Currency()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(currency.DesignStateKey(fact.Currency()), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
 	}
 
 	whitelist := fact.Whitelist()
 	for _, white := range whitelist {
-		if _, _, _, cErr := state.ExistsCAccount(white, "whitelist", true, false, getStateFunc); cErr != nil {
-			return ctx, mitumbase.NewBaseOperationProcessReasonError(
+		if _, _, _, cErr := cstate.ExistsCAccount(white, "whitelist", true, false, getStateFunc); cErr != nil {
+			return ctx, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
 					Errorf("%v: whitelist %v is contract account", cErr, white)), nil
 		}
 	}
 
-	st, err := state.ExistsState(statenft.NFTStateKey(fact.Contract(), statenft.CollectionKey), "design", getStateFunc)
+	st, err := cstate.ExistsState(state.NFTStateKey(fact.Contract(), state.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError(
+		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
 				Errorf("nft collection state for contract account %v", fact.Contract())), nil
 
 	}
 
-	design, err := statenft.StateCollectionValue(st)
+	design, err := state.StateCollectionValue(st)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError(
+		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
 				Errorf("nft collection state value for contract account %v", fact.Contract())), nil
 	}
 
 	if !design.Active() {
-		return nil, mitumbase.NewBaseOperationProcessReasonError(
+		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Errorf("collection in contract account %v has already been deactivated ", fact.Contract())), nil
 	}
@@ -116,27 +114,27 @@ func (opp *UpdateModelConfigProcessor) PreProcess(
 }
 
 func (opp *UpdateModelConfigProcessor) Process(
-	_ context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc) (
-	[]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error,
+	_ context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
+	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	fact, _ := op.Fact().(UpdateModelConfigFact)
 
-	st, err := state.ExistsState(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), "design", getStateFunc)
+	st, err := cstate.ExistsState(state.NFTStateKey(fact.contract, state.CollectionKey), "design", getStateFunc)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design not found, %v: %w", fact.Contract(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("collection design not found, %v: %w", fact.Contract(), err), nil
 	}
 
-	design, err := statenft.StateCollectionValue(st)
+	design, err := state.StateCollectionValue(st)
 	if err != nil {
-		return nil, mitumbase.NewBaseOperationProcessReasonError("collection design value not found, %v: %w", fact.Contract(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("collection design value not found, %v: %w", fact.Contract(), err), nil
 	}
 
-	var sts []mitumbase.StateMergeValue
+	var sts []base.StateMergeValue
 	whitelist := fact.Whitelist()
 	for _, white := range whitelist {
-		smv, err := state.CreateNotExistAccount(white, getStateFunc)
+		smv, err := cstate.CreateNotExistAccount(white, getStateFunc)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("%w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("%w", err), nil
 		} else if smv != nil {
 			sts = append(sts, smv)
 		}
@@ -146,7 +144,7 @@ func (opp *UpdateModelConfigProcessor) Process(
 		design.Contract(), design.Creator(), design.Active(),
 		types.NewCollectionPolicy(fact.name, fact.royalty, fact.uri, fact.whitelist),
 	)
-	sts = append(sts, state.NewStateMergeValue(statenft.NFTStateKey(fact.contract, statenft.CollectionKey), statenft.NewCollectionStateValue(de)))
+	sts = append(sts, cstate.NewStateMergeValue(state.NFTStateKey(fact.contract, state.CollectionKey), state.NewCollectionStateValue(de)))
 
 	return sts, nil, nil
 }

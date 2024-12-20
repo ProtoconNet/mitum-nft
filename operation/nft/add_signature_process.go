@@ -5,16 +5,12 @@ import (
 	"sync"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	statenft "github.com/ProtoconNet/mitum-nft/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	ccstate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
-
-	"github.com/ProtoconNet/mitum-currency/v3/state"
-	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	"github.com/ProtoconNet/mitum2/base"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
 )
@@ -32,19 +28,19 @@ var signProcessorPool = sync.Pool{
 }
 
 func (AddSignature) Process(
-	_ context.Context, _ mitumbase.GetStateFunc,
-) ([]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error) {
+	_ context.Context, _ base.GetStateFunc,
+) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
 type SignItemProcessor struct {
 	h      util.Hash
-	sender mitumbase.Address
+	sender base.Address
 	item   AddSignatureItem
 }
 
 func (ipp *SignItemProcessor) PreProcess(
-	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess SignItemProcessor")
 
@@ -54,18 +50,18 @@ func (ipp *SignItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(ccstate.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.NFTStateKey(ipp.item.Contract(), statenft.CollectionKey), "design", getStateFunc)
+	st, err := cstate.ExistsState(state.NFTStateKey(ipp.item.Contract(), state.CollectionKey), "design", getStateFunc)
 	if err != nil {
 		return e.Wrap(common.ErrServiceNF.Errorf("nft collection state for contract account %v: %v", it.Contract(), err))
 	}
 
-	design, err := statenft.StateCollectionValue(st)
+	design, err := state.StateCollectionValue(st)
 	if err != nil {
 		return e.Wrap(common.ErrServiceNF.Errorf("nft collection state value for contract account %v: %v", it.Contract(), err))
 
@@ -76,12 +72,12 @@ func (ipp *SignItemProcessor) PreProcess(
 			errors.Errorf("nft collection in contract account %v has already been deactivated", ipp.item.Contract()))
 	}
 
-	st, err = state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
+	st, err = cstate.ExistsState(state.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
 		return e.Wrap(common.ErrStateNF.Errorf("nft idx %v in contract account %v", nid, ipp.item.Contract()))
 	}
 
-	nv, err := statenft.StateNFTValue(st)
+	nv, err := state.StateNFTValue(st)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateValInvalid.Errorf("nft idx %v in contract account %v", nid, ipp.item.Contract()))
@@ -101,16 +97,16 @@ func (ipp *SignItemProcessor) PreProcess(
 }
 
 func (ipp *SignItemProcessor) Process(
-	_ context.Context, _ mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
-) ([]mitumbase.StateMergeValue, error) {
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
+) ([]base.StateMergeValue, error) {
 	nid := ipp.item.NFT()
 
-	st, err := state.ExistsState(statenft.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
+	st, err := cstate.ExistsState(state.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)
 	if err != nil {
 		return nil, errors.Errorf("nft not found, %v: %w", nid, err)
 	}
 
-	nv, err := statenft.StateNFTValue(st)
+	nv, err := state.StateNFTValue(st)
 	if err != nil {
 		return nil, errors.Errorf("nft value not found, %v: %w", nid, err)
 	}
@@ -138,9 +134,9 @@ func (ipp *SignItemProcessor) Process(
 		return nil, errors.Errorf("invalid nft, %v: %w", n.ID(), err)
 	}
 
-	sts := make([]mitumbase.StateMergeValue, 1)
+	sts := make([]base.StateMergeValue, 1)
 
-	sts[0] = state.NewStateMergeValue(statenft.StateKeyNFT(ipp.item.Contract(), n.ID()), statenft.NewNFTStateValue(n))
+	sts[0] = cstate.NewStateMergeValue(state.StateKeyNFT(ipp.item.Contract(), n.ID()), state.NewNFTStateValue(n))
 
 	return sts, nil
 }
@@ -155,16 +151,16 @@ func (ipp *SignItemProcessor) Close() {
 }
 
 type SignProcessor struct {
-	*mitumbase.BaseOperationProcessor
+	*base.BaseOperationProcessor
 }
 
-func NewSignProcessor() currencytypes.GetNewProcessor {
+func NewSignProcessor() ctypes.GetNewProcessor {
 	return func(
-		height mitumbase.Height,
-		getStateFunc mitumbase.GetStateFunc,
-		newPreProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-		newProcessConstraintFunc mitumbase.NewOperationProcessorProcessFunc,
-	) (mitumbase.OperationProcessor, error) {
+		height base.Height,
+		getStateFunc base.GetStateFunc,
+		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
+	) (base.OperationProcessor, error) {
 		e := util.StringError("failed to create new SignProcessor")
 
 		nopp := signProcessorPool.Get()
@@ -173,7 +169,7 @@ func NewSignProcessor() currencytypes.GetNewProcessor {
 			return nil, e.Errorf("expected SignProcessor, not %T", nopp)
 		}
 
-		b, err := mitumbase.NewBaseOperationProcessor(
+		b, err := base.NewBaseOperationProcessor(
 			height, getStateFunc, newPreProcessConstraintFunc, newProcessConstraintFunc)
 		if err != nil {
 			return nil, e.Wrap(err)
@@ -186,8 +182,8 @@ func NewSignProcessor() currencytypes.GetNewProcessor {
 }
 
 func (opp *SignProcessor) PreProcess(
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc,
-) (context.Context, mitumbase.OperationProcessReasonError, error) {
+	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
+) (context.Context, base.OperationProcessReasonError, error) {
 	fact, ok := op.Fact().(AddSignatureFact)
 	if !ok {
 		return ctx, base.NewBaseOperationProcessReasonError(
@@ -227,13 +223,13 @@ func (opp *SignProcessor) PreProcess(
 }
 
 func (opp *SignProcessor) Process( // nolint:dupl
-	ctx context.Context, op mitumbase.Operation, getStateFunc mitumbase.GetStateFunc) (
-	[]mitumbase.StateMergeValue, mitumbase.OperationProcessReasonError, error,
+	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
+	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	e := util.StringError("failed to process Sign")
 
 	fact, _ := op.Fact().(AddSignatureFact)
-	var sts []mitumbase.StateMergeValue
+	var sts []base.StateMergeValue
 
 	for _, item := range fact.Items() {
 		ip := signItemProcessorPool.Get()
@@ -248,7 +244,7 @@ func (opp *SignProcessor) Process( // nolint:dupl
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, mitumbase.NewBaseOperationProcessReasonError("failed to process SignItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process SignItem; %w", err), nil
 		}
 		sts = append(sts, s...)
 

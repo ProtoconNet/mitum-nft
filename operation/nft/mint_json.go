@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type MintFactJSONMarshaler struct {
-	mitumbase.BaseFactJSONMarshaler
-	Sender mitumbase.Address `json:"sender"`
-	Items  []MintItem        `json:"items"`
+	base.BaseFactJSONMarshaler
+	Sender base.Address `json:"sender"`
+	Items  []MintItem   `json:"items"`
 }
 
 func (fact MintFact) MarshalJSON() ([]byte, error) {
@@ -24,7 +24,7 @@ func (fact MintFact) MarshalJSON() ([]byte, error) {
 }
 
 type MintFactJSONUnmarshaler struct {
-	mitumbase.BaseFactJSONUnmarshaler
+	base.BaseFactJSONUnmarshaler
 	Sender string          `json:"sender"`
 	Items  json.RawMessage `json:"items"`
 }
