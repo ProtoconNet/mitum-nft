@@ -18,15 +18,9 @@ import (
 var maxLimit int64 = 50
 
 var (
-	defaultColNameAccount         = "digest_ac"
-	defaultColNameContractAccount = "digest_ca"
-	defaultColNameBalance         = "digest_bl"
-	defaultColNameCurrency        = "digest_cr"
-	defaultColNameOperation       = "digest_op"
-	defaultColNameBlock           = "digest_bm"
-	defaultColNameNFTCollection   = "digest_nftcollection"
-	defaultColNameNFT             = "digest_nft"
-	defaultColNameNFTOperator     = "digest_nftoperator"
+	DefaultColNameNFTCollection = "digest_nftcollection"
+	DefaultColNameNFT           = "digest_nft"
+	DefaultColNameNFTOperator   = "digest_nftoperator"
 )
 
 func NFTCollection(st *cdigest.Database, contract string) (*types.Design, error) {
@@ -36,7 +30,7 @@ func NFTCollection(st *cdigest.Database, contract string) (*types.Design, error)
 	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
-		defaultColNameNFTCollection,
+		DefaultColNameNFTCollection,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -71,7 +65,7 @@ func NFT(st *cdigest.Database, contract, idx string) (*types.NFT, error) {
 	var nft *types.NFT
 	var sta base.State
 	if err = st.MongoClient().GetByFilter(
-		defaultColNameNFT,
+		DefaultColNameNFT,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -124,7 +118,7 @@ func NFTsByCollection(
 
 	return st.MongoClient().Find(
 		context.Background(),
-		defaultColNameNFT,
+		DefaultColNameNFT,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
 			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
@@ -164,7 +158,7 @@ func NFTCountByCollection(
 
 	return st.MongoClient().Count(
 		context.Background(),
-		defaultColNameNFT,
+		DefaultColNameNFT,
 		filter,
 		opt,
 	)
@@ -181,7 +175,7 @@ func NFTOperators(
 	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
-		defaultColNameNFTOperator,
+		DefaultColNameNFTOperator,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())

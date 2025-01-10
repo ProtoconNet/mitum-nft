@@ -120,42 +120,42 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}()
 
 	_, err := bs.st.MongoClient().WithSession(func(txnCtx mongo.SessionContext, collection func(string) *mongo.Collection) (interface{}, error) {
-		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+		if err := bs.writeModels(txnCtx, cdigest.DefaultColNameBlock, bs.blockModels); err != nil {
 			return nil, err
 		}
 
 		if len(bs.operationModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameOperation, bs.operationModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameOperation, bs.operationModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.currencyModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameCurrency, bs.currencyModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameCurrency, bs.currencyModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.accountModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameAccount, bs.accountModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameAccount, bs.accountModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.contractAccountModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameContractAccount, bs.contractAccountModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.balanceModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameBalance, bs.balanceModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameBalance, bs.balanceModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.nftCollectionModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameNFTCollection, bs.nftCollectionModels); err != nil {
 				return nil, err
 			}
 		}
@@ -170,7 +170,7 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 				err = bs.st.CleanByHeightColName(
 					ctx,
 					bs.block.Manifest().Height(),
-					defaultColNameNFT,
+					DefaultColNameNFT,
 					bson.D{{"contract", parsedKey[1]}},
 					bson.D{{"nft_idx", i}},
 				)
@@ -179,19 +179,19 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 				}
 			}
 
-			if err := bs.writeModels(txnCtx, defaultColNameNFT, bs.nftModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameNFT, bs.nftModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.nftOperatorModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameNFTOperator, bs.nftOperatorModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameNFTOperator, bs.nftOperatorModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.nftBoxModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameNFT, bs.nftBoxModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameNFT, bs.nftBoxModels); err != nil {
 				return nil, err
 			}
 		}
