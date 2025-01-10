@@ -5,7 +5,6 @@ import (
 	"github.com/ProtoconNet/mitum-nft/operation/nft"
 	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
-	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
 )
@@ -55,25 +54,11 @@ var AddedSupportedHinters = []encoder.DecodeDetail{
 }
 
 func init() {
-	defaultLen := len(launch.Hinters)
-	currencyExtendedLen := defaultLen + len(currencycmds.AddedHinters)
-	allExtendedLen := currencyExtendedLen + len(AddedHinters)
+	Hinters = append(Hinters, currencycmds.Hinters...)
+	Hinters = append(Hinters, AddedHinters...)
 
-	Hinters = make([]encoder.DecodeDetail, allExtendedLen)
-	copy(Hinters, launch.Hinters)
-	copy(Hinters[defaultLen:currencyExtendedLen], currencycmds.AddedHinters)
-	copy(Hinters[currencyExtendedLen:], AddedHinters)
-
-	defaultSupportedLen := len(launch.SupportedProposalOperationFactHinters)
-	currencySupportedExtendedLen := defaultSupportedLen + len(currencycmds.AddedSupportedHinters)
-	allSupportedExtendedLen := currencySupportedExtendedLen + len(AddedSupportedHinters)
-
-	SupportedProposalOperationFactHinters = make(
-		[]encoder.DecodeDetail,
-		allSupportedExtendedLen)
-	copy(SupportedProposalOperationFactHinters, launch.SupportedProposalOperationFactHinters)
-	copy(SupportedProposalOperationFactHinters[defaultSupportedLen:currencySupportedExtendedLen], currencycmds.AddedSupportedHinters)
-	copy(SupportedProposalOperationFactHinters[currencySupportedExtendedLen:], AddedSupportedHinters)
+	SupportedProposalOperationFactHinters = append(SupportedProposalOperationFactHinters, currencycmds.SupportedProposalOperationFactHinters...)
+	SupportedProposalOperationFactHinters = append(SupportedProposalOperationFactHinters, AddedSupportedHinters...)
 }
 
 func LoadHinters(encs *encoder.Encoders) error {
