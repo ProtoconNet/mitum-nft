@@ -509,20 +509,12 @@ func (cmd *RunCommand) setDigestNetworkClient(
 		return nil, err
 	}
 
-	connectionPool, err := launch.NewConnectionPool(
-		1<<9,
-		params.ISAAC.NetworkID(),
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	handlers = handlers.SetNetworkClientFunc(
-		func() (*quicstream.ConnectionPool, *quicmemberlist.Memberlist, []quicstream.ConnInfo, error) { // nolint:contextcheck
-			return connectionPool, memberList, design.ConnInfo, nil
+		func() (*launch.LocalParams, *quicmemberlist.Memberlist, []quicstream.ConnInfo, error) { // nolint:contextcheck
+			return params, memberList, design.ConnInfo, nil
 		},
 	)
+
 	cmd.log.Debug().Msg("send handler attached")
 
 	return handlers, nil
