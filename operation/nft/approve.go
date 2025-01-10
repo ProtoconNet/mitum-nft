@@ -1,11 +1,11 @@
 package nft
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"strconv"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -150,6 +150,10 @@ func (fact ApproveFact) FeePayer() base.Address {
 }
 
 func (fact ApproveFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact ApproveFact) Signer() base.Address {
 	return fact.sender
 }
 

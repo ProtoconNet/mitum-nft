@@ -155,6 +155,10 @@ func (fact ApproveAllFact) FactUser() base.Address {
 	return fact.sender
 }
 
+func (fact ApproveAllFact) Signer() base.Address {
+	return fact.sender
+}
+
 func (fact ApproveAllFact) ActiveContract() []base.Address {
 	var arr []base.Address
 	for i := range fact.items {

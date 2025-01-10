@@ -184,6 +184,10 @@ func (fact UpdateModelConfigFact) FactUser() base.Address {
 	return fact.sender
 }
 
+func (fact UpdateModelConfigFact) Signer() base.Address {
+	return fact.sender
+}
+
 func (fact UpdateModelConfigFact) ActiveContractOwnerHandlerOnly() [][2]base.Address {
 	return [][2]base.Address{{fact.contract, fact.sender}}
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
-	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
@@ -73,11 +72,6 @@ func (opp *UpdateModelConfigProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Errorf("%v", err)), nil
-	}
-
-	if err := cstate.CheckExistsState(currency.DesignStateKey(fact.Currency()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
 	}
 
 	whitelist := fact.Whitelist()

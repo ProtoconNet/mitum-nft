@@ -6,7 +6,6 @@ import (
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
-	ccstate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum-nft/types"
@@ -15,15 +14,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-var signItemProcessorPool = sync.Pool{
+var AddSignatureItemProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(SignItemProcessor)
+		return new(AddSignatureItemProcessor)
 	},
 }
 
-var signProcessorPool = sync.Pool{
+var AddSignatureProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(SignProcessor)
+		return new(AddSignatureProcessor)
 	},
 }
 
@@ -33,25 +32,21 @@ func (AddSignature) Process(
 	return nil, nil, nil
 }
 
-type SignItemProcessor struct {
+type AddSignatureItemProcessor struct {
 	h      util.Hash
 	sender base.Address
 	item   AddSignatureItem
 }
 
-func (ipp *SignItemProcessor) PreProcess(
+func (ipp *AddSignatureItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
-	e := util.StringError("preprocess SignItemProcessor")
+	e := util.StringError("preprocess AddSignatureItemProcessor")
 
 	it := ipp.item
 
 	if err := it.IsValid(nil); err != nil {
 		return e.Wrap(err)
-	}
-
-	if err := cstate.CheckExistsState(ccstate.DesignStateKey(it.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
 	nid := ipp.item.NFT()
@@ -96,7 +91,7 @@ func (ipp *SignItemProcessor) PreProcess(
 	return nil
 }
 
-func (ipp *SignItemProcessor) Process(
+func (ipp *AddSignatureItemProcessor) Process(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	nid := ipp.item.NFT()
@@ -141,16 +136,16 @@ func (ipp *SignItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *SignItemProcessor) Close() {
+func (ipp *AddSignatureItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
 	ipp.item = AddSignatureItem{}
-	signItemProcessorPool.Put(ipp)
+	AddSignatureItemProcessorPool.Put(ipp)
 
 	return
 }
 
-type SignProcessor struct {
+type AddSignatureProcessor struct {
 	*base.BaseOperationProcessor
 }
 
@@ -161,10 +156,10 @@ func NewSignProcessor() ctypes.GetNewProcessor {
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringError("failed to create new SignProcessor")
+		e := util.StringError("failed to create new AddSignatureProcessor")
 
-		nopp := signProcessorPool.Get()
-		opp, ok := nopp.(*SignProcessor)
+		nopp := AddSignatureProcessorPool.Get()
+		opp, ok := nopp.(*AddSignatureProcessor)
 		if !ok {
 			return nil, e.Errorf("expected SignProcessor, not %T", nopp)
 		}
@@ -181,7 +176,7 @@ func NewSignProcessor() ctypes.GetNewProcessor {
 	}
 }
 
-func (opp *SignProcessor) PreProcess(
+func (opp *AddSignatureProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
 	fact, ok := op.Fact().(AddSignatureFact)
@@ -199,11 +194,11 @@ func (opp *SignProcessor) PreProcess(
 	}
 
 	for _, item := range fact.Items() {
-		ip := signItemProcessorPool.Get()
-		ipc, ok := ip.(*SignItemProcessor)
+		ip := AddSignatureItemProcessorPool.Get()
+		ipc, ok := ip.(*AddSignatureItemProcessor)
 		if !ok {
 			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMTypeMismatch.Errorf("expected SignItemProcessor, not %T", ip)), nil
+				common.ErrMTypeMismatch.Errorf("expected AddSignatureItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -222,20 +217,20 @@ func (opp *SignProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *SignProcessor) Process( // nolint:dupl
+func (opp *AddSignatureProcessor) Process( // nolint:dupl
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError("failed to process Sign")
+	e := util.StringError("failed to process AddSignature")
 
 	fact, _ := op.Fact().(AddSignatureFact)
 	var sts []base.StateMergeValue
 
 	for _, item := range fact.Items() {
-		ip := signItemProcessorPool.Get()
-		ipc, ok := ip.(*SignItemProcessor)
+		ip := AddSignatureItemProcessorPool.Get()
+		ipc, ok := ip.(*AddSignatureItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected SignItemProcessor, not %T", ip)
+			return nil, nil, e.Errorf("expected AddSignatureItemProcessor, not %T", ip)
 		}
 
 		ipc.h = op.Hash()
@@ -244,7 +239,7 @@ func (opp *SignProcessor) Process( // nolint:dupl
 
 		s, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to process SignItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process AddSignatureItem; %w", err), nil
 		}
 		sts = append(sts, s...)
 
@@ -254,8 +249,8 @@ func (opp *SignProcessor) Process( // nolint:dupl
 	return sts, nil, nil
 }
 
-func (opp *SignProcessor) Close() error {
-	signProcessorPool.Put(opp)
+func (opp *AddSignatureProcessor) Close() error {
+	AddSignatureProcessorPool.Put(opp)
 
 	return nil
 }

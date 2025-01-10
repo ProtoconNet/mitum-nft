@@ -140,6 +140,10 @@ func (fact MintFact) FactUser() base.Address {
 	return fact.sender
 }
 
+func (fact MintFact) Signer() base.Address {
+	return fact.sender
+}
+
 func (fact MintFact) ActiveContract() []base.Address {
 	var arr []base.Address
 	for i := range fact.items {
