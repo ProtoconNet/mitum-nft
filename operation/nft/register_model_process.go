@@ -75,12 +75,6 @@ func (opp *RegisterModelProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	_, err := cstate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
-	}
-
 	if found, _ := cstate.CheckNotExistsState(state.NFTStateKey(fact.contract, state.CollectionKey), getStateFunc); found {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
@@ -136,15 +130,8 @@ func (opp *RegisterModelProcessor) Process(
 		state.NewLastNFTIndexStateValue(0),
 	))
 
-	st, err := cstate.ExistsState(statee.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("target contract account not found, %v: %w", fact.Contract(), err), nil
-	}
-
-	ca, err := statee.StateContractAccountValue(st)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to get state value of contract account, %v: %w", fact.Contract(), err), nil
-	}
+	st, _ := cstate.ExistsState(statee.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
+	ca, _ := statee.StateContractAccountValue(st)
 	nca := ca.SetIsActive(true)
 
 	sts = append(sts, cstate.NewStateMergeValue(

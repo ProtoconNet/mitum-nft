@@ -44,11 +44,6 @@ func (ipp *ApproveItemProcessor) PreProcess(
 ) error {
 	e := util.StringError("preprocess ApproveItemProcessor")
 
-	if err := cstate.CheckExistsState(
-		ccstate.DesignStateKey(ipp.item.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", ipp.item.Currency())))
-	}
-
 	st, err := cstate.ExistsState(
 		state.NFTStateKey(ipp.item.Contract(), state.CollectionKey), "design", getStateFunc)
 	if err != nil {

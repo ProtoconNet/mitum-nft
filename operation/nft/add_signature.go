@@ -45,7 +45,7 @@ func (fact AddSignatureFact) IsValid(b []byte) error {
 
 	if l := len(fact.items); l < 1 {
 		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items for AddSignatureFact")))
-	} else if l > int(MaxAddSignatureItems) {
+	} else if l > MaxAddSignatureItems {
 		return common.ErrArrayLen.Wrap(errors.Errorf("items over allowed, %d > %d", l, MaxAddSignatureItems))
 	}
 
@@ -144,6 +144,10 @@ func (fact AddSignatureFact) FeePayer() base.Address {
 }
 
 func (fact AddSignatureFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact AddSignatureFact) Signer() base.Address {
 	return fact.sender
 }
 

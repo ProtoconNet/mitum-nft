@@ -6,7 +6,6 @@ import (
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
-	ccstate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	cestate "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/state"
@@ -46,11 +45,6 @@ func (ipp *MintItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
 	e := util.StringError("preprocess MintItemProcessor")
-
-	if err := cstate.CheckExistsState(
-		ccstate.DesignStateKey(ipp.item.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", ipp.item.Currency())))
-	}
 
 	if _, _, _, cErr := cstate.ExistsCAccount(
 		ipp.item.receiver, "receiver", true, false, getStateFunc); cErr != nil {

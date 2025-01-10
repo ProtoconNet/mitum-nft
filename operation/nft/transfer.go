@@ -116,7 +116,7 @@ func (fact TransferFact) Items() []TransferItem {
 }
 
 func (fact TransferFact) Addresses() ([]base.Address, error) {
-	as := []base.Address{}
+	var as []base.Address
 
 	for i := range fact.items {
 		if ads, err := fact.items[i].Addresses(); err != nil {
@@ -155,6 +155,10 @@ func (fact TransferFact) FeePayer() base.Address {
 }
 
 func (fact TransferFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact TransferFact) Signer() base.Address {
 	return fact.sender
 }
 
