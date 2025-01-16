@@ -54,10 +54,10 @@ var AddedSupportedHinters = []encoder.DecodeDetail{
 }
 
 func init() {
-	Hinters = append(Hinters, currencycmds.Hinters...)
+	Hinters = append(Hinters, ccmds.Hinters...)
 	Hinters = append(Hinters, AddedHinters...)
 
-	SupportedProposalOperationFactHinters = append(SupportedProposalOperationFactHinters, currencycmds.SupportedProposalOperationFactHinters...)
+	SupportedProposalOperationFactHinters = append(SupportedProposalOperationFactHinters, ccmds.SupportedProposalOperationFactHinters...)
 	SupportedProposalOperationFactHinters = append(SupportedProposalOperationFactHinters, AddedSupportedHinters...)
 }
 
