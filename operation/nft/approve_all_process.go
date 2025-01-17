@@ -44,6 +44,10 @@ func (ipp *DelegateItemProcessor) PreProcess(
 ) error {
 	e := util.StringError("preprocess DelegateItemProcessor")
 
+	if err := ipp.item.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
 	if _, _, _, cErr := cstate.ExistsCAccount(
 		ipp.item.Approved(), "approved", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(

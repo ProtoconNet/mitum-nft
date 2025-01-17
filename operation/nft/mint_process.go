@@ -46,6 +46,10 @@ func (ipp *MintItemProcessor) PreProcess(
 ) error {
 	e := util.StringError("preprocess MintItemProcessor")
 
+	if err := ipp.item.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
 	if _, _, _, cErr := cstate.ExistsCAccount(
 		ipp.item.receiver, "receiver", true, false, getStateFunc); cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(
