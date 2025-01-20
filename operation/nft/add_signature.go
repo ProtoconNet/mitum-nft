@@ -65,7 +65,7 @@ func (fact AddSignatureFact) IsValid(b []byte) error {
 		}
 
 		nid := strconv.FormatUint(item.NFT(), 10)
-		if _, found := founds[nid]; found {
+		if _, found := founds[item.contract.String()+"-"+nid]; found {
 			return common.ErrFactInvalid.Wrap(
 				common.ErrDupVal.Wrap(
 					errors.Errorf("nft idx %v in contract account %v", item.NFT(), item.contract)))

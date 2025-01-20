@@ -68,8 +68,8 @@ func (fact ApproveFact) IsValid(b []byte) error {
 
 		n := strconv.FormatUint(item.NFTIdx(), 10)
 
-		if _, found := founds[n]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft idx %v", n)))
+		if _, found := founds[item.contract.String()+"-"+n]; found {
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("nft idx %v in contract account %v", item.NFTIdx(), item.contract)))
 		}
 
 		founds[n] = struct{}{}

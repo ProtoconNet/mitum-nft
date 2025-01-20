@@ -53,7 +53,6 @@ func (fact MintFact) IsValid(b []byte) error {
 		if err := item.IsValid(nil); err != nil {
 			return common.ErrFactInvalid.Wrap(err)
 		}
-
 		if fact.sender.Equal(item.contract) {
 			return common.ErrFactInvalid.Wrap(
 				common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
