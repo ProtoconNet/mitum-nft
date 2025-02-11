@@ -18,6 +18,6 @@ parameters:
     object_cache_size: 3000000
   isaac:
     threshold: "100"
-    interval_broadcast_ballot: 1.5s
-    wait_preparing_init_ballot: 3s
+    interval_broadcast_ballot: 0.7s
+    wait_preparing_init_ballot: 0.1s
     min_wait_next_block_init_ballot: 3s
