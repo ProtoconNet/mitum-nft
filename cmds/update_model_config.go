@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type UpdateCollectionPolicyCommand struct {
+type UpdateModelConfigCommand struct {
 	BaseCommand
 	ccmds.OperationFlags
 	Sender   ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
@@ -29,7 +29,7 @@ type UpdateCollectionPolicyCommand struct {
 	white    []base.Address
 }
 
-func (cmd *UpdateCollectionPolicyCommand) Run(pctx context.Context) error {
+func (cmd *UpdateModelConfigCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (cmd *UpdateCollectionPolicyCommand) Run(pctx context.Context) error {
 	return nil
 }
 
-func (cmd *UpdateCollectionPolicyCommand) parseFlags() error {
+func (cmd *UpdateModelConfigCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -97,8 +97,8 @@ func (cmd *UpdateCollectionPolicyCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *UpdateCollectionPolicyCommand) createOperation() (base.Operation, error) {
-	e := util.StringError("failed to create update-collection-policy operation")
+func (cmd *UpdateModelConfigCommand) createOperation() (base.Operation, error) {
+	e := util.StringError("failed to create update-model-config operation")
 
 	fact := nft.NewUpdateModelConfigFact(
 		[]byte(cmd.Token),

@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CreateCollectionCommand struct {
+type RegisterModelCommand struct {
 	BaseCommand
 	ccmds.OperationFlags
 	Sender    ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
@@ -29,7 +29,7 @@ type CreateCollectionCommand struct {
 	whitelist []base.Address
 }
 
-func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
+func (cmd *RegisterModelCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (cmd *CreateCollectionCommand) Run(pctx context.Context) error {
 	return nil
 }
 
-func (cmd *CreateCollectionCommand) parseFlags() error {
+func (cmd *RegisterModelCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -105,8 +105,8 @@ func (cmd *CreateCollectionCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *CreateCollectionCommand) createOperation() (base.Operation, error) {
-	e := util.StringError("failed to create create-collection operation")
+func (cmd *RegisterModelCommand) createOperation() (base.Operation, error) {
+	e := util.StringError("failed to create register-model operation")
 
 	fact := nft.NewRegisterModelFact(
 		[]byte(cmd.Token),

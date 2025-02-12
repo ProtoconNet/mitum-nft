@@ -40,19 +40,21 @@ func init() {
 
 type Handlers struct {
 	*zerolog.Logger
-	networkID       base.NetworkID
-	encoders        *encoder.Encoders
-	encoder         encoder.Encoder
-	database        *cdigest.Database
-	cache           cdigest.Cache
-	nodeInfoHandler cdigest.NodeInfoHandler
-	send            func(interface{}) (base.Operation, error)
-	client          func() (*isaacnetwork.BaseClient, *quicmemberlist.Memberlist, []quicstream.ConnInfo, error)
-	router          *mux.Router
-	routes          map[ /* path */ string]*mux.Route
-	itemsLimiter    func(string /* request type */) int64
-	rg              *singleflight.Group
-	expireNotFilled time.Duration
+	networkID        base.NetworkID
+	encoders         *encoder.Encoders
+	encoder          encoder.Encoder
+	database         *cdigest.Database
+	cache            cdigest.Cache
+	nodeInfoHandler  cdigest.NodeInfoHandler
+	send             func(interface{}) (base.Operation, error)
+	client           func() (*isaacnetwork.BaseClient, *quicmemberlist.Memberlist, []quicstream.ConnInfo, error)
+	router           *mux.Router
+	routes           map[ /* path */ string]*mux.Route
+	itemsLimiter     func(string /* request type */) int64
+	rg               *singleflight.Group
+	expireNotFilled  time.Duration
+	expireShortLived time.Duration
+	expireLongLived  time.Duration
 }
 
 func NewHandlers(
@@ -71,17 +73,19 @@ func NewHandlers(
 	}
 
 	return &Handlers{
-		Logger:          log.Log(),
-		networkID:       networkID,
-		encoders:        encs,
-		encoder:         enc,
-		database:        st,
-		cache:           cache,
-		router:          router,
-		routes:          routes,
-		itemsLimiter:    cdigest.DefaultItemsLimiter,
-		rg:              &singleflight.Group{},
-		expireNotFilled: time.Second * 3,
+		Logger:           log.Log(),
+		networkID:        networkID,
+		encoders:         encs,
+		encoder:          enc,
+		database:         st,
+		cache:            cache,
+		router:           router,
+		routes:           routes,
+		itemsLimiter:     cdigest.DefaultItemsLimiter,
+		rg:               &singleflight.Group{},
+		expireNotFilled:  cdigest.ExpireFilled,
+		expireShortLived: cdigest.ExpireShortLived,
+		expireLongLived:  cdigest.ExpireLongLived,
 	}
 }
 
