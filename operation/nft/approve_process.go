@@ -49,20 +49,20 @@ func (ipp *ApproveItemProcessor) PreProcess(
 	if err != nil {
 		return e.Wrap(
 			common.ErrServiceNF.Wrap(
-				errors.Errorf("nft collection state for contract account %v", ipp.item.Contract())))
+				errors.Errorf("nft service state for contract account %v", ipp.item.Contract())))
 	}
 
 	design, err := state.StateCollectionValue(st)
 	if err != nil {
 		return e.Wrap(
 			common.ErrServiceNF.Wrap(
-				errors.Errorf("nft collection state value for contract account %v", ipp.item.Contract())))
+				errors.Errorf("nft service state value for contract account %v", ipp.item.Contract())))
 	}
 
 	if !design.Active() {
 		return e.Wrap(
 			common.ErrServiceNF.Wrap(
-				errors.Errorf("collection in the contract account %v has been deactived", ipp.item.Contract())))
+				errors.Errorf("nft service in the contract account %v has been deactived", ipp.item.Contract())))
 	}
 
 	if _, _, _, cErr := cstate.ExistsCAccount(

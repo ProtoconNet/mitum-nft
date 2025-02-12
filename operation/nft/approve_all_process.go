@@ -157,20 +157,20 @@ func (opp *DelegateProcessor) PreProcess(
 		if err != nil {
 			return ctx, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-					Errorf("nft collection, %v: %v", item.Contract(), err)), nil
+					Errorf("nft service state for contract account, %v: %v", item.Contract(), err)), nil
 		}
 
 		design, err := state.StateCollectionValue(st)
 		if err != nil {
 			return ctx, base.NewBaseOperationProcessReasonError(
-				common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-					Errorf("nft collection, %v: %v", item.Contract(), err)), nil
+				common.ErrMPreProcess.Wrap(common.ErrMStateInvalid).
+					Errorf("nft service state value for contract account, %v: %v", item.Contract(), err)), nil
 		}
 
 		if !design.Active() {
 			return ctx, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-					Errorf("collection in contract account %v has already been deactivated",
+					Errorf("nft service state for contract account %v has already been deactivated",
 						item.Contract())), nil
 		}
 	}

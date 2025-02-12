@@ -61,19 +61,18 @@ func (ipp *TransferItemProcessor) PreProcess(
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateNF.Wrap(
-				common.ErrServiceNF.Errorf("nft collection state for contract account %v", it.Contract())))
+				common.ErrServiceNF.Errorf("nft service state for contract account %v", it.Contract())))
 	}
 
 	design, err := state.StateCollectionValue(st)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateValInvalid.Wrap(
-				common.ErrServiceNF.Errorf("nft collection state value for contract account %v", it.Contract())))
+				common.ErrServiceNF.Errorf("nft service state value for contract account %v", it.Contract())))
 	}
 	if !design.Active() {
-		return e.Wrap(
-			errors.Errorf(
-				"nft collection in contract account %v has already been deactivated ", ipp.item.Contract()))
+		return e.Wrap(common.ErrServiceNF.
+			Errorf("nft service in contract account %v has already been deactivated ", ipp.item.Contract()))
 	}
 
 	st, err = cstate.ExistsState(state.StateKeyNFT(ipp.item.Contract(), nid), "nft", getStateFunc)

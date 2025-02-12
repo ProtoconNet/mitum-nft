@@ -87,7 +87,7 @@ func (opp *UpdateModelConfigProcessor) PreProcess(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-				Errorf("nft collection state for contract account %v", fact.Contract())), nil
+				Errorf("nft service state for contract account %v", fact.Contract())), nil
 
 	}
 
@@ -95,13 +95,13 @@ func (opp *UpdateModelConfigProcessor) PreProcess(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
-				Errorf("nft collection state value for contract account %v", fact.Contract())), nil
+				Errorf("nft service state value for contract account %v", fact.Contract())), nil
 	}
 
 	if !design.Active() {
 		return nil, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("collection in contract account %v has already been deactivated ", fact.Contract())), nil
+			common.ErrMPreProcess.Wrap(common.ErrMServiceNF).
+				Errorf("nft service in contract account %v has already been deactivated ", fact.Contract())), nil
 	}
 
 	return ctx, nil, nil
