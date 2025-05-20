@@ -2,9 +2,10 @@ package types
 
 import (
 	"bytes"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"regexp"
 	"sort"
+
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -12,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var MaxWhitelist = 10
+var MaxWhitelist = 20
 
 var (
 	MinLengthCollectionName = 3
