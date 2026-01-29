@@ -1,6 +1,8 @@
 package nft
 
 import (
+	"strconv"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
@@ -9,7 +11,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 var (
@@ -152,6 +153,10 @@ func (fact TransferFact) FeeBase() map[types.CurrencyID][]common.Big {
 
 func (fact TransferFact) FeePayer() base.Address {
 	return fact.sender
+}
+
+func (fact TransferFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
 }
 
 func (fact TransferFact) FactUser() base.Address {

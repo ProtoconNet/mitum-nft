@@ -101,12 +101,18 @@ func (ipp *MintItemProcessor) Process(
 		}
 	}
 
-	n := types.NewNFT(ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(), ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators())
+	n := types.NewNFT(
+		ipp.idx, true, ipp.item.Receiver(), ipp.item.NFTHash(),
+		ipp.item.URI(), ipp.item.Receiver(), ipp.item.Creators(),
+	)
 	if err := n.IsValid(nil); err != nil {
 		return nil, errors.Errorf("invalid nft, %v: %v", ipp.idx, err)
 	}
 
-	sts = append(sts, cstate.NewStateMergeValue(state.StateKeyNFT(ipp.item.Contract(), ipp.idx), state.NewNFTStateValue(n)))
+	sts = append(
+		sts,
+		cstate.NewStateMergeValue(state.StateKeyNFT(ipp.item.Contract(), ipp.idx), state.NewNFTStateValue(n)),
+	)
 
 	st, _ := cstate.ExistsState(state.NFTStateKey(ipp.item.contract, state.CollectionKey), "design", getStateFunc)
 	design, _ := state.StateCollectionValue(st)

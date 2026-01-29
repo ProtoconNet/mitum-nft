@@ -181,6 +181,10 @@ func (fact RegisterModelFact) FeePayer() base.Address {
 	return fact.sender
 }
 
+func (fact RegisterModelFact) FeeItemCount() (uint, bool) {
+	return extras.ZeroItem, extras.HasNoItem
+}
+
 func (fact RegisterModelFact) FactUser() base.Address {
 	return fact.sender
 }

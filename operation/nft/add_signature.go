@@ -1,9 +1,10 @@
 package nft
 
 import (
+	"strconv"
+
 	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
 	"github.com/ProtoconNet/mitum-currency/v3/types"
-	"strconv"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum2/base"
@@ -141,6 +142,10 @@ func (fact AddSignatureFact) FeeBase() map[types.CurrencyID][]common.Big {
 
 func (fact AddSignatureFact) FeePayer() base.Address {
 	return fact.sender
+}
+
+func (fact AddSignatureFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
 }
 
 func (fact AddSignatureFact) FactUser() base.Address {

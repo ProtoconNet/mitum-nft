@@ -135,6 +135,10 @@ func (fact MintFact) FeePayer() base.Address {
 	return fact.sender
 }
 
+func (fact MintFact) FeeItemCount() (uint, bool) {
+	return uint(len(fact.items)), extras.HasItem
+}
+
 func (fact MintFact) FactUser() base.Address {
 	return fact.sender
 }
