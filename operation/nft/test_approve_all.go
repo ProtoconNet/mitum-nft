@@ -120,7 +120,7 @@ func (t *TestDelegateProcessor) SetService(
 	}
 
 	policy := types.NewCollectionPolicy(t.name, t.royalty, t.uri, whs)
-	design := types.NewDesign(contract, sender, true, policy)
+	design := types.NewDesign(contract, sender, true, 0, policy)
 
 	st := common.NewBaseState(base.Height(1), state.NFTStateKey(design.Contract(), state.CollectionKey), state.NewCollectionStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)

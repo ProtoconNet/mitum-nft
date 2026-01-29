@@ -135,7 +135,7 @@ func (opp *UpdateModelConfigProcessor) Process(
 	}
 
 	de := types.NewDesign(
-		design.Contract(), design.Creator(), design.Active(),
+		design.Contract(), design.Creator(), design.Active(), design.Count(),
 		types.NewCollectionPolicy(fact.name, fact.royalty, fact.uri, fact.whitelist),
 	)
 	sts = append(sts, cstate.NewStateMergeValue(state.NFTStateKey(fact.contract, state.CollectionKey), state.NewCollectionStateValue(de)))

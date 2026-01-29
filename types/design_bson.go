@@ -10,11 +10,12 @@ import (
 func (de Design) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":    de.Hint().String(),
-			"contract": de.contract,
-			"creator":  de.creator,
-			"active":   de.active,
-			"policy":   de.policy,
+			"_hint":            de.Hint().String(),
+			"contract":         de.contract,
+			"creator":          de.creator,
+			"active":           de.active,
+			"collection_count": de.count,
+			"policy":           de.policy,
 		})
 }
 
@@ -23,6 +24,7 @@ type DesignBSONUnmarshaler struct {
 	Contract string   `bson:"contract"`
 	Creator  string   `bson:"creator"`
 	Active   bool     `bson:"active"`
+	Count    uint64   `bson:"collection_count"`
 	Policy   bson.Raw `bson:"policy"`
 }
 
@@ -39,5 +41,5 @@ func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unpack(enc, ht, u.Contract, u.Creator, u.Active, u.Policy)
+	return de.unpack(enc, ht, u.Contract, u.Creator, u.Active, u.Count, u.Policy)
 }

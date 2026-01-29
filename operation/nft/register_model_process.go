@@ -116,7 +116,7 @@ func (opp *RegisterModelProcessor) Process(
 	}
 
 	policy := types.NewCollectionPolicy(fact.Name(), fact.Royalty(), fact.URI(), fact.WhiteList())
-	design := types.NewDesign(fact.Contract(), fact.Sender(), true, policy)
+	design := types.NewDesign(fact.Contract(), fact.Sender(), true, 0, policy)
 	if err := design.IsValid(nil); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("invalid collection design, %v: %w", fact.Contract(), err), nil
 	}

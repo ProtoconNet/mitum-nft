@@ -108,6 +108,16 @@ func (ipp *MintItemProcessor) Process(
 
 	sts = append(sts, cstate.NewStateMergeValue(state.StateKeyNFT(ipp.item.Contract(), ipp.idx), state.NewNFTStateValue(n)))
 
+	st, _ := cstate.ExistsState(state.NFTStateKey(ipp.item.contract, state.CollectionKey), "design", getStateFunc)
+	design, _ := state.StateCollectionValue(st)
+	de := types.NewDesign(design.Contract(), design.Creator(), design.Active(), design.Count()+1, design.Policy())
+	sts = append(
+		sts,
+		cstate.NewStateMergeValue(
+			state.NFTStateKey(ipp.item.contract, state.CollectionKey),
+			state.NewCollectionStateValue(de)),
+	)
+
 	return sts, nil
 }
 

@@ -10,13 +10,14 @@ import (
 func (de *Design) unpack(
 	enc encoder.Encoder,
 	ht hint.Hint,
-	pAdr string,
-	crAdr string,
+	pAdr, crAdr string,
 	active bool,
+	count uint64,
 	bPcy []byte,
 ) error {
 	de.BaseHinter = hint.NewBaseHinter(ht)
 	de.active = active
+	de.count = count
 
 	contract, err := base.DecodeAddress(pAdr, enc)
 	if err != nil {

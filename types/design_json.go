@@ -14,6 +14,7 @@ type DesignJSONMarshaler struct {
 	Contract base.Address `json:"contract"`
 	Creator  base.Address `json:"creator"`
 	Active   bool         `json:"active"`
+	Count    uint64       `json:"collection_count"`
 	Policy   BasePolicy   `json:"policy"`
 }
 
@@ -23,6 +24,7 @@ func (de Design) MarshalJSON() ([]byte, error) {
 		Contract:   de.contract,
 		Creator:    de.creator,
 		Active:     de.active,
+		Count:      de.count,
 		Policy:     de.policy,
 	})
 }
@@ -32,6 +34,7 @@ type DesignJSONUnmarshaler struct {
 	Contract string          `json:"contract"`
 	Creator  string          `json:"creator"`
 	Active   bool            `json:"active"`
+	Count    uint64          `json:"collection_count"`
 	Policy   json.RawMessage `json:"policy"`
 }
 
@@ -43,5 +46,5 @@ func (de *Design) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unpack(enc, u.Hint, u.Contract, u.Creator, u.Active, u.Policy)
+	return de.unpack(enc, u.Hint, u.Contract, u.Creator, u.Active, u.Count, u.Policy)
 }

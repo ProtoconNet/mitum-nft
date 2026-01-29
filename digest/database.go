@@ -10,7 +10,6 @@ import (
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -134,36 +133,6 @@ func NFTsByCollection(
 		opt,
 	)
 }
-
-func NFTCountByCollection(
-	st *cdigest.Database,
-	contract string,
-) (int64, error) {
-	filterA := bson.A{}
-
-	// filter fot matching collection
-	filterContract := bson.D{{"contract", bson.D{{"$in", []string{contract}}}}}
-	filterToken := bson.D{{"istoken", true}}
-	filterA = append(filterA, filterToken)
-	filterA = append(filterA, filterContract)
-
-	filter := bson.D{}
-	if len(filterA) > 0 {
-		filter = bson.D{
-			{"$and", filterA},
-		}
-	}
-
-	opt := options.Count()
-
-	return st.MongoClient().Count(
-		context.Background(),
-		DefaultColNameNFT,
-		filter,
-		opt,
-	)
-}
-
 func NFTOperators(
 	st *cdigest.Database,
 	contract, account string,

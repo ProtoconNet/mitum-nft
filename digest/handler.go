@@ -27,7 +27,6 @@ var (
 	HandlerPathNFTCollection  = `/nft/{contract:(?i)` + types.REStringAddressString + `}`
 	HandlerPathNFT            = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nftidx/{nft_idx:[0-9]+}`
 	HandlerPathNFTs           = `/nft/{contract:(?i)` + types.REStringAddressString + `}/nfts`
-	HandlerPathNFTCount       = `/nft/{contract:(?i)` + types.REStringAddressString + `}/totalsupply`
 )
 
 func init() {
@@ -126,8 +125,6 @@ func (hd *Handlers) setHandlers() {
 	_ = hd.setHandler(HandlerPathNFTCollection, hd.handleNFTCollection, true, get, get).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFTs, hd.handleNFTs, true, get, get).
-		Methods(http.MethodOptions, "GET")
-	_ = hd.setHandler(HandlerPathNFTCount, hd.handleNFTCount, true, get, get).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathNFTAllApproved, hd.handleNFTOperators, true, get, get).
 		Methods(http.MethodOptions, "GET")

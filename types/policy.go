@@ -133,55 +133,41 @@ func (policy CollectionPolicy) Addresses() ([]base.Address, error) {
 }
 
 func (policy CollectionPolicy) Equal(c BasePolicy) bool {
-	cpolicy, ok := c.(CollectionPolicy)
+	cPolicy, ok := c.(CollectionPolicy)
 	if !ok {
 		return false
 	}
 
-	if policy.name != cpolicy.name {
+	if policy.name != cPolicy.name {
 		return false
 	}
 
-	if policy.royalty != cpolicy.royalty {
+	if policy.royalty != cPolicy.royalty {
 		return false
 	}
 
-	if policy.uri != cpolicy.uri {
+	if policy.uri != cPolicy.uri {
 		return false
 	}
 
-	if len(policy.whitelist) != len(cpolicy.whitelist) {
+	if len(policy.whitelist) != len(cPolicy.whitelist) {
 		return false
 	}
 
 	whitelist := policy.Whitelist()
-	cwhitelist := cpolicy.Whitelist()
+	cWhitelist := cPolicy.Whitelist()
 	sort.Slice(whitelist, func(i, j int) bool {
 		return bytes.Compare(whitelist[j].Bytes(), whitelist[i].Bytes()) < 0
 	})
-	sort.Slice(cwhitelist, func(i, j int) bool {
-		return bytes.Compare(cwhitelist[j].Bytes(), cwhitelist[i].Bytes()) < 0
+	sort.Slice(cWhitelist, func(i, j int) bool {
+		return bytes.Compare(cWhitelist[j].Bytes(), cWhitelist[i].Bytes()) < 0
 	})
 
 	for i := range whitelist {
-		if !whitelist[i].Equal(cwhitelist[i]) {
+		if !whitelist[i].Equal(cWhitelist[i]) {
 			return false
 		}
 	}
 
 	return true
-}
-
-var CollectionDesignHint = hint.MustNewHint("mitum-nft-collection-design-v0.0.1")
-
-type CollectionDesign struct {
-	Design
-}
-
-func NewCollectionDesign(contract base.Address, creator base.Address, active bool, policy CollectionPolicy) CollectionDesign {
-	design := NewDesign(contract, creator, active, policy)
-
-	return CollectionDesign{
-		Design: design,
-	}
 }

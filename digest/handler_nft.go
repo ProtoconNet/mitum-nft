@@ -1,12 +1,13 @@
 package digest
 
 import (
-	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
-	"github.com/ProtoconNet/mitum-nft/types"
-	"github.com/ProtoconNet/mitum2/util"
 	"net/http"
 	"strconv"
 	"time"
+
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	"github.com/ProtoconNet/mitum-nft/types"
+	"github.com/ProtoconNet/mitum2/util"
 
 	"github.com/ProtoconNet/mitum2/base"
 )
@@ -202,89 +203,6 @@ func (hd *Handlers) handleNFTsInGroup(
 
 	b, err := hd.encoder.Marshal(i)
 	return b, int64(len(vas)) == limit, err
-}
-
-func (hd *Handlers) handleNFTCount(w http.ResponseWriter, r *http.Request) {
-	cachekey := cdigest.CacheKey(
-		r.URL.Path,
-	)
-
-	contract, err, status := cdigest.ParseRequest(w, r, "contract")
-	if err != nil {
-		cdigest.HTTP2ProblemWithError(w, err, status)
-
-		return
-	}
-
-	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		i, err := hd.handleNFTCountInGroup(contract)
-
-		return i, err
-	})
-
-	if err != nil {
-		hd.Log().Err(err).Str("contract", contract).Msg("failed to count nft")
-		cdigest.HTTP2HandleError(w, err)
-
-		return
-	}
-
-	cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
-
-	if !shared {
-		expire := hd.expireNotFilled
-		cdigest.HTTP2WriteCache(w, cachekey, expire)
-	}
-}
-
-func (hd *Handlers) handleNFTCountInGroup(
-	contract string,
-) ([]byte, error) {
-	count, err := NFTCountByCollection(
-		hd.database, contract,
-	)
-	if err != nil {
-		return nil, util.ErrNotFound.WithMessage(err, "nft count by contract, %s", contract)
-	}
-
-	i, err := hd.buildNFTCountHal(contract, count)
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := hd.encoder.Marshal(i)
-	return b, err
-}
-
-func (hd *Handlers) buildNFTCountHal(
-	contract string,
-	count int64,
-) (cdigest.Hal, error) {
-	baseSelf, err := hd.combineURL(HandlerPathNFTCount, "contract", contract)
-	if err != nil {
-		return nil, err
-	}
-
-	self := baseSelf
-
-	var m struct {
-		Contract string `json:"contract"`
-		NFTCount int64  `json:"nft_total_supply"`
-	}
-
-	m.Contract = contract
-	m.NFTCount = count
-
-	var hal cdigest.Hal
-	hal = cdigest.NewBaseHal(m, cdigest.NewHalLink(self, nil))
-
-	h, err := hd.combineURL(HandlerPathNFTCollection, "contract", contract)
-	if err != nil {
-		return nil, err
-	}
-	hal = hal.AddLink("collection", cdigest.NewHalLink(h, nil))
-
-	return hal, nil
 }
 
 func (hd *Handlers) buildNFTsHal(

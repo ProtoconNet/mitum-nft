@@ -4,13 +4,16 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var MaxPaymentParameter uint = 99
+var MaxCount uint64 = 100000
 
 type PaymentParameter uint
 
@@ -65,15 +68,17 @@ type Design struct {
 	contract base.Address
 	creator  base.Address
 	active   bool
+	count    uint64
 	policy   BasePolicy
 }
 
-func NewDesign(contract base.Address, creator base.Address, active bool, policy BasePolicy) Design {
+func NewDesign(contract base.Address, creator base.Address, active bool, count uint64, policy BasePolicy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		contract:   contract,
 		creator:    creator,
 		active:     active,
+		count:      count,
 		policy:     policy,
 	}
 }
@@ -86,6 +91,10 @@ func (de Design) IsValid([]byte) error {
 		de.policy,
 	); err != nil {
 		return err
+	}
+
+	if de.count > MaxCount {
+		return common.ErrValueInvalid.Wrap(errors.Errorf("count %d > Max Collection nft %d", de.count, MaxCount))
 	}
 
 	if de.contract.Equal(de.creator) {
@@ -107,6 +116,7 @@ func (de Design) Bytes() []byte {
 		de.contract.Bytes(),
 		de.creator.Bytes(),
 		ab,
+		util.Uint64ToBytes(de.count),
 		de.policy.Bytes(),
 	)
 }
@@ -129,6 +139,10 @@ func (de Design) Creator() base.Address {
 
 func (de Design) Active() bool {
 	return de.active
+}
+
+func (de Design) Count() uint64 {
+	return de.count
 }
 
 func (de Design) Policy() BasePolicy {
@@ -160,6 +174,10 @@ func (de Design) Equal(cd Design) bool {
 	}
 
 	if de.active != cd.active {
+		return false
+	}
+
+	if de.count != cd.count {
 		return false
 	}
 
