@@ -156,56 +156,6 @@ func StateNFTValue(st base.State) (*types.NFT, error) {
 	return &ns.NFT, nil
 }
 
-var NFTBoxStateValueHint = hint.MustNewHint("nft-box-state-value-v0.0.1")
-
-type NFTBoxStateValue struct {
-	hint.BaseHinter
-	Box types.NFTBox
-}
-
-func NewNFTBoxStateValue(box types.NFTBox) NFTBoxStateValue {
-	return NFTBoxStateValue{
-		BaseHinter: hint.NewBaseHinter(NFTBoxStateValueHint),
-		Box:        box,
-	}
-}
-
-func (nb NFTBoxStateValue) Hint() hint.Hint {
-	return nb.BaseHinter.Hint()
-}
-
-func (nb NFTBoxStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid NFTBoxStateValue")
-
-	if err := nb.BaseHinter.IsValid(NFTBoxStateValueHint.Type().Bytes()); err != nil {
-		return e.Wrap(err)
-	}
-
-	if err := nb.Box.IsValid(nil); err != nil {
-		return e.Wrap(err)
-	}
-
-	return nil
-}
-
-func (nb NFTBoxStateValue) HashBytes() []byte {
-	return nb.Box.Bytes()
-}
-
-func StateNFTBoxValue(st base.State) (types.NFTBox, error) {
-	v := st.Value()
-	if v == nil {
-		return types.NFTBox{}, util.ErrNotFound.Errorf("nft box not found in State")
-	}
-
-	nb, ok := v.(NFTBoxStateValue)
-	if !ok {
-		return types.NFTBox{}, errors.Errorf("invalid nft box value found, %T", v)
-	}
-
-	return nb.Box, nil
-}
-
 var OperatorsBookStateValueHint = hint.MustNewHint("operators-book-state-value-v0.0.1")
 
 type OperatorsBookStateValue struct {

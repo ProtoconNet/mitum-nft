@@ -16,7 +16,6 @@ const (
 	CollectionKey
 	OperatorsKey
 	LastIDXKey
-	NFTBoxKey
 	NFTKey
 )
 
@@ -25,7 +24,6 @@ var (
 	StateKeyCollectionSuffix = "collection"
 	StateKeyOperatorsSuffix  = "operators"
 	StateKeyLastNFTIDXSuffix = "lastnftidx"
-	StateKeyNFTBoxSuffix     = "nftbox"
 	StateKeyNFTSuffix        = "nft"
 )
 
@@ -44,8 +42,6 @@ func NFTStateKey(
 		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyCollectionSuffix)
 	case LastIDXKey:
 		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyLastNFTIDXSuffix)
-	case NFTBoxKey:
-		stateKey = fmt.Sprintf("%s:%s", prefix, StateKeyNFTBoxSuffix)
 	}
 
 	return stateKey
@@ -61,13 +57,11 @@ func StateKeyNFT(contract base.Address, id uint64) string {
 
 func ParseNFTStateKey(key string) (StateKey, error) {
 	if !strings.HasPrefix(key, NFTPrefix) {
-		return NilKey, errors.Errorf("invalid NFT State Key")
+		return NilKey, errors.Errorf("invalid NFT State Key, %s", key)
 	}
 	switch {
 	case strings.HasSuffix(key, StateKeyCollectionSuffix):
 		return CollectionKey, nil
-	case strings.HasSuffix(key, StateKeyNFTBoxSuffix):
-		return NFTBoxKey, nil
 	case strings.HasSuffix(key, StateKeyNFTSuffix):
 		return NFTKey, nil
 	case strings.HasSuffix(key, StateKeyLastNFTIDXSuffix):
@@ -75,6 +69,6 @@ func ParseNFTStateKey(key string) (StateKey, error) {
 	case strings.HasSuffix(key, StateKeyOperatorsSuffix):
 		return OperatorsKey, nil
 	default:
-		return NilKey, errors.Errorf("invalid NFT State Key")
+		return NilKey, errors.Errorf("invalid NFT State Key, %s", key)
 	}
 }

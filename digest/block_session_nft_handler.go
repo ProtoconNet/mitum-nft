@@ -13,7 +13,6 @@ func (bs *BlockSession) prepareNFTs() error {
 
 	var nftCollectionModels []mongo.WriteModel
 	var nftOperatorModels []mongo.WriteModel
-	var nftBoxModels []mongo.WriteModel
 	var nftModels []mongo.WriteModel
 
 	for i := range bs.sts {
@@ -35,12 +34,6 @@ func (bs *BlockSession) prepareNFTs() error {
 				return err
 			}
 			nftOperatorModels = append(nftOperatorModels, j...)
-		case state.NFTBoxKey:
-			j, err := bs.handleNFTBoxState(st)
-			if err != nil {
-				return err
-			}
-			nftBoxModels = append(nftBoxModels, j...)
 		case state.NFTKey:
 			j, err := bs.handleNFTState(st)
 			if err != nil {
@@ -55,7 +48,6 @@ func (bs *BlockSession) prepareNFTs() error {
 
 	bs.nftCollectionModels = nftCollectionModels
 	bs.nftOperatorModels = nftOperatorModels
-	bs.nftBoxModels = nftBoxModels
 	bs.nftModels = nftModels
 
 	return nil
@@ -87,16 +79,6 @@ func (bs *BlockSession) handleNFTState(st base.State) ([]mongo.WriteModel, error
 	} else {
 		return []mongo.WriteModel{
 			mongo.NewInsertOneModel().SetDocument(nftDoc),
-		}, nil
-	}
-}
-
-func (bs *BlockSession) handleNFTBoxState(st base.State) ([]mongo.WriteModel, error) {
-	if nftBoxDoc, err := NewNFTBoxDoc(st, bs.st.Encoder()); err != nil {
-		return nil, err
-	} else {
-		return []mongo.WriteModel{
-			mongo.NewInsertOneModel().SetDocument(nftBoxDoc),
 		}, nil
 	}
 }
