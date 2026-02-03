@@ -114,16 +114,6 @@ func (ipp *MintItemProcessor) Process(
 		cstate.NewStateMergeValue(state.StateKeyNFT(ipp.item.Contract(), ipp.idx), state.NewNFTStateValue(n)),
 	)
 
-	st, _ := cstate.ExistsState(state.NFTStateKey(ipp.item.contract, state.CollectionKey), "design", getStateFunc)
-	design, _ := state.StateCollectionValue(st)
-	de := types.NewDesign(design.Contract(), design.Creator(), design.Active(), design.Count()+1, design.Policy())
-	sts = append(
-		sts,
-		cstate.NewStateMergeValue(
-			state.NFTStateKey(ipp.item.contract, state.CollectionKey),
-			state.NewCollectionStateValue(de)),
-	)
-
 	return sts, nil
 }
 
@@ -309,6 +299,7 @@ func (opp *MintProcessor) Process( // nolint:dupl
 
 	fact, _ := op.Fact().(MintFact)
 	idxes := map[string]uint64{}
+	designs := map[string]types.Design{}
 
 	for _, item := range fact.items {
 		idxKey := state.NFTStateKey(item.contract, state.LastIDXKey)
@@ -324,6 +315,16 @@ func (opp *MintProcessor) Process( // nolint:dupl
 			}
 
 			idxes[idxKey] = nftID
+		}
+
+		if d, found := designs[item.contract.String()]; !found {
+			st, _ := cstate.ExistsState(state.NFTStateKey(item.contract, state.CollectionKey), "design", getStateFunc)
+			design, _ := state.StateCollectionValue(st)
+			de := types.NewDesign(design.Contract(), design.Creator(), design.Active(), design.Count()+1, design.Policy())
+			designs[item.contract.String()] = de
+		} else {
+			de := types.NewDesign(d.Contract(), d.Creator(), d.Active(), d.Count()+1, d.Policy())
+			designs[item.contract.String()] = de
 		}
 	}
 
@@ -353,6 +354,14 @@ func (opp *MintProcessor) Process( // nolint:dupl
 
 		idxes[idxKey] += 1
 		ipcs[i] = ipc
+	}
+	for _, design := range designs {
+		sts = append(
+			sts,
+			cstate.NewStateMergeValue(
+				state.NFTStateKey(design.Contract(), state.CollectionKey),
+				state.NewCollectionStateValue(design)),
+		)
 	}
 
 	for key, idx := range idxes {
