@@ -6,15 +6,34 @@ import (
 	"time"
 
 	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"
-	"github.com/ProtoconNet/mitum2/util"
-
 	"github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/util"
 )
 
-func (hd *Handlers) handleNFT(w http.ResponseWriter, r *http.Request) {
+var (
+	HandlerPathNFTAllApproved = `/nft/{contract:(?i)` + ctypes.REStringAddressString + `}/account/{address:(?i)` + ctypes.REStringAddressString + `}/allapproved` // revive:disable-line:line-length-limit
+	HandlerPathNFTCollection  = `/nft/{contract:(?i)` + ctypes.REStringAddressString + `}`
+	HandlerPathNFT            = `/nft/{contract:(?i)` + ctypes.REStringAddressString + `}/nftidx/{nft_idx:[0-9]+}`
+	HandlerPathNFTs           = `/nft/{contract:(?i)` + ctypes.REStringAddressString + `}/nfts`
+)
+
+func SetHandlers(hd *cdigest.Handlers) {
+	get := 1000
+	_ = hd.SetHandler(HandlerPathNFTCollection, HandleNFTCollection, true, get, get).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.SetHandler(HandlerPathNFTs, HandleNFTs, true, get, get).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.SetHandler(HandlerPathNFTAllApproved, HandleNFTOperators, true, get, get).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.SetHandler(HandlerPathNFT, HandleNFT, true, get, get).
+		Methods(http.MethodOptions, "GET")
+}
+
+func HandleNFT(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	cachekey := cdigest.CacheKeyPath(r)
-	if err := cdigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+	if err := cdigest.LoadFromCache(hd.Cache(), cachekey, w); err == nil {
 		return
 	}
 
@@ -30,33 +49,33 @@ func (hd *Handlers) handleNFT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		return hd.handleNFTInGroup(contract, id)
+	if v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		return handleNFTInGroup(hd, contract, id)
 	}); err != nil {
 		cdigest.HTTP2HandleError(w, err)
 	} else {
-		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cachekey, hd.expireShortLived)
+			cdigest.HTTP2WriteCache(w, cachekey, hd.ExpireShortLived())
 		}
 	}
 }
 
-func (hd *Handlers) handleNFTInGroup(contract, id string) (interface{}, error) {
-	switch nft, err := NFT(hd.database, contract, id); {
+func handleNFTInGroup(hd *cdigest.Handlers, contract, id string) (interface{}, error) {
+	switch nft, err := NFT(hd.Database(), contract, id); {
 	case err != nil:
 		return nil, err
 	default:
-		hal, err := hd.buildNFTHal(contract, *nft)
+		hal, err := buildNFTHal(hd, contract, *nft)
 		if err != nil {
 			return nil, err
 		}
-		return hd.encoder.Marshal(hal)
+		return hd.Encoder().Marshal(hal)
 	}
 }
 
-func (hd *Handlers) buildNFTHal(contract string, nft types.NFT) (cdigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFT, "contract", contract, "nft_idx", strconv.FormatUint(nft.ID(), 10))
+func buildNFTHal(hd *cdigest.Handlers, contract string, nft types.NFT) (cdigest.Hal, error) {
+	h, err := hd.CombineURL(HandlerPathNFT, "contract", contract, "nft_idx", strconv.FormatUint(nft.ID(), 10))
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +85,9 @@ func (hd *Handlers) buildNFTHal(contract string, nft types.NFT) (cdigest.Hal, er
 	return hal, nil
 }
 
-func (hd *Handlers) handleNFTCollection(w http.ResponseWriter, r *http.Request) {
+func HandleNFTCollection(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	cachekey := cdigest.CacheKeyPath(r)
-	if err := cdigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+	if err := cdigest.LoadFromCache(hd.Cache(), cachekey, w); err == nil {
 		return
 	}
 
@@ -79,33 +98,33 @@ func (hd *Handlers) handleNFTCollection(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		return hd.handleNFTCollectionInGroup(contract)
+	if v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		return handleNFTCollectionInGroup(hd, contract)
 	}); err != nil {
 		cdigest.HTTP2HandleError(w, err)
 	} else {
-		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cachekey, hd.expireShortLived)
+			cdigest.HTTP2WriteCache(w, cachekey, hd.ExpireShortLived())
 		}
 	}
 }
 
-func (hd *Handlers) handleNFTCollectionInGroup(contract string) (interface{}, error) {
-	switch design, err := NFTCollection(hd.database, contract); {
+func handleNFTCollectionInGroup(hd *cdigest.Handlers, contract string) (interface{}, error) {
+	switch design, err := NFTCollection(hd.Database(), contract); {
 	case err != nil:
 		return nil, err
 	default:
-		hal, err := hd.buildNFTCollectionHal(contract, *design)
+		hal, err := buildNFTCollectionHal(hd, contract, *design)
 		if err != nil {
 			return nil, err
 		}
-		return hd.encoder.Marshal(hal)
+		return hd.Encoder().Marshal(hal)
 	}
 }
 
-func (hd *Handlers) buildNFTCollectionHal(contract string, design types.Design) (cdigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFTCollection, "contract", contract)
+func buildNFTCollectionHal(hd *cdigest.Handlers, contract string, design types.Design) (cdigest.Hal, error) {
+	h, err := hd.CombineURL(HandlerPathNFTCollection, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +134,7 @@ func (hd *Handlers) buildNFTCollectionHal(contract string, design types.Design) 
 	return hal, nil
 }
 
-func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
+func HandleNFTs(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	limit := cdigest.ParseLimitQuery(r.URL.Query().Get("limit"))
 	offset := cdigest.ParseStringQuery(r.URL.Query().Get("offset"))
 	reverse := cdigest.ParseBoolQuery(r.URL.Query().Get("reverse"))
@@ -133,8 +152,8 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		i, filled, err := hd.handleNFTsInGroup(contract, facthash, offset, reverse, limit)
+	v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		i, filled, err := handleNFTsInGroup(hd, contract, facthash, offset, reverse, limit)
 
 		return []interface{}{i, filled}, err
 	})
@@ -154,10 +173,10 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 		filled = l[1].(bool)
 	}
 
-	cdigest.HTTP2WriteHalBytes(hd.encoder, w, b, http.StatusOK)
+	cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, b, http.StatusOK)
 
 	if !shared {
-		expire := hd.expireNotFilled
+		expire := hd.ExpireNotFilled()
 		if len(offset) > 0 && filled {
 			expire = time.Minute
 		}
@@ -166,23 +185,24 @@ func (hd *Handlers) handleNFTs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleNFTsInGroup(
+func handleNFTsInGroup(
+	hd *cdigest.Handlers,
 	contract, facthash, offset string,
 	reverse bool,
 	l int64,
 ) ([]byte, bool, error) {
 	var limit int64
 	if l < 0 {
-		limit = hd.itemsLimiter("collection-nfts")
+		limit = hd.ItemsLimiter("collection-nfts")
 	} else {
 		limit = l
 	}
 
 	var vas []cdigest.Hal
 	if err := NFTsByCollection(
-		hd.database, contract, facthash, offset, reverse, limit,
+		hd.Database(), contract, facthash, offset, reverse, limit,
 		func(nft types.NFT, st base.State) (bool, error) {
-			hal, err := hd.buildNFTHal(contract, nft)
+			hal, err := buildNFTHal(hd, contract, nft)
 			if err != nil {
 				return false, err
 			}
@@ -196,22 +216,23 @@ func (hd *Handlers) handleNFTsInGroup(
 		return nil, false, util.ErrNotFound.Errorf("nft tokens by contract, %s", contract)
 	}
 
-	i, err := hd.buildNFTsHal(contract, vas, offset, reverse)
+	i, err := buildNFTsHal(hd, contract, vas, offset, reverse)
 	if err != nil {
 		return nil, false, err
 	}
 
-	b, err := hd.encoder.Marshal(i)
+	b, err := hd.Encoder().Marshal(i)
 	return b, int64(len(vas)) == limit, err
 }
 
-func (hd *Handlers) buildNFTsHal(
+func buildNFTsHal(
+	hd *cdigest.Handlers,
 	contract string,
 	vas []cdigest.Hal,
 	offset string,
 	reverse bool,
 ) (cdigest.Hal, error) {
-	baseSelf, err := hd.combineURL(HandlerPathNFTs, "contract", contract)
+	baseSelf, err := hd.CombineURL(HandlerPathNFTs, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +248,7 @@ func (hd *Handlers) buildNFTsHal(
 	var hal cdigest.Hal
 	hal = cdigest.NewBaseHal(vas, cdigest.NewHalLink(self, nil))
 
-	h, err := hd.combineURL(HandlerPathNFTCollection, "contract", contract)
+	h, err := hd.CombineURL(HandlerPathNFTCollection, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -262,9 +283,9 @@ func (hd *Handlers) buildNFTsHal(
 	return hal, nil
 }
 
-func (hd *Handlers) handleNFTOperators(w http.ResponseWriter, r *http.Request) {
+func HandleNFTOperators(hd *cdigest.Handlers, w http.ResponseWriter, r *http.Request) {
 	cachekey := cdigest.CacheKeyPath(r)
-	if err := cdigest.LoadFromCache(hd.cache, cachekey, w); err == nil {
+	if err := cdigest.LoadFromCache(hd.Cache(), cachekey, w); err == nil {
 		return
 	}
 
@@ -282,33 +303,33 @@ func (hd *Handlers) handleNFTOperators(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		return hd.handleNFTOperatorsInGroup(contract, account)
+	if v, err, shared := hd.RG().Do(cachekey, func() (interface{}, error) {
+		return handleNFTOperatorsInGroup(hd, contract, account)
 	}); err != nil {
 		cdigest.HTTP2HandleError(w, err)
 	} else {
-		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
+		cdigest.HTTP2WriteHalBytes(hd.Encoder(), w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cachekey, hd.expireShortLived)
+			cdigest.HTTP2WriteCache(w, cachekey, hd.ExpireShortLived())
 		}
 	}
 }
 
-func (hd *Handlers) handleNFTOperatorsInGroup(contract, account string) (interface{}, error) {
-	switch operators, err := NFTOperators(hd.database, contract, account); {
+func handleNFTOperatorsInGroup(hd *cdigest.Handlers, contract, account string) (interface{}, error) {
+	switch operators, err := NFTOperators(hd.Database(), contract, account); {
 	case err != nil:
 		return nil, err
 	default:
-		hal, err := hd.buildNFTOperatorsHal(contract, account, *operators)
+		hal, err := buildNFTOperatorsHal(hd, contract, account, *operators)
 		if err != nil {
 			return nil, err
 		}
-		return hd.encoder.Marshal(hal)
+		return hd.Encoder().Marshal(hal)
 	}
 }
 
-func (hd *Handlers) buildNFTOperatorsHal(contract, account string, operators types.AllApprovedBook) (cdigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathNFTAllApproved, "contract", contract, "address", account)
+func buildNFTOperatorsHal(hd *cdigest.Handlers, contract, account string, operators types.AllApprovedBook) (cdigest.Hal, error) {
+	h, err := hd.CombineURL(HandlerPathNFTAllApproved, "contract", contract, "address", account)
 	if err != nil {
 		return nil, err
 	}
