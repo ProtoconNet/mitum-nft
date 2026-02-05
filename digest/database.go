@@ -10,6 +10,7 @@ import (
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -93,32 +94,51 @@ func NFTsByCollection(
 	limit int64,
 	callback func(nft types.NFT, st base.State) (bool, error),
 ) error {
-	filter, err := buildNFTsFilterByContract(contract, factHash, offset, reverse)
-	if err != nil {
-		return err
-	}
-
-	sr := 1
+	sortDir := 1
+	cmpOp := "$gt"
 	if reverse {
-		sr = -1
+		sortDir = -1
+		cmpOp = "$lt"
 	}
 
-	opt := options.Find().SetSort(
-		cutil.NewBSONFilter("nft_idx", sr).D(),
-	)
-
-	switch {
-	case limit <= 0: // no limit
-	case limit > maxLimit:
-		opt = opt.SetLimit(maxLimit)
-	default:
-		opt = opt.SetLimit(limit)
+	match := bson.D{
+		{Key: "contract", Value: contract},
 	}
 
-	return st.MongoClient().Find(
+	if offset != "" {
+		match = append(match, bson.E{
+			Key:   "nft_idx",
+			Value: bson.D{{Key: cmpOp, Value: offset}},
+		})
+	}
+
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: match}},
+		bson.D{{Key: "$sort", Value: bson.D{
+			{Key: "nft_idx", Value: sortDir},
+			{Key: "height", Value: -1},
+			{Key: "_id", Value: -1},
+		}}},
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$nft_idx"},
+			{Key: "doc", Value: bson.D{{Key: "$first", Value: "$$ROOT"}}},
+		}}},
+		bson.D{{Key: "$sort", Value: bson.D{
+			{Key: "_id", Value: sortDir},
+		}}},
+		bson.D{{Key: "$replaceRoot", Value: bson.D{
+			{Key: "newRoot", Value: "$doc"},
+		}}},
+	}
+
+	if limit > 0 {
+		pipeline = append(pipeline, bson.D{{Key: "$limit", Value: limit}})
+	}
+
+	return st.MongoClient().Aggregate(
 		context.Background(),
 		DefaultColNameNFT,
-		filter,
+		pipeline,
 		func(cursor *mongo.Cursor) (bool, error) {
 			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
@@ -130,9 +150,9 @@ func NFTsByCollection(
 			}
 			return callback(*nft, st)
 		},
-		opt,
 	)
 }
+
 func NFTOperators(
 	st *cdigest.Database,
 	contract, account string,
