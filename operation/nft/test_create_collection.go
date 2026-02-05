@@ -115,8 +115,8 @@ func (t *TestCreateCollectionProcessor) SetService(
 		panic(err)
 	}
 
-	nstatus := status.SetActive(true)
-	cState := common.NewBaseState(base.Height(1), extension.StateKeyContractAccount(contract), extension.NewContractAccountStateValue(nstatus), nil, []util.Hash{})
+	status.SetActive(true)
+	cState := common.NewBaseState(base.Height(1), extension.StateKeyContractAccount(contract), extension.NewContractAccountStateValue(status), nil, []util.Hash{})
 	t.SetState(cState, true)
 
 	return t

@@ -3,7 +3,7 @@ package digest
 import (
 	"strconv"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func buildNFTsFilterByContract(contract, facthash, offset string, reverse bool) (bson.D, error) {

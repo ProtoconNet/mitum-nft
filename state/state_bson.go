@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-nft/types"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (s CollectionStateValue) MarshalBSON() ([]byte, error) {
