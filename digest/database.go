@@ -105,6 +105,10 @@ func NFTsByCollection(
 		{Key: "contract", Value: contract},
 	}
 
+	if factHash != "" {
+		match = append(match, bson.E{Key: "facthash", Value: factHash})
+	}
+
 	if offset != "" {
 		match = append(match, bson.E{
 			Key:   "nft_idx",
