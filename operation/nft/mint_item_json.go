@@ -2,6 +2,7 @@ package nft
 
 import (
 	"encoding/json"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum-nft/types"

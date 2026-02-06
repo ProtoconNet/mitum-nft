@@ -1,13 +1,13 @@
 package digest
 
 import (
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-nft/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func PrepareNFTs(bs *currencydigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
+func PrepareNFTs(bs *cdigest.BlockSession, st base.State) (string, []mongo.WriteModel, error) {
 	stateKey, err := state.ParseNFTStateKey(st.Key())
 	if err != nil {
 		return "", nil, nil
@@ -39,7 +39,7 @@ func PrepareNFTs(bs *currencydigest.BlockSession, st base.State) (string, []mong
 	return "", nil, nil
 }
 
-func handleNFTCollectionState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+func handleNFTCollectionState(bs *cdigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
 	if nftCollectionDoc, err := NewNFTCollectionDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -49,7 +49,7 @@ func handleNFTCollectionState(bs *currencydigest.BlockSession, st base.State) ([
 	}
 }
 
-func handleNFTOperatorsState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+func handleNFTOperatorsState(bs *cdigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
 	if nftCollectionDoc, err := NewNFTOperatorDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
@@ -59,7 +59,7 @@ func handleNFTOperatorsState(bs *currencydigest.BlockSession, st base.State) ([]
 	}
 }
 
-func handleNFTState(bs *currencydigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
+func handleNFTState(bs *cdigest.BlockSession, st base.State) ([]mongo.WriteModel, error) {
 	if nftDoc, err := NewNFTDoc(st, bs.Database().Encoder()); err != nil {
 		return nil, err
 	} else {
